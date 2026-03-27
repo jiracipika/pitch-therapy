@@ -152,6 +152,12 @@ export {
   generateNoteOptions,
   calculateScore,
 } from "./audio";
+
+export { getSupabaseClient } from "./supabase";
+export { signUp, signIn, signOut, getSession, getUser } from "./auth";
+export type { UserProfile } from "./auth";
+export { getDailySeed as getDailyChallengeSeed, calculateStreak, todayDateString } from "./dailyChallenge";
+export type { DailyChallengeResult } from "./dailyChallenge";
 export type { FrequencyToNoteResult } from "./audio";
 
 // ─── Game Session ────────────────────────────────────────────────────────────

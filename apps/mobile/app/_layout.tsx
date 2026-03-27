@@ -20,6 +20,11 @@ export default function RootLayout() {
         <Stack.Screen name="progress" options={{ title: 'Progress' }} />
         <Stack.Screen name="settings" options={{ title: 'Settings' }} />
         <Stack.Screen name="play/[mode]" options={{ headerShown: false }} />
+        <Stack.Screen name="play/pitch-match" options={{ headerShown: false }} />
+        <Stack.Screen name="play/note-id" options={{ headerShown: false }} />
+        <Stack.Screen name="play/frequency-guess" options={{ headerShown: false }} />
+        <Stack.Screen name="play/note-wordle" options={{ headerShown: false }} />
+        <Stack.Screen name="play/frequency-wordle" options={{ headerShown: false }} />
       </Stack>
     </>
   );
