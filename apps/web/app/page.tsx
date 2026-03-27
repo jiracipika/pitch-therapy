@@ -108,6 +108,46 @@ const MODES = [
     href: '/play/tuning-battle',
     practiceHref: '/play/tuning-battle?practice=true',
   },
+  {
+    id: 'tune-in',
+    label: 'Tune In',
+    color: '#EC4899',
+    desc: 'Hit the target note with your voice or instrument using a real-time tuning meter.',
+    href: '/play/tune-in',
+    practiceHref: '/play/tune-in?practice=true',
+  },
+  {
+    id: 'piano-tap',
+    label: 'Piano Tap',
+    color: '#6366F1',
+    desc: 'Identify notes by tapping the correct key on an on-screen piano keyboard.',
+    href: '/play/piano-tap',
+    practiceHref: '/play/piano-tap?practice=true',
+  },
+  {
+    id: 'frequency-slider',
+    label: 'Frequency Slider',
+    color: '#06B6D4',
+    desc: 'Drag a handle on a log-scale bar to match a hidden frequency by ear.',
+    href: '/play/frequency-slider',
+    practiceHref: '/play/frequency-slider?practice=true',
+  },
+  {
+    id: 'cents-deviation',
+    label: 'Cents Deviation',
+    color: '#84CC16',
+    desc: 'Detect microtonal sharp and flat shifts by setting a cents needle.',
+    href: '/play/cents-deviation',
+    practiceHref: '/play/cents-deviation?practice=true',
+  },
+  {
+    id: 'interval-archer',
+    label: 'Interval Archer',
+    color: '#D946EF',
+    desc: 'Identify intervals — closer to bullseye means more points.',
+    href: '/play/interval-archer',
+    practiceHref: '/play/interval-archer?practice=true',
+  },
 ];
 
 export default function Home() {
@@ -183,7 +223,7 @@ export default function Home() {
           transition={{ duration: 0.5 }}
           className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.1em] text-zinc-600"
         >
-          Nine Modes
+          18 Modes
         </motion.div>
         <motion.h3
           initial={{ opacity: 0 }}
@@ -196,7 +236,7 @@ export default function Home() {
           One goal: perfect pitch.
         </motion.h3>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           {MODES.map((m, i) => (
             <motion.div
               key={m.id}

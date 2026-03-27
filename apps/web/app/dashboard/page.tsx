@@ -10,6 +10,19 @@ const MODES = [
   { id: 'frequency-guess', label: 'Frequency Guess', color: '#FBBF24', desc: 'Guess frequencies', href: '/play/frequency-guess' },
   { id: 'note-wordle', label: 'Note Wordle', color: '#4ADE80', desc: 'Wordle meets ear training', href: '/play/note-wordle' },
   { id: 'frequency-wordle', label: 'Frequency Wordle', color: '#2DD4BF', desc: 'Wordle for frequencies', href: '/play/frequency-wordle' },
+  { id: 'pitch-memory', label: 'Pitch Memory', color: '#F43F5E', desc: 'Reproduce note sequences', href: '/play/pitch-memory' },
+  { id: 'name-that-note', label: 'Name That Note', color: '#0EA5E9', desc: 'Read the musical staff', href: '/play/name-that-note' },
+  { id: 'frequency-hunt', label: 'Frequency Hunt', color: '#F97316', desc: 'Find frequencies by ear', href: '/play/frequency-hunt' },
+  { id: 'drone-lock', label: 'Drone Lock', color: '#10B981', desc: 'Intervals over a drone', href: '/play/drone-lock' },
+  { id: 'speed-round', label: 'Speed Round', color: '#FB923C', desc: 'Rapid-fire note tapping', href: '/play/speed-round' },
+  { id: 'chord-detective', label: 'Chord Detective', color: '#F472B6', desc: 'Identify chord quality', href: '/play/chord-detective' },
+  { id: 'waveform-match', label: 'Waveform Match', color: '#818CF8', desc: 'Align waveforms by ear', href: '/play/waveform-match' },
+  { id: 'tuning-battle', label: 'Tuning Battle', color: '#F43F5E', desc: 'Race to lock the note', href: '/play/tuning-battle' },
+  { id: 'tune-in', label: 'Tune In', color: '#EC4899', desc: 'Hit target notes with tuning meter', href: '/play/tune-in' },
+  { id: 'piano-tap', label: 'Piano Tap', color: '#6366F1', desc: 'Tap correct piano keys', href: '/play/piano-tap' },
+  { id: 'frequency-slider', label: 'Frequency Slider', color: '#06B6D4', desc: 'Match hidden frequencies', href: '/play/frequency-slider' },
+  { id: 'cents-deviation', label: 'Cents Deviation', color: '#84CC16', desc: 'Detect microtonal shifts', href: '/play/cents-deviation' },
+  { id: 'interval-archer', label: 'Interval Archer', color: '#D946EF', desc: 'Interval identification', href: '/play/interval-archer' },
 ];
 
 function CountdownTimer() {
