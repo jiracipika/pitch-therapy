@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { playTone } from '@/lib/audio';
+import WaveVisualizer from '@/components/WaveVisualizer';
 
 type Feedback = 'correct' | 'close' | 'miss';
 interface GuessRow { freq: number; feedback: Feedback; direction?: 'up' | 'down' }
@@ -14,6 +15,7 @@ export default function FrequencyWordlePage() {
   const [inputVal, setInputVal] = useState('');
   const [phase, setPhase] = useState<'playing' | 'won' | 'lost'>('playing');
   const [copied, setCopied] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const initGame = () => {
     setTargetFreq(Math.round((Math.random() * 800 + 200) * 10) / 10);
@@ -33,6 +35,8 @@ export default function FrequencyWordlePage() {
     const freq = parseFloat(inputVal);
     if (isNaN(freq) || freq <= 0 || guesses.length >= 6 || phase !== 'playing') return;
     playTone(freq, 0.3);
+    setIsPlaying(true);
+    setTimeout(() => setIsPlaying(false), 300);
     const { feedback, direction } = getFeedback(freq);
     const newGuesses = [...guesses, { freq, feedback, direction }];
     setGuesses(newGuesses); setInputVal('');
@@ -55,7 +59,11 @@ export default function FrequencyWordlePage() {
           <button onClick={initGame} className="text-sm text-zinc-500 hover:text-white transition-colors duration-300">🔄 New</button>
         </div>
 
-        <div className="mt-6 flex flex-col items-center gap-2">
+        <div className="mt-3">
+          <WaveVisualizer active={isPlaying} color="#2DD4BF" height={35} />
+        </div>
+
+        <div className="mt-4 flex flex-col items-center gap-2">
           {Array.from({ length: 6 }).map((_, i) => {
             const guess = guesses[i];
             return (

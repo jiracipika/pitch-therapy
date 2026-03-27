@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 const MODES = [
   { id: 'pitch-match', label: 'Pitch Match', color: '#60A5FA' },
@@ -11,6 +12,13 @@ const MODES = [
 ];
 
 type DiffMap = Record<string, 'easy' | 'medium' | 'hard'>;
+
+const SOUND_TYPES = [
+  { id: 'sine', label: 'Sine', desc: 'Pure, clean tone' },
+  { id: 'triangle', label: 'Triangle', desc: 'Softer, mellow' },
+  { id: 'square', label: 'Square', desc: 'Retro, buzzy' },
+  { id: 'sawtooth', label: 'Sawtooth', desc: 'Bright, rich' },
+];
 
 function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
@@ -47,17 +55,19 @@ export default function SettingsPage() {
   });
   const [sound, setSound] = useState(true);
   const [haptics, setHaptics] = useState(true);
+  const [soundType, setSoundType] = useState('sine');
+  const [volume, setVolume] = useState(70);
 
   return (
     <div className="min-h-screen pb-nav px-4 pt-12">
-      <div className="mx-auto max-w-lg">
-
-        {/* ── HEADER ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="mx-auto max-w-lg"
+      >
         <div className="mb-8">
-          <h1
-            className="text-3xl font-semibold text-white"
-            style={{ letterSpacing: '-0.03em' }}
-          >
+          <h1 className="text-3xl font-semibold text-white" style={{ letterSpacing: '-0.03em' }}>
             Settings
           </h1>
         </div>
@@ -82,6 +92,31 @@ export default function SettingsPage() {
             <Toggle on={sound} onToggle={() => setSound((v) => !v)} />
           </div>
 
+          {/* Volume slider */}
+          <div className="px-5 py-4 border-b border-white/5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)' }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                  </svg>
+                </div>
+                <p className="text-sm font-medium text-white">Volume</p>
+              </div>
+              <span className="text-sm font-medium text-zinc-400 tabular-nums">{volume}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={volume}
+              onChange={(e) => setVolume(Number(e.target.value))}
+              className="w-full accent-[#A78BFA] h-1 rounded-full appearance-none cursor-pointer"
+              style={{ background: `linear-gradient(to right, #A78BFA ${volume}%, rgba(255,255,255,0.08) ${volume}%)` }}
+            />
+          </div>
+
           <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)' }}>
@@ -100,6 +135,33 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* ── SOUND TYPE ── */}
+        <SectionLabel>Sound Type</SectionLabel>
+        <div className="glass-card overflow-hidden">
+          <div className="grid grid-cols-2 gap-0">
+            {SOUND_TYPES.map((s, idx) => {
+              const active = soundType === s.id;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => setSoundType(s.id)}
+                  className={`flex flex-col items-center gap-1 py-4 transition-all duration-200 ${idx < 3 && idx % 2 === 0 ? '' : ''} ${active ? '' : 'hover:bg-white/[0.03]'}`}
+                  style={{
+                    background: active ? 'rgba(255,255,255,0.06)' : 'transparent',
+                  }}
+                >
+                  <div
+                    className={`text-xs font-semibold transition-colors ${active ? 'text-white' : 'text-zinc-500'}`}
+                  >
+                    {s.label}
+                  </div>
+                  <div className="text-[10px] text-zinc-700">{s.desc}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* ── DIFFICULTY ── */}
         <SectionLabel>Default Difficulty</SectionLabel>
         <div className="glass-card overflow-hidden">
@@ -109,10 +171,7 @@ export default function SettingsPage() {
               className={`flex items-center justify-between px-5 py-3.5 ${idx < MODES.length - 1 ? 'border-b border-white/5' : ''}`}
             >
               <div className="flex items-center gap-3">
-                <div
-                  className="h-2 w-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: m.color }}
-                />
+                <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: m.color }} />
                 <span className="text-sm font-medium text-white">{m.label}</span>
               </div>
               <div className="flex gap-1">
@@ -125,16 +184,8 @@ export default function SettingsPage() {
                       className="rounded-full px-3 py-1 text-xs font-medium transition-all duration-200"
                       style={
                         active
-                          ? {
-                              background: m.color,
-                              color: '#000',
-                              boxShadow: `0 0 8px ${m.color}40`,
-                            }
-                          : {
-                              background: 'rgba(255,255,255,0.05)',
-                              color: 'rgb(113,113,122)',
-                              border: '1px solid rgba(255,255,255,0.07)',
-                            }
+                          ? { background: m.color, color: '#000', boxShadow: `0 0 8px ${m.color}40` }
+                          : { background: 'rgba(255,255,255,0.05)', color: 'rgb(113,113,122)', border: '1px solid rgba(255,255,255,0.07)' }
                       }
                     >
                       {d.charAt(0).toUpperCase() + d.slice(1)}
@@ -161,10 +212,7 @@ export default function SettingsPage() {
                 <p className="text-xs text-zinc-600">Only dark mode for now</p>
               </div>
             </div>
-            <div
-              className="rounded-full px-3 py-1 text-xs font-semibold text-black"
-              style={{ background: '#ffffff' }}
-            >
+            <div className="rounded-full px-3 py-1 text-xs font-semibold text-black" style={{ background: '#ffffff' }}>
               Active
             </div>
           </div>
@@ -186,8 +234,7 @@ export default function SettingsPage() {
             <p className="mt-0.5 text-xs text-zinc-600">Train Your Ear. Every Day.</p>
           </div>
         </div>
-
-      </div>
+      </motion.div>
     </div>
   );
 }

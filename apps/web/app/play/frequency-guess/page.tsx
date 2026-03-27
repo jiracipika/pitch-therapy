@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { playTone } from '@/lib/audio';
+import WaveVisualizer from '@/components/WaveVisualizer';
+import FeedbackOverlay from '@/components/FeedbackOverlay';
 
 type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -14,6 +17,8 @@ const CONFIGS: Record<Difficulty, { min: number; max: number; step: number; roun
 
 export default function FrequencyGuessPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isPractice = searchParams.get('practice') === 'true';
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [phase, setPhase] = useState<'setup' | 'playing' | 'done'>('setup');
   const [round, setRound] = useState(0);
@@ -22,6 +27,8 @@ export default function FrequencyGuessPage() {
   const [guess, setGuess] = useState(200);
   const [showFeedback, setShowFeedback] = useState(false);
   const [errorPct, setErrorPct] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showFeedbackOverlay, setShowFeedbackOverlay] = useState(false);
   const [results, setResults] = useState<{ correct: boolean; points: number; target: string; answer: string }[]>([]);
   const config = CONFIGS[difficulty];
 
@@ -30,24 +37,29 @@ export default function FrequencyGuessPage() {
   const startGame = () => { setRound(0); setScore(0); setResults([]); nextRound(); };
 
   const nextRound = () => {
-    setTargetFreq(generateFreq());
+    const freq = generateFreq();
+    setTargetFreq(freq);
     setGuess(Math.round((config.min + config.max) / 2));
     setShowFeedback(false);
     setPhase('playing');
     setRound((r) => r + 1);
-    playTone(generateFreq(), 0.8);
+    setIsPlaying(true);
+    playTone(freq, 0.8);
+    setTimeout(() => setIsPlaying(false), 800);
   };
 
   const submitGuess = () => {
     const err = Math.abs(guess - targetFreq) / targetFreq * 100;
     setErrorPct(err);
     const correct = err < 5;
-    const points = correct ? Math.max(Math.round(100 - err * 10), 10) : 0;
+    const points = isPractice ? 0 : correct ? Math.max(Math.round(100 - err * 10), 10) : 0;
     setScore((s) => s + points);
     setResults((r) => [...r, { correct, points, target: `${targetFreq} Hz`, answer: `${guess} Hz` }]);
     setShowFeedback(true);
+    if (!isPractice) setShowFeedbackOverlay(correct);
     setTimeout(() => {
-      if (round >= config.rounds) setPhase('done');
+      if (isPractice) nextRound();
+      else if (round >= config.rounds) setPhase('done');
       else nextRound();
     }, 2000);
   };
@@ -55,8 +67,8 @@ export default function FrequencyGuessPage() {
   if (phase === 'done') {
     return (
       <div className="min-h-screen px-4 pt-10">
-        <div className="mx-auto max-w-md text-center">
-          <div className="text-6xl">🏆</div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15 }} className="text-6xl">🏆</motion.div>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Game Complete!</h1>
           <div className="mt-6 grid grid-cols-3 gap-3">
             <div className="glass-card p-4"><div className="text-2xl font-bold text-white">{score}</div><div className="text-xs text-zinc-500">Score</div></div>
@@ -67,7 +79,7 @@ export default function FrequencyGuessPage() {
             <button onClick={startGame} className="flex-1 rounded-full bg-[#FBBF24] py-3 font-semibold text-black transition-all duration-300 ease-out hover:opacity-90">Play Again</button>
             <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-full bg-white/5 py-3 font-medium text-zinc-300 transition-all duration-300 ease-out hover:bg-white/10">Dashboard</button>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -96,22 +108,32 @@ export default function FrequencyGuessPage() {
 
   return (
     <div className="min-h-screen px-4 pt-10">
+      <FeedbackOverlay correct={showFeedback && errorPct < 5} show={showFeedbackOverlay} onDone={() => setShowFeedbackOverlay(false)} />
       <div className="mx-auto max-w-md">
         <div className="flex items-center justify-between">
           <button onClick={() => router.push('/dashboard')} className="text-sm text-zinc-500 hover:text-white transition-colors duration-300">← Back</button>
           <h1 className="text-lg font-semibold tracking-tight text-[#FBBF24]">🎯 Frequency Guess</h1>
-          <div className="text-sm text-zinc-500">Score: {score}</div>
+          <div className="flex items-center gap-2">
+            {isPractice && <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(251,191,36,0.15)', color: '#FBBF24' }}>Practice</span>}
+            {!isPractice && <div className="text-sm text-zinc-500">Score: {score}</div>}
+          </div>
         </div>
         <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/5">
           <div className="h-full rounded-full bg-[#FBBF24] transition-all duration-500" style={{ width: `${(round / config.rounds) * 100}%` }} />
         </div>
 
-        <div className="mt-10 text-center">
-          <button onClick={() => playTone(targetFreq, 0.8)}
-            className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-4xl transition-all duration-300 ease-out hover:bg-white/10">
-            🔊
-          </button>
-          <p className="mt-3 text-sm text-zinc-500">Tap to replay</p>
+        <div className="mt-8">
+          <WaveVisualizer active={isPlaying} color="#FBBF24" height={40} />
+          <div className="mt-4 text-center">
+            <motion.button
+              onClick={() => { setIsPlaying(true); playTone(targetFreq, 0.8); setTimeout(() => setIsPlaying(false), 800); }}
+              whileTap={{ scale: 0.92 }}
+              className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-4xl transition-all duration-300 ease-out hover:bg-white/10"
+            >
+              🔊
+            </motion.button>
+            <p className="mt-3 text-sm text-zinc-500">Tap to replay</p>
+          </div>
         </div>
 
         <div className="mt-8">

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+// import Link from 'next/link';
 
 export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
   const router = useRouter();

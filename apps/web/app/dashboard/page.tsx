@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 const MODES = [
   { id: 'pitch-match', label: 'Pitch Match', color: '#60A5FA', desc: 'Match pitches with your voice', href: '/play/pitch-match' },
@@ -50,15 +51,10 @@ function StreakRing({ streak, size = 88 }: { streak: number; size?: number }) {
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg className="streak-ring" width={size} height={size}>
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={strokeWidth} />
         <circle
-          cx={size / 2} cy={size / 2} r={radius}
-          fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={strokeWidth}
-        />
-        <circle
-          cx={size / 2} cy={size / 2} r={radius}
-          fill="none" stroke="#FBBF24" strokeWidth={strokeWidth} strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={circumference * (1 - progress)}
+          cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#FBBF24" strokeWidth={strokeWidth} strokeLinecap="round"
+          strokeDasharray={circumference} strokeDashoffset={circumference * (1 - progress)}
           className="transition-all duration-700 ease-out"
           style={{ filter: progress > 0 ? 'drop-shadow(0 0 4px rgba(251,191,36,0.5))' : 'none' }}
         />
@@ -82,97 +78,60 @@ function greeting() {
 export default function Dashboard() {
   return (
     <div className="min-h-screen pb-nav px-4 pt-12">
-      <div className="mx-auto max-w-lg">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="mx-auto max-w-lg">
 
-        {/* ── GREETING ── */}
-        <div className="mb-8">
-          <p className="text-sm font-medium text-zinc-600" style={{ letterSpacing: '0.01em' }}>
-            {greeting()}
-          </p>
-          <h1
-            className="mt-0.5 text-3xl font-semibold text-white"
-            style={{ letterSpacing: '-0.03em' }}
-          >
-            Ready to train?
-          </h1>
-        </div>
+        {/* GREETING */}
+        <motion.div className="mb-8" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+          <p className="text-sm font-medium text-zinc-600" style={{ letterSpacing: '0.01em' }}>{greeting()}</p>
+          <h1 className="mt-0.5 text-3xl font-semibold text-white" style={{ letterSpacing: '-0.03em' }}>Ready to train?</h1>
+        </motion.div>
 
-        {/* ── STREAK + DAILY ROW ── */}
-        <div className="grid gap-3 sm:grid-cols-2 mb-3">
-          {/* Streak */}
+        {/* STREAK + DAILY ROW */}
+        <motion.div className="grid gap-3 sm:grid-cols-2 mb-3" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <div className="glass-card flex items-center gap-5 p-5">
             <StreakRing streak={0} />
             <div>
-              <div
-                className="text-4xl font-bold text-white"
-                style={{ letterSpacing: '-0.04em' }}
-              >
-                0
-              </div>
+              <div className="text-4xl font-bold text-white" style={{ letterSpacing: '-0.04em' }}>0</div>
               <div className="mt-0.5 text-sm text-zinc-500">Day Streak</div>
             </div>
           </div>
-
-          {/* Daily Challenge */}
           <div className="glass-card flex flex-col justify-between p-5">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-600 mb-1">Daily Challenge</p>
               <p className="text-[11px] text-zinc-600">Next reset in</p>
               <CountdownTimer />
             </div>
-            <Link
-              href="/daily"
-              className="btn-primary mt-4 w-full justify-center text-sm"
-              style={{ padding: '0.5rem 1rem' }}
-            >
-              Play Today
-            </Link>
+            <Link href="/daily" className="btn-primary mt-4 w-full justify-center text-sm" style={{ padding: '0.5rem 1rem' }}>Play Today</Link>
           </div>
-        </div>
+        </motion.div>
 
-        {/* ── GAME MODES ── */}
+        {/* GAME MODES */}
         <p className="section-header mt-8">Game Modes</p>
-        <div className="grid gap-2.5 sm:grid-cols-2">
+        <motion.div className="grid gap-2.5 sm:grid-cols-2" initial="hidden" animate="visible" variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}>
           {MODES.map((m) => (
-            <Link
-              key={m.id}
-              href={m.href}
-              className="glass-card group flex items-center gap-4 p-4 transition-all duration-250 ease-out hover:scale-[1.015]"
-            >
-              <div
-                className="h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: `${m.color}15`, border: `1px solid ${m.color}25` }}
-              >
-                <div
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: m.color, boxShadow: `0 0 6px ${m.color}80` }}
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3
-                  className="text-sm font-semibold text-white truncate"
-                  style={{ letterSpacing: '-0.01em' }}
-                >
-                  {m.label}
-                </h3>
-                <p className="mt-0.5 text-xs text-zinc-600 truncate">{m.desc}</p>
-              </div>
-              <div className="flex-shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(82,82,91)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-colors group-hover:stroke-zinc-400">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </div>
-            </Link>
+            <motion.div key={m.id} variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
+              <Link href={m.href} className="glass-card group flex items-center gap-4 p-4 transition-all duration-250 ease-out hover:scale-[1.015]">
+                <div className="h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${m.color}15`, border: `1px solid ${m.color}25` }}>
+                  <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: m.color, boxShadow: `0 0 6px ${m.color}80` }} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-semibold text-white truncate" style={{ letterSpacing: '-0.01em' }}>{m.label}</h3>
+                  <p className="mt-0.5 text-xs text-zinc-600 truncate">{m.desc}</p>
+                </div>
+                <div className="flex-shrink-0">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(82,82,91)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-colors group-hover:stroke-zinc-400">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </div>
+              </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        {/* ── QUICK PLAY ── */}
-        <p className="section-header mt-8">Quick Play</p>
-        <div className="grid grid-cols-2 gap-2.5">
-          <Link
-            href="/play/pitch-match"
-            className="glass-card flex flex-col items-center justify-center gap-2 py-6 transition-all duration-200 hover:scale-[1.02]"
-          >
+        {/* QUICK PLAY */}
+        <motion.p className="section-header mt-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>Quick Play</motion.p>
+        <motion.div className="grid grid-cols-2 gap-2.5" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
+          <Link href="/play/pitch-match" className="glass-card flex flex-col items-center justify-center gap-2 py-6 transition-all duration-200 hover:scale-[1.02]">
             <div className="h-10 w-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(96,165,250,0.12)', border: '1px solid rgba(96,165,250,0.2)' }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
@@ -183,10 +142,7 @@ export default function Dashboard() {
             </div>
             <span className="text-xs font-semibold text-white" style={{ letterSpacing: '-0.01em' }}>Pitch Match</span>
           </Link>
-          <Link
-            href="/play/note-id"
-            className="glass-card flex flex-col items-center justify-center gap-2 py-6 transition-all duration-200 hover:scale-[1.02]"
-          >
+          <Link href="/play/note-id" className="glass-card flex flex-col items-center justify-center gap-2 py-6 transition-all duration-200 hover:scale-[1.02]">
             <div className="h-10 w-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)' }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18V5l12-2v13"/>
@@ -196,9 +152,9 @@ export default function Dashboard() {
             </div>
             <span className="text-xs font-semibold text-white" style={{ letterSpacing: '-0.01em' }}>Note ID</span>
           </Link>
-        </div>
+        </motion.div>
 
-      </div>
+      </motion.div>
     </div>
   );
 }

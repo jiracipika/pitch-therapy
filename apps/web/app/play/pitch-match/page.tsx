@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
+import WaveVisualizer from '@/components/WaveVisualizer';
 
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
 const freq = (i: number) => NOTE_FREQS[i] ?? 261.63;
@@ -11,6 +13,8 @@ const ACCENT = '#60A5FA';
 
 export default function PitchMatchPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isPractice = searchParams.get('practice') === 'true';
   const [phase, setPhase] = useState<'idle' | 'playing' | 'done'>('idle');
   const [round, setRound] = useState(0);
   const [totalRounds] = useState(5);
@@ -19,6 +23,7 @@ export default function PitchMatchPage() {
   const [targetNote, setTargetNote] = useState(0);
   const [cents, setCents] = useState(0);
   const [results, setResults] = useState<{ round: number; correct: boolean; points: number; target: string; answer: string; timeMs: number }[]>([]);
+  const [isPlaying, setIsPlaying] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number>(0);
   const roundStart = useRef(0);
@@ -29,7 +34,9 @@ export default function PitchMatchPage() {
     setPhase('playing');
     setRound((r) => r + 1);
     roundStart.current = Date.now();
+    setIsPlaying(true);
     playTone(freq(noteIdx), 0.8);
+    setTimeout(() => setIsPlaying(false), 800);
   };
 
   const startMic = async () => {
@@ -161,11 +168,11 @@ export default function PitchMatchPage() {
             </svg>
           </button>
           <h1 className="text-base font-semibold" style={{ color: ACCENT, letterSpacing: '-0.01em' }}>Pitch Match</h1>
-          <div
-            className="rounded-full px-3 py-1 text-xs font-semibold text-white"
-            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}
-          >
-            {score} pts
+          <div className="flex items-center gap-2">
+            {isPractice && <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}20`, color: ACCENT }}>Practice</span>}
+            <div className="rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}>
+              {isPractice ? 'Practice' : `${score} pts`}
+            </div>
           </div>
         </div>
 
@@ -204,24 +211,31 @@ export default function PitchMatchPage() {
         {phase === 'playing' && (
           <div className="text-center animate-fade-in">
             <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-600 mb-2">Match this note</p>
-            <div
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               className="text-6xl font-bold"
               style={{ color: ACCENT, letterSpacing: '-0.04em' }}
             >
               {(NOTE_NAMES[targetNote] ?? 'A')}4
+            </motion.div>
+
+            <div className="mt-3">
+              <WaveVisualizer active={isPlaying} color={ACCENT} height={40} />
             </div>
 
             {/* Play target button */}
-            <button
-              onClick={() => playTone(freq(targetNote), 0.8)}
-              className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium text-zinc-400 transition-all duration-200 hover:text-white"
+            <motion.button
+              onClick={() => { setIsPlaying(true); playTone(freq(targetNote), 0.8); setTimeout(() => setIsPlaying(false), 800); }}
+              whileTap={{ scale: 0.92 }}
+              className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium text-zinc-400 transition-all duration-200 hover:text-white"
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none">
                 <polygon points="5 3 19 12 5 21 5 3"/>
               </svg>
               Play Target
-            </button>
+            </motion.button>
 
             {/* Cents meter */}
             <div className="mt-8">

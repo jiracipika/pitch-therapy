@@ -1,5 +1,7 @@
 'use client';
 
+import { motion } from 'framer-motion';
+
 const MODES = [
   { id: 'pitch-match', label: 'Pitch Match', color: '#60A5FA' },
   { id: 'note-id', label: 'Note ID', color: '#A78BFA' },
@@ -15,10 +17,15 @@ const DAYS = 7;
 export default function ProgressPage() {
   return (
     <div className="min-h-screen pb-nav px-4 pt-12">
-      <div className="mx-auto max-w-lg">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="mx-auto max-w-lg"
+      >
 
         {/* ── HEADER ── */}
-        <div className="mb-8">
+        <motion.div className="mb-8" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <p className="text-sm font-medium text-zinc-600" style={{ letterSpacing: '0.01em' }}>
             Your journey
           </p>
@@ -28,10 +35,10 @@ export default function ProgressPage() {
           >
             Progress
           </h1>
-        </div>
+        </motion.div>
 
         {/* ── SUMMARY STATS ── */}
-        <div className="grid grid-cols-3 gap-2.5 mb-8">
+        <motion.div className="grid grid-cols-3 gap-2.5 mb-8" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           {[
             { label: 'Games Played', value: '0' },
             { label: 'Best Streak', value: '0' },
@@ -47,7 +54,7 @@ export default function ProgressPage() {
               <div className="mt-1 text-[11px] text-zinc-600 leading-tight">{s.label}</div>
             </div>
           ))}
-        </div>
+        </motion.div>
 
         {/* ── ACTIVITY CALENDAR ── */}
         <p className="section-header">Activity</p>
@@ -132,7 +139,7 @@ export default function ProgressPage() {
           <p className="mt-1 text-xs text-zinc-700">Detailed charts and stats coming soon.</p>
         </div>
 
-      </div>
+      </motion.div>
     </div>
   );
 }
