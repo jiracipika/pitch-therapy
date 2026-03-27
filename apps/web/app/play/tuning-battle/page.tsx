@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const ACCENT = '#F43F5E'; // rose-500
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -106,41 +106,42 @@ export default function TuningBattlePage() {
     const p = players[playerIdx];
     if (!p.selectedNote || p.lockedIn) return;
 
-    const cents = p.selectedNote === targetNote ? 0 : (Math.random() * 8 - 4); // ±4 cents if wrong note, 0 if correct
+    const cents = p.selectedNote === targetNote ? 0 : (Math.random() * 8 - 4);
+
+    // Use functional update so we always read the latest player state
     setPlayers(prev => {
       const next = [...prev] as [Player, Player];
       next[playerIdx] = { ...next[playerIdx], lockedIn: true, lastCents: cents };
-      return next;
-    });
 
-    // Check if both locked in
-    const otherIdx = 1 - playerIdx;
-    const other = players[otherIdx];
-    if (other.lockedIn || !other.selectedNote) {
-      // Determine winner
-      const myCorrect = p.selectedNote === targetNote;
-      const otherCorrect = other.lockedIn && other.selectedNote === targetNote;
+      const other = next[1 - playerIdx];
+      if (other.lockedIn || !other.selectedNote) {
+        const myCorrect = next[playerIdx].selectedNote === targetNote;
+        const otherCorrect = other.lockedIn && other.selectedNote === targetNote;
 
-      let winner: string | null = null;
-      if (myCorrect && !otherCorrect) {
-        winner = p.name;
-      } else if (otherCorrect && !myCorrect) {
-        winner = other.name;
-      } else if (myCorrect && otherCorrect) {
-        winner = Math.abs(p.lastCents) <= Math.abs(other.lastCents) ? p.name : other.name;
-      } else {
-        winner = null; // tie / both wrong
-      }
+        let winner: string | null = null;
+        if (myCorrect && !otherCorrect) {
+          winner = next[playerIdx].name;
+        } else if (otherCorrect && !myCorrect) {
+          winner = other.name;
+        } else if (myCorrect && otherCorrect) {
+          // Use local `cents` (not stale p.lastCents) for the current player's tiebreaker
+          const myCents = playerIdx === 0 ? cents : other.lastCents;
+          const otherCents = playerIdx === 0 ? other.lastCents : cents;
+          winner = Math.abs(myCents) <= Math.abs(otherCents) ? next[playerIdx].name : other.name;
+        }
 
-      setRoundWinner(winner);
-      setPlayers(prev => {
-        const next = [...prev] as [Player, Player];
         if (winner === next[0].name) next[0] = { ...next[0], score: next[0].score + 1 };
         if (winner === next[1].name) next[1] = { ...next[1], score: next[1].score + 1 };
-        return next;
-      });
-      setPhase('roundResult');
-    }
+
+        // Schedule phase updates outside the setter
+        setTimeout(() => {
+          setRoundWinner(winner);
+          setPhase('roundResult');
+        }, 0);
+      }
+
+      return next;
+    });
   };
 
   const nextRoundOrEnd = () => {
@@ -175,7 +176,19 @@ export default function TuningBattlePage() {
             </motion.div>
             <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Tuning Battle</h1>
             <p className="mt-2 text-zinc-500">Two players, one target note. First to lock in wins!</p>
-            <div className="mt-8">
+
+            {/* How to play */}
+            <div className="mt-6 rounded-2xl p-4 text-left" style={{ background: 'rgba(244,63,94,0.06)', border: '1px solid rgba(244,63,94,0.15)' }}>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: ACCENT }}>How to Play</p>
+              <ol className="space-y-1.5 text-sm text-zinc-400">
+                <li>1. A target note plays on countdown — listen carefully</li>
+                <li>2. Each player selects the correct note from their half</li>
+                <li>3. Tap 🔒 Lock In once you&apos;re confident</li>
+                <li>4. Closest correct answer wins the round</li>
+              </ol>
+            </div>
+
+            <div className="mt-6">
               <p className="text-sm font-medium text-zinc-400 mb-3">Best of</p>
               <div className="flex gap-3 justify-center">
                 {[5, 10].map(n => (

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 
@@ -153,7 +153,19 @@ export default function ChordDetectivePage() {
           </motion.div>
           <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Chord Detective</h1>
           <p className="mt-2 text-zinc-500">Identify chord quality by ear</p>
-          <div className="mt-8">
+
+          {/* How to play */}
+          <div className="mt-6 rounded-2xl p-4 text-left" style={{ background: 'rgba(244,114,182,0.06)', border: '1px solid rgba(244,114,182,0.15)' }}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: ACCENT }}>How to Play</p>
+            <ol className="space-y-1.5 text-sm text-zinc-400">
+              <li>1. A chord plays — tap 🔊 to replay it</li>
+              <li>2. Select the chord quality (Major, Minor, Dim…)</li>
+              <li>3. Advanced mode: also identify the root note</li>
+              <li>4. Hit Submit to lock in your answer</li>
+            </ol>
+          </div>
+
+          <div className="mt-6">
             <label className="flex items-center justify-center gap-3 cursor-pointer">
               <span className="text-sm text-zinc-400">Advanced: Identify root note too</span>
               <div className={`w-12 h-7 rounded-full transition-colors relative ${advanced ? 'bg-[#F472B6]' : 'bg-white/10'}`} onClick={() => setAdvanced(!advanced)}>

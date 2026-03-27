@@ -1,5 +1,18 @@
+// Singleton AudioContext — reused to avoid browser 6-context limit and memory leaks
+let _ctx: AudioContext | null = null;
+
+export function getAudioContext(): AudioContext {
+  if (!_ctx || _ctx.state === 'closed') {
+    _ctx = new AudioContext();
+  }
+  if (_ctx.state === 'suspended') {
+    void _ctx.resume();
+  }
+  return _ctx;
+}
+
 export function playTone(frequency: number, duration: number = 0.5): void {
-  const ctx = new AudioContext();
+  const ctx = getAudioContext();
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.connect(gain);

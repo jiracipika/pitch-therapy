@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
+import { playTone, getAudioContext, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 
 const ACCENT = '#D946EF';
@@ -77,8 +77,8 @@ export default function IntervalArcherPage() {
       playTone(secondFreq, 0.5);
       setTimeout(() => playTone(freq, 0.8), 550);
     } else {
-      // harmonic: play both at once
-      const ctx = new AudioContext();
+      // harmonic: play both at once using shared context (no leak)
+      const ctx = getAudioContext();
       const osc1 = ctx.createOscillator();
       const osc2 = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -179,7 +179,19 @@ export default function IntervalArcherPage() {
           </motion.div>
           <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Interval Archer</h1>
           <p className="mt-2 text-zinc-500">Identify intervals — closer to bullseye = more points</p>
-          <div className="mt-8">
+
+          {/* How to play */}
+          <div className="mt-6 rounded-2xl p-4 text-left" style={{ background: 'rgba(217,70,239,0.06)', border: '1px solid rgba(217,70,239,0.15)' }}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: ACCENT }}>How to Play</p>
+            <ol className="space-y-1.5 text-sm text-zinc-400">
+              <li>1. Hear two notes played in sequence (or together)</li>
+              <li>2. Identify the musical interval between them</li>
+              <li>3. Exact = bullseye (max points), 1 semitone off = partial credit</li>
+              <li>4. Tap 🔊 to replay the interval at any time</li>
+            </ol>
+          </div>
+
+          <div className="mt-6">
             <h3 className="text-sm font-medium text-zinc-500 mb-3">Mode</h3>
             <div className="flex gap-2 justify-center">
               {(Object.keys(MODE_CONFIG) as IntervalMode[]).map(m => (

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
+import { playTone, NOTE_FREQUENCIES } from '@/lib/audio';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 
 const ACCENT = '#6366F1';
@@ -88,8 +88,12 @@ export default function PianoTapPage() {
     }, isPractice ? 800 : 1200);
   };
 
-  const isBlack = (key: string) => key.includes('#');
   const activeKeys = MODE_CONFIG[mode].keys;
+
+  // For chromatic mode: lay out a proper piano with absolute-positioned black keys
+  const ALL_WHITE = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+  const BLACK_POSITIONS: Record<string, number> = { 'C#': 1, 'D#': 2, 'F#': 4, 'G#': 5, 'A#': 6 };
+  const isChromaticMode = mode === 'chromatic';
 
   if (phase === 'done') {
     return (
@@ -127,7 +131,19 @@ export default function PianoTapPage() {
           </motion.div>
           <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Piano Tap</h1>
           <p className="mt-2 text-zinc-500">Tap the correct key after hearing the note</p>
-          <div className="mt-8">
+
+          {/* How to play */}
+          <div className="mt-6 rounded-2xl p-4 text-left" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)' }}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: ACCENT }}>How to Play</p>
+            <ol className="space-y-1.5 text-sm text-zinc-400">
+              <li>1. A note plays — identify it by ear</li>
+              <li>2. Tap 🔊 to replay if needed</li>
+              <li>3. Tap the matching key on the piano</li>
+              <li>4. Score more by answering quickly</li>
+            </ol>
+          </div>
+
+          <div className="mt-6">
             <h3 className="text-sm font-medium text-zinc-500 mb-3">Keyboard Mode</h3>
             <div className="flex gap-2 justify-center flex-wrap">
               {(Object.keys(MODE_CONFIG) as Mode[]).map(m => (
@@ -165,33 +181,83 @@ export default function PianoTapPage() {
         </div>
 
         {/* Piano keyboard */}
-        <div className="mt-8 relative">
-          <div className="flex justify-center">
-            {activeKeys.map(key => {
-              const black = isBlack(key);
-              const isTarget = feedback && key === targetNote;
-              const isSelected = selectedKey === key;
-              let bg = black ? 'rgba(30,30,40,0.9)' : 'rgba(255,255,255,0.08)';
-              let border = 'rgba(255,255,255,0.1)';
-
-              if (isTarget) { bg = 'rgba(74,222,128,0.2)'; border = '#4ADE80'; }
-              else if (isSelected && feedback === 'wrong') { bg = 'rgba(248,113,113,0.2)'; border = '#F87171'; }
-              if (flashKey === key) { bg = 'rgba(99,102,241,0.4)'; border = ACCENT; }
-
-              return (
-                <motion.button
-                  key={key}
-                  whileTap={{ scale: 0.93 }}
-                  onClick={() => handleKeyTap(key)}
-                  className={`rounded-b-lg transition-all duration-200 flex items-end justify-center pb-2 ${black ? 'w-8 h-24 -mx-1 z-10' : 'w-10 h-32'}`}
-                  style={{ background: bg, border: `1px solid ${border}` }}
-                  disabled={!!feedback}
-                >
-                  <span className={`text-xs font-bold ${black ? 'text-zinc-400' : 'text-zinc-300'}`}>{key}</span>
-                </motion.button>
-              );
-            })}
-          </div>
+        <div className="mt-8">
+          {isChromaticMode ? (
+            /* Proper piano layout: white keys with black keys overlaid */
+            <div className="relative flex justify-center" style={{ height: 128 }}>
+              {/* White keys */}
+              {ALL_WHITE.map((key) => {
+                const isTarget = feedback && key === targetNote;
+                const isSelected = selectedKey === key;
+                let bg = 'rgba(255,255,255,0.08)';
+                let border = 'rgba(255,255,255,0.12)';
+                if (isTarget) { bg = 'rgba(74,222,128,0.25)'; border = '#4ADE80'; }
+                else if (isSelected && feedback === 'wrong') { bg = 'rgba(248,113,113,0.2)'; border = '#F87171'; }
+                if (flashKey === key) { bg = 'rgba(99,102,241,0.4)'; border = ACCENT; }
+                return (
+                  <motion.button
+                    key={key}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => handleKeyTap(key)}
+                    disabled={!!feedback}
+                    className="relative rounded-b-lg flex items-end justify-center pb-2 transition-all duration-150"
+                    style={{ width: 40, height: 128, background: bg, border: `1px solid ${border}`, marginRight: 2 }}
+                  >
+                    <span className="text-xs font-bold text-zinc-300">{key}</span>
+                  </motion.button>
+                );
+              })}
+              {/* Black keys — absolutely positioned */}
+              {Object.entries(BLACK_POSITIONS).map(([key, pos]) => {
+                const isTarget = feedback && key === targetNote;
+                const isSelected = selectedKey === key;
+                let bg = 'rgba(20,20,30,0.95)';
+                let border = 'rgba(255,255,255,0.15)';
+                if (isTarget) { bg = 'rgba(74,222,128,0.3)'; border = '#4ADE80'; }
+                else if (isSelected && feedback === 'wrong') { bg = 'rgba(248,113,113,0.3)'; border = '#F87171'; }
+                if (flashKey === key) { bg = 'rgba(99,102,241,0.6)'; border = ACCENT; }
+                // Each white key is 42px wide; black key sits between pos-1 and pos
+                const leftOffset = pos * 42 - 14;
+                return (
+                  <motion.button
+                    key={key}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => handleKeyTap(key)}
+                    disabled={!!feedback}
+                    className="absolute top-0 rounded-b-md flex items-end justify-center pb-1.5 z-10 transition-all duration-150"
+                    style={{ width: 28, height: 80, left: leftOffset, background: bg, border: `1px solid ${border}` }}
+                  >
+                    <span className="text-[9px] font-bold text-zinc-300">{key}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          ) : (
+            /* Non-chromatic: simple grid of note buttons */
+            <div className="grid grid-cols-4 gap-2">
+              {activeKeys.map(key => {
+                const isTarget = feedback && key === targetNote;
+                const isSelected = selectedKey === key;
+                let bg = 'rgba(255,255,255,0.06)';
+                let border = 'rgba(255,255,255,0.1)';
+                if (isTarget) { bg = 'rgba(74,222,128,0.2)'; border = '#4ADE80'; }
+                else if (isSelected && feedback === 'wrong') { bg = 'rgba(248,113,113,0.2)'; border = '#F87171'; }
+                if (flashKey === key) { bg = `${ACCENT}40`; border = ACCENT; }
+                return (
+                  <motion.button
+                    key={key}
+                    whileTap={{ scale: 0.93 }}
+                    onClick={() => handleKeyTap(key)}
+                    disabled={!!feedback}
+                    className="rounded-2xl py-5 font-bold text-lg transition-all duration-150"
+                    style={{ background: bg, border: `1px solid ${border}`, color: isTarget ? '#4ADE80' : 'rgba(255,255,255,0.8)' }}
+                  >
+                    {key}
+                  </motion.button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Feedback banner */}

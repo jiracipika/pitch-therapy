@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
 
 const ACCENT = '#84CC16';
-const TOTAL_ROUNDS = 8;
 const CENTS_RANGE = 50;
 
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -31,21 +30,19 @@ export default function CentsDeviationPage() {
   const [needlePos, setNeedlePos] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [hasHeardDeviation, setHasHeardDeviation] = useState(false);
   const [results, setResults] = useState<{ round: number; note: string; actualCents: number; guessCents: number; points: number }[]>([]);
   const meterRef = useRef<HTMLDivElement>(null);
 
   const config = DIFF_CONFIG[difficulty];
   const totalRounds = config.rounds;
 
-  const playRefAndDeviation = useCallback(() => {
-    playTone(baseFreq, 0.8);
+  const playRefAndDeviation = useCallback((freq: number, cents: number) => {
+    playTone(freq, 0.8);
     setTimeout(() => {
-      const deviatedFreq = baseFreq * Math.pow(2, actualCents / 1200);
+      const deviatedFreq = freq * Math.pow(2, cents / 1200);
       playTone(deviatedFreq, 1.2);
-      setHasHeardDeviation(true);
     }, 1000);
-  }, [baseFreq, actualCents]);
+  }, []);
 
   const pickRound = () => {
     const noteIdx = Math.floor(Math.random() * 12);
@@ -59,9 +56,9 @@ export default function CentsDeviationPage() {
     setActualCents(clampedCents);
     setNeedlePos(0);
     setSubmitted(false);
-    setHasHeardDeviation(false);
 
-    playTone(freq, 0.8);
+    // Auto-play reference then deviated tone so user hears both immediately
+    playRefAndDeviation(freq, clampedCents);
     return { note, freq, cents: clampedCents };
   };
 
@@ -133,8 +130,20 @@ export default function CentsDeviationPage() {
             <span className="text-4xl">🎯</span>
           </motion.div>
           <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Cents Deviation</h1>
-          <p className="mt-2 text-zinc-500">Detect sharp/flat deviations in cents</p>
-          <div className="mt-8 flex gap-2 justify-center">
+          <p className="mt-2 text-zinc-500">Detect microtonal sharp/flat deviations</p>
+
+          {/* How to play */}
+          <div className="mt-6 rounded-2xl p-4 text-left" style={{ background: 'rgba(132,204,22,0.06)', border: '1px solid rgba(132,204,22,0.15)' }}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: ACCENT }}>How to Play</p>
+            <ol className="space-y-1.5 text-sm text-zinc-400">
+              <li>1. Hear a reference note, then a slightly detuned version</li>
+              <li>2. Drag the needle to match the deviation in cents</li>
+              <li>3. Within ±5¢ = correct; wider = partial credit</li>
+              <li>4. Tap "Play Both" to replay both notes anytime</li>
+            </ol>
+          </div>
+
+          <div className="mt-6 flex gap-2 justify-center">
             {(Object.keys(DIFF_CONFIG) as Difficulty[]).map(d => (
               <button key={d} onClick={() => setDifficulty(d)} className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${difficulty === d ? 'text-white' : 'bg-white/5 text-zinc-500 hover:bg-white/10'}`} style={difficulty === d ? { background: ACCENT } : {}}>{DIFF_CONFIG[d].label}</button>
             ))}
@@ -173,7 +182,7 @@ export default function CentsDeviationPage() {
           <motion.button onClick={() => playTone(baseFreq, 0.8)} whileTap={{ scale: 0.92 }} className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-xl hover:bg-white/10 transition-all">
             🔊
           </motion.button>
-          <motion.button onClick={playRefAndDeviation} whileTap={{ scale: 0.92 }} disabled={!hasHeardDeviation} className="flex h-14 items-center justify-center rounded-xl px-4 text-sm font-medium transition-all" style={{ background: hasHeardDeviation ? `${ACCENT}20` : 'rgba(255,255,255,0.04)', border: `1px solid ${hasHeardDeviation ? ACCENT : 'rgba(255,255,255,0.08)'}`, color: hasHeardDeviation ? ACCENT : '#71717a' }}>
+          <motion.button onClick={() => playRefAndDeviation(baseFreq, actualCents)} whileTap={{ scale: 0.92 }} className="flex h-14 items-center justify-center rounded-xl px-4 text-sm font-medium transition-all" style={{ background: `${ACCENT}20`, border: `1px solid ${ACCENT}`, color: ACCENT }}>
             🔊+🔊 Play Both
           </motion.button>
         </div>
