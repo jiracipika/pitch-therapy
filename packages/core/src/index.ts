@@ -5,7 +5,20 @@ export type GameMode =
   | "note-id"
   | "frequency-guess"
   | "note-wordle"
-  | "frequency-wordle";
+  | "frequency-wordle"
+  | "pitch-memory"
+  | "name-that-note"
+  | "frequency-hunt"
+  | "drone-lock"
+  | "tune-in"
+  | "piano-tap"
+  | "frequency-slider"
+  | "cents-deviation"
+  | "interval-archer"
+  | "speed-round"
+  | "chord-detective"
+  | "waveform-match"
+  | "tuning-battle";
 
 export const GAME_MODES: GameMode[] = [
   "pitch-match",
@@ -13,6 +26,19 @@ export const GAME_MODES: GameMode[] = [
   "frequency-guess",
   "note-wordle",
   "frequency-wordle",
+  "pitch-memory",
+  "name-that-note",
+  "frequency-hunt",
+  "drone-lock",
+  "tune-in",
+  "piano-tap",
+  "frequency-slider",
+  "cents-deviation",
+  "interval-archer",
+  "speed-round",
+  "chord-detective",
+  "waveform-match",
+  "tuning-battle",
 ];
 
 export interface GameModeMeta {
@@ -58,6 +84,97 @@ export const GAME_MODE_META: Record<GameMode, GameModeMeta> = {
     description: "Wordle-style frequency guessing",
     color: "text-teal-500",
     accentHex: "#14B8A6",
+  },
+  "pitch-memory": {
+    id: "pitch-memory",
+    label: "Pitch Memory",
+    description: "Reproduce increasingly longer note sequences",
+    color: "text-rose-500",
+    accentHex: "#F43F5E",
+  },
+  "name-that-note": {
+    id: "name-that-note",
+    label: "Name That Note",
+    description: "Read notes on the musical staff",
+    color: "text-sky-500",
+    accentHex: "#0EA5E9",
+  },
+  "frequency-hunt": {
+    id: "frequency-hunt",
+    label: "Frequency Hunt",
+    description: "Find exact frequencies by ear on a log scale",
+    color: "text-orange-500",
+    accentHex: "#F97316",
+  },
+  "drone-lock": {
+    id: "drone-lock",
+    label: "Drone Lock",
+    description: "Lock onto intervals relative to a drone",
+    color: "text-emerald-500",
+    accentHex: "#10B981",
+  },
+  "tune-in": {
+    id: "tune-in",
+    label: "Tune In",
+    description: "Hit the target note with your voice or instrument",
+    color: "text-pink-500",
+    accentHex: "#EC4899",
+  },
+  "piano-tap": {
+    id: "piano-tap",
+    label: "Piano Tap",
+    description: "Identify notes by tapping the correct piano key",
+    color: "text-indigo-500",
+    accentHex: "#6366F1",
+  },
+  "frequency-slider": {
+    id: "frequency-slider",
+    label: "Frequency Slider",
+    description: "Drag to match a hidden frequency on a log scale",
+    color: "text-cyan-500",
+    accentHex: "#06B6D4",
+  },
+  "cents-deviation": {
+    id: "cents-deviation",
+    label: "Cents Deviation",
+    description: "Detect microtonal pitch shifts in cents",
+    color: "text-lime-500",
+    accentHex: "#84CC16",
+  },
+  "interval-archer": {
+    id: "interval-archer",
+    label: "Interval Archer",
+    description: "Identify intervals with arrow-accuracy scoring",
+    color: "text-fuchsia-500",
+    accentHex: "#D946EF",
+  },
+  "speed-round": {
+    id: "speed-round",
+    label: "Speed Round",
+    description: "Identify notes as fast as you can in a time sprint",
+    color: "text-orange-400",
+    accentHex: "#FB923C",
+  },
+  "chord-detective": {
+    id: "chord-detective",
+    label: "Chord Detective",
+    description: "Identify chord quality by ear",
+    color: "text-pink-400",
+    accentHex: "#F472B6",
+  },
+  "waveform-match": {
+    id: "waveform-match",
+    label: "Waveform Match",
+    description: "Align waveforms by detecting sharp/flat tuning",
+    color: "text-indigo-400",
+    accentHex: "#818CF8",
+  },
+  "tuning-battle": {
+    id: "tuning-battle",
+    label: "Tuning Battle",
+    description: "Two-player head-to-head tuning challenge",
+    color: "text-rose-500",
+    accentHex: "#F43F5E",
   },
 };
 
@@ -159,6 +276,45 @@ export type { UserProfile } from "./auth";
 export { getDailySeed as getDailyChallengeSeed, calculateStreak, todayDateString } from "./dailyChallenge";
 export type { DailyChallengeResult } from "./dailyChallenge";
 export type { FrequencyToNoteResult } from "./audio";
+
+// ─── Shared Game Framework ───────────────────────────────────────────────────
+
+export {
+  calculateScoreBreakdown,
+  calculateGrade,
+  createInitialGameState,
+} from "./gameFramework";
+export {
+  GRADE_COLORS,
+} from "./gameFramework";
+export type {
+  BaseGameState,
+  ScoreBreakdown,
+  Grade,
+} from "./gameFramework";
+
+// ─── Pitch Detection & Microphone ───────────────────────────────────────────
+
+export {
+  PitchDetector,
+  MicrophoneManager,
+  calculateCentsDeviation,
+  centsToTunerRange,
+} from "./pitchDetection";
+export type {
+  PitchDetectionResult,
+  MicPermissionState,
+} from "./pitchDetection";
+
+// ─── MIDI ────────────────────────────────────────────────────────────────────
+
+export {
+  MidiManager,
+  midiNoteToFrequency,
+  midiNoteToName,
+  frequencyToMidiNote,
+} from "./midi";
+export type { MidiNoteEvent, MidiDevice } from "./midi";
 
 // ─── Game Session ────────────────────────────────────────────────────────────
 

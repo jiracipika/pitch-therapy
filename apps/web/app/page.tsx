@@ -44,6 +44,70 @@ const MODES = [
     href: '/play/frequency-wordle',
     practiceHref: '/play/frequency-wordle?practice=true',
   },
+  {
+    id: 'pitch-memory',
+    label: 'Pitch Memory',
+    color: '#F43F5E',
+    desc: 'Listen to note sequences and reproduce them on the piano. Ramps up in difficulty.',
+    href: '/play/pitch-memory',
+    practiceHref: '/play/pitch-memory?practice=true',
+  },
+  {
+    id: 'name-that-note',
+    label: 'Name That Note',
+    color: '#0EA5E9',
+    desc: 'Read notes on the musical staff and identify them by tapping the right key.',
+    href: '/play/name-that-note',
+    practiceHref: '/play/name-that-note?practice=true',
+  },
+  {
+    id: 'frequency-hunt',
+    label: 'Frequency Hunt',
+    color: '#F97316',
+    desc: 'Scrub a log-scale bar to find the exact frequency of a sine wave by ear.',
+    href: '/play/frequency-hunt',
+    practiceHref: '/play/frequency-hunt?practice=true',
+  },
+  {
+    id: 'drone-lock',
+    label: 'Drone Lock',
+    color: '#10B981',
+    desc: 'Sing intervals relative to a continuous drone. Real-time tuning meter feedback.',
+    href: '/play/drone-lock',
+    practiceHref: '/play/drone-lock?practice=true',
+  },
+  {
+    id: 'speed-round',
+    label: 'Speed Round',
+    color: '#FB923C',
+    desc: 'Notes flash on screen — tap the piano keyboard as fast and accurately as possible in a 30s or 60s sprint.',
+    href: '/play/speed-round',
+    practiceHref: '/play/speed-round?practice=true',
+  },
+  {
+    id: 'chord-detective',
+    label: 'Chord Detective',
+    color: '#F472B6',
+    desc: 'A chord plays — identify its quality (major, minor, dim, aug, 7ths). Advanced mode also finds the root.',
+    href: '/play/chord-detective',
+    practiceHref: '/play/chord-detective?practice=true',
+  },
+  {
+    id: 'waveform-match',
+    label: 'Waveform Match',
+    color: '#818CF8',
+    desc: 'Two waveforms side by side — one target, one detuned. Identify sharp/flat and drag a slider to align.',
+    href: '/play/waveform-match',
+    practiceHref: '/play/waveform-match?practice=true',
+  },
+  {
+    id: 'tuning-battle',
+    label: 'Tuning Battle',
+    color: '#F43F5E',
+    desc: 'Two players on one device race to lock in the correct note. Best of 5 or 10 rounds wins.',
+    href: '/play/tuning-battle',
+    practiceHref: '/play/tuning-battle?practice=true',
+  },
 ];
 
 export default function Home() {
@@ -119,7 +183,7 @@ export default function Home() {
           transition={{ duration: 0.5 }}
           className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.1em] text-zinc-600"
         >
-          Five Modes
+          Nine Modes
         </motion.div>
         <motion.h3
           initial={{ opacity: 0 }}
