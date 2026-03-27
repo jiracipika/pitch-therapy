@@ -1,8 +1,8 @@
 import { View, Text, ScrollView } from 'react-native';
 import { GAME_MODE_META } from '@pitch-therapy/core';
-import { ModeCard } from '@/components/ModeCard';
+import { AnimatedModeCard } from '@/components/AnimatedModeCard';
 import { StreakRing } from '@/components/StreakRing';
-import { TabBar } from '@/components/TabBar';
+import { AnimatedTabBar } from '@/components/AnimatedTabBar';
 
 export default function DashboardScreen() {
   return (
@@ -43,12 +43,12 @@ export default function DashboardScreen() {
         {/* Mode cards */}
         {Object.values(GAME_MODE_META).map((mode) => (
           <View key={mode.id} style={{ marginBottom: 12 }}>
-            <ModeCard mode={mode} />
+            <AnimatedModeCard mode={mode} />
           </View>
         ))}
       </ScrollView>
 
-      <TabBar />
+      <AnimatedTabBar />
     </View>
   );
 }

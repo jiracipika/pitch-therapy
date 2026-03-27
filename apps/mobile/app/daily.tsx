@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META, getDailySeed } from '@pitch-therapy/core';
-import { TabBar } from '@/components/TabBar';
+import { AnimatedTabBar } from '@/components/AnimatedTabBar';
 
 const DAILY_MODES = ['note-wordle', 'frequency-wordle'] as const;
 
@@ -115,7 +115,7 @@ export default function DailyScreen() {
         </View>
       </ScrollView>
 
-      <TabBar />
+      <AnimatedTabBar />
     </View>
   );
 }

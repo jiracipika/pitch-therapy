@@ -1,5 +1,15 @@
 import { View, Text, Pressable } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withSequence,
+  withTiming,
+  runOnJS,
+} from 'react-native-reanimated';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const TABS = [
   { label: 'Home',       route: '/dashboard',   icon: '⊞' },
@@ -9,7 +19,7 @@ const TABS = [
   { label: 'Settings',   route: '/settings',    icon: '⚙' },
 ] as const;
 
-export function TabBar() {
+export function AnimatedTabBar() {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -30,25 +40,50 @@ export function TabBar() {
     >
       {TABS.map((tab) => {
         const active = pathname === tab.route || (pathname === '/' && tab.route === '/dashboard');
+        const scale = useSharedValue(1);
+
+        const handlePress = () => {
+          scale.value = withSequence(
+            withTiming(0.9, { duration: 100 }),
+            withTiming(1, { duration: 200 })
+          );
+          runOnJS(router.push)(tab.route);
+        };
+
+        const animatedStyle = useAnimatedStyle(() => ({
+          transform: [{ scale: scale.value }],
+        }));
+
         return (
-          <Pressable
+          <AnimatedPressable
             key={tab.route}
-            onPress={() => router.push(tab.route)}
-            style={{ flex: 1, alignItems: 'center', paddingVertical: 4 }}
+            onPress={handlePress}
+            style={[
+              animatedStyle,
+              { flex: 1, alignItems: 'center', paddingVertical: 4 },
+            ]}
           >
-            <Text style={{ fontSize: 18, marginBottom: 2, color: active ? '#a78bfa' : '#71717a' }}>
+            <Animated.Text
+              style={{
+                fontSize: 18,
+                marginBottom: 2,
+                color: active ? '#a78bfa' : '#71717a',
+                transform: [{ scale: active ? 1.2 : 1 }],
+              }}
+            >
               {tab.icon}
-            </Text>
-            <Text
+            </Animated.Text>
+            <Animated.Text
               style={{
                 fontSize: 10,
                 fontWeight: '600',
                 color: active ? '#a78bfa' : '#71717a',
+                opacity: active ? 1 : 0.7,
               }}
             >
               {tab.label}
-            </Text>
-          </Pressable>
+            </Animated.Text>
+          </AnimatedPressable>
         );
       })}
     </View>

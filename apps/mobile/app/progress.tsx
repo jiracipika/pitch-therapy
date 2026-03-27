@@ -1,7 +1,7 @@
 import { View, Text, ScrollView } from 'react-native';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { StreakRing } from '@/components/StreakRing';
-import { TabBar } from '@/components/TabBar';
+import { AnimatedTabBar } from '@/components/AnimatedTabBar';
 
 const STATS = [
   { label: 'Total Sessions', value: '0' },
@@ -94,7 +94,7 @@ export default function ProgressScreen() {
         ))}
       </ScrollView>
 
-      <TabBar />
+      <AnimatedTabBar />
     </View>
   );
 }

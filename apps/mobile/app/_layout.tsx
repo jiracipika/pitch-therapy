@@ -16,6 +16,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="dashboard" options={{ title: 'Dashboard' }} />
+        <Stack.Screen name="play-modes" options={{ title: 'Play Modes' }} />
         <Stack.Screen name="daily" options={{ title: 'Daily Challenge' }} />
         <Stack.Screen name="progress" options={{ title: 'Progress' }} />
         <Stack.Screen name="settings" options={{ title: 'Settings' }} />

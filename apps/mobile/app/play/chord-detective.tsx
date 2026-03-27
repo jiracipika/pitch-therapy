@@ -1,5 +1,5 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, NOTE_FREQS_4, playFrequency } from '@/lib/audio';
 

@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Switch } from 'react-native';
 import { useState } from 'react';
-import { TabBar } from '@/components/TabBar';
+import { AnimatedTabBar } from '@/components/AnimatedTabBar';
 
 export default function SettingsScreen() {
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -107,7 +107,7 @@ export default function SettingsScreen() {
         </View>
       </ScrollView>
 
-      <TabBar />
+      <AnimatedTabBar />
     </View>
   );
 }
