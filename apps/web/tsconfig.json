@@ -3,13 +3,32 @@
   "compilerOptions": {
     "jsx": "preserve",
     "incremental": true,
-    "plugins": [{ "name": "next" }],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
-      "@/*": ["./*"],
-      "@pitch-therapy/core": ["../../packages/core/src"],
-      "@pitch-therapy/ui": ["../../packages/ui/src"]
-    }
+      "@/*": [
+        "./*"
+      ],
+      "@pitch-therapy/core": [
+        "../../packages/core/src"
+      ],
+      "@pitch-therapy/ui": [
+        "../../packages/ui/src"
+      ]
+    },
+    "allowJs": true,
+    "noEmit": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

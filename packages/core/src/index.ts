@@ -163,7 +163,7 @@ export function frequencyToNote(frequency: number): Note {
   const noteNames: NoteName[] = [
     "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
   ];
-  const name = noteNames[((noteIndex % 12) + 12) % 12];
+  const name: NoteName = noteNames[((noteIndex % 12) + 12) % 12] ?? "A";
   return { name, octave, frequency };
 }
 

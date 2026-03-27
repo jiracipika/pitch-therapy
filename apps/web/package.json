@@ -10,7 +10,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.9.0",
     "@pitch-therapy/core": "*",
     "@pitch-therapy/ui": "*",
     "next": "^15.1.0",
