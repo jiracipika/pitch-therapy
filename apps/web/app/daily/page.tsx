@@ -22,7 +22,7 @@ function CountdownTimer() {
     return () => clearInterval(id);
   }, []);
 
-  return <span className="font-mono text-xl font-bold">{timeLeft}</span>;
+  return <span className="font-mono text-xl font-semibold tracking-tight text-white">{timeLeft}</span>;
 }
 
 export default function DailyPage() {
@@ -30,66 +30,61 @@ export default function DailyPage() {
   const [playedFreq] = useState(false);
 
   return (
-    <div className="min-h-screen px-4 pt-8">
-      <div className="mx-auto max-w-md">
-        <h1 className="text-3xl font-bold">📅 Daily Challenge</h1>
-        <p className="mt-1 text-zinc-400">A fresh challenge every day</p>
+    <div className="min-h-screen px-4 pt-10">
+      <div className="mx-auto max-w-5xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-white">📅 Daily Challenge</h1>
+        <p className="mt-1 text-zinc-500">A fresh challenge every day</p>
 
-        {/* Timer */}
-        <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-center">
-          <p className="text-sm text-zinc-400">Next challenge in</p>
+        <div className="mt-6 glass-card p-6 text-center">
+          <p className="text-sm text-zinc-500">Next challenge in</p>
           <CountdownTimer />
         </div>
 
-        {/* Today's challenges */}
-        <h2 className="mt-8 text-xl font-bold">Today&apos;s Challenges</h2>
+        <h2 className="mt-10 text-xl font-semibold tracking-tight text-white">Today&apos;s Challenges</h2>
 
         <div className="mt-4 space-y-3">
-          <div className="rounded-xl border border-green-500/30 bg-gradient-to-r from-green-500/10 to-transparent p-5">
+          <div className="glass-card border-l-4 border-l-[#4ADE80] p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <span className="text-2xl">🟩</span>
-                  <h3 className="text-lg font-bold text-green-500">Note Wordle</h3>
+                  <h3 className="text-lg font-semibold tracking-tight text-[#4ADE80]">Note Wordle</h3>
                 </div>
-                <p className="mt-1 text-sm text-zinc-400">6 attempts to identify the note</p>
+                <p className="mt-1 text-sm text-zinc-500">6 attempts to identify the note</p>
               </div>
               <Link href="/play/note-wordle"
-                className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${playedNote ? 'bg-zinc-700 text-zinc-400' : 'bg-green-500 text-white hover:bg-green-600'}`}>
+                className={`rounded-full px-5 py-2 text-sm font-semibold transition-all duration-300 ease-out ${playedNote ? 'bg-white/5 text-zinc-500' : 'bg-[#4ADE80] text-black hover:opacity-90'}`}>
                 {playedNote ? '✅ Done' : 'Play'}
               </Link>
             </div>
           </div>
 
-          <div className="rounded-xl border border-teal-500/30 bg-gradient-to-r from-teal-500/10 to-transparent p-5">
+          <div className="glass-card border-l-4 border-l-[#2DD4BF] p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <span className="text-2xl">🔵</span>
-                  <h3 className="text-lg font-bold text-teal-500">Frequency Wordle</h3>
+                  <h3 className="text-lg font-semibold tracking-tight text-[#2DD4BF]">Frequency Wordle</h3>
                 </div>
-                <p className="mt-1 text-sm text-zinc-400">6 attempts to guess the frequency</p>
+                <p className="mt-1 text-sm text-zinc-500">6 attempts to guess the frequency</p>
               </div>
               <Link href="/play/frequency-wordle"
-                className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${playedFreq ? 'bg-zinc-700 text-zinc-400' : 'bg-teal-500 text-white hover:bg-teal-600'}`}>
+                className={`rounded-full px-5 py-2 text-sm font-semibold transition-all duration-300 ease-out ${playedFreq ? 'bg-white/5 text-zinc-500' : 'bg-[#2DD4BF] text-black hover:opacity-90'}`}>
                 {playedFreq ? '✅ Done' : 'Play'}
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Previous days */}
-        <h2 className="mt-8 text-xl font-bold">Previous Days</h2>
+        <h2 className="mt-10 text-xl font-semibold tracking-tight text-white">Previous Days</h2>
         <div className="mt-4 space-y-2">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 flex items-center justify-between">
-              <div className="text-sm">
-                <span className="text-zinc-400">
-                  {new Date(Date.now() - (i + 1) * 86400000).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                </span>
+            <div key={i} className="glass-card p-4 flex items-center justify-between">
+              <div className="text-sm text-zinc-500">
+                {new Date(Date.now() - (i + 1) * 86400000).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
               </div>
               <div className="flex gap-1 text-xs">
-                <span className="rounded bg-zinc-800 px-2 py-1 text-zinc-500">—</span>
+                <span className="rounded-full bg-white/5 px-3 py-1 text-zinc-600">—</span>
               </div>
             </div>
           ))}

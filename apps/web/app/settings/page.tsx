@@ -14,33 +14,29 @@ type DiffMap = Record<string, 'easy' | 'medium' | 'hard'>;
 
 export default function SettingsPage() {
   const [difficulty, setDifficulty] = useState<DiffMap>({
-    'pitch-match': 'medium',
-    'note-id': 'medium',
-    'frequency-guess': 'medium',
-    'note-wordle': 'medium',
-    'frequency-wordle': 'medium',
+    'pitch-match': 'medium', 'note-id': 'medium', 'frequency-guess': 'medium',
+    'note-wordle': 'medium', 'frequency-wordle': 'medium',
   });
   const [sound, setSound] = useState(true);
 
   return (
-    <div className="min-h-screen px-4 pt-8">
-      <div className="mx-auto max-w-md">
-        <h1 className="text-3xl font-bold">⚙️ Settings</h1>
+    <div className="min-h-screen px-4 pt-10">
+      <div className="mx-auto max-w-5xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-white">⚙️ Settings</h1>
 
-        {/* Default Difficulty */}
         <div className="mt-8">
-          <h2 className="text-lg font-bold mb-4">Default Difficulty</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-white mb-4">Default Difficulty</h2>
           <div className="space-y-3">
             {MODES.map((m) => (
-              <div key={m.id} className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-                <div className="flex items-center gap-3">
+              <div key={m.id} className="glass-card flex items-center justify-between p-5">
+                <div className="flex items-center gap-4">
                   <span className="text-xl">{m.icon}</span>
-                  <span className="font-medium">{m.label}</span>
+                  <span className="font-medium text-white">{m.label}</span>
                 </div>
                 <div className="flex gap-1">
                   {(['easy', 'medium', 'hard'] as const).map((d) => (
                     <button key={d} onClick={() => setDifficulty({ ...difficulty, [m.id]: d })}
-                      className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${difficulty[m.id] === d ? 'bg-zinc-100 text-zinc-950' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}>
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 ease-out ${difficulty[m.id] === d ? 'bg-white text-black' : 'bg-white/5 text-zinc-500 hover:bg-white/10 hover:text-zinc-300'}`}>
                       {d.charAt(0).toUpperCase() + d.slice(1)}
                     </button>
                   ))}
@@ -50,40 +46,37 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Sound */}
         <div className="mt-8">
-          <h2 className="text-lg font-bold mb-4">Sound</h2>
-          <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-            <span className="font-medium">🔊 Sound Effects</span>
+          <h2 className="text-lg font-semibold tracking-tight text-white mb-4">Sound</h2>
+          <div className="glass-card flex items-center justify-between p-5">
+            <span className="font-medium text-white">🔊 Sound Effects</span>
             <button onClick={() => setSound(!sound)}
-              className={`relative h-8 w-14 rounded-full transition-colors ${sound ? 'bg-blue-500' : 'bg-zinc-700'}`}>
-              <div className={`absolute top-1 h-6 w-6 rounded-full bg-white transition-transform ${sound ? 'left-7' : 'left-1'}`} />
+              className={`relative h-8 w-14 rounded-full transition-all duration-300 ease-out ${sound ? 'bg-[#60A5FA]' : 'bg-white/10'}`}>
+              <div className={`absolute top-1 h-6 w-6 rounded-full bg-white transition-all duration-300 ease-out ${sound ? 'left-7' : 'left-1'}`} />
             </button>
           </div>
         </div>
 
-        {/* Theme */}
         <div className="mt-8">
-          <h2 className="text-lg font-bold mb-4">Theme</h2>
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+          <h2 className="text-lg font-semibold tracking-tight text-white mb-4">Theme</h2>
+          <div className="glass-card p-5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <span className="text-xl">🌙</span>
                 <div>
-                  <span className="font-medium">Dark Mode</span>
-                  <p className="text-xs text-zinc-500">Only dark mode available for now</p>
+                  <span className="font-medium text-white">Dark Mode</span>
+                  <p className="text-xs text-zinc-600">Only dark mode available for now</p>
                 </div>
               </div>
-              <div className="rounded-lg bg-zinc-100 px-3 py-1.5 text-xs font-bold text-zinc-950">Active</div>
+              <div className="rounded-full bg-white px-4 py-1.5 text-xs font-bold text-black">Active</div>
             </div>
           </div>
         </div>
 
-        {/* About */}
-        <div className="mt-8 rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-center">
-          <h3 className="text-lg font-bold">🎵 Pitch Therapy</h3>
-          <p className="mt-1 text-sm text-zinc-400">Train Your Ear. Every Day.</p>
-          <p className="mt-2 text-xs text-zinc-600">Version 0.1.0</p>
+        <div className="mt-8 glass-card p-8 text-center">
+          <h3 className="text-lg font-semibold tracking-tight text-white">🎵 Pitch Therapy</h3>
+          <p className="mt-1 text-sm text-zinc-500">Train Your Ear. Every Day.</p>
+          <p className="mt-2 text-xs text-zinc-700">Version 0.1.0</p>
         </div>
       </div>
     </div>

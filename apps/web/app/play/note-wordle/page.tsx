@@ -17,9 +17,7 @@ export default function NoteWordlePage() {
 
   const initGame = () => {
     setTargetIdx(Math.floor(Math.random() * 12));
-    setGuesses([]);
-    setCurrentGuess(null);
-    setPhase('playing');
+    setGuesses([]); setCurrentGuess(null); setPhase('playing');
   };
 
   useEffect(() => { initGame(); }, []);
@@ -37,9 +35,7 @@ export default function NoteWordlePage() {
     const feedback = getFeedback(currentGuess);
     playTone(NOTE_FREQUENCIES[`${currentGuess}4`] || 261.63, 0.3);
     const newGuesses = [...guesses, { note: currentGuess, feedback }];
-    setGuesses(newGuesses);
-    setCurrentGuess(null);
-
+    setGuesses(newGuesses); setCurrentGuess(null);
     if (feedback === 'correct') setPhase('won');
     else if (newGuesses.length >= 6) setPhase('lost');
   };
@@ -47,50 +43,47 @@ export default function NoteWordlePage() {
   const handleShare = () => {
     const grid = guesses.map(g => g.feedback === 'correct' ? '🟩' : g.feedback === 'close' ? '🟨' : '🟥').join('\n');
     navigator.clipboard.writeText(`🎵 Note Wordle ${phase === 'won' ? guesses.length : 'X'}/6\n${grid}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
 
   const targetNote = NOTE_NAMES[targetIdx];
 
   return (
-    <div className="min-h-screen px-4 pt-8">
+    <div className="min-h-screen px-4 pt-10">
       <div className="mx-auto max-w-md">
         <div className="flex items-center justify-between">
-          <button onClick={() => router.push('/dashboard')} className="text-sm text-zinc-400 hover:text-white">← Back</button>
-          <h1 className="text-lg font-bold text-green-500">🟩 Note Wordle</h1>
-          <button onClick={initGame} className="text-sm text-zinc-400 hover:text-white">🔄 New</button>
+          <button onClick={() => router.push('/dashboard')} className="text-sm text-zinc-500 hover:text-white transition-colors duration-300">← Back</button>
+          <h1 className="text-lg font-semibold tracking-tight text-[#4ADE80]">🟩 Note Wordle</h1>
+          <button onClick={initGame} className="text-sm text-zinc-500 hover:text-white transition-colors duration-300">🔄 New</button>
         </div>
 
-        {/* Grid */}
         <div className="mt-6 flex flex-col items-center gap-2">
           {Array.from({ length: 6 }).map((_, i) => {
             const guess = guesses[i];
             return (
-              <div key={i} className={`flex h-12 w-full items-center justify-center rounded-xl text-lg font-bold transition-all
-                ${guess ? guess.feedback === 'correct' ? 'bg-green-500/20 border-2 border-green-500 text-green-400'
-                  : guess.feedback === 'close' ? 'bg-amber-500/20 border-2 border-amber-500 text-amber-400'
-                  : 'bg-red-500/20 border-2 border-red-500 text-red-400'
-                  : i === guesses.length ? 'bg-zinc-800 border-2 border-zinc-600 text-zinc-300' : 'bg-zinc-900 border border-zinc-800 text-zinc-700'}`}>
+              <div key={i} className={`flex h-12 w-full items-center justify-center rounded-2xl text-lg font-semibold transition-all duration-300 ease-out
+                ${guess ? guess.feedback === 'correct' ? 'bg-[#4ADE80]/10 border-2 border-[#4ADE80] text-[#4ADE80]'
+                  : guess.feedback === 'close' ? 'bg-[#FBBF24]/10 border-2 border-[#FBBF24] text-[#FBBF24]'
+                  : 'bg-red-400/10 border-2 border-red-400 text-red-400'
+                  : i === guesses.length ? 'glass-card border-2 border-white/10 text-zinc-300' : 'bg-white/[0.02] border border-white/5 text-zinc-700'}`}>
                 {guess ? guess.note : i === guesses.length ? currentGuess ?? '?' : ''}
               </div>
             );
           })}
         </div>
 
-        {/* Note Keyboard */}
         {phase === 'playing' && (
           <div className="mt-8">
             <div className="grid grid-cols-6 gap-2">
               {NOTE_NAMES.map((n) => (
                 <button key={n} onClick={() => setCurrentGuess(n)}
-                  className={`rounded-lg py-3 text-sm font-bold transition-all ${currentGuess === n ? 'bg-green-500 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>
+                  className={`rounded-2xl py-3 text-sm font-semibold transition-all duration-300 ease-out ${currentGuess === n ? 'bg-[#4ADE80] text-black' : 'glass-card text-zinc-300 hover:bg-white/[0.08]'}`}>
                   {n}
                 </button>
               ))}
             </div>
             <button onClick={submitGuess} disabled={!currentGuess}
-              className="mt-3 w-full rounded-xl bg-green-500 py-3 font-bold text-white hover:bg-green-600 disabled:opacity-40">
+              className="mt-3 w-full rounded-full bg-[#4ADE80] py-3 font-semibold text-black transition-all duration-300 ease-out hover:opacity-90 disabled:opacity-30">
               Submit
             </button>
           </div>
@@ -99,23 +92,23 @@ export default function NoteWordlePage() {
         {(phase === 'won' || phase === 'lost') && (
           <div className="mt-6 text-center animate-slide-up">
             <div className="text-4xl mb-2">{phase === 'won' ? '🎉' : '😔'}</div>
-            <h2 className="text-2xl font-bold">{phase === 'won' ? 'Got it!' : `It was ${targetNote}4`}</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-white">{phase === 'won' ? 'Got it!' : `It was ${targetNote}4`}</h2>
             <div className="mt-4 flex gap-3">
-              <button onClick={handleShare} className="flex-1 rounded-xl bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-700">
+              <button onClick={handleShare} className="flex-1 rounded-full bg-white/5 py-3 text-sm font-medium text-zinc-300 transition-all duration-300 ease-out hover:bg-white/10">
                 {copied ? '✅ Copied!' : '📋 Share'}
               </button>
-              <button onClick={initGame} className="flex-1 rounded-xl bg-green-500 py-3 font-bold text-white hover:bg-green-600">Play Again</button>
-              <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-xl bg-zinc-800 py-3 font-medium hover:bg-zinc-700">Dashboard</button>
+              <button onClick={initGame} className="flex-1 rounded-full bg-[#4ADE80] py-3 font-semibold text-black transition-all duration-300 ease-out hover:opacity-90">Play Again</button>
+              <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-full bg-white/5 py-3 font-medium text-zinc-300 transition-all duration-300 ease-out hover:bg-white/10">Dashboard</button>
             </div>
           </div>
         )}
 
-        <div className="mt-6 rounded-xl bg-zinc-900 border border-zinc-800 p-4 text-center">
-          <p className="text-xs text-zinc-400">
+        <div className="mt-6 glass-card p-4 text-center">
+          <p className="text-xs text-zinc-500">
             🟩 Correct • 🟨 Within 2 semitones • 🟥 More than 2 semitones
           </p>
           <button onClick={() => playTone(NOTE_FREQUENCIES[`${targetNote}4`] || 261.63, 0.6)}
-            className="mt-2 text-xs text-green-500 hover:text-green-400">
+            className="mt-2 text-xs text-[#4ADE80] hover:text-[#4ADE80]/80 transition-colors duration-300">
             🔊 Play target tone
           </button>
         </div>
