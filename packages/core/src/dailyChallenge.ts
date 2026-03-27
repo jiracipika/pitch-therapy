@@ -11,13 +11,11 @@ export function getDailySeed(date?: Date): { note: string; frequency: number } {
   hash = Math.abs(hash);
 
   const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const NOTE_FREQS: Record<string, number> = {
-    'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13,
     'E': 329.63, 'F': 349.23, 'F#': 369.99, 'G': 392.0,
     'G#': 415.30, 'A': 440.0, 'A#': 466.16, 'B': 493.88,
   };
 
-  const note = NOTE_NAMES[hash % 12];
+  const note = NOTE_NAMES[hash % 12]!;
   // Frequency between 200-1000
   const frequency = Math.round(200 + (hash % 800));
 
@@ -55,8 +53,8 @@ export function calculateStreak(dates: string[]): number {
 
   let streak = 1;
   for (let i = 1; i < sorted.length; i++) {
-    const prev = new Date(sorted[i - 1]);
-    const curr = new Date(sorted[i]);
+    const prev = new Date(sorted[i - 1]!);
+    const curr = new Date(sorted[i]!);
     const diff = (prev.getTime() - curr.getTime()) / 86400000;
     if (diff === 1) streak++;
     else break;

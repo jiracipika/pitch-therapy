@@ -25,9 +25,10 @@ const SEMITONE_OFFSETS: Record<string, number> = {
  */
 export function noteToFrequency(noteName: string): number {
   const match = noteName.match(/^([A-Ga-g][#b]?)(\d)$/);
-  if (!match) return NaN;
+  if (!match || !match[1] || !match[2]) return NaN;
 
-  const [, rawNote, octStr] = match;
+  const rawNote = match[1];
+  const octStr = match[2];
   const semitone = SEMITONE_OFFSETS[capitalize(rawNote)];
   if (semitone === undefined) return NaN;
 
@@ -69,7 +70,7 @@ export function frequencyToNote(hz: number): FrequencyToNoteResult | null {
   const octave = Math.floor((roundedSemitones + 9) / 12) + 4;
 
   return {
-    noteName: NOTE_NAMES[noteIndex],
+    noteName: NOTE_NAMES[noteIndex]!,
     octave,
     centsOff,
   };
@@ -93,8 +94,8 @@ export function getDailySeed(date?: Date): { note: string; frequency: number } {
   const note = naturalNotes[noteIndex] + octave;
 
   // Deterministic frequency within that note's octave range
-  const lowFreq = noteToFrequency("C" + octave);
-  const highFreq = noteToFrequency("B" + octave);
+  const lowFreq = noteToFrequency("C" + octave)!;
+  const highFreq = noteToFrequency("B" + octave)!;
   const freqHash = simpleHash(dateStr + "-freq");
   const frequency = lowFreq + (freqHash % 10000) / 10000 * (highFreq - lowFreq);
 
@@ -145,7 +146,7 @@ export function generateNoteOptions(
 }
 
 function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
+  const a: T[] = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];

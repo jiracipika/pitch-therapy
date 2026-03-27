@@ -324,8 +324,6 @@ export {
   generateShareGrid,
 } from "./gameSession";
 export type {
-  SessionState,
   WordleAttempt,
   WordleFeedback,
-  SessionAction,
 } from "./gameSession";

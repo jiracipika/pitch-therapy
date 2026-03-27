@@ -72,7 +72,6 @@ function getWordleFeedback(
   mode: GameMode,
   answer: string | number,
   target: { note?: string; frequency?: number },
-  allNotes: string[],
 ): WordleFeedback[] {
   if (mode === "note-wordle") {
     const guess = String(answer).toUpperCase().replace(" ", "");
@@ -153,7 +152,7 @@ export function sessionReducer(
     case "SUBMIT_ANSWER": {
       if (state.isComplete || state.phase !== "in_round") return state;
 
-      const { correct, centsOff } = isAnswerCorrect(
+      const { correct } = isAnswerCorrect(
         state.mode,
         action.answer,
         state.currentTarget,
