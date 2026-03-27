@@ -3,81 +3,190 @@
 import { useState } from 'react';
 
 const MODES = [
-  { id: 'pitch-match', label: 'Pitch Match', icon: '🎤' },
-  { id: 'note-id', label: 'Note ID', icon: '🎵' },
-  { id: 'frequency-guess', label: 'Frequency Guess', icon: '🎯' },
-  { id: 'note-wordle', label: 'Note Wordle', icon: '🟩' },
-  { id: 'frequency-wordle', label: 'Frequency Wordle', icon: '🔵' },
+  { id: 'pitch-match', label: 'Pitch Match', color: '#60A5FA' },
+  { id: 'note-id', label: 'Note ID', color: '#A78BFA' },
+  { id: 'frequency-guess', label: 'Frequency Guess', color: '#FBBF24' },
+  { id: 'note-wordle', label: 'Note Wordle', color: '#4ADE80' },
+  { id: 'frequency-wordle', label: 'Frequency Wordle', color: '#2DD4BF' },
 ];
 
 type DiffMap = Record<string, 'easy' | 'medium' | 'hard'>;
 
+function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button
+      onClick={onToggle}
+      role="switch"
+      aria-checked={on}
+      className="toggle-track flex-shrink-0"
+      style={{
+        background: on ? '#30d158' : 'rgba(255,255,255,0.12)',
+      }}
+    >
+      <div
+        className="toggle-thumb"
+        style={{ left: on ? '22px' : '2px' }}
+      />
+    </button>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="section-header px-1 mt-8 mb-2">{children}</p>
+  );
+}
+
 export default function SettingsPage() {
   const [difficulty, setDifficulty] = useState<DiffMap>({
-    'pitch-match': 'medium', 'note-id': 'medium', 'frequency-guess': 'medium',
-    'note-wordle': 'medium', 'frequency-wordle': 'medium',
+    'pitch-match': 'medium',
+    'note-id': 'medium',
+    'frequency-guess': 'medium',
+    'note-wordle': 'medium',
+    'frequency-wordle': 'medium',
   });
   const [sound, setSound] = useState(true);
+  const [haptics, setHaptics] = useState(true);
 
   return (
-    <div className="min-h-screen px-4 pt-10">
-      <div className="mx-auto max-w-5xl">
-        <h1 className="text-3xl font-semibold tracking-tight text-white">⚙️ Settings</h1>
+    <div className="min-h-screen pb-nav px-4 pt-12">
+      <div className="mx-auto max-w-lg">
 
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold tracking-tight text-white mb-4">Default Difficulty</h2>
-          <div className="space-y-3">
-            {MODES.map((m) => (
-              <div key={m.id} className="glass-card flex items-center justify-between p-5">
-                <div className="flex items-center gap-4">
-                  <span className="text-xl">{m.icon}</span>
-                  <span className="font-medium text-white">{m.label}</span>
-                </div>
-                <div className="flex gap-1">
-                  {(['easy', 'medium', 'hard'] as const).map((d) => (
-                    <button key={d} onClick={() => setDifficulty({ ...difficulty, [m.id]: d })}
-                      className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 ease-out ${difficulty[m.id] === d ? 'bg-white text-black' : 'bg-white/5 text-zinc-500 hover:bg-white/10 hover:text-zinc-300'}`}>
+        {/* ── HEADER ── */}
+        <div className="mb-8">
+          <h1
+            className="text-3xl font-semibold text-white"
+            style={{ letterSpacing: '-0.03em' }}
+          >
+            Settings
+          </h1>
+        </div>
+
+        {/* ── AUDIO ── */}
+        <SectionLabel>Audio</SectionLabel>
+        <div className="glass-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(96,165,250,0.12)', border: '1px solid rgba(96,165,250,0.2)' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white">Sound Effects</p>
+                <p className="text-xs text-zinc-600">Game audio and feedback tones</p>
+              </div>
+            </div>
+            <Toggle on={sound} onToggle={() => setSound((v) => !v)} />
+          </div>
+
+          <div className="flex items-center justify-between px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 18L12 22L16 18"/>
+                  <path d="M8 6L12 2L16 6"/>
+                  <line x1="12" y1="2" x2="12" y2="22"/>
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white">Haptic Feedback</p>
+                <p className="text-xs text-zinc-600">Vibration on answers</p>
+              </div>
+            </div>
+            <Toggle on={haptics} onToggle={() => setHaptics((v) => !v)} />
+          </div>
+        </div>
+
+        {/* ── DIFFICULTY ── */}
+        <SectionLabel>Default Difficulty</SectionLabel>
+        <div className="glass-card overflow-hidden">
+          {MODES.map((m, idx) => (
+            <div
+              key={m.id}
+              className={`flex items-center justify-between px-5 py-3.5 ${idx < MODES.length - 1 ? 'border-b border-white/5' : ''}`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="h-2 w-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: m.color }}
+                />
+                <span className="text-sm font-medium text-white">{m.label}</span>
+              </div>
+              <div className="flex gap-1">
+                {(['easy', 'medium', 'hard'] as const).map((d) => {
+                  const active = difficulty[m.id] === d;
+                  return (
+                    <button
+                      key={d}
+                      onClick={() => setDifficulty({ ...difficulty, [m.id]: d })}
+                      className="rounded-full px-3 py-1 text-xs font-medium transition-all duration-200"
+                      style={
+                        active
+                          ? {
+                              background: m.color,
+                              color: '#000',
+                              boxShadow: `0 0 8px ${m.color}40`,
+                            }
+                          : {
+                              background: 'rgba(255,255,255,0.05)',
+                              color: 'rgb(113,113,122)',
+                              border: '1px solid rgba(255,255,255,0.07)',
+                            }
+                      }
+                    >
                       {d.charAt(0).toUpperCase() + d.slice(1)}
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold tracking-tight text-white mb-4">Sound</h2>
-          <div className="glass-card flex items-center justify-between p-5">
-            <span className="font-medium text-white">🔊 Sound Effects</span>
-            <button onClick={() => setSound(!sound)}
-              className={`relative h-8 w-14 rounded-full transition-all duration-300 ease-out ${sound ? 'bg-[#60A5FA]' : 'bg-white/10'}`}>
-              <div className={`absolute top-1 h-6 w-6 rounded-full bg-white transition-all duration-300 ease-out ${sound ? 'left-7' : 'left-1'}`} />
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold tracking-tight text-white mb-4">Theme</h2>
-          <div className="glass-card p-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <span className="text-xl">🌙</span>
-                <div>
-                  <span className="font-medium text-white">Dark Mode</span>
-                  <p className="text-xs text-zinc-600">Only dark mode available for now</p>
-                </div>
+        {/* ── APPEARANCE ── */}
+        <SectionLabel>Appearance</SectionLabel>
+        <div className="glass-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgb(161,161,170)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
               </div>
-              <div className="rounded-full bg-white px-4 py-1.5 text-xs font-bold text-black">Active</div>
+              <div>
+                <p className="text-sm font-medium text-white">Dark Mode</p>
+                <p className="text-xs text-zinc-600">Only dark mode for now</p>
+              </div>
+            </div>
+            <div
+              className="rounded-full px-3 py-1 text-xs font-semibold text-black"
+              style={{ background: '#ffffff' }}
+            >
+              Active
             </div>
           </div>
         </div>
 
-        <div className="mt-8 glass-card p-8 text-center">
-          <h3 className="text-lg font-semibold tracking-tight text-white">🎵 Pitch Therapy</h3>
-          <p className="mt-1 text-sm text-zinc-500">Train Your Ear. Every Day.</p>
-          <p className="mt-2 text-xs text-zinc-700">Version 0.1.0</p>
+        {/* ── ABOUT ── */}
+        <SectionLabel>About</SectionLabel>
+        <div className="glass-card overflow-hidden mb-4">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+            <span className="text-sm font-medium text-white">Version</span>
+            <span className="text-sm text-zinc-500">0.1.0</span>
+          </div>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+            <span className="text-sm font-medium text-white">Build</span>
+            <span className="text-sm text-zinc-500 font-mono">2025-q1</span>
+          </div>
+          <div className="px-5 py-5 text-center">
+            <p className="text-sm font-semibold text-white" style={{ letterSpacing: '-0.01em' }}>Pitch Therapy</p>
+            <p className="mt-0.5 text-xs text-zinc-600">Train Your Ear. Every Day.</p>
+          </div>
         </div>
+
       </div>
     </div>
   );

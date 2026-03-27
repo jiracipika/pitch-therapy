@@ -1,96 +1,163 @@
 import Link from 'next/link';
 
 const MODES = [
-  { id: 'pitch-match', label: 'Pitch Match', icon: '🎤', color: 'blue', desc: 'Match a target pitch with your voice', href: '/play/pitch-match' },
-  { id: 'note-id', label: 'Note ID', icon: '🎵', color: 'violet', desc: 'Identify notes by ear', href: '/play/note-id' },
-  { id: 'frequency-guess', label: 'Frequency Guess', icon: '🎯', color: 'amber', desc: 'Guess the frequency of a tone', href: '/play/frequency-guess' },
-  { id: 'note-wordle', label: 'Note Wordle', icon: '🟩', color: 'green', desc: 'Wordle-style note identification', href: '/play/note-wordle' },
-  { id: 'frequency-wordle', label: 'Frequency Wordle', icon: '🔵', color: 'teal', desc: 'Wordle-style frequency guessing', href: '/play/frequency-wordle' },
+  {
+    id: 'pitch-match',
+    label: 'Pitch Match',
+    color: '#60A5FA',
+    desc: 'Match a target pitch with your voice and tune your ear in real time.',
+    href: '/play/pitch-match',
+  },
+  {
+    id: 'note-id',
+    label: 'Note ID',
+    color: '#A78BFA',
+    desc: 'Hear a note and identify it by ear across increasing difficulty.',
+    href: '/play/note-id',
+  },
+  {
+    id: 'frequency-guess',
+    label: 'Frequency Guess',
+    color: '#FBBF24',
+    desc: 'Guess the exact frequency of a pure tone within a sliding range.',
+    href: '/play/frequency-guess',
+  },
+  {
+    id: 'note-wordle',
+    label: 'Note Wordle',
+    color: '#4ADE80',
+    desc: 'Six attempts to identify a mystery note. Hot and cold feedback.',
+    href: '/play/note-wordle',
+  },
+  {
+    id: 'frequency-wordle',
+    label: 'Frequency Wordle',
+    color: '#2DD4BF',
+    desc: 'Hunt for an unknown frequency in six guesses with directional hints.',
+    href: '/play/frequency-wordle',
+  },
 ];
-
-const colorMap: Record<string, { border: string; accent: string; text: string }> = {
-  blue: { border: 'border-l-[#60A5FA]', accent: '#60A5FA', text: 'text-[#60A5FA]' },
-  violet: { border: 'border-l-[#A78BFA]', accent: '#A78BFA', text: 'text-[#A78BFA]' },
-  amber: { border: 'border-l-[#FBBF24]', accent: '#FBBF24', text: 'text-[#FBBF24]' },
-  green: { border: 'border-l-[#4ADE80]', accent: '#4ADE80', text: 'text-[#4ADE80]' },
-  teal: { border: 'border-l-[#2DD4BF]', accent: '#2DD4BF', text: 'text-[#2DD4BF]' },
-};
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black">
-      {/* Floating Music Notes */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <span className="animate-note-1 absolute left-[10%] top-[20%] text-3xl text-zinc-600">♪</span>
-        <span className="animate-note-2 absolute left-[80%] top-[15%] text-2xl text-zinc-700">♫</span>
-        <span className="animate-note-3 absolute left-[25%] top-[60%] text-4xl text-zinc-700">♬</span>
-        <span className="animate-note-2 absolute left-[70%] top-[50%] text-3xl text-zinc-600">♩</span>
-        <span className="animate-note-1 absolute left-[50%] top-[80%] text-2xl text-zinc-700">♪</span>
+    <div className="min-h-screen pb-12">
+      {/* Floating musical note symbols — barely visible */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden select-none" aria-hidden>
+        <span className="animate-note-1 absolute left-[8%] top-[18%] text-5xl text-zinc-800/60 font-serif">♪</span>
+        <span className="animate-note-2 absolute left-[78%] top-[12%] text-4xl text-zinc-800/50 font-serif">♫</span>
+        <span className="animate-note-3 absolute left-[22%] top-[58%] text-6xl text-zinc-800/40 font-serif">♬</span>
+        <span className="animate-note-2 absolute left-[68%] top-[48%] text-5xl text-zinc-800/50 font-serif">♩</span>
+        <span className="animate-note-1 absolute left-[48%] top-[75%] text-4xl text-zinc-800/40 font-serif">♪</span>
+        <span className="animate-note-3 absolute left-[88%] top-[65%] text-3xl text-zinc-800/30 font-serif">♫</span>
       </div>
 
-      {/* Hero */}
-      <section className="relative flex min-h-[75vh] flex-col items-center justify-center px-4 text-center">
-        <h1 className="text-5xl font-bold tracking-tight text-white md:text-7xl">
+      {/* ── HERO ── */}
+      <section className="relative flex min-h-[92vh] flex-col items-center justify-center px-6 text-center">
+        {/* subtle pill label */}
+        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/4 px-4 py-1.5 backdrop-blur-xl">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#60A5FA]" style={{ boxShadow: '0 0 6px #60A5FA' }} />
+          <span className="text-xs font-medium tracking-wide text-zinc-400">Ear Training, Reimagined</span>
+        </div>
+
+        <h1
+          className="gradient-text text-6xl font-bold md:text-8xl"
+          style={{ letterSpacing: '-0.04em', lineHeight: 1.0 }}
+        >
           Train Your Ear.
         </h1>
-        <p className="mt-4 max-w-md text-lg text-zinc-400">
+
+        <p
+          className="mt-6 max-w-sm text-lg text-zinc-500"
+          style={{ letterSpacing: '-0.01em', lineHeight: 1.6 }}
+        >
           A daily gym for your ears. Five modes. Infinite growth.
         </p>
-        <div className="mt-8 flex gap-4">
-          <Link
-            href="/dashboard"
-            className="rounded-full bg-white px-6 py-2.5 font-semibold text-black transition-all duration-300 ease-out hover:bg-zinc-200 hover:scale-105"
-          >
+
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <Link href="/dashboard" className="btn-primary">
             Start Training
           </Link>
-          <Link
-            href="/daily"
-            className="rounded-full border border-white/10 bg-white/5 px-6 py-2.5 font-medium text-zinc-300 transition-all duration-300 ease-out hover:bg-white/10 hover:text-white backdrop-blur-xl"
-          >
+          <Link href="/daily" className="btn-secondary">
             Daily Challenge
           </Link>
         </div>
-      </section>
 
-      {/* Mode Cards */}
-      <section className="mx-auto max-w-5xl px-4 pb-12">
-        <h2 className="mb-8 text-center text-2xl font-semibold tracking-tight text-white">
-          Five modes. One goal.
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {MODES.map((m) => {
-            const c = colorMap[m.color] ?? { border: '', accent: '', text: '' };
-            return (
-              <Link
-                key={m.id}
-                href={m.href}
-                className={`glass-card border-l-4 ${c.border} group p-6 transition-all duration-300 ease-out hover:scale-[1.02]`}
-              >
-                <div className="mb-3 text-3xl">{m.icon}</div>
-                <h3 className={`text-lg font-semibold tracking-tight ${c.text}`}>{m.label}</h3>
-                <p className="mt-1 text-sm text-zinc-500">{m.desc}</p>
-                <div className="mt-4 text-sm font-medium text-zinc-500 transition-colors duration-300 group-hover:text-zinc-300">
-                  Play →
-                </div>
-              </Link>
-            );
-          })}
+        {/* Scroll hint */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30">
+          <div className="h-8 w-px bg-gradient-to-b from-transparent to-white/40" />
         </div>
       </section>
 
-      {/* Daily CTA */}
-      <section className="mx-auto max-w-md px-4 py-16 text-center">
-        <div className="glass-card p-8">
-          <div className="mb-3 text-4xl">🔥</div>
-          <h2 className="text-2xl font-semibold tracking-tight text-white">Daily Challenge</h2>
-          <p className="mt-2 text-zinc-500">
+      {/* ── MODE CARDS ── */}
+      <section className="mx-auto max-w-4xl px-5 pb-10">
+        <h2
+          className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.1em] text-zinc-600"
+        >
+          Five Modes
+        </h2>
+        <h3
+          className="mb-10 text-center text-2xl font-semibold text-white"
+          style={{ letterSpacing: '-0.025em' }}
+        >
+          One goal: perfect pitch.
+        </h3>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {MODES.map((m) => (
+            <Link
+              key={m.id}
+              href={m.href}
+              className="glass-card group relative overflow-hidden p-6 transition-all duration-300 ease-out hover:scale-[1.02]"
+            >
+              {/* Subtle color accent in top-right */}
+              <div
+                className="absolute right-4 top-4 h-2 w-2 rounded-full"
+                style={{ backgroundColor: m.color, boxShadow: `0 0 8px ${m.color}80` }}
+              />
+
+              <h3
+                className="text-base font-semibold text-white"
+                style={{ letterSpacing: '-0.02em', color: m.color }}
+              >
+                {m.label}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-500">{m.desc}</p>
+
+              <div className="mt-5 flex items-center gap-1 text-xs font-medium text-zinc-600 transition-colors duration-200 group-hover:text-zinc-400">
+                <span>Play now</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-0.5">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ── DAILY CTA ── */}
+      <section className="mx-auto max-w-md px-5 py-8">
+        <div className="glass-card p-8 text-center">
+          {/* Flame icon using SVG */}
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.15)' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+            </svg>
+          </div>
+
+          <h2
+            className="text-xl font-semibold text-white"
+            style={{ letterSpacing: '-0.025em' }}
+          >
+            Daily Challenge
+          </h2>
+          <p className="mt-2 text-sm text-zinc-500">
             A fresh challenge every day. Can you keep your streak alive?
           </p>
           <Link
             href="/daily"
-            className="mt-6 inline-block rounded-full bg-white px-6 py-2.5 font-semibold text-black transition-all duration-300 ease-out hover:bg-zinc-200 hover:scale-105"
+            className="btn-primary mt-6 inline-flex"
           >
-            Today&apos;s Challenge →
+            Today&apos;s Challenge
           </Link>
         </div>
       </section>

@@ -1,56 +1,121 @@
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META, getDailySeed } from '@pitch-therapy/core';
-import { colors } from '@/lib/theme';
+import { TabBar } from '@/components/TabBar';
 
-const tabs = [
-  { label: 'Dashboard', route: '/dashboard' },
-  { label: 'Daily', route: '/daily' },
-  { label: 'Progress', route: '/progress' },
-  { label: 'Settings', route: '/settings' },
-] as const;
+const DAILY_MODES = ['note-wordle', 'frequency-wordle'] as const;
+
+function getTimeUntilMidnight(): string {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  const diff = midnight.getTime() - now.getTime();
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `${h}h ${m}m ${s}s`;
+}
 
 export default function DailyScreen() {
   const router = useRouter();
   const seed = getDailySeed();
-  const modes = Object.values(GAME_MODE_META);
 
   return (
-    <View className="flex-1 bg-background">
-      <ScrollView className="flex-1 px-4 pt-4 pb-24">
-        <Text className="text-text text-2xl font-bold mb-1">Daily Challenge</Text>
-        <Text className="text-muted text-sm mb-6">Seed: {seed}</Text>
+    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <ScrollView style={{ flex: 1, paddingHorizontal: 16 }} contentContainerStyle={{ paddingTop: 56, paddingBottom: 100 }}>
+        <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>
+          Daily Challenge
+        </Text>
+        <Text style={{ color: '#71717a', fontSize: 14, marginBottom: 24 }}>
+          Resets at midnight
+        </Text>
 
-        <View className="bg-card rounded-2xl p-5 border border-border mb-4">
-          <Text className="text-text font-bold text-lg mb-1">Today's Workout</Text>
-          <Text className="text-muted text-sm">Complete all modes to earn bonus streak!</Text>
+        {/* Countdown card */}
+        <View
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.04)',
+            borderRadius: 16,
+            padding: 20,
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.07)',
+            marginBottom: 20,
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ color: '#71717a', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+            Next Challenge In
+          </Text>
+          <Text style={{ color: '#f4f4f5', fontSize: 32, fontWeight: '700', fontVariant: ['tabular-nums'] }}>
+            {getTimeUntilMidnight()}
+          </Text>
+          <Text style={{ color: '#71717a', fontSize: 12, marginTop: 6 }}>
+            Today's seed: {seed.note}
+          </Text>
         </View>
 
-        {modes.map((mode, i) => (
-          <View key={mode.id} className="bg-card rounded-xl p-4 border border-border mb-2 flex-row items-center gap-3">
-            <View className="w-8 h-8 rounded-full items-center justify-center" style={{ backgroundColor: mode.accentHex + '20' }}>
-              <Text className="text-sm font-bold" style={{ color: mode.accentHex }}>{i + 1}</Text>
-            </View>
-            <View className="flex-1">
-              <Text className="text-text font-medium">{mode.label}</Text>
-              <Text className="text-muted text-xs">{mode.description}</Text>
-            </View>
-            <Text className="text-muted text-xs">--</Text>
-          </View>
-        ))}
+        <Text style={{ color: '#71717a', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
+          Today's Modes
+        </Text>
+
+        {DAILY_MODES.map((modeId) => {
+          const mode = GAME_MODE_META[modeId];
+          return (
+            <Pressable
+              key={modeId}
+              onPress={() => router.push(`/play/${modeId}`)}
+              style={({ pressed }) => ({
+                backgroundColor: 'rgba(255,255,255,0.04)',
+                borderRadius: 16,
+                padding: 20,
+                borderWidth: 1,
+                borderColor: 'rgba(255,255,255,0.07)',
+                marginBottom: 12,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 16,
+                opacity: pressed ? 0.75 : 1,
+              })}
+            >
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: mode.accentHex + '20',
+                }}
+              >
+                <Text style={{ color: mode.accentHex, fontSize: 20, fontWeight: '700' }}>◉</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: '#f4f4f5', fontWeight: '600', fontSize: 16 }}>{mode.label}</Text>
+                <Text style={{ color: '#71717a', fontSize: 13, marginTop: 2 }}>{mode.description}</Text>
+              </View>
+              <Text style={{ color: mode.accentHex, fontSize: 18 }}>›</Text>
+            </Pressable>
+          );
+        })}
+
+        {/* Complete all bonus */}
+        <View
+          style={{
+            backgroundColor: 'rgba(167,139,250,0.08)',
+            borderRadius: 16,
+            padding: 16,
+            borderWidth: 1,
+            borderColor: 'rgba(167,139,250,0.15)',
+            marginTop: 8,
+          }}
+        >
+          <Text style={{ color: '#a78bfa', fontWeight: '600', marginBottom: 4 }}>Streak Bonus</Text>
+          <Text style={{ color: '#71717a', fontSize: 13 }}>
+            Complete both daily modes to extend your streak!
+          </Text>
+        </View>
       </ScrollView>
 
-      <View className="absolute bottom-0 left-0 right-0 bg-card border-t border-border flex-row">
-        {tabs.map((tab) => (
-          <Pressable
-            key={tab.route}
-            onPress={() => router.push(tab.route)}
-            className="flex-1 py-3 items-center"
-          >
-            <Text className={`text-xs font-medium ${tab.route === '/daily' ? 'text-blue-500' : 'text-muted'}`}>{tab.label}</Text>
-          </Pressable>
-        ))}
-      </View>
+      <TabBar />
     </View>
   );
 }
