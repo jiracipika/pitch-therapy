@@ -1,16 +1,21 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
-import { playTone, playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
+import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
 
 const ACCENT = '#EC4899';
-const TARGET_NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const TARGET_NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const;
 const TOTAL_ROUNDS = 5;
 
 type Phase = 'setup' | 'playing' | 'results';
 
-interface RoundResult { round: number; target: string; correct: boolean; points: number; accuracy: number }
+interface RoundResult {
+  round: number;
+  target: string;
+  correct: boolean;
+  points: number;
+}
 
 export default function TuneInScreen() {
   const router = useRouter();
@@ -18,98 +23,108 @@ export default function TuneInScreen() {
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
   const [target, setTarget] = useState('A');
   const [targetFreq, setTargetFreq] = useState(440);
-  const [centsOff, setCentsOff] = useState(0);
-  const [holdProgress, setHoldProgress] = useState(0);
-  const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [results, setResults] = useState<RoundResult[]>([]);
-  const holdStartRef = useRef<number | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const pickTarget = () => {
+  const pickTarget = useCallback(() => {
     const note = TARGET_NOTES[Math.floor(Math.random() * TARGET_NOTES.length)];
-    const freq = NOTE_FREQS_4[note] || 440;
+    const freq = NOTE_FREQS_4[note] ?? 440;
     setTarget(note);
     setTargetFreq(freq);
-    setCentsOff(0);
-    setHoldProgress(0);
-    setFeedback(null);
-    return note;
-  };
+    return { note, freq };
+  }, []);
 
-  const startGame = () => {
-    setRound(0); setScore(0); setStreak(0); setResults([]);
-    const note = pickTarget();
+  const startGame = useCallback(() => {
+    setRound(0);
+    setScore(0);
+    setStreak(0);
+    setBestStreak(0);
+    setResults([]);
+    const { note, freq } = pickTarget();
     setRound(1);
     setPhase('playing');
-    if (NOTE_FREQS_4[note]) playTone(note, NOTE_FREQS_4[note]);
-  };
+    playTone(note, freq);
+  }, [pickTarget]);
 
-  // Simulate tuning detection with random walk toward target
-  useEffect(() => {
-    if (phase !== 'playing') return;
-    intervalRef.current = setInterval(() => {
-      setCentsOff(prev => {
-        // Drift toward target with some noise
-        const drift = -prev * 0.05 + (Math.random() - 0.5) * 15;
-        const next = Math.max(-50, Math.min(50, prev + drift));
-        if (Math.abs(next) <= 10) {
-          if (!holdStartRef.current) holdStartRef.current = Date.now();
-          const held = Date.now() - holdStartRef.current;
-          setHoldProgress(Math.min(held / 1500, 1));
-          if (held >= 1500) {
-            handleSuccess(next);
-          }
-        } else {
-          holdStartRef.current = null;
-          setHoldProgress(0);
-        }
-        return next;
-      });
-    }, 100);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [phase, round]);
+  const handleSuccess = useCallback(() => {
+    // Scoring: base 80 pts + up to 50 streak bonus (matches web's accuracy + time formula)
+    const newStreak = streak + 1;
+    const points = 80 + Math.min(newStreak * 5, 50);
+    const newBestStreak = Math.max(bestStreak, newStreak);
 
-  const handleSuccess = (cents: number) => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    const accuracy = 1 - Math.abs(cents) / 50;
-    const points = Math.round(accuracy * 100 + 30);
     setScore(s => s + points);
-    setStreak(s => s + 1);
-    setFeedback('correct');
-    setResults(r => [...r, { round, target, correct: true, points, accuracy }]);
+    setStreak(newStreak);
+    setBestStreak(newBestStreak);
+    setResults(r => [...r, { round, target, correct: true, points }]);
+
     setTimeout(() => {
-      if (round >= TOTAL_ROUNDS) { setPhase('results'); }
-      else {
-        pickTarget();
+      if (round >= TOTAL_ROUNDS) {
+        setPhase('results');
+      } else {
+        const { note, freq } = pickTarget();
         setRound(r => r + 1);
-        const next = TARGET_NOTES[Math.floor(Math.random() * TARGET_NOTES.length)];
-        setTarget(next);
-        const freq = NOTE_FREQS_4[next] || 440;
-        setTargetFreq(freq);
-        if (NOTE_FREQS_4[next]) playTone(next, NOTE_FREQS_4[next]);
+        playTone(note, freq);
       }
-    }, 1500);
-  };
+    }, 600);
+  }, [streak, bestStreak, round, target, pickTarget]);
+
+  const handleSkip = useCallback(() => {
+    setStreak(0);
+    setResults(r => [...r, { round, target, correct: false, points: 0 }]);
+
+    setTimeout(() => {
+      if (round >= TOTAL_ROUNDS) {
+        setPhase('results');
+      } else {
+        const { note, freq } = pickTarget();
+        setRound(r => r + 1);
+        playTone(note, freq);
+      }
+    }, 600);
+  }, [round, target, pickTarget]);
 
   if (phase === 'setup') {
     return (
       <View style={{ flex: 1, backgroundColor: '#09090b' }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
-          <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
-          <Text style={{ color: '#f4f4f5', fontSize: 22, fontWeight: '700', marginTop: 12 }}>Tune In</Text>
-          <Text style={{ color: '#71717a', fontSize: 14, marginTop: 4 }}>Hit the target note with your voice</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
+            <Text style={{ color: '#f4f4f5', fontSize: 22, fontWeight: '700' }}>Tune In</Text>
+          </View>
+          <Text style={{ color: '#71717a', fontSize: 14, marginTop: 4 }}>
+            Hit the target note with your voice or instrument
+          </Text>
         </View>
+
         <View style={{ flex: 1, paddingHorizontal: 20, justifyContent: 'center' }}>
-          <Text style={{ color: '#f4f4f5', fontSize: 18, fontWeight: '600', marginBottom: 32 }}>Get ready to tune!</Text>
-          <Text style={{ color: '#71717a', fontSize: 13, marginBottom: 8 }}>• Target note will be shown</Text>
-          <Text style={{ color: '#71717a', fontSize: 13, marginBottom: 8 }}>• Tuning meter shows your accuracy</Text>
-          <Text style={{ color: '#71717a', fontSize: 13, marginBottom: 8 }}>• Hold steady for 1.5s to score</Text>
-          <Pressable onPress={startGame} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 32 }}>
+          {/* How to play */}
+          <View style={{ backgroundColor: `${ACCENT}0A`, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: `${ACCENT}26`, marginBottom: 32 }}>
+            <Text style={{ color: ACCENT, fontSize: 10, fontWeight: '700', letterSpacing: 1.5, marginBottom: 10 }}>HOW TO PLAY</Text>
+            <Text style={{ color: '#71717a', fontSize: 13, marginBottom: 6 }}>1. A target note appears — tap 🔊 to hear it</Text>
+            <Text style={{ color: '#71717a', fontSize: 13, marginBottom: 6 }}>2. Sing or play that note on your instrument</Text>
+            <Text style={{ color: '#71717a', fontSize: 13, marginBottom: 6 }}>3. Mark ✓ if you nailed it or ✗ to skip</Text>
+            <Text style={{ color: '#71717a', fontSize: 13 }}>4. Build a streak for bonus points!</Text>
+          </View>
+
+          <Pressable
+            onPress={startGame}
+            style={({ pressed }) => ({
+              backgroundColor: ACCENT,
+              borderRadius: 14,
+              padding: 16,
+              alignItems: 'center',
+              opacity: pressed ? 0.85 : 1,
+            })}
+          >
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Start Game</Text>
           </Pressable>
         </View>
+
+        <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
+          <Text style={{ color: '#71717a', textAlign: 'center' }}>← Back</Text>
+        </Pressable>
       </View>
     );
   }
@@ -120,14 +135,16 @@ export default function TuneInScreen() {
       <View style={{ flex: 1, backgroundColor: '#09090b' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
           <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Tune In Complete!</Text>
+
           <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', marginBottom: 20, alignItems: 'center' }}>
             <Text style={{ color: ACCENT, fontSize: 48, fontWeight: '700' }}>{score}</Text>
             <Text style={{ color: '#71717a', marginTop: 4 }}>points</Text>
           </View>
+
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
             {[
               { label: 'Hit', value: `${correct}/${TOTAL_ROUNDS}` },
-              { label: 'Streak', value: `🔥 ${streak}` },
+              { label: 'Best Streak', value: `🔥 ${bestStreak}` },
             ].map(s => (
               <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center' }}>
                 <Text style={{ color: '#f4f4f5', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
@@ -135,55 +152,111 @@ export default function TuneInScreen() {
               </View>
             ))}
           </View>
-          <Pressable onPress={startGame} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24 }}>
+
+          {results.map((r, i) => (
+            <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
+              <Text style={{ color: '#71717a', fontSize: 13 }}>Round {i + 1}</Text>
+              <Text style={{ color: '#f4f4f5', fontSize: 13, fontWeight: '600' }}>Target: {r.target}</Text>
+              <Text style={{ color: r.correct ? '#4ade80' : '#f87171', fontSize: 13 }}>
+                {r.correct ? `✓ +${r.points}` : '✗ skip'}
+              </Text>
+            </View>
+          ))}
+
+          <Pressable
+            onPress={startGame}
+            style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24 }}
+          >
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Play Again</Text>
+          </Pressable>
+          <Pressable onPress={() => router.back()} style={{ padding: 16 }}>
+            <Text style={{ color: '#71717a', textAlign: 'center' }}>← Dashboard</Text>
           </Pressable>
         </ScrollView>
       </View>
     );
   }
 
-  const centsColor = Math.abs(centsOff) <= 10 ? '#4ade80' : Math.abs(centsOff) <= 25 ? '#fbbf24' : '#f87171';
-
+  // ── Playing ──────────────────────────────────────────────────────────────────
   return (
     <View style={{ flex: 1, backgroundColor: '#09090b' }}>
       <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} />
-      <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
-        <View style={{ alignItems: 'center', marginBottom: 24 }}>
-          <Text style={{ color: ACCENT, fontSize: 64, fontWeight: '700' }}>{target}</Text>
-          <Text style={{ color: '#71717a', fontSize: 14, marginTop: 4 }}>{targetFreq.toFixed(1)} Hz</Text>
-        </View>
 
-        {/* Tuning meter */}
-        <View style={{ marginBottom: 16 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-            <Text style={{ color: '#52525b', fontSize: 10 }}>-50¢</Text>
-            <Text style={{ color: '#52525b', fontSize: 10 }}>0</Text>
-            <Text style={{ color: '#52525b', fontSize: 10 }}>+50¢</Text>
-          </View>
-          <View style={{ height: 12, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 6, position: 'relative', overflow: 'hidden' }}>
-            <View style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, backgroundColor: '#52525b' }} />
-            <View style={{ position: 'absolute', left: '40%', top: 0, bottom: 0, width: '20%', backgroundColor: 'rgba(74,222,128,0.1)', borderRadius: 4 }} />
-            <View style={{ position: 'absolute', top: 2, left: `${50 + (centsOff / 50) * 45}%`, width: 16, height: 8, borderRadius: 4, backgroundColor: centsColor, marginLeft: -8, borderWidth: 2, borderColor: centsColor }} />
-          </View>
-          <Text style={{ textAlign: 'center', fontSize: 18, fontWeight: '700', color: centsColor, marginTop: 8 }}>
-            {centsOff > 0 ? '+' : ''}{centsOff}¢
+      <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 40, justifyContent: 'space-between', paddingBottom: 40 }}>
+        {/* Target note */}
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ color: '#52525b', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 }}>
+            Target Note
+          </Text>
+          <Text style={{ color: ACCENT, fontSize: 72, fontWeight: '800', letterSpacing: -2 }}>
+            {target}
+          </Text>
+          <Text style={{ color: '#52525b', fontSize: 14, marginTop: 6 }}>
+            {targetFreq.toFixed(1)} Hz
+          </Text>
+
+          {/* Hear button */}
+          <Pressable
+            onPress={() => playTone(target, targetFreq)}
+            style={({ pressed }) => ({
+              marginTop: 24,
+              paddingVertical: 12,
+              paddingHorizontal: 24,
+              borderRadius: 24,
+              backgroundColor: 'rgba(255,255,255,0.05)',
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.08)',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <Text style={{ fontSize: 18 }}>🔊</Text>
+            <Text style={{ color: '#a1a1aa', fontSize: 14, fontWeight: '600' }}>Hear target</Text>
+          </Pressable>
+
+          <Text style={{ color: '#3f3f46', fontSize: 13, marginTop: 20 }}>
+            Sing or play the note, then mark your result
           </Text>
         </View>
 
-        {holdProgress > 0 && (
-          <View style={{ marginBottom: 16 }}>
-            <View style={{ height: 8, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 4, overflow: 'hidden' }}>
-              <View style={{ height: '100%', backgroundColor: '#4ade80', borderRadius: 4, width: `${holdProgress * 100}%` }} />
-            </View>
-            <Text style={{ textAlign: 'center', fontSize: 12, color: '#71717a', marginTop: 4 }}>Hold steady...</Text>
-          </View>
-        )}
+        {/* Self-assessment buttons */}
+        <View style={{ flexDirection: 'row', gap: 12 }}>
+          <Pressable
+            onPress={handleSuccess}
+            style={({ pressed }) => ({
+              flex: 1,
+              paddingVertical: 28,
+              borderRadius: 20,
+              alignItems: 'center',
+              backgroundColor: 'rgba(74,222,128,0.1)',
+              borderWidth: 1,
+              borderColor: 'rgba(74,222,128,0.35)',
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <Text style={{ fontSize: 28, marginBottom: 6 }}>✓</Text>
+            <Text style={{ color: '#4ade80', fontWeight: '700', fontSize: 15 }}>Got it</Text>
+          </Pressable>
 
-        <Pressable onPress={() => { if (NOTE_FREQS_4[target]) playTone(target, NOTE_FREQS_4[target]); }} style={{ alignSelf: 'center', width: 64, height: 64, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ fontSize: 24 }}>🔊</Text>
-        </Pressable>
-        <Text style={{ textAlign: 'center', color: '#52525b', fontSize: 12, marginTop: 8 }}>Tap to hear target</Text>
+          <Pressable
+            onPress={handleSkip}
+            style={({ pressed }) => ({
+              flex: 1,
+              paddingVertical: 28,
+              borderRadius: 20,
+              alignItems: 'center',
+              backgroundColor: 'rgba(248,113,113,0.08)',
+              borderWidth: 1,
+              borderColor: 'rgba(248,113,113,0.3)',
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <Text style={{ fontSize: 28, marginBottom: 6 }}>✗</Text>
+            <Text style={{ color: '#f87171', fontWeight: '700', fontSize: 15 }}>Skip</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
