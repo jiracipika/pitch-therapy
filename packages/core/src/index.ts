@@ -142,42 +142,28 @@ export interface RoundResult {
   timeMs: number;
 }
 
-// ─── Audio Utility Stubs ─────────────────────────────────────────────────────
+// ─── Audio Utilities ─────────────────────────────────────────────────────────
 
-/**
- * Convert a note name + octave to frequency in Hz.
- * Placeholder — real implementation uses equal temperament.
- */
-export function noteToFrequency(note: Note): number {
-  return note.frequency;
-}
+export {
+  noteToFrequency,
+  frequencyToNote,
+  getDailySeed,
+  getAllNoteNames,
+  generateNoteOptions,
+  calculateScore,
+} from "./audio";
+export type { FrequencyToNoteResult } from "./audio";
 
-/**
- * Convert a frequency in Hz to the closest note.
- * Placeholder — real implementation rounds to nearest 12-TET note.
- */
-export function frequencyToNote(frequency: number): Note {
-  const semitones = 12 * Math.log2(frequency / 440);
-  const noteIndex = Math.round(semitones) + 9; // A = index 9
-  const octave = Math.floor((noteIndex + 3) / 12) + 4;
-  const noteNames: NoteName[] = [
-    "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-  ];
-  const name: NoteName = noteNames[((noteIndex % 12) + 12) % 12] ?? "A";
-  return { name, octave, frequency };
-}
+// ─── Game Session ────────────────────────────────────────────────────────────
 
-/**
- * Generate a deterministic daily seed for challenge generation.
- */
-export function getDailySeed(date?: Date): number {
-  const d = date ?? new Date();
-  const dateStr = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-  let hash = 0;
-  for (let i = 0; i < dateStr.length; i++) {
-    const char = dateStr.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
+export {
+  sessionReducer,
+  initialSessionState,
+  generateShareGrid,
+} from "./gameSession";
+export type {
+  SessionState,
+  WordleAttempt,
+  WordleFeedback,
+  SessionAction,
+} from "./gameSession";

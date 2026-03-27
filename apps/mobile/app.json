@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Pitch Therapy",
+    "slug": "pitch-therapy",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "pitch-therapy",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pitchtherapy.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#09090b"
+      },
+      "package": "com.pitchtherapy.app"
+    },
+    "plugins": ["expo-router", "expo-av"]
+  }
+}

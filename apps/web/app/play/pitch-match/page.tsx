@@ -1,17 +1,234 @@
-import { GAME_MODE_META } from "@pitch-therapy/core";
-import Link from "next/link";
+'use client';
 
-export default function PlayPitchMatchPage() {
-  const meta = GAME_MODE_META["pitch-match"];
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
+
+const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
+
+const freq = (i: number) => NOTE_FREQS[i] ?? 261.63;
+
+export default function PitchMatchPage() {
+  const router = useRouter();
+  const [phase, setPhase] = useState<'idle' | 'playing' | 'done'>('idle');
+  const [round, setRound] = useState(0);
+  const [totalRounds] = useState(5);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [targetNote, setTargetNote] = useState(0);
+  const [cents, setCents] = useState(0);
+  const [results, setResults] = useState<{ round: number; correct: boolean; points: number; target: string; answer: string; timeMs: number }[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const rafRef = useRef<number>(0);
+  const roundStart = useRef(0);
+
+  const startRound = () => {
+    const noteIdx = Math.floor(Math.random() * 12);
+    setTargetNote(noteIdx);
+    setPhase('playing');
+    setRound((r) => r + 1);
+    roundStart.current = Date.now();
+    playTone(freq(noteIdx), 0.8);
+  };
+
+  const startMic = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    streamRef.current = stream;
+    const ctx = new AudioContext();
+    const source = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    source.connect(analyser);
+    analyser.fftSize = 2048;
+    const data = new Float32Array(analyser.fftSize);
+
+    const detect = () => {
+      analyser.getFloatTimeDomainData(data);
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) { const v = data[i] ?? 0; sum += v * v; }
+      const rms = Math.sqrt(sum / data.length);
+      if (rms > 0.01) {
+        const detectedFreq = autoCorrelate(data, ctx.sampleRate);
+        if (detectedFreq > 0) {
+          const targetFreq = freq(targetNote);
+          const measuredCents = Math.round(1200 * Math.log2(detectedFreq / targetFreq));
+          setCents(measuredCents);
+        }
+      }
+      rafRef.current = requestAnimationFrame(detect);
+    };
+    detect();
+  };
+
+  const stopMic = () => {
+    cancelAnimationFrame(rafRef.current);
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+  };
+
+  const submit = () => {
+    const correct = Math.abs(cents) < 50;
+    const points = correct ? Math.max(100 - Math.abs(cents) * 2, 10) : 0;
+    const targetName = (NOTE_NAMES[targetNote] ?? 'A');
+    setScore((s) => s + points);
+    if (correct) setStreak((s) => s + 1);
+    else setStreak(0);
+    setResults((r) => [...r, { round: round, correct, points, target: targetName, answer: `${cents} cents`, timeMs: Date.now() - roundStart.current }]);
+    stopMic();
+
+    if (round >= totalRounds) {
+      setPhase('done');
+    } else {
+      setTimeout(startRound, 1500);
+    }
+  };
+
+  const handleStart = async () => {
+    setPhase('idle');
+    setRound(0);
+    setScore(0);
+    setStreak(0);
+    setResults([]);
+    startRound();
+    await startMic();
+  };
+
+  const handleStop = () => {
+    stopMic();
+    setPhase('idle');
+  };
+
+  useEffect(() => {
+    return () => { stopMic(); };
+  }, []);
+
+  if (phase === 'done') {
+    return (
+      <div className="min-h-screen px-4 pt-8">
+        <div className="mx-auto max-w-md text-center">
+          <div className="text-6xl">🏆</div>
+          <h1 className="mt-4 text-3xl font-bold">Game Complete!</h1>
+          <div className="mt-6 grid grid-cols-3 gap-3">
+            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-3">
+              <div className="text-2xl font-bold">{score}</div>
+              <div className="text-xs text-zinc-400">Score</div>
+            </div>
+            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-3">
+              <div className="text-2xl font-bold">{results.filter(r => r.correct).length}/{totalRounds}</div>
+              <div className="text-xs text-zinc-400">Correct</div>
+            </div>
+            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-3">
+              <div className="text-2xl font-bold">🔥 {streak}</div>
+              <div className="text-xs text-zinc-400">Best Streak</div>
+            </div>
+          </div>
+          <div className="mt-6 flex gap-3">
+            <button onClick={() => router.push('/play/pitch-match')} className="flex-1 rounded-xl bg-blue-500 py-3 font-bold text-white hover:bg-blue-600">Play Again</button>
+            <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-xl bg-zinc-800 py-3 font-medium hover:bg-zinc-700">Dashboard</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto flex max-w-2xl flex-col items-center gap-8 px-6 py-20 text-center">
-      <span className="text-6xl">🎯</span>
-      <h1 className={`text-4xl font-black ${meta.color}`}>{meta.label}</h1>
-      <p className="text-zinc-400">{meta.description}</p>
-      <p className="text-sm text-zinc-600">Game UI coming in Phase 4.</p>
-      <Link href="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-300">
-        ← Back to Dashboard
-      </Link>
+    <div className="min-h-screen px-4 pt-8">
+      <div className="mx-auto max-w-md">
+        <div className="flex items-center justify-between">
+          <button onClick={() => router.push('/dashboard')} className="text-sm text-zinc-400 hover:text-white">← Back</button>
+          <h1 className="text-lg font-bold text-blue-500">🎤 Pitch Match</h1>
+          <div className="text-sm text-zinc-400">Score: {score}</div>
+        </div>
+
+        {/* Progress */}
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-zinc-800">
+          <div className="h-full bg-blue-500 transition-all" style={{ width: `${(round / totalRounds) * 100}%` }} />
+        </div>
+
+        {phase === 'idle' && (
+          <div className="mt-16 text-center">
+            <div className="text-6xl mb-4">🎤</div>
+            <h2 className="text-2xl font-bold">Ready to train?</h2>
+            <p className="mt-2 text-zinc-400">Match the target pitch with your voice</p>
+            <button onClick={handleStart} className="mt-6 rounded-xl bg-blue-500 px-8 py-3 font-bold text-white hover:bg-blue-600">
+              Start Training
+            </button>
+          </div>
+        )}
+
+        {phase === 'playing' && (
+          <div className="mt-8 text-center">
+            <p className="text-sm text-zinc-400">Match this note</p>
+            <div className="mt-2 text-5xl font-bold text-blue-500">{(NOTE_NAMES[targetNote] ?? 'A')}4</div>
+            <button onClick={() => playTone(freq(targetNote), 0.8)} className="mt-3 rounded-lg bg-zinc-800 px-4 py-2 text-sm hover:bg-zinc-700">
+              🔊 Play Target
+            </button>
+
+            {/* Pitch Meter */}
+            <div className="mt-8 relative">
+              <div className="h-4 rounded-full bg-zinc-800 relative overflow-hidden">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-green-500" />
+                  <div
+                    className="absolute top-0 bottom-0 w-2 bg-blue-500 rounded-full transition-all duration-100"
+                    style={{ left: `calc(50% + ${Math.max(-50, Math.min(50, cents))}%)`, transform: 'translateX(-50%)' }}
+                  />
+                </div>
+              </div>
+              <div className="mt-2 flex justify-between text-xs text-zinc-500">
+                <span>-100¢</span>
+                <span>0¢</span>
+                <span>+100¢</span>
+              </div>
+              <div className={`mt-2 text-lg font-bold ${Math.abs(cents) < 25 ? 'text-green-400' : Math.abs(cents) < 50 ? 'text-amber-400' : 'text-red-400'}`}>
+                {cents > 0 ? '+' : ''}{cents} cents {Math.abs(cents) < 25 ? '🎵' : ''}
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <div className="text-sm text-zinc-400">🔥 Streak: {streak}</div>
+              <div className="text-sm text-zinc-400">Round {round}/{totalRounds}</div>
+            </div>
+
+            <div className="mt-6 flex gap-3 justify-center">
+              <button onClick={submit} className="rounded-xl bg-blue-500 px-6 py-3 font-bold text-white hover:bg-blue-600">
+                ✓ Submit
+              </button>
+              <button onClick={handleStop} className="rounded-xl bg-zinc-800 px-6 py-3 font-medium hover:bg-zinc-700">
+                Stop
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
+}
+
+function autoCorrelate(buf: Float32Array, sampleRate: number): number {
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) { const v = buf[i] ?? 0; rms += v * v; }
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.01) return -1;
+
+  const HALF = Math.floor(SIZE / 2);
+  let bestOffset = -1;
+  let bestCorrelation = 0;
+  let foundGoodCorrelation = false;
+
+  for (let offset = 20; offset < HALF; offset++) {
+    let correlation = 0;
+    for (let i = 0; i < HALF; i++) {
+      correlation += Math.abs((buf[i] ?? 0) - (buf[i + offset] ?? 0));
+    }
+    correlation = 1 - correlation / HALF;
+
+    if (correlation > 0.9 && !foundGoodCorrelation) foundGoodCorrelation = true;
+    if (foundGoodCorrelation) {
+      if (correlation > bestCorrelation) { bestCorrelation = correlation; bestOffset = offset; }
+      else if (correlation < bestCorrelation - 0.01) break;
+    }
+  }
+
+  return bestCorrelation > 0.01 && bestOffset > 0 ? sampleRate / bestOffset : -1;
 }
