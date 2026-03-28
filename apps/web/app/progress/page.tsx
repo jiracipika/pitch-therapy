@@ -3,143 +3,194 @@
 import { motion } from 'framer-motion';
 
 const MODES = [
-  { id: 'pitch-match', label: 'Pitch Match', color: '#60A5FA' },
-  { id: 'note-id', label: 'Note ID', color: '#A78BFA' },
-  { id: 'frequency-guess', label: 'Frequency Guess', color: '#FBBF24' },
-  { id: 'note-wordle', label: 'Note Wordle', color: '#4ADE80' },
-  { id: 'frequency-wordle', label: 'Frequency Wordle', color: '#2DD4BF' },
+  { id: 'pitch-match',      label: 'Pitch Match',      icon: '🎤', color: '#0A84FF' },
+  { id: 'note-id',          label: 'Note ID',           icon: '🎵', color: '#BF5AF2' },
+  { id: 'frequency-guess',  label: 'Freq Guess',        icon: '📡', color: '#FF9F0A' },
+  { id: 'note-wordle',      label: 'Note Wordle',       icon: '🟩', color: '#30D158' },
+  { id: 'frequency-wordle', label: 'Freq Wordle',       icon: '🔊', color: '#5AC8FA' },
+  { id: 'pitch-memory',     label: 'Pitch Memory',      icon: '🧠', color: '#FF375F' },
+  { id: 'name-that-note',   label: 'Name That Note',    icon: '🎼', color: '#32ADE6' },
+  { id: 'frequency-hunt',   label: 'Freq Hunt',         icon: '🔍', color: '#FF9F0A' },
+  { id: 'drone-lock',       label: 'Drone Lock',        icon: '🔒', color: '#63E6E2' },
+  { id: 'speed-round',      label: 'Speed Round',       icon: '⚡', color: '#FF9F0A' },
 ];
 
-// 7 columns × 5 rows activity grid (35 cells)
 const WEEKS = 5;
-const DAYS = 7;
+const DAYS  = 7;
+const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+const STATS = [
+  { label: 'Games', value: '0' },
+  { label: 'Best Streak', value: '0' },
+  { label: 'Avg Accuracy', value: '—' },
+];
 
 export default function ProgressPage() {
   return (
-    <div className="min-h-screen pb-nav px-4 pt-12">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className="mx-auto max-w-lg"
-      >
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-lg mx-auto px-4 pt-14">
 
         {/* ── HEADER ── */}
-        <motion.div className="mb-8" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          <p className="text-sm font-medium text-zinc-600" style={{ letterSpacing: '0.01em' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-6"
+        >
+          <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 2 }}>
             Your journey
-          </p>
-          <h1
-            className="mt-0.5 text-3xl font-semibold text-white"
-            style={{ letterSpacing: '-0.03em' }}
-          >
-            Progress
-          </h1>
+          </div>
+          <h1 className="ios-large-title">Progress</h1>
         </motion.div>
 
         {/* ── SUMMARY STATS ── */}
-        <motion.div className="grid grid-cols-3 gap-2.5 mb-8" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          {[
-            { label: 'Games Played', value: '0' },
-            { label: 'Best Streak', value: '0' },
-            { label: 'Avg Accuracy', value: '—' },
-          ].map((s) => (
-            <div key={s.label} className="stat-card">
-              <div
-                className="text-2xl font-bold text-white"
-                style={{ letterSpacing: '-0.03em' }}
-              >
+        <motion.div
+          className="grid grid-cols-3 gap-2.5 mb-1"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08, duration: 0.4 }}
+        >
+          {STATS.map((s) => (
+            <div
+              key={s.label}
+              className="ios-card"
+              style={{ padding: '14px 12px', textAlign: 'center' }}
+            >
+              <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)', lineHeight: 1 }}>
                 {s.value}
               </div>
-              <div className="mt-1 text-[11px] text-zinc-600 leading-tight">{s.label}</div>
+              <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4, letterSpacing: '-0.08px', lineHeight: 1.3 }}>
+                {s.label}
+              </div>
             </div>
           ))}
         </motion.div>
 
         {/* ── ACTIVITY CALENDAR ── */}
-        <p className="section-header">Activity</p>
-        <div className="glass-card p-5 mb-8">
-          <div className="flex gap-1 mb-3">
-            {(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']).map((d) => (
-              <div key={d} className="flex-1 text-center text-[9px] font-medium text-zinc-700">{d}</div>
+        <div style={{ fontSize: 13, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '-0.08px', padding: '20px 4px 8px' }}>
+          Activity
+        </div>
+
+        <motion.div
+          className="ios-card"
+          style={{ padding: '16px' }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.14, duration: 0.4 }}
+        >
+          {/* Day labels */}
+          <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+            {DAY_LABELS.map((d, i) => (
+              <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: 10, fontWeight: 600, color: 'var(--ios-label3)', letterSpacing: 0.3 }}>
+                {d}
+              </div>
             ))}
           </div>
-          <div className="space-y-1.5">
+
+          {/* Grid */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {Array.from({ length: WEEKS }).map((_, w) => (
-              <div key={w} className="flex gap-1">
+              <div key={w} style={{ display: 'flex', gap: 4 }}>
                 {Array.from({ length: DAYS }).map((_, d) => (
                   <div
                     key={d}
-                    className="activity-cell flex-1"
-                    style={{ height: '12px', borderRadius: '3px' }}
+                    className="ios-activity-cell"
+                    style={{ flex: 1, aspectRatio: '1 / 1', minHeight: 10 }}
                   />
                 ))}
               </div>
             ))}
           </div>
-          <p className="mt-3 text-right text-[10px] text-zinc-700">Play games to fill this in</p>
+
+          <div style={{ fontSize: 11, color: 'var(--ios-label3)', textAlign: 'right', marginTop: 10 }}>
+            Play to fill this in
+          </div>
+        </motion.div>
+
+        {/* ── PER MODE ── */}
+        <div style={{ fontSize: 13, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '-0.08px', padding: '24px 4px 8px' }}>
+          Per Mode
         </div>
 
-        {/* ── PER MODE BREAKDOWN ── */}
-        <p className="section-header">Per Mode</p>
-        <div className="space-y-2.5">
-          {MODES.map((m) => (
-            <div key={m.id} className="glass-card p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="h-8 w-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: `${m.color}12`, border: `1px solid ${m.color}22` }}
-                  >
-                    <div
-                      className="h-2 w-2 rounded-full"
-                      style={{ backgroundColor: m.color }}
-                    />
+        <motion.div
+          className="ios-group"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+        >
+          {MODES.map((m, idx) => (
+            <div
+              key={m.id}
+              className="ios-row"
+              style={{
+                padding: '14px 16px',
+                borderTop: idx === 0 ? 'none' : '0.5px solid var(--ios-sep)',
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                gap: 0,
+              }}
+            >
+              {/* Top row */}
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 9,
+                    background: `${m.color}18`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 18,
+                    marginRight: 12,
+                    flexShrink: 0,
+                  }}
+                >
+                  {m.icon}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--ios-label)', letterSpacing: '-0.32px' }}>
+                    {m.label}
                   </div>
-                  <div>
-                    <h3
-                      className="text-sm font-semibold text-white"
-                      style={{ letterSpacing: '-0.01em' }}
-                    >
-                      {m.label}
-                    </h3>
-                    <p className="text-[11px] text-zinc-600">0 games · — accuracy</p>
+                  <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>
+                    0 games · — accuracy
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-zinc-500">—</div>
-                  <div className="text-[10px] text-zinc-700">Best</div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label2)' }}>—</div>
+                  <div style={{ fontSize: 11, color: 'var(--ios-label3)' }}>Best</div>
                 </div>
               </div>
 
               {/* Progress bar */}
-              <div className="progress-bar-track">
+              <div className="ios-progress-track">
                 <div
-                  className="progress-bar-fill"
-                  style={{ width: '0%', backgroundColor: m.color }}
+                  className="ios-progress-fill"
+                  style={{ width: '0%', background: m.color }}
                 />
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
 
         {/* ── EMPTY STATE ── */}
-        <div className="mt-8 glass-card p-8 text-center">
-          <div
-            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgb(113,113,122)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10"/>
-              <line x1="12" y1="20" x2="12" y2="4"/>
-              <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
+        <motion.div
+          className="ios-card"
+          style={{ padding: '32px 20px', textAlign: 'center', marginTop: 12, marginBottom: 8 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+        >
+          <div style={{ fontSize: 36, marginBottom: 12 }}>📊</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.23px', marginBottom: 6 }}>
+            No data yet
           </div>
-          <p className="text-sm font-medium text-zinc-500">Play games to see your progress here.</p>
-          <p className="mt-1 text-xs text-zinc-700">Detailed charts and stats coming soon.</p>
-        </div>
+          <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px' }}>
+            Play games to see your progress charts here.
+          </div>
+        </motion.div>
 
-      </motion.div>
+      </div>
     </div>
   );
 }

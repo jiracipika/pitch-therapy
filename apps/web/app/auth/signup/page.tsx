@@ -3,20 +3,65 @@ import AuthForm from './AuthForm';
 
 export default function SignupPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-6">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="gradient-text text-3xl font-bold" style={{ letterSpacing: '-0.03em' }}>
+    <div
+      style={{
+        minHeight: '100dvh',
+        background: 'var(--ios-bg)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '32px 24px',
+        paddingBottom: 'calc(32px + env(safe-area-inset-bottom, 0px))',
+      }}
+    >
+      <div style={{ width: '100%', maxWidth: 360 }}>
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <div
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: '16.2px',
+              background: 'linear-gradient(145deg, #1a1a2e 0%, #0f3460 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 34,
+              margin: '0 auto 16px',
+              boxShadow: '0 12px 40px rgba(10,132,255,0.25)',
+            }}
+          >
+            🎵
+          </div>
+          <h1
+            style={{
+              fontSize: 28,
+              fontWeight: 700,
+              letterSpacing: '-0.5px',
+              color: 'var(--ios-label)',
+              marginBottom: 6,
+            }}
+          >
             Create account
           </h1>
-          <p className="mt-2 text-sm text-zinc-500">Start your ear training journey</p>
+          <p style={{ fontSize: 15, color: 'var(--ios-label3)', letterSpacing: '-0.23px' }}>
+            Start your ear training journey
+          </p>
         </div>
 
         <AuthForm mode="signup" />
 
-        <p className="mt-6 text-center text-sm text-zinc-600">
+        <p
+          style={{
+            textAlign: 'center',
+            marginTop: 20,
+            fontSize: 15,
+            color: 'var(--ios-label3)',
+            letterSpacing: '-0.23px',
+          }}
+        >
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-zinc-300 underline-offset-2 hover:underline transition-colors">
+          <Link href="/auth/login" style={{ color: 'var(--ios-blue)', textDecoration: 'none', fontWeight: 500 }}>
             Sign in
           </Link>
         </p>

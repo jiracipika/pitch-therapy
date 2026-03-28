@@ -3,99 +3,105 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-function IconHome({ active }: { active: boolean }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2 : 1.75} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-      <polyline points="9 22 9 12 15 12 15 22"/>
+/* ── SF Symbol–equivalent SVG icons ── */
+
+function IconHome({ filled }: { filled: boolean }) {
+  return filled ? (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M10.55 2.533a2.25 2.25 0 0 1 2.9 0l6.75 5.695A2.25 2.25 0 0 1 21 10.03V20.25A1.75 1.75 0 0 1 19.25 22H15.5a.75.75 0 0 1-.75-.75v-5a.75.75 0 0 0-.75-.75h-4a.75.75 0 0 0-.75.75v5a.75.75 0 0 1-.75.75H4.75A1.75 1.75 0 0 1 3 20.25V10.03a2.25 2.25 0 0 1 .8-1.73z" />
+    </svg>
+  ) : (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>
+      <path d="M9 21V12h6v9"/>
     </svg>
   );
 }
 
-function IconCalendar({ active }: { active: boolean }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2 : 1.75} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-      <line x1="16" y1="2" x2="16" y2="6"/>
-      <line x1="8" y1="2" x2="8" y2="6"/>
-      <line x1="3" y1="10" x2="21" y2="10"/>
+function IconCalendar({ filled }: { filled: boolean }) {
+  return filled ? (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M8 2a.75.75 0 0 1 .75.75V4h6.5V2.75a.75.75 0 0 1 1.5 0V4h1.5A2.75 2.75 0 0 1 21 6.75v11.5A2.75 2.75 0 0 1 18.25 21H5.75A2.75 2.75 0 0 1 3 18.25V6.75A2.75 2.75 0 0 1 5.75 4h1.5V2.75A.75.75 0 0 1 8 2zm-2.25 7a.25.25 0 0 0-.25.25v9c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-9a.25.25 0 0 0-.25-.25z" />
+    </svg>
+  ) : (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2.5"/>
+      <path d="M8 2v3M16 2v3M3 10h18"/>
     </svg>
   );
 }
 
-function IconBarChart({ active }: { active: boolean }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2 : 1.75} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="20" x2="18" y2="10"/>
-      <line x1="12" y1="20" x2="12" y2="4"/>
+function IconChart({ filled }: { filled: boolean }) {
+  return filled ? (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M6.25 13A.75.75 0 0 0 5.5 13.75v5.5a.75.75 0 0 0 1.5 0v-5.5A.75.75 0 0 0 6.25 13zM12 8.75a.75.75 0 0 0-1.5 0v10.5a.75.75 0 0 0 1.5 0zM17.75 4a.75.75 0 0 0-1.5 0v15.25a.75.75 0 0 0 1.5 0z" />
+    </svg>
+  ) : (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <line x1="6" y1="20" x2="6" y2="14"/>
+      <line x1="12" y1="20" x2="12" y2="9"/>
+      <line x1="18" y1="20" x2="18" y2="4"/>
     </svg>
   );
 }
 
-function IconSliders({ active }: { active: boolean }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2 : 1.75} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="4" y1="21" x2="4" y2="14"/>
-      <line x1="4" y1="10" x2="4" y2="3"/>
-      <line x1="12" y1="21" x2="12" y2="12"/>
-      <line x1="12" y1="8" x2="12" y2="3"/>
-      <line x1="20" y1="21" x2="20" y2="16"/>
-      <line x1="20" y1="12" x2="20" y2="3"/>
-      <line x1="1" y1="14" x2="7" y2="14"/>
-      <line x1="9" y1="8" x2="15" y2="8"/>
-      <line x1="17" y1="16" x2="23" y2="16"/>
+function IconGear({ filled }: { filled: boolean }) {
+  return filled ? (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path fillRule="evenodd" d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm-5 3.5a5 5 0 1 1 10 0 5 5 0 0 1-10 0z" clipRule="evenodd" />
+      <path d="M9.77 2.44a.75.75 0 0 1 .73-.44h3a.75.75 0 0 1 .73.44l.8 1.87c.36.08.72.18 1.06.32l1.78-.9a.75.75 0 0 1 .84.14l2.12 2.12a.75.75 0 0 1 .14.84l-.9 1.78c.14.34.24.7.32 1.06l1.87.8a.75.75 0 0 1 .44.73v3a.75.75 0 0 1-.44.73l-1.87.8c-.08.36-.18.72-.32 1.06l.9 1.78a.75.75 0 0 1-.14.84l-2.12 2.12a.75.75 0 0 1-.84.14l-1.78-.9c-.34.14-.7.24-1.06.32l-.8 1.87a.75.75 0 0 1-.73.44h-3a.75.75 0 0 1-.73-.44l-.8-1.87a8.23 8.23 0 0 1-1.06-.32l-1.78.9a.75.75 0 0 1-.84-.14L3.17 19.3a.75.75 0 0 1-.14-.84l.9-1.78a8.23 8.23 0 0 1-.32-1.06l-1.87-.8A.75.75 0 0 1 1.3 14v-3a.75.75 0 0 1 .44-.73l1.87-.8c.08-.36.18-.72.32-1.06l-.9-1.78a.75.75 0 0 1 .14-.84L5.29 3.67a.75.75 0 0 1 .84-.14l1.78.9c.34-.14.7-.24 1.06-.32z" />
+    </svg>
+  ) : (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
     </svg>
   );
 }
 
-const NAV = [
-  { href: '/dashboard', label: 'Dashboard', Icon: IconHome },
-  { href: '/daily', label: 'Daily', Icon: IconCalendar },
-  { href: '/progress', label: 'Progress', Icon: IconBarChart },
-  { href: '/settings', label: 'Settings', Icon: IconSliders },
-];
+const TABS = [
+  { href: '/dashboard', label: 'Home',     Icon: IconHome },
+  { href: '/daily',     label: 'Daily',    Icon: IconCalendar },
+  { href: '/progress',  label: 'Progress', Icon: IconChart },
+  { href: '/settings',  label: 'Settings', Icon: IconGear },
+] as const;
 
 export default function Nav() {
   const pathname = usePathname();
 
-  if (pathname === '/') return null;
+  /* Hide nav on landing, onboarding, and auth pages */
+  if (
+    pathname === '/' ||
+    pathname.startsWith('/onboarding') ||
+    pathname.startsWith('/auth')
+  ) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 frosted-nav" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-      <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-1">
-        {NAV.map((n) => {
-          const isActive = pathname === n.href || pathname.startsWith(n.href + '/');
-          return (
-            <Link
-              key={n.href}
-              href={n.href}
-              className={`relative flex flex-col items-center gap-1 px-5 py-2 transition-all duration-200 ease-out ${
-                isActive ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
-              }`}
+    <nav className="ios-tab-bar">
+      {TABS.map(({ href, label, Icon }) => {
+        const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+        const color = active ? 'var(--ios-blue)' : 'var(--ios-label3)';
+
+        return (
+          <Link key={href} href={href} className="ios-tab-item" style={{ textDecoration: 'none' }}>
+            <span style={{ color, transition: 'color 0.15s ease' }}>
+              <Icon filled={active} />
+            </span>
+            <span
+              style={{
+                fontSize: '10px',
+                fontWeight: active ? 600 : 500,
+                letterSpacing: '0.01em',
+                color,
+                transition: 'color 0.15s ease',
+                lineHeight: 1,
+              }}
             >
-              {isActive && (
-                <div
-                  className="absolute top-1 left-1/2 h-[3px] w-6 -translate-x-1/2 rounded-full bg-white"
-                  style={{ boxShadow: '0 0 6px rgba(255,255,255,0.5)' }}
-                />
-              )}
-              <span
-                className={`transition-transform duration-200 ${isActive ? 'scale-[1.08]' : 'scale-100'}`}
-                style={{ marginTop: isActive ? '2px' : '0px' }}
-              >
-                <n.Icon active={isActive} />
-              </span>
-              <span
-                className="text-[10px] font-medium leading-none tracking-wide"
-                style={{ letterSpacing: '0.02em' }}
-              >
-                {n.label}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
+              {label}
+            </span>
+          </Link>
+        );
+      })}
     </nav>
   );
 }

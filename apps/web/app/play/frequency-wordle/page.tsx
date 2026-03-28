@@ -8,6 +8,8 @@ import WaveVisualizer from '@/components/WaveVisualizer';
 type Feedback = 'correct' | 'close' | 'miss';
 interface GuessRow { freq: number; feedback: Feedback; direction?: 'up' | 'down' }
 
+const ACCENT = '#0A84FF';
+
 export default function FrequencyWordlePage() {
   const router = useRouter();
   const [targetFreq, setTargetFreq] = useState(0);
@@ -51,68 +53,135 @@ export default function FrequencyWordlePage() {
   };
 
   return (
-    <div className="min-h-screen px-4 pt-10">
-      <div className="mx-auto max-w-md">
-        <div className="flex items-center justify-between">
-          <button onClick={() => router.push('/dashboard')} className="text-sm text-zinc-500 hover:text-white transition-colors duration-300">← Back</button>
-          <h1 className="text-lg font-semibold tracking-tight text-[#2DD4BF]">🔵 Frequency Wordle</h1>
-          <button onClick={initGame} className="text-sm text-zinc-500 hover:text-white transition-colors duration-300">🔄 New</button>
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-sm mx-auto px-4 pt-12">
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+          <button
+            onClick={() => router.push('/dashboard')}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'var(--ios-bg2)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>🔵 Frequency Wordle</div>
+          <button
+            onClick={initGame}
+            style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-blue)', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            🔄 New
+          </button>
         </div>
 
-        <div className="mt-3">
-          <WaveVisualizer active={isPlaying} color="#2DD4BF" height={35} />
+        <div style={{ marginBottom: 12 }}>
+          <WaveVisualizer active={isPlaying} color={ACCENT} height={35} />
         </div>
 
-        <div className="mt-4 flex flex-col items-center gap-2">
+        {/* Guess rows */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 20 }}>
           {Array.from({ length: 6 }).map((_, i) => {
             const guess = guesses[i];
+            let bg = 'var(--ios-bg2)';
+            let border = '1.5px solid var(--ios-sep)';
+            let color = 'var(--ios-label3)';
+            if (guess) {
+              if (guess.feedback === 'correct') { bg = 'rgba(48,209,88,0.15)'; border = '2px solid var(--ios-green)'; color = 'var(--ios-green)'; }
+              else if (guess.feedback === 'close') { bg = 'rgba(255,159,10,0.15)'; border = '2px solid var(--ios-orange)'; color = 'var(--ios-orange)'; }
+              else { bg = 'rgba(255,69,58,0.12)'; border = '2px solid var(--ios-red)'; color = 'var(--ios-red)'; }
+            } else if (i === guesses.length) {
+              bg = 'var(--ios-bg2)'; border = '2px solid var(--ios-sep)'; color = 'var(--ios-label)';
+            }
             return (
-              <div key={i} className={`flex h-12 w-full items-center justify-center rounded-2xl text-lg font-semibold transition-all duration-300 ease-out
-                ${guess ? guess.feedback === 'correct' ? 'bg-[#2DD4BF]/10 border-2 border-[#2DD4BF] text-[#2DD4BF]'
-                  : guess.feedback === 'close' ? 'bg-[#FBBF24]/10 border-2 border-[#FBBF24] text-[#FBBF24]'
-                  : 'bg-red-400/10 border-2 border-red-400 text-red-400'
-                  : i === guesses.length ? 'glass-card border-2 border-white/10 text-zinc-300' : 'bg-white/[0.02] border border-white/5 text-zinc-700'}`}>
-                {guess ? `${guess.freq} Hz ${guess.direction === 'up' ? '▲' : guess.direction === 'down' ? '▼' : '✓'}` : i === guesses.length && inputVal ? `${inputVal} Hz` : ''}
+              <div
+                key={i}
+                style={{
+                  width: '100%', height: 52, borderRadius: 12,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 16, fontWeight: 700,
+                  background: bg, border, color,
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {guess
+                  ? `${guess.freq} Hz ${guess.direction === 'up' ? '▲' : guess.direction === 'down' ? '▼' : '✓'}`
+                  : i === guesses.length && inputVal ? `${inputVal} Hz` : ''}
               </div>
             );
           })}
         </div>
 
         {phase === 'playing' && (
-          <div className="mt-8">
-            <div className="flex gap-2">
-              <input type="number" value={inputVal} onChange={(e) => setInputVal(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && submitGuess()}
-                placeholder="Frequency in Hz"
-                className="focus-glow flex-1 rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-zinc-600 focus:border-[#2DD4BF]/50 focus:outline-none transition-all duration-300" />
-              <button onClick={submitGuess} disabled={!inputVal}
-                className="rounded-full bg-[#2DD4BF] px-6 py-3 font-semibold text-black transition-all duration-300 ease-out hover:opacity-90 disabled:opacity-30">
-                Go
-              </button>
-            </div>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            <input
+              type="number" value={inputVal} onChange={(e) => setInputVal(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && submitGuess()}
+              placeholder="Frequency in Hz"
+              style={{
+                flex: 1, borderRadius: 12, padding: '12px 16px',
+                background: 'var(--ios-bg2)', border: '1px solid var(--ios-sep)',
+                color: 'var(--ios-label)', fontSize: 15, outline: 'none',
+              }}
+            />
+            <button
+              onClick={submitGuess} disabled={!inputVal}
+              style={{
+                borderRadius: 12, padding: '0 20px',
+                background: ACCENT, color: '#fff',
+                fontSize: 15, fontWeight: 700, border: 'none', cursor: 'pointer',
+                opacity: inputVal ? 1 : 0.3,
+              }}
+            >
+              Go
+            </button>
           </div>
         )}
 
         {(phase === 'won' || phase === 'lost') && (
-          <div className="mt-6 text-center animate-slide-up">
-            <div className="text-4xl mb-2">{phase === 'won' ? '🎉' : '😔'}</div>
-            <h2 className="text-2xl font-semibold tracking-tight text-white">{phase === 'won' ? 'Got it!' : `It was ${targetFreq} Hz`}</h2>
-            <div className="mt-4 flex gap-3">
-              <button onClick={handleShare} className="flex-1 rounded-full bg-white/5 py-3 text-sm font-medium text-zinc-300 transition-all duration-300 ease-out hover:bg-white/10">
+          <div style={{ textAlign: 'center', paddingTop: 16 }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>{phase === 'won' ? '🎉' : '😔'}</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 20 }}>
+              {phase === 'won' ? 'Got it!' : `It was ${targetFreq} Hz`}
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+              <button
+                onClick={handleShare}
+                style={{
+                  flex: 1, borderRadius: 14, height: 50,
+                  fontSize: 15, fontWeight: 600, border: 'none', cursor: 'pointer',
+                  background: 'var(--ios-bg2)', color: 'var(--ios-label2)',
+                }}
+              >
                 {copied ? '✅ Copied!' : '📋 Share'}
               </button>
-              <button onClick={initGame} className="flex-1 rounded-full bg-[#2DD4BF] py-3 font-semibold text-black transition-all duration-300 ease-out hover:opacity-90">Play Again</button>
-              <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-full bg-white/5 py-3 font-medium text-zinc-300 transition-all duration-300 ease-out hover:bg-white/10">Dashboard</button>
+              <button
+                onClick={initGame}
+                style={{
+                  flex: 1, borderRadius: 14, height: 50,
+                  fontSize: 15, fontWeight: 600, border: 'none', cursor: 'pointer',
+                  background: ACCENT, color: '#fff',
+                }}
+              >
+                Play Again
+              </button>
             </div>
+            <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
           </div>
         )}
 
-        <div className="mt-6 glass-card p-4 text-center">
-          <p className="text-xs text-zinc-500">
+        <div className="ios-card" style={{ padding: 16, textAlign: 'center', marginTop: 16 }}>
+          <div style={{ fontSize: 12, color: 'var(--ios-label3)' }}>
             🟩 Within 2% • 🟨 Within 10% (+ ▲▼ direction) • 🟥 More than 10%
-          </p>
-          <button onClick={() => playTone(targetFreq, 0.6)}
-            className="mt-2 text-xs text-[#2DD4BF] hover:text-[#2DD4BF]/80 transition-colors duration-300">
+          </div>
+          <button
+            onClick={() => playTone(targetFreq, 0.6)}
+            style={{ marginTop: 8, fontSize: 12, color: ACCENT, background: 'none', border: 'none', cursor: 'pointer' }}
+          >
             🔊 Play target tone
           </button>
         </div>

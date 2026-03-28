@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { playTone, NOTE_FREQUENCIES } from '@/lib/audio';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 
-const ACCENT = '#EC4899';
+const ACCENT = '#FF2D55';
 
 const TARGET_NOTES = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
 
@@ -107,7 +107,6 @@ export default function TuneInPage() {
       analyserRef.current = analyser;
       setIsListening(true);
     } catch {
-      // mic not available, fall back to play-and-match
       setUseMidi(false);
     }
   };
@@ -135,7 +134,7 @@ export default function TuneInPage() {
     setStreak(0);
     setBestStreak(0);
     setResults([]);
-    if (!useMidi) startMic(); // Microphone mode: detect pitch in real time
+    if (!useMidi) startMic();
     nextRound();
   };
 
@@ -195,154 +194,235 @@ export default function TuneInPage() {
 
   if (phase === 'done') {
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15 }} className="text-6xl">🏆</motion.div>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Tune In Complete!</h1>
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            {[
-              { label: 'Score', value: score },
-              { label: 'Hit', value: `${results.filter(r => r.correct).length}/${totalRounds}` },
-              { label: 'Best Streak', value: `🔥 ${bestStreak}` },
-            ].map((s, i) => (
-              <motion.div key={s.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.1 }} className="glass-card p-4">
-                <div className="text-2xl font-bold text-white">{s.value}</div>
-                <div className="text-xs text-zinc-500">{s.label}</div>
-              </motion.div>
-            ))}
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+            <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+              Tune In Complete!
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{results.filter(r => r.correct).length}/{totalRounds}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Hit</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>🔥 {bestStreak}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Streak</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Play Again</button>
+              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            </div>
           </div>
-          <div className="mt-6 flex gap-3">
-            <button onClick={startGame} className="flex-1 rounded-full py-3 font-semibold text-white hover:opacity-90 transition-all" style={{ background: ACCENT }}>Play Again</button>
-            <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-full bg-white/5 py-3 font-medium text-zinc-300 hover:bg-white/10 transition-all">Dashboard</button>
-          </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   if (phase === 'setup') {
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md">
-          <div className="text-center">
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }} className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl" style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}25` }}>
-              <span className="text-4xl">🎤</span>
-            </motion.div>
-            <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Tune In</h1>
-            <p className="mt-2 text-zinc-500">Hit the target note with your voice or instrument</p>
-          </div>
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+            <div style={{ fontSize: 64, marginBottom: 20 }}>🎤</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Tune In</div>
+            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 24 }}>Hit the target note with your voice or instrument</div>
 
-          {/* How to play */}
-          <div className="mt-8 rounded-2xl p-4 text-left" style={{ background: 'rgba(236,72,153,0.06)', border: '1px solid rgba(236,72,153,0.15)' }}>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: ACCENT }}>How to Play</p>
-            <ol className="space-y-2 text-sm text-zinc-400">
-              <li>1. A target note appears — tap 🔊 to hear it</li>
-              <li>2. Sing or play that note into your microphone</li>
-              <li>3. The tuning meter shows how close you are (±50¢)</li>
-              <li>4. Hold within ±10¢ for 1.5 seconds to score</li>
-            </ol>
-          </div>
-
-          <div className="mt-6">
-            <h3 className="text-sm font-medium text-zinc-500 mb-3 text-center">Input Mode</h3>
-            <div className="flex items-center justify-center gap-3">
-              <button onClick={() => setUseMidi(false)} className={`rounded-full px-5 py-2 text-sm font-medium transition-all ${!useMidi ? 'text-white' : 'bg-white/5 text-zinc-500 hover:bg-white/10'}`} style={!useMidi ? { background: ACCENT } : {}}>🎤 Microphone</button>
-              <button onClick={() => setUseMidi(true)} className={`rounded-full px-5 py-2 text-sm font-medium transition-all ${useMidi ? 'text-white' : 'bg-white/5 text-zinc-500 hover:bg-white/10'}`} style={useMidi ? { background: ACCENT } : {}}>👁️ Listen Only</button>
+            <div className="ios-card" style={{ padding: 16, textAlign: 'left', marginBottom: 24 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: ACCENT, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>How to Play</div>
+              <ol style={{ fontSize: 14, color: 'var(--ios-label3)', listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <li>1. A target note appears — tap 🔊 to hear it</li>
+                <li>2. Sing or play that note into your microphone</li>
+                <li>3. The tuning meter shows how close you are (±50¢)</li>
+                <li>4. Hold within ±10¢ for 1.5 seconds to score</li>
+              </ol>
             </div>
-            <p className="mt-2 text-center text-xs text-zinc-600">
-              {useMidi ? 'Practice without mic — mark rounds yourself' : 'Real-time pitch detection via microphone'}
-            </p>
-          </div>
 
-          <button onClick={startGame} className="mt-8 w-full rounded-full py-3 font-semibold text-white hover:opacity-90 transition-all" style={{ background: ACCENT }}>Start Game</button>
-        </motion.div>
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginBottom: 10 }}>Input Mode</div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                <button
+                  onClick={() => setUseMidi(false)}
+                  style={{
+                    height: 34, borderRadius: 17, padding: '0 16px',
+                    fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                    background: !useMidi ? ACCENT : 'var(--ios-bg2)',
+                    color: !useMidi ? '#fff' : 'var(--ios-label3)',
+                    transition: 'background 0.15s',
+                  }}
+                >
+                  🎤 Microphone
+                </button>
+                <button
+                  onClick={() => setUseMidi(true)}
+                  style={{
+                    height: 34, borderRadius: 17, padding: '0 16px',
+                    fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                    background: useMidi ? ACCENT : 'var(--ios-bg2)',
+                    color: useMidi ? '#fff' : 'var(--ios-label3)',
+                    transition: 'background 0.15s',
+                  }}
+                >
+                  👁️ Listen Only
+                </button>
+              </div>
+              <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ios-label3)' }}>
+                {useMidi ? 'Practice without mic — mark rounds yourself' : 'Real-time pitch detection via microphone'}
+              </div>
+            </div>
+            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Start Game</button>
+          </div>
+        </div>
       </div>
     );
   }
 
-  const centsColor = Math.abs(centsOff) <= 10 ? '#4ADE80' : Math.abs(centsOff) <= 25 ? '#FBBF24' : '#F87171';
+  const centsColor = Math.abs(centsOff) <= 10 ? 'var(--ios-green)' : Math.abs(centsOff) <= 25 ? 'var(--ios-orange)' : 'var(--ios-red)';
 
   return (
-    <div className="min-h-screen px-4 pt-10">
-      <FeedbackOverlay correct={feedback === 'correct'} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-sm mx-auto px-4 pt-12">
+        <FeedbackOverlay correct={feedback === 'correct'} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
 
-      <div className="mx-auto max-w-md">
-        <div className="flex items-center justify-between">
-          <button onClick={() => { stopMic(); router.push('/dashboard'); }} className="text-sm text-zinc-500 hover:text-white transition-colors">← Back</button>
-          <h1 className="text-lg font-semibold tracking-tight" style={{ color: ACCENT }}>🎤 Tune In</h1>
-          <div className="text-sm text-zinc-500">Score: {score}</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+          <button
+            onClick={() => { stopMic(); router.push('/dashboard'); }}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'var(--ios-bg2)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>🎤 Tune In</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+            {score} pts
+          </div>
         </div>
 
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/5">
-          <motion.div className="h-full rounded-full" style={{ background: ACCENT }} animate={{ width: `${(round / totalRounds) * 100}%` }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} />
+        <div className="ios-progress-track mb-6">
+          <motion.div
+            className="ios-progress-fill"
+            style={{ background: ACCENT }}
+            animate={{ width: `${(round / totalRounds) * 100}%` }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          />
         </div>
 
-        {/* Target note + replay */}
-        <div className="mt-10 text-center">
-          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-7xl font-bold" style={{ color: ACCENT }}>
+        {/* Target note */}
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            style={{ fontSize: 72, fontWeight: 800, color: ACCENT, letterSpacing: '-2px', lineHeight: 1 }}
+          >
             {targetNote}
           </motion.div>
-          <p className="mt-2 text-sm text-zinc-500">{targetFreq.toFixed(1)} Hz</p>
-          <motion.button onClick={() => playTone(targetFreq, 0.8)} whileTap={{ scale: 0.92 }} className="mt-4 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium bg-white/5 border border-white/10 text-zinc-300 hover:bg-white/10 transition-all">
+          <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ios-label3)' }}>{targetFreq.toFixed(1)} Hz</div>
+          <motion.button
+            onClick={() => playTone(targetFreq, 0.8)}
+            whileTap={{ scale: 0.92 }}
+            style={{
+              marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 6,
+              borderRadius: 12, padding: '8px 16px', fontSize: 14, fontWeight: 500,
+              background: 'var(--ios-bg2)', border: '1px solid var(--ios-sep)',
+              color: 'var(--ios-label2)', cursor: 'pointer',
+            }}
+          >
             🔊 Hear target
           </motion.button>
         </div>
 
         {useMidi ? (
-          /* Listen Only mode — manual self-assessment */
-          <div className="mt-10 text-center">
-            <p className="text-sm text-zinc-400 mb-6">Sing or play the note, then mark your result</p>
-            <div className="flex gap-3 justify-center">
-              <motion.button onClick={handleSuccess} whileTap={{ scale: 0.93 }} className="flex-1 rounded-2xl py-5 font-semibold text-white" style={{ background: 'rgba(74,222,128,0.15)', border: '1px solid rgba(74,222,128,0.4)' }}>
-                <span className="block text-2xl mb-1">✓</span>
-                <span className="text-green-400">Got it</span>
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <div style={{ fontSize: 14, color: 'var(--ios-label3)', marginBottom: 20 }}>Sing or play the note, then mark your result</div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <motion.button
+                onClick={handleSuccess}
+                whileTap={{ scale: 0.93 }}
+                style={{
+                  flex: 1, borderRadius: 16, padding: '20px 0',
+                  background: 'rgba(48,209,88,0.15)', border: '1px solid rgba(48,209,88,0.4)',
+                  cursor: 'pointer',
+                }}
+              >
+                <span style={{ display: 'block', fontSize: 24, marginBottom: 4 }}>✓</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ios-green)' }}>Got it</span>
               </motion.button>
-              <motion.button onClick={handleGiveUp} whileTap={{ scale: 0.93 }} className="flex-1 rounded-2xl py-5 font-semibold text-white" style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)' }}>
-                <span className="block text-2xl mb-1">✗</span>
-                <span className="text-red-400">Skip</span>
+              <motion.button
+                onClick={handleGiveUp}
+                whileTap={{ scale: 0.93 }}
+                style={{
+                  flex: 1, borderRadius: 16, padding: '20px 0',
+                  background: 'rgba(255,69,58,0.1)', border: '1px solid rgba(255,69,58,0.3)',
+                  cursor: 'pointer',
+                }}
+              >
+                <span style={{ display: 'block', fontSize: 24, marginBottom: 4 }}>✗</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ios-red)' }}>Skip</span>
               </motion.button>
             </div>
           </div>
         ) : (
           <>
             {/* Tuning meter */}
-            <div className="mt-8 relative">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] text-zinc-600">-50¢</span>
-                <span className="text-[10px] text-zinc-600">0</span>
-                <span className="text-[10px] text-zinc-600">+50¢</span>
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--ios-label3)', marginBottom: 6 }}>
+                <span>-50¢</span><span>0</span><span>+50¢</span>
               </div>
-              <div className="relative h-3 overflow-hidden rounded-full bg-white/5">
-                <div className="absolute left-1/2 top-0 h-full w-px bg-zinc-600" />
-                <div className="absolute left-[38%] top-0 h-full w-[24%] rounded-full" style={{ background: 'rgba(74,222,128,0.15)' }} />
-                <motion.div
-                  className="absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full border-2"
-                  style={{ left: `${Math.max(5, Math.min(95, 50 + (centsOff / 50) * 45))}%`, borderColor: centsColor, backgroundColor: `${centsColor}40`, boxShadow: `0 0 8px ${centsColor}60` }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                />
+              <div style={{ position: 'relative', height: 8, borderRadius: 4, background: 'var(--ios-bg3)', overflow: 'visible', margin: '0 4px' }}>
+                <div style={{ position: 'absolute', left: '50%', top: -2, bottom: -2, width: 1.5, background: 'var(--ios-green)', transform: 'translateX(-50%)' }} />
+                <div style={{
+                  position: 'absolute', top: 0, width: 12, height: 8, borderRadius: 4,
+                  background: ACCENT,
+                  left: `calc(50% + ${Math.max(-45, Math.min(45, centsOff / 2))}%)`,
+                  transform: 'translateX(-50%)',
+                  transition: 'left 0.1s ease',
+                  boxShadow: `0 0 8px ${ACCENT}60`,
+                }} />
               </div>
-              <div className="mt-2 text-center text-lg font-bold" style={{ color: centsColor }}>{centsOff > 0 ? '+' : ''}{centsOff}¢</div>
+              <div style={{ marginTop: 8, textAlign: 'center', fontSize: 18, fontWeight: 700, color: centsColor }}>
+                {centsOff > 0 ? '+' : ''}{centsOff}¢
+              </div>
             </div>
 
             {/* Hold progress */}
             {holdProgress > 0 && (
-              <div className="mt-4">
-                <div className="h-2 overflow-hidden rounded-full bg-white/5">
-                  <motion.div className="h-full rounded-full" style={{ background: '#4ADE80' }} animate={{ width: `${holdProgress * 100}%` }} />
+              <div style={{ marginBottom: 16 }}>
+                <div className="ios-progress-track">
+                  <motion.div
+                    className="ios-progress-fill"
+                    style={{ background: 'var(--ios-green)' }}
+                    animate={{ width: `${holdProgress * 100}%` }}
+                  />
                 </div>
-                <p className="mt-1 text-center text-xs text-zinc-500">Hold steady...</p>
+                <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--ios-label3)', marginTop: 4 }}>Hold steady...</div>
               </div>
             )}
 
-            {/* Controls */}
-            <div className="mt-8 flex flex-col items-center gap-3">
-              <p className="text-xs text-zinc-500">Sing or play into your mic</p>
-              <button onClick={handleGiveUp} className="mt-2 text-sm text-zinc-600 hover:text-zinc-400 transition-colors">Skip round</button>
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginBottom: 8 }}>Sing or play into your mic</div>
+              <button
+                onClick={handleGiveUp}
+                style={{ fontSize: 14, color: 'var(--ios-label3)', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                Skip round
+              </button>
             </div>
           </>
         )}
 
-        <div className="mt-6 text-center text-sm text-zinc-500">
+        <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--ios-label3)' }}>
           🔥 {streak} streak • Round {round}/{totalRounds}
         </div>
       </div>

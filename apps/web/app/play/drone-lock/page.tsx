@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
 
-const ACCENT = '#10B981';
+const ACCENT = '#30D158';
 const INTERVALS = [
   { name: 'Unison', semitones: 0 },
   { name: 'Minor 2nd', semitones: 1 },
@@ -29,7 +29,7 @@ export default function DroneLockPage() {
   const [round, setRound] = useState(0);
   const [totalRounds] = useState(8);
   const [score, setScore] = useState(0);
-  const [droneNote, setDroneNote] = useState(0); // index into NOTE_NAMES
+  const [droneNote, setDroneNote] = useState(0);
   const [targetInterval, setTargetInterval] = useState(INTERVALS[0]);
   const [cents, setCents] = useState(0);
   const [detectedFreq, setDetectedFreq] = useState(0);
@@ -108,7 +108,7 @@ export default function DroneLockPage() {
   };
 
   const startRound = () => {
-    const noteIdx = Math.floor(Math.random() * 7) + 3; // D4 to B4
+    const noteIdx = Math.floor(Math.random() * 7) + 3;
     const intervalIdx = Math.floor(Math.random() * INTERVALS.length);
     const interval = INTERVALS[intervalIdx];
     setDroneNote(noteIdx);
@@ -149,22 +149,31 @@ export default function DroneLockPage() {
   if (phase === 'done') {
     const avgCents = Math.round(results.reduce((s, r) => s + Math.abs(r.cents), 0) / results.length);
     return (
-      <div className="min-h-screen flex items-center justify-center px-5">
-        <div className="w-full max-w-sm text-center animate-slide-up">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}30` }}>
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-white" style={{ letterSpacing: '-0.035em' }}>Session Complete</h1>
-          <div className="mt-6 grid grid-cols-3 gap-2.5">
-            <div className="stat-card"><div className="text-2xl font-bold" style={{ color: ACCENT }}>{score}</div><div className="mt-1 text-[11px] text-zinc-600">Score</div></div>
-            <div className="stat-card"><div className="text-2xl font-bold text-white">{avgCents}¢</div><div className="mt-1 text-[11px] text-zinc-600">Avg Error</div></div>
-            <div className="stat-card"><div className="text-2xl font-bold text-white">{results.length}</div><div className="mt-1 text-[11px] text-zinc-600">Rounds</div></div>
-          </div>
-          <div className="mt-6 flex gap-2.5">
-            <button onClick={handleStart} className="flex-1 rounded-full py-3 text-sm font-semibold text-white transition-all duration-200 hover:opacity-85" style={{ background: ACCENT }}>Play Again</button>
-            <button onClick={() => router.push('/')} className="flex-1 rounded-full py-3 text-sm font-medium text-zinc-300 transition-all duration-200 hover:bg-white/10" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}>Home</button>
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+            <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+              Session Complete
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{avgCents}¢</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Avg Error</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{results.length}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Rounds</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={handleStart}>Play Again</button>
+              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            </div>
           </div>
         </div>
       </div>
@@ -172,95 +181,94 @@ export default function DroneLockPage() {
   }
 
   return (
-    <div className="min-h-screen px-5 pt-12 pb-nav">
-      <div className="mx-auto max-w-sm">
-        <div className="flex items-center justify-between mb-5">
-          <button onClick={() => { stopMic(); stopDrone(); router.push('/'); }} className="flex h-9 w-9 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgb(161,161,170)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-sm mx-auto px-4 pt-12">
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+          <button
+            onClick={() => { stopMic(); stopDrone(); router.push('/dashboard'); }}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'var(--ios-bg2)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
-          <h1 className="text-base font-semibold" style={{ color: ACCENT }}>Drone Lock</h1>
-          <div className="rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}>{score} pts</div>
+          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Drone Lock</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+            {score} pts
+          </div>
         </div>
 
-        <div className="progress-bar-track mb-8">
-          <div className="progress-bar-fill" style={{ width: `${(round / totalRounds) * 100}%`, backgroundColor: ACCENT }} />
+        <div className="ios-progress-track mb-6">
+          <div className="ios-progress-fill" style={{ width: `${(round / totalRounds) * 100}%`, background: ACCENT }} />
         </div>
 
         {phase === 'idle' && (
-          <div className="flex flex-col items-center text-center animate-fade-in">
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full" style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}25` }}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-              </svg>
-            </div>
-            <h2 className="text-2xl font-semibold text-white" style={{ letterSpacing: '-0.025em' }}>Drone Lock</h2>
-            <p className="mt-2 text-sm text-zinc-500">Sing to match intervals relative to a drone</p>
-            <button onClick={handleStart} className="mt-8 rounded-full px-8 py-3 text-sm font-semibold text-white transition-all duration-200 hover:opacity-85 active:scale-95" style={{ background: ACCENT, boxShadow: `0 4px 20px ${ACCENT}40` }}>Start Session</button>
+          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+            <div style={{ fontSize: 64, marginBottom: 20 }}>🎤</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Drone Lock</div>
+            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 32 }}>Sing to match intervals relative to a drone</div>
+            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={handleStart}>Start Session</button>
           </div>
         )}
 
         {(phase === 'listening' || phase === 'locking' || phase === 'scored') && (
-          <div className="animate-fade-in text-center">
+          <div style={{ textAlign: 'center' }}>
             {/* Drone indicator */}
-            <div className="mb-4 flex items-center justify-center gap-2">
-              <div className="h-2 w-2 rounded-full animate-pulse" style={{ backgroundColor: ACCENT }} />
-              <span className="text-xs text-zinc-500">Drone: <span className="text-white font-medium">{NOTE_NAMES[droneNote]}4</span></span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: ACCENT }} />
+              <span style={{ fontSize: 13, color: 'var(--ios-label3)' }}>Drone: <span style={{ color: 'var(--ios-label)', fontWeight: 600 }}>{NOTE_NAMES[droneNote]}4</span></span>
             </div>
 
             {/* Target interval */}
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="mb-6"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-600 mb-2">Sing this interval</p>
-              <div className="text-3xl font-bold" style={{ color: ACCENT, letterSpacing: '-0.03em' }}>{targetInterval.name}</div>
+            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginBottom: 8 }}>Sing this interval</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: ACCENT, letterSpacing: '-0.03em' }}>{targetInterval.name}</div>
             </motion.div>
 
             {/* Play target button */}
             <motion.button
               onClick={() => playTone(NOTE_FREQS[droneNote] * Math.pow(2, targetInterval.semitones / 12), 1.0)}
               whileTap={{ scale: 0.92 }}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium text-zinc-400 transition-all duration-200 hover:text-white mb-6"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                borderRadius: 20, padding: '8px 16px', marginBottom: 24,
+                fontSize: 13, fontWeight: 500, color: 'var(--ios-label2)',
+                background: 'var(--ios-bg2)', border: 'none', cursor: 'pointer',
+              }}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
               Hear Target
             </motion.button>
 
             {/* Tuning meter */}
-            <div className="mb-6">
-              <div className="relative h-4 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }}>
-                {/* Zone markers */}
-                <div className="absolute left-[45%] top-0 bottom-0 w-[10%] rounded-full" style={{ background: 'rgba(74,222,128,0.15)' }} />
-                <div className="absolute left-1/2 top-0 bottom-0 w-px" style={{ background: 'rgba(74,222,128,0.5)' }} />
-                {/* Needle */}
-                <motion.div
-                  className="absolute top-0.5 bottom-0.5 w-2.5 rounded-full"
-                  style={{
-                    backgroundColor: Math.abs(cents) < 10 ? '#4ADE80' : Math.abs(cents) < 25 ? '#FBBF24' : '#f87171',
-                    left: `calc(50% + ${Math.max(-48, Math.min(48, cents * 0.48))}%)`,
-                    transform: 'translateX(-50%)',
-                    boxShadow: `0 0 8px ${Math.abs(cents) < 10 ? '#4ADE80' : '#FBBF24'}60`,
-                  }}
-                  animate={{ left: `calc(50% + ${Math.max(-48, Math.min(48, cents * 0.48))}%)` }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                />
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ position: 'relative', height: 8, borderRadius: 4, background: 'var(--ios-bg3)', overflow: 'visible', margin: '0 4px' }}>
+                <div style={{ position: 'absolute', left: '50%', top: -2, bottom: -2, width: 1.5, background: 'var(--ios-green)', transform: 'translateX(-50%)' }} />
+                <div style={{
+                  position: 'absolute', top: 0, width: 12, height: 8, borderRadius: 4,
+                  background: Math.abs(cents) < 10 ? 'var(--ios-green)' : Math.abs(cents) < 25 ? 'var(--ios-orange)' : 'var(--ios-red)',
+                  left: `calc(50% + ${Math.max(-45, Math.min(45, cents * 0.48))}%)`,
+                  transform: 'translateX(-50%)',
+                  transition: 'left 0.1s ease',
+                }} />
               </div>
-              <div className="mt-1.5 flex justify-between text-[10px] text-zinc-700">
-                <span>-100¢</span><span>-50¢</span><span style={{ color: '#4ADE80' }}>0¢</span><span>+50¢</span><span>+100¢</span>
+              <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--ios-label3)' }}>
+                <span>-100¢</span><span>-50¢</span><span style={{ color: 'var(--ios-green)' }}>0¢</span><span>+50¢</span><span>+100¢</span>
               </div>
-              <div
-                className="mt-3 text-3xl font-bold"
-                style={{
-                  color: Math.abs(cents) < 10 ? '#4ADE80' : Math.abs(cents) < 25 ? '#FBBF24' : Math.abs(cents) < 50 ? '#f97316' : '#f87171',
-                  letterSpacing: '-0.03em',
-                }}
-              >
+              <div style={{
+                marginTop: 10, fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em',
+                color: Math.abs(cents) < 10 ? 'var(--ios-green)' : Math.abs(cents) < 25 ? 'var(--ios-orange)' : Math.abs(cents) < 50 ? 'var(--ios-orange)' : 'var(--ios-red)',
+              }}>
                 {cents > 0 ? '+' : ''}{cents}¢
               </div>
               {phase === 'scored' && (
-                <div className="mt-2 text-sm font-medium" style={{ color: Math.abs(cents) < 10 ? '#4ADE80' : Math.abs(cents) < 25 ? '#FBBF24' : '#f87171' }}>
+                <div style={{ marginTop: 8, fontSize: 15, fontWeight: 600, color: Math.abs(cents) < 10 ? 'var(--ios-green)' : Math.abs(cents) < 25 ? 'var(--ios-orange)' : 'var(--ios-red)' }}>
                   {Math.abs(cents) < 10 ? '🎯 Perfect Lock!' : Math.abs(cents) < 25 ? '👍 Great!' : Math.abs(cents) < 50 ? '👌 Close' : '🔄 Try again'}
                 </div>
               )}
@@ -269,15 +277,15 @@ export default function DroneLockPage() {
             {phase === 'listening' && (
               <button
                 onClick={handleLock}
-                className="w-full rounded-full py-3 text-sm font-semibold text-white transition-all duration-200 hover:opacity-85 active:scale-95"
-                style={{ background: ACCENT, boxShadow: `0 4px 20px ${ACCENT}40` }}
+                className="ios-btn-primary"
+                style={{ background: ACCENT }}
               >
                 Lock In
               </button>
             )}
 
-            <div className="flex items-center justify-center gap-6 text-xs text-zinc-600 mt-4">
-              <span>Round {round}/{totalRounds}</span>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12, fontSize: 13, color: 'var(--ios-label3)' }}>
+              Round {round}/{totalRounds}
             </div>
           </div>
         )}

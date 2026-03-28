@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { playTone, NOTE_FREQUENCIES } from '@/lib/audio';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 
-const ACCENT = '#6366F1';
+const ACCENT = '#5E5CE6';
 
 const KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -97,113 +97,170 @@ export default function PianoTapPage() {
 
   if (phase === 'done') {
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15 }} className="text-6xl">🎹</motion.div>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Piano Tap Complete!</h1>
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            {[
-              { label: 'Score', value: score },
-              { label: 'Hit', value: `${results.filter(r => r.correct).length}/${totalRounds}` },
-              { label: 'Best Streak', value: `🔥 ${bestStreak}` },
-            ].map((s, i) => (
-              <motion.div key={s.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.1 }} className="glass-card p-4">
-                <div className="text-2xl font-bold text-white">{s.value}</div>
-                <div className="text-xs text-zinc-500">{s.label}</div>
-              </motion.div>
-            ))}
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+            <div style={{ fontSize: 60, marginBottom: 12 }}>🎹</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+              Piano Tap Complete!
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{results.filter(r => r.correct).length}/{totalRounds}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Hit</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>🔥 {bestStreak}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Streak</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Play Again</button>
+              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            </div>
           </div>
-          <div className="mt-6 flex gap-3">
-            <button onClick={startGame} className="flex-1 rounded-full py-3 font-semibold text-white hover:opacity-90 transition-all" style={{ background: ACCENT }}>Play Again</button>
-            <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-full bg-white/5 py-3 font-medium text-zinc-300 hover:bg-white/10 transition-all">Dashboard</button>
-          </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   if (phase === 'setup') {
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }} className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl" style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}25` }}>
-            <span className="text-4xl">🎹</span>
-          </motion.div>
-          <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Piano Tap</h1>
-          <p className="mt-2 text-zinc-500">Tap the correct key after hearing the note</p>
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+            <div style={{ fontSize: 64, marginBottom: 20 }}>🎹</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Piano Tap</div>
+            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 24 }}>Tap the correct key after hearing the note</div>
 
-          {/* How to play */}
-          <div className="mt-6 rounded-2xl p-4 text-left" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)' }}>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: ACCENT }}>How to Play</p>
-            <ol className="space-y-1.5 text-sm text-zinc-400">
-              <li>1. A note plays — identify it by ear</li>
-              <li>2. Tap 🔊 to replay if needed</li>
-              <li>3. Tap the matching key on the piano</li>
-              <li>4. Score more by answering quickly</li>
-            </ol>
-          </div>
-
-          <div className="mt-6">
-            <h3 className="text-sm font-medium text-zinc-500 mb-3">Keyboard Mode</h3>
-            <div className="flex gap-2 justify-center flex-wrap">
-              {(Object.keys(MODE_CONFIG) as Mode[]).map(m => (
-                <button key={m} onClick={() => setMode(m)} className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${mode === m ? 'text-white' : 'bg-white/5 text-zinc-500 hover:bg-white/10'}`} style={mode === m ? { background: ACCENT } : {}}>{MODE_CONFIG[m].label}</button>
-              ))}
+            <div className="ios-card" style={{ padding: 16, textAlign: 'left', marginBottom: 24 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: ACCENT, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>How to Play</div>
+              <ol style={{ fontSize: 14, color: 'var(--ios-label3)', listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <li>1. A note plays — identify it by ear</li>
+                <li>2. Tap 🔊 to replay if needed</li>
+                <li>3. Tap the matching key on the piano</li>
+                <li>4. Score more by answering quickly</li>
+              </ol>
             </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginBottom: 10 }}>Keyboard Mode</div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+                {(Object.keys(MODE_CONFIG) as Mode[]).map(m => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    style={{
+                      height: 34, borderRadius: 17, padding: '0 16px',
+                      fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
+                      background: mode === m ? ACCENT : 'var(--ios-bg2)',
+                      color: mode === m ? '#fff' : 'var(--ios-label3)',
+                      transition: 'background 0.15s, color 0.15s',
+                    }}
+                  >
+                    {MODE_CONFIG[m].label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+              {isPractice ? '🎓 Start Practicing' : 'Start Game'}
+            </button>
           </div>
-          <button onClick={startGame} className="mt-8 rounded-full px-6 py-2.5 font-semibold text-white hover:opacity-90 transition-all" style={{ background: ACCENT }}>Start Game</button>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen px-4 pt-10">
-      <FeedbackOverlay correct={feedback === 'correct'} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-sm mx-auto px-4 pt-12">
+        <FeedbackOverlay correct={feedback === 'correct'} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
 
-      <div className="mx-auto max-w-md">
-        <div className="flex items-center justify-between">
-          <button onClick={() => router.push('/dashboard')} className="text-sm text-zinc-500 hover:text-white transition-colors">← Back</button>
-          <h1 className="text-lg font-semibold tracking-tight" style={{ color: ACCENT }}>🎹 Piano Tap</h1>
-          <div className="text-sm text-zinc-500">Score: {score}</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+          <button
+            onClick={() => router.push('/dashboard')}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'var(--ios-bg2)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>🎹 Piano Tap</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+            {score} pts
+          </div>
         </div>
 
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/5">
-          <motion.div className="h-full rounded-full" style={{ background: ACCENT }} animate={{ width: `${(round / totalRounds) * 100}%` }} transition={{ duration: 0.5 }} />
+        <div className="ios-progress-track mb-6">
+          <motion.div
+            className="ios-progress-fill"
+            style={{ background: ACCENT }}
+            animate={{ width: `${(round / totalRounds) * 100}%` }}
+            transition={{ duration: 0.5 }}
+          />
         </div>
 
         {/* Replay */}
-        <div className="mt-8 text-center">
-          <motion.button onClick={() => playTone(NOTE_FREQUENCIES[`${targetNote}4`] || 261.63, 0.6)} whileTap={{ scale: 0.92 }} className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-3xl hover:bg-white/10 transition-all">
-            🔊
-          </motion.button>
-          <p className="mt-3 text-sm text-zinc-500">Tap to replay note</p>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+          <div style={{ textAlign: 'center' }}>
+            <motion.button
+              onClick={() => playTone(NOTE_FREQUENCIES[`${targetNote}4`] || 261.63, 0.6)}
+              whileTap={{ scale: 0.92 }}
+              style={{
+                width: 80, height: 80,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 24, background: 'var(--ios-bg2)',
+                border: '1px solid var(--ios-sep)', fontSize: 36, cursor: 'pointer',
+              }}
+            >
+              🔊
+            </motion.button>
+            <div style={{ marginTop: 8, fontSize: 13, color: 'var(--ios-label3)' }}>Tap to replay note</div>
+          </div>
         </div>
 
         {/* Piano keyboard */}
-        <div className="mt-8">
+        <div style={{ marginBottom: 20 }}>
           {isChromaticMode ? (
             /* Proper piano layout: white keys with black keys overlaid */
-            <div className="relative flex justify-center" style={{ height: 128 }}>
+            <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', height: 128 }}>
               {/* White keys */}
               {ALL_WHITE.map((key) => {
                 const isTarget = feedback && key === targetNote;
                 const isSelected = selectedKey === key;
-                let bg = 'rgba(255,255,255,0.08)';
-                let border = 'rgba(255,255,255,0.12)';
-                if (isTarget) { bg = 'rgba(74,222,128,0.25)'; border = '#4ADE80'; }
-                else if (isSelected && feedback === 'wrong') { bg = 'rgba(248,113,113,0.2)'; border = '#F87171'; }
-                if (flashKey === key) { bg = 'rgba(99,102,241,0.4)'; border = ACCENT; }
+                let bg = 'rgba(255,255,255,0.92)';
+                let border = 'var(--ios-sep)';
+                let color = 'rgba(0,0,0,0.7)';
+                if (isTarget) { bg = 'rgba(48,209,88,0.3)'; border = 'var(--ios-green)'; color = 'var(--ios-green)'; }
+                else if (isSelected && feedback === 'wrong') { bg = 'rgba(255,69,58,0.2)'; border = 'var(--ios-red)'; color = 'var(--ios-red)'; }
+                if (flashKey === key) { bg = `rgba(94,92,230,0.4)`; border = ACCENT; color = ACCENT; }
                 return (
                   <motion.button
                     key={key}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => handleKeyTap(key)}
                     disabled={!!feedback}
-                    className="relative rounded-b-lg flex items-end justify-center pb-2 transition-all duration-150"
-                    style={{ width: 40, height: 128, background: bg, border: `1px solid ${border}`, marginRight: 2 }}
+                    style={{
+                      width: 40, height: 128, borderRadius: '0 0 8px 8px',
+                      background: bg, border: `0.5px solid ${border}`,
+                      display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+                      paddingBottom: 8, cursor: 'pointer', marginRight: 2,
+                      fontWeight: 700, fontSize: 11, color,
+                      transition: 'all 0.15s',
+                    }}
                   >
-                    <span className="text-xs font-bold text-zinc-300">{key}</span>
+                    {key}
                   </motion.button>
                 );
               })}
@@ -211,11 +268,12 @@ export default function PianoTapPage() {
               {Object.entries(BLACK_POSITIONS).map(([key, pos]) => {
                 const isTarget = feedback && key === targetNote;
                 const isSelected = selectedKey === key;
-                let bg = 'rgba(20,20,30,0.95)';
-                let border = 'rgba(255,255,255,0.15)';
-                if (isTarget) { bg = 'rgba(74,222,128,0.3)'; border = '#4ADE80'; }
-                else if (isSelected && feedback === 'wrong') { bg = 'rgba(248,113,113,0.3)'; border = '#F87171'; }
-                if (flashKey === key) { bg = 'rgba(99,102,241,0.6)'; border = ACCENT; }
+                let bg = 'var(--ios-bg4)';
+                let border = 'var(--ios-sep)';
+                let color = 'rgba(255,255,255,0.7)';
+                if (isTarget) { bg = 'rgba(48,209,88,0.4)'; border = 'var(--ios-green)'; color = 'var(--ios-green)'; }
+                else if (isSelected && feedback === 'wrong') { bg = 'rgba(255,69,58,0.4)'; border = 'var(--ios-red)'; color = 'var(--ios-red)'; }
+                if (flashKey === key) { bg = `rgba(94,92,230,0.7)`; border = ACCENT; color = '#fff'; }
                 // Each white key is 42px wide; black key sits between pos-1 and pos
                 const leftOffset = pos * 42 - 14;
                 return (
@@ -224,33 +282,46 @@ export default function PianoTapPage() {
                     whileTap={{ scale: 0.97 }}
                     onClick={() => handleKeyTap(key)}
                     disabled={!!feedback}
-                    className="absolute top-0 rounded-b-md flex items-end justify-center pb-1.5 z-10 transition-all duration-150"
-                    style={{ width: 28, height: 80, left: leftOffset, background: bg, border: `1px solid ${border}` }}
+                    style={{
+                      position: 'absolute', top: 0, left: leftOffset,
+                      width: 28, height: 80, borderRadius: '0 0 5px 5px',
+                      background: bg, border: `0.5px solid ${border}`,
+                      display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+                      paddingBottom: 6, zIndex: 10, cursor: 'pointer',
+                      fontWeight: 700, fontSize: 9, color,
+                      transition: 'all 0.15s',
+                    }}
                   >
-                    <span className="text-[9px] font-bold text-zinc-300">{key}</span>
+                    {key}
                   </motion.button>
                 );
               })}
             </div>
           ) : (
             /* Non-chromatic: simple grid of note buttons */
-            <div className="grid grid-cols-4 gap-2">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
               {activeKeys.map(key => {
                 const isTarget = feedback && key === targetNote;
                 const isSelected = selectedKey === key;
-                let bg = 'rgba(255,255,255,0.06)';
-                let border = 'rgba(255,255,255,0.1)';
-                if (isTarget) { bg = 'rgba(74,222,128,0.2)'; border = '#4ADE80'; }
-                else if (isSelected && feedback === 'wrong') { bg = 'rgba(248,113,113,0.2)'; border = '#F87171'; }
-                if (flashKey === key) { bg = `${ACCENT}40`; border = ACCENT; }
+                let bg = 'var(--ios-bg2)';
+                let border = '1.5px solid transparent';
+                let color = 'var(--ios-label2)';
+                if (isTarget) { bg = 'rgba(48,209,88,0.15)'; border = `2px solid var(--ios-green)`; color = 'var(--ios-green)'; }
+                else if (isSelected && feedback === 'wrong') { bg = 'rgba(255,69,58,0.15)'; border = `2px solid var(--ios-red)`; color = 'var(--ios-red)'; }
+                if (flashKey === key) { bg = `rgba(94,92,230,0.2)`; border = `2px solid ${ACCENT}`; color = ACCENT; }
                 return (
                   <motion.button
                     key={key}
                     whileTap={{ scale: 0.93 }}
                     onClick={() => handleKeyTap(key)}
                     disabled={!!feedback}
-                    className="rounded-2xl py-5 font-bold text-lg transition-all duration-150"
-                    style={{ background: bg, border: `1px solid ${border}`, color: isTarget ? '#4ADE80' : 'rgba(255,255,255,0.8)' }}
+                    style={{
+                      borderRadius: 12, padding: '18px 8px',
+                      fontSize: 18, fontWeight: 700,
+                      background: bg, border,
+                      color, cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
                   >
                     {key}
                   </motion.button>
@@ -263,14 +334,26 @@ export default function PianoTapPage() {
         {/* Feedback banner */}
         <AnimatePresence>
           {feedback && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className={`mt-6 rounded-2xl p-4 text-center font-semibold ${feedback === 'correct' ? 'bg-green-500/10 text-green-400 border border-green-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}`}>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              style={{
+                borderRadius: 12, padding: '12px 16px', textAlign: 'center',
+                fontSize: 14, fontWeight: 600, marginBottom: 12,
+                background: feedback === 'correct' ? 'rgba(48,209,88,0.12)' : 'rgba(255,69,58,0.12)',
+                border: `1px solid ${feedback === 'correct' ? 'var(--ios-green)' : 'var(--ios-red)'}`,
+                color: feedback === 'correct' ? 'var(--ios-green)' : 'var(--ios-red)',
+              }}
+            >
               {feedback === 'correct' ? '✓ Correct!' : `✗ The note was ${targetNote}`}
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div className="mt-6 text-center text-sm text-zinc-500">
-          🔥 {streak} streak • Round {round}/{totalRounds} • {MODE_CONFIG[mode].label}
+        <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--ios-label3)' }}>
+          🔥 {streak} streak · Round {round}/{totalRounds} · {MODE_CONFIG[mode].label}
+          {isPractice && <span style={{ marginLeft: 8, color: ACCENT }}>Practice</span>}
         </div>
       </div>
     </div>

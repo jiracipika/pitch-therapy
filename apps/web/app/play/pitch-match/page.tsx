@@ -9,7 +9,7 @@ import WaveVisualizer from '@/components/WaveVisualizer';
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
 const freq = (i: number) => NOTE_FREQS[i] ?? 261.63;
 
-const ACCENT = '#60A5FA';
+const ACCENT = '#0A84FF';
 
 export default function PitchMatchPage() {
   const router = useRouter();
@@ -98,54 +98,37 @@ export default function PitchMatchPage() {
   if (phase === 'done') {
     const correct = results.filter(r => r.correct).length;
     return (
-      <div className="min-h-screen flex items-center justify-center px-5">
-        <div className="w-full max-w-sm text-center animate-slide-up">
-          <div
-            className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full"
-            style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}30`, boxShadow: `0 0 40px ${ACCENT}20` }}
-          >
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
-              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
-              <path d="M4 22h16"/>
-              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-              <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
-            </svg>
-          </div>
-
-          <h1 className="text-3xl font-bold text-white" style={{ letterSpacing: '-0.035em' }}>Game Complete</h1>
-
-          <div className="mt-6 grid grid-cols-3 gap-2.5">
-            <div className="stat-card">
-              <div className="text-2xl font-bold text-white" style={{ letterSpacing: '-0.03em', color: ACCENT }}>{score}</div>
-              <div className="mt-1 text-[11px] text-zinc-600">Score</div>
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+            <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+              Game Complete
             </div>
-            <div className="stat-card">
-              <div className="text-2xl font-bold text-white" style={{ letterSpacing: '-0.03em' }}>{correct}/{totalRounds}</div>
-              <div className="mt-1 text-[11px] text-zinc-600">Correct</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{correct}/{totalRounds}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Correct</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{streak}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Streak</div>
+              </div>
             </div>
-            <div className="stat-card">
-              <div className="text-2xl font-bold text-white" style={{ letterSpacing: '-0.03em' }}>{streak}</div>
-              <div className="mt-1 text-[11px] text-zinc-600">Best Streak</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button
+                className="ios-btn-primary"
+                style={{ background: ACCENT }}
+                onClick={() => { setPhase('idle'); setRound(0); setScore(0); setStreak(0); setResults([]); }}
+              >
+                Play Again
+              </button>
+              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
             </div>
-          </div>
-
-          <div className="mt-6 flex gap-2.5">
-            <button
-              onClick={() => { setPhase('idle'); setRound(0); setScore(0); setStreak(0); setResults([]); }}
-              className="flex-1 rounded-full py-3 text-sm font-semibold text-white transition-all duration-200 hover:opacity-85"
-              style={{ background: ACCENT }}
-            >
-              Play Again
-            </button>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="flex-1 rounded-full py-3 text-sm font-medium text-zinc-300 transition-all duration-200 hover:bg-white/10"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}
-            >
-              Dashboard
-            </button>
           </div>
         </div>
       </div>
@@ -153,54 +136,45 @@ export default function PitchMatchPage() {
   }
 
   return (
-    <div className="min-h-screen px-5 pt-12 pb-nav">
-      <div className="mx-auto max-w-sm">
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-sm mx-auto px-4 pt-12">
 
         {/* ── HEADER ── */}
-        <div className="flex items-center justify-between mb-5">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
           <button
             onClick={() => router.push('/dashboard')}
-            className="flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'var(--ios-bg2)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer'
+            }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgb(161,161,170)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className="text-base font-semibold" style={{ color: ACCENT, letterSpacing: '-0.01em' }}>Pitch Match</h1>
-          <div className="flex items-center gap-2">
-            {isPractice && <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}20`, color: ACCENT }}>Practice</span>}
-            <div className="rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}>
-              {isPractice ? 'Practice' : `${score} pts`}
-            </div>
+          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Pitch Match</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+            {isPractice ? 'Practice' : `${score} pts`}
           </div>
         </div>
 
         {/* ── PROGRESS BAR ── */}
-        <div className="progress-bar-track mb-8">
-          <div className="progress-bar-fill" style={{ width: `${(round / totalRounds) * 100}%`, backgroundColor: ACCENT }} />
+        <div className="ios-progress-track mb-6">
+          <div className="ios-progress-fill" style={{ width: `${(round / totalRounds) * 100}%`, background: ACCENT }} />
         </div>
 
         {/* ── IDLE STATE ── */}
         {phase === 'idle' && (
-          <div className="flex flex-col items-center text-center animate-fade-in">
-            <div
-              className="mb-6 flex h-20 w-20 items-center justify-center rounded-full"
-              style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}25` }}
-            >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                <line x1="12" y1="19" x2="12" y2="23"/>
-                <line x1="8" y1="23" x2="16" y2="23"/>
-              </svg>
-            </div>
-            <h2 className="text-2xl font-semibold text-white" style={{ letterSpacing: '-0.025em' }}>Ready to train?</h2>
-            <p className="mt-2 text-sm text-zinc-500">Sing or hum to match the target pitch</p>
+          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+            <div style={{ fontSize: 64, marginBottom: 20 }}>🎤</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Ready to train?</div>
+            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 32 }}>Sing or hum to match the target pitch</div>
             <button
               onClick={handleStart}
-              className="mt-8 rounded-full px-8 py-3 text-sm font-semibold text-white transition-all duration-200 hover:opacity-85 active:scale-95"
-              style={{ background: ACCENT, boxShadow: `0 4px 20px ${ACCENT}40` }}
+              className="ios-btn-primary"
+              style={{ background: ACCENT }}
             >
               Start Training
             </button>
@@ -209,27 +183,29 @@ export default function PitchMatchPage() {
 
         {/* ── PLAYING STATE ── */}
         {phase === 'playing' && (
-          <div className="text-center animate-fade-in">
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-600 mb-2">Match this note</p>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 8 }}>Match this note</div>
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-6xl font-bold"
-              style={{ color: ACCENT, letterSpacing: '-0.04em' }}
+              style={{ fontSize: 72, fontWeight: 800, color: ACCENT, letterSpacing: '-2px', lineHeight: 1, marginBottom: 12 }}
             >
               {(NOTE_NAMES[targetNote] ?? 'A')}4
             </motion.div>
 
-            <div className="mt-3">
+            <div style={{ marginBottom: 12 }}>
               <WaveVisualizer active={isPlaying} color={ACCENT} height={40} />
             </div>
 
-            {/* Play target button */}
             <motion.button
               onClick={() => { setIsPlaying(true); playTone(freq(targetNote), 0.8); setTimeout(() => setIsPlaying(false), 800); }}
               whileTap={{ scale: 0.92 }}
-              className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium text-zinc-400 transition-all duration-200 hover:text-white"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                borderRadius: 20, padding: '6px 14px',
+                fontSize: 13, fontWeight: 500, color: 'var(--ios-label2)',
+                background: 'var(--ios-bg2)', border: 'none', cursor: 'pointer',
+              }}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none">
                 <polygon points="5 3 19 12 5 21 5 3"/>
@@ -238,29 +214,24 @@ export default function PitchMatchPage() {
             </motion.button>
 
             {/* Cents meter */}
-            <div className="mt-8">
-              <div className="relative h-3 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }}>
-                {/* Center marker */}
-                <div className="absolute left-1/2 top-0 bottom-0 w-px" style={{ background: 'rgba(74,222,128,0.5)' }} />
-                {/* Needle */}
-                <div
-                  className="absolute top-0.5 bottom-0.5 w-2 rounded-full transition-all duration-100"
-                  style={{
-                    backgroundColor: ACCENT,
-                    left: `calc(50% + ${Math.max(-46, Math.min(46, cents))}%)`,
-                    transform: 'translateX(-50%)',
-                    boxShadow: `0 0 6px ${ACCENT}80`,
-                  }}
-                />
+            <div style={{ marginTop: 28 }}>
+              <div style={{ position: 'relative', height: 8, borderRadius: 4, background: 'var(--ios-bg3)', overflow: 'visible', margin: '0 4px' }}>
+                <div style={{ position: 'absolute', left: '50%', top: -2, bottom: -2, width: 1.5, background: 'var(--ios-green)', transform: 'translateX(-50%)' }} />
+                <div style={{
+                  position: 'absolute', top: 0, width: 12, height: 8, borderRadius: 4,
+                  background: ACCENT, left: `calc(50% + ${Math.max(-45, Math.min(45, cents / 2))}%)`,
+                  transform: 'translateX(-50%)',
+                  transition: 'left 0.1s ease',
+                  boxShadow: `0 0 8px ${ACCENT}60`
+                }} />
               </div>
-              <div className="mt-1.5 flex justify-between text-[10px] text-zinc-700">
+              <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--ios-label3)' }}>
                 <span>-100¢</span><span>0¢</span><span>+100¢</span>
               </div>
               <div
-                className="mt-3 text-xl font-bold"
                 style={{
-                  color: Math.abs(cents) < 25 ? '#4ADE80' : Math.abs(cents) < 50 ? '#FBBF24' : '#f87171',
-                  letterSpacing: '-0.02em',
+                  marginTop: 10, fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em',
+                  color: Math.abs(cents) < 25 ? 'var(--ios-green)' : Math.abs(cents) < 50 ? 'var(--ios-orange)' : 'var(--ios-red)',
                 }}
               >
                 {cents > 0 ? '+' : ''}{cents}¢
@@ -268,24 +239,26 @@ export default function PitchMatchPage() {
             </div>
 
             {/* Round + streak info */}
-            <div className="mt-5 flex items-center justify-center gap-6 text-xs text-zinc-600">
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 20, fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginTop: 16 }}>
               <span>Round {round}/{totalRounds}</span>
-              <span className="h-3 w-px bg-white/10" />
-              <span>Streak: {streak}</span>
+              <span>🔥 {streak}</span>
             </div>
 
-            <div className="mt-6 flex gap-2.5 justify-center">
+            <div style={{ marginTop: 20, display: 'flex', gap: 10, justifyContent: 'center' }}>
               <button
                 onClick={submit}
-                className="rounded-full px-7 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:opacity-85 active:scale-95"
-                style={{ background: ACCENT }}
+                className="ios-btn-tonal"
+                style={{ background: ACCENT, color: '#fff' }}
               >
                 Submit
               </button>
               <button
                 onClick={handleStop}
-                className="rounded-full px-5 py-2.5 text-sm font-medium text-zinc-400 transition-all duration-200 hover:text-white"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                style={{
+                  height: 34, borderRadius: 17, padding: '0 16px',
+                  fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
+                  background: 'var(--ios-bg2)', color: 'var(--ios-label3)',
+                }}
               >
                 Stop
               </button>

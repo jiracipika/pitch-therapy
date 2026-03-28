@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playTone } from '@/lib/audio';
 
-const ACCENT = '#06B6D4';
+const ACCENT = '#0A84FF';
 const MIN_FREQ = 80;
 const MAX_FREQ = 1200;
 const TOTAL_ROUNDS = 6;
@@ -109,43 +109,51 @@ export default function FrequencySliderPage() {
   if (phase === 'done') {
     const avgCents = results.length > 0 ? Math.round(results.reduce((s, r) => s + Math.abs(r.centsOff), 0) / results.length) : 0;
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15 }} className="text-6xl">📊</motion.div>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Slider Complete!</h1>
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            {[
-              { label: 'Score', value: score },
-              { label: 'Avg Error', value: `${avgCents}¢` },
-              { label: 'Best Streak', value: `🔥 ${streak}` },
-            ].map((s, i) => (
-              <motion.div key={s.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.1 }} className="glass-card p-4">
-                <div className="text-2xl font-bold text-white">{s.value}</div>
-                <div className="text-xs text-zinc-500">{s.label}</div>
-              </motion.div>
-            ))}
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+            <div style={{ fontSize: 60, marginBottom: 12 }}>📊</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+              Slider Complete!
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{avgCents}¢</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Avg Error</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>🔥 {streak}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Streak</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Play Again</button>
+              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            </div>
           </div>
-          <div className="mt-6 flex gap-3">
-            <button onClick={startGame} className="flex-1 rounded-full py-3 font-semibold text-white hover:opacity-90 transition-all" style={{ background: ACCENT }}>Play Again</button>
-            <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-full bg-white/5 py-3 font-medium text-zinc-300 hover:bg-white/10 transition-all">Dashboard</button>
-          </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   if (phase === 'setup') {
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }} className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl" style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}25` }}>
-            <span className="text-4xl">↔️</span>
-          </motion.div>
-          <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Frequency Slider</h1>
-          <p className="mt-2 text-zinc-500">Drag the slider to match a hidden frequency</p>
-          <p className="mt-1 text-xs text-zinc-600">80 Hz — 1,200 Hz · Logarithmic scale</p>
-          <button onClick={startGame} className="mt-8 rounded-full px-6 py-2.5 font-semibold text-white hover:opacity-90 transition-all" style={{ background: ACCENT }}>Start Game</button>
-        </motion.div>
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+            <div style={{ fontSize: 64, marginBottom: 20 }}>↔️</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Frequency Slider</div>
+            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 4 }}>Drag the slider to match a hidden frequency</div>
+            <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginBottom: 32 }}>80 Hz — 1,200 Hz · Logarithmic scale</div>
+            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+              Start Game
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -154,33 +162,67 @@ export default function FrequencySliderPage() {
   const targetPos = freqToPos(targetFreq);
 
   return (
-    <div className="min-h-screen px-4 pt-10">
-      <div className="mx-auto max-w-md">
-        <div className="flex items-center justify-between">
-          <button onClick={() => router.push('/dashboard')} className="text-sm text-zinc-500 hover:text-white transition-colors">← Back</button>
-          <h1 className="text-lg font-semibold tracking-tight" style={{ color: ACCENT }}>↔️ Frequency Slider</h1>
-          <div className="text-sm text-zinc-500">Score: {score}</div>
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-sm mx-auto px-4 pt-12">
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+          <button
+            onClick={() => router.push('/dashboard')}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'var(--ios-bg2)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>↔️ Frequency Slider</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+            {score} pts
+          </div>
         </div>
 
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/5">
-          <motion.div className="h-full rounded-full" style={{ background: ACCENT }} animate={{ width: `${(round / TOTAL_ROUNDS) * 100}%` }} transition={{ duration: 0.5 }} />
+        <div className="ios-progress-track mb-6">
+          <motion.div
+            className="ios-progress-fill"
+            style={{ background: ACCENT }}
+            animate={{ width: `${(round / TOTAL_ROUNDS) * 100}%` }}
+            transition={{ duration: 0.5 }}
+          />
         </div>
 
-        <div className="mt-10 text-center">
-          <motion.button onClick={() => playTone(targetFreq, 1.0)} whileTap={{ scale: 0.92 }} className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-3xl hover:bg-white/10 transition-all">
-            🔊
-          </motion.button>
-          <p className="mt-3 text-sm text-zinc-500">Tap to replay tone</p>
-          <p className="mt-1 text-xs text-zinc-600">Your pick: {answerFreq.toFixed(1)} Hz</p>
+        {/* Replay */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+          <div style={{ textAlign: 'center' }}>
+            <motion.button
+              onClick={() => playTone(targetFreq, 1.0)}
+              whileTap={{ scale: 0.92 }}
+              style={{
+                width: 80, height: 80,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 24, background: 'var(--ios-bg2)',
+                border: '1px solid var(--ios-sep)', fontSize: 36, cursor: 'pointer',
+              }}
+            >
+              🔊
+            </motion.button>
+            <div style={{ marginTop: 8, fontSize: 13, color: 'var(--ios-label3)' }}>Tap to replay tone</div>
+            <div style={{ marginTop: 4, fontSize: 12, color: 'var(--ios-label4)' }}>Your pick: {answerFreq.toFixed(1)} Hz</div>
+          </div>
         </div>
 
         {/* Slider */}
-        <div className="mt-8 px-2">
-          <div className="relative h-12 flex items-center">
+        <div className="ios-card" style={{ padding: 16, marginBottom: 16 }}>
+          <div style={{ position: 'relative', height: 48, display: 'flex', alignItems: 'center' }}>
             <div
               ref={barRef}
-              className="absolute inset-0 rounded-full cursor-pointer"
-              style={{ background: 'rgba(255,255,255,0.06)' }}
+              style={{
+                position: 'absolute', inset: 0, borderRadius: 24,
+                background: 'var(--ios-bg3)', cursor: 'pointer',
+              }}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
@@ -188,14 +230,30 @@ export default function FrequencySliderPage() {
             />
             {/* Reference lines */}
             {REFERENCE_NOTES.map(n => (
-              <div key={n.name} className="absolute top-0 bottom-0 w-px bg-zinc-800" style={{ left: `${freqToPos(n.freq)}%` }}>
-                <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] text-zinc-700 whitespace-nowrap">{n.name}</span>
+              <div
+                key={n.name}
+                style={{
+                  position: 'absolute', top: 0, bottom: 0, width: 1,
+                  background: 'var(--ios-sep)', left: `${freqToPos(n.freq)}%`,
+                }}
+              >
+                <span style={{
+                  position: 'absolute', bottom: -18, left: '50%', transform: 'translateX(-50%)',
+                  fontSize: 9, color: 'var(--ios-label4)', whiteSpace: 'nowrap',
+                }}>{n.name}</span>
               </div>
             ))}
             {/* Handle */}
             <motion.div
-              className="absolute top-1/2 -translate-y-1/2 z-10 w-6 h-6 rounded-full border-2 cursor-grab active:cursor-grabbing"
-              style={{ left: `${sliderPos}%`, marginLeft: '-12px', borderColor: ACCENT, backgroundColor: `${ACCENT}30`, boxShadow: `0 0 12px ${ACCENT}50` }}
+              style={{
+                position: 'absolute', top: '50%', transform: 'translateY(-50%)',
+                zIndex: 10, width: 24, height: 24, borderRadius: 12,
+                border: `2px solid ${ACCENT}`,
+                backgroundColor: `${ACCENT}30`,
+                boxShadow: `0 0 12px ${ACCENT}50`,
+                left: `${sliderPos}%`, marginLeft: -12,
+                cursor: 'grab',
+              }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             />
             {/* Target (revealed) */}
@@ -203,43 +261,68 @@ export default function FrequencySliderPage() {
               <motion.div
                 initial={{ opacity: 0, scaleY: 0 }}
                 animate={{ opacity: 1, scaleY: 1 }}
-                className="absolute top-2 bottom-2 w-1 rounded-full"
-                style={{ left: `${targetPos}%`, marginLeft: '-2px', backgroundColor: '#4ADE80' }}
+                style={{
+                  position: 'absolute', top: 8, bottom: 8, width: 4, borderRadius: 2,
+                  left: `${targetPos}%`, marginLeft: -2,
+                  backgroundColor: 'var(--ios-green)',
+                }}
               />
             )}
           </div>
-          <div className="flex justify-between mt-6">
-            <span className="text-[10px] text-zinc-600">80 Hz</span>
-            <span className="text-[10px] text-zinc-600">1,200 Hz</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
+            <span style={{ fontSize: 10, color: 'var(--ios-label4)' }}>80 Hz</span>
+            <span style={{ fontSize: 10, color: 'var(--ios-label4)' }}>1,200 Hz</span>
           </div>
         </div>
 
         {/* Reveal */}
         <AnimatePresence>
           {submitted && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 rounded-2xl p-4 text-center" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-              <p className="text-sm text-zinc-400">Target: <span className="font-bold text-white">{targetFreq.toFixed(1)} Hz</span></p>
-              <p className="text-sm text-zinc-400">Your answer: <span className="font-bold text-white">{answerFreq.toFixed(1)} Hz</span></p>
-              <p className="mt-2 text-lg font-bold" style={{ color: Math.abs(1200 * Math.log2(answerFreq / targetFreq)) <= 15 ? '#4ADE80' : '#FBBF24' }}>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="ios-card"
+              style={{ padding: '12px 16px', textAlign: 'center', marginBottom: 16 }}
+            >
+              <div style={{ fontSize: 13, color: 'var(--ios-label3)' }}>
+                Target: <span style={{ fontWeight: 700, color: 'var(--ios-label)' }}>{targetFreq.toFixed(1)} Hz</span>
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginTop: 2 }}>
+                Your answer: <span style={{ fontWeight: 700, color: 'var(--ios-label)' }}>{answerFreq.toFixed(1)} Hz</span>
+              </div>
+              <div style={{
+                marginTop: 8, fontSize: 18, fontWeight: 700,
+                color: Math.abs(1200 * Math.log2(answerFreq / targetFreq)) <= 15 ? 'var(--ios-green)' : 'var(--ios-orange)',
+              }}>
                 {Math.abs(Math.round(1200 * Math.log2(answerFreq / targetFreq)))}¢ off
-              </p>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Submit / Next */}
-        <div className="mt-6">
-          {!submitted ? (
-            <button onClick={handleSubmit} className="w-full rounded-full py-3 font-semibold text-white hover:opacity-90 transition-all" style={{ background: ACCENT }}>Lock In</button>
-          ) : (
-            <button onClick={() => { if (round >= TOTAL_ROUNDS) { setPhase('done'); } else { nextRound(); } }} className="w-full rounded-full py-3 font-semibold text-white hover:opacity-90 transition-all" style={{ background: ACCENT }}>
-              {round >= TOTAL_ROUNDS ? 'See Results' : 'Next Round →'}
-            </button>
-          )}
-        </div>
+        {!submitted ? (
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={handleSubmit}
+            className="ios-btn-primary"
+            style={{ background: ACCENT }}
+          >
+            Lock In
+          </motion.button>
+        ) : (
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => { if (round >= TOTAL_ROUNDS) { setPhase('done'); } else { nextRound(); } }}
+            className="ios-btn-primary"
+            style={{ background: ACCENT }}
+          >
+            {round >= TOTAL_ROUNDS ? 'See Results' : 'Next Round →'}
+          </motion.button>
+        )}
 
-        <div className="mt-4 text-center text-sm text-zinc-500">
-          🔥 {streak} streak • Round {round}/{TOTAL_ROUNDS}
+        <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--ios-label3)', marginTop: 16 }}>
+          🔥 {streak} streak · Round {round}/{TOTAL_ROUNDS}
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 
-const ACCENT = '#FB923C'; // orange-400
+const ACCENT = '#FF9F0A';
 const DURATION_OPTIONS = [30, 60];
 
 const ALL_NOTES = NOTE_NAMES;
@@ -42,7 +42,7 @@ export default function SpeedRoundPage() {
     setFeedback(null);
     nextNote();
     setPhase('playing');
-    playTone(NOTE_FREQUENCIES['A4'] || 440, 0.1); // start beep
+    playTone(NOTE_FREQUENCIES['A4'] || 440, 0.1);
 
     timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
@@ -89,106 +89,170 @@ export default function SpeedRoundPage() {
   if (phase === 'done') {
     const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15 }} className="text-6xl">⚡</motion.div>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Time&apos;s Up!</h1>
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            {[
-              { label: 'Score', value: score },
-              { label: 'Accuracy', value: `${accuracy}%` },
-              { label: 'Correct', value: `${correct}/${total}` },
-              { label: 'Best Streak', value: `🔥 ${bestStreak}` },
-            ].map((s, i) => (
-              <motion.div key={s.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.1 }} className="glass-card p-4">
-                <div className="text-2xl font-bold text-white">{s.value}</div>
-                <div className="text-xs text-zinc-500">{s.label}</div>
-              </motion.div>
-            ))}
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+            <div style={{ fontSize: 60, marginBottom: 12 }}>⚡</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+              Time&apos;s Up!
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 24 }}>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{accuracy}%</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Accuracy</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{correct}/{total}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Correct</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>🔥 {bestStreak}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Streak</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Play Again</button>
+              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            </div>
           </div>
-          <div className="mt-6 flex gap-3">
-            <button onClick={startGame} className="flex-1 rounded-full py-3 font-semibold text-white" style={{ background: ACCENT }}>Play Again</button>
-            <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-full bg-white/5 py-3 font-medium text-zinc-300">Dashboard</button>
-          </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   if (phase === 'setup') {
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
-            className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl" style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}25` }}>
-            <span className="text-4xl">⚡</span>
-          </motion.div>
-          <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Speed Round</h1>
-          <p className="mt-2 text-zinc-500">Identify notes as fast as you can</p>
-          <div className="mt-8">
-            <h3 className="text-sm font-medium text-zinc-500 mb-3">Duration</h3>
-            <div className="flex gap-3 justify-center">
-              {DURATION_OPTIONS.map((d) => (
-                <button key={d} onClick={() => setDuration(d)}
-                  className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-300 ${duration === d ? 'text-white' : 'bg-white/5 text-zinc-500 hover:bg-white/10'}`}
-                  style={duration === d ? { background: ACCENT } : {}}>
-                  {d}s
-                </button>
-              ))}
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+            <div style={{ fontSize: 64, marginBottom: 20 }}>⚡</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Speed Round</div>
+            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 32 }}>Identify notes as fast as you can</div>
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 10 }}>Duration</div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                {DURATION_OPTIONS.map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDuration(d)}
+                    style={{
+                      height: 34, borderRadius: 17, padding: '0 20px',
+                      fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
+                      background: duration === d ? ACCENT : 'var(--ios-bg2)',
+                      color: duration === d ? '#000' : 'var(--ios-label3)',
+                      transition: 'background 0.15s, color 0.15s',
+                    }}
+                  >
+                    {d}s
+                  </button>
+                ))}
+              </div>
             </div>
+            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+              Start Sprint
+            </button>
           </div>
-          <button onClick={startGame} className="mt-8 rounded-full px-6 py-2.5 font-semibold text-white" style={{ background: ACCENT }}>
-            Start Sprint
-          </button>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen px-4 pt-10">
-      <FeedbackOverlay correct={feedback === 'correct'} show={showOverlay} streak={streak} onDone={() => setShowOverlay(false)} />
-      <div className="mx-auto max-w-md">
-        <div className="flex items-center justify-between">
-          <button onClick={() => router.push('/dashboard')} className="text-sm text-zinc-500 hover:text-white transition-colors">← Back</button>
-          <h1 className="text-lg font-semibold tracking-tight" style={{ color: ACCENT }}>⚡ Speed Round</h1>
-          <div className="text-sm text-zinc-500">Score: {score}</div>
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-sm mx-auto px-4 pt-12">
+        <FeedbackOverlay correct={feedback === 'correct'} show={showOverlay} streak={streak} onDone={() => setShowOverlay(false)} />
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+          <button
+            onClick={() => router.push('/dashboard')}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'var(--ios-bg2)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>⚡ Speed Round</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+            {score} pts
+          </div>
         </div>
 
         {/* Timer bar */}
-        <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/5">
-          <motion.div className="h-full rounded-full" style={{ background: timeLeft < 5 ? '#f87171' : ACCENT }}
-            animate={{ width: `${(timeLeft / duration) * 100}%` }} transition={{ duration: 0.5 }} />
+        <div className="ios-progress-track mb-6">
+          <motion.div
+            className="ios-progress-fill"
+            style={{ background: timeLeft < 5 ? 'var(--ios-red)' : ACCENT }}
+            animate={{ width: `${(timeLeft / duration) * 100}%` }}
+            transition={{ duration: 0.5 }}
+          />
         </div>
 
         {/* Flashcard */}
-        <div className="mt-8 flex justify-center">
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
           <AnimatePresence mode="wait">
-            <motion.div key={currentNote} initial={{ opacity: 0, scale: 0.8, rotateY: 90 }} animate={{ opacity: 1, scale: 1, rotateY: 0 }} exit={{ opacity: 0, scale: 0.8, rotateY: -90 }}
+            <motion.div
+              key={currentNote}
+              initial={{ opacity: 0, scale: 0.8, rotateY: 90 }}
+              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+              exit={{ opacity: 0, scale: 0.8, rotateY: -90 }}
               transition={{ duration: 0.2 }}
-              className={`flex h-32 w-32 items-center justify-center rounded-3xl text-5xl font-bold ${feedback === 'correct' ? 'text-green-400' : feedback === 'wrong' ? 'text-red-400' : 'text-white'}`}
-              style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(40px)' }}>
+              style={{
+                width: 128, height: 128,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 28, fontSize: 48, fontWeight: 800,
+                color: feedback === 'correct' ? 'var(--ios-green)' : feedback === 'wrong' ? 'var(--ios-red)' : 'var(--ios-label)',
+                background: 'var(--ios-bg2)', border: '1.5px solid var(--ios-sep)',
+              }}
+            >
               {currentNote}
             </motion.div>
           </AnimatePresence>
         </div>
 
         {/* Piano keyboard */}
-        <div className="mt-8 flex justify-center">
-          <div className="flex">
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'flex' }}>
             {ALL_NOTES.map((note, i) => {
               const isBlack = note.includes('#');
               if (isBlack) return null;
               const blackKey = i < 11 && ALL_NOTES[i + 1]?.includes('#');
               return (
-                <div key={note} className="relative" style={{ marginRight: 2 }}>
-                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleKeyTap(note)}
-                    className="h-40 w-12 rounded-b-xl bg-white/10 border border-white/15 text-white font-bold text-sm flex items-end justify-center pb-3 hover:bg-white/15 transition-colors">
+                <div key={note} style={{ position: 'relative', marginRight: 2 }}>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleKeyTap(note)}
+                    style={{
+                      width: 44, height: 144, borderRadius: '0 0 8px 8px',
+                      background: 'rgba(255,255,255,0.92)', border: '0.5px solid var(--ios-sep)',
+                      color: 'rgba(0,0,0,0.7)', fontWeight: 700, fontSize: 12,
+                      display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+                      paddingBottom: 10, cursor: 'pointer',
+                    }}
+                  >
                     {note}
                   </motion.button>
                   {blackKey && (
-                    <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleKeyTap(ALL_NOTES[i + 1])}
-                      className="absolute -top-4 left-7 h-24 w-8 rounded-b-lg bg-zinc-800 border border-zinc-700 text-zinc-300 font-bold text-xs flex items-end justify-center pb-2 z-10 hover:bg-zinc-700 transition-colors">
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleKeyTap(ALL_NOTES[i + 1])}
+                      style={{
+                        position: 'absolute', top: -16, left: 28,
+                        width: 32, height: 88, borderRadius: '0 0 5px 5px',
+                        background: 'var(--ios-bg4)', border: '0.5px solid var(--ios-sep)',
+                        color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: 10,
+                        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+                        paddingBottom: 8, zIndex: 10, cursor: 'pointer',
+                      }}
+                    >
                       {ALL_NOTES[i + 1]}
                     </motion.button>
                   )}
@@ -198,8 +262,8 @@ export default function SpeedRoundPage() {
           </div>
         </div>
 
-        <div className="mt-4 text-center text-sm text-zinc-500">
-          🔥 Streak: {streak} • {correct}/{total} correct • {timeLeft}s left
+        <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--ios-label3)' }}>
+          🔥 {streak} • {correct}/{total} correct • {timeLeft}s left
         </div>
       </div>
     </div>

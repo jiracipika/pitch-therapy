@@ -7,7 +7,7 @@ import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
 
 const NOTE_FREQS: Record<string, number> = {};
 (NOTE_NAMES as unknown as string[]).forEach((n) => { NOTE_FREQS[`${n}4`] = NOTE_FREQUENCIES[`${n}4`] ?? 261.63; });
-const ACCENT = '#0EA5E9';
+const ACCENT = '#0A84FF';
 
 // Staff positions: 0 = C4 (ledger below), 1 = D4, 2 = E4, ..., 12 = C5
 const STAFF_NOTES = [
@@ -92,23 +92,31 @@ export default function NameThatNotePage() {
   if (phase === 'done') {
     const correct = results.filter(r => r.correct).length;
     return (
-      <div className="min-h-screen flex items-center justify-center px-5">
-        <div className="w-full max-w-sm text-center animate-slide-up">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}30` }}>
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-              <path d="M8 7h8M8 11h6"/>
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-white" style={{ letterSpacing: '-0.035em' }}>Game Complete</h1>
-          <div className="mt-6 grid grid-cols-3 gap-2.5">
-            <div className="stat-card"><div className="text-2xl font-bold" style={{ color: ACCENT }}>{score}</div><div className="mt-1 text-[11px] text-zinc-600">Score</div></div>
-            <div className="stat-card"><div className="text-2xl font-bold text-white">{correct}/{totalRounds}</div><div className="mt-1 text-[11px] text-zinc-600">Correct</div></div>
-            <div className="stat-card"><div className="text-2xl font-bold text-white">{streak}</div><div className="mt-1 text-[11px] text-zinc-600">Best Streak</div></div>
-          </div>
-          <div className="mt-6 flex gap-2.5">
-            <button onClick={handleStart} className="flex-1 rounded-full py-3 text-sm font-semibold text-white transition-all duration-200 hover:opacity-85" style={{ background: ACCENT }}>Play Again</button>
-            <button onClick={() => router.push('/')} className="flex-1 rounded-full py-3 text-sm font-medium text-zinc-300 transition-all duration-200 hover:bg-white/10" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}>Home</button>
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+            <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+              Game Complete
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{correct}/{totalRounds}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Correct</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{streak}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Streak</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={handleStart}>Play Again</button>
+              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            </div>
           </div>
         </div>
       </div>
@@ -116,111 +124,130 @@ export default function NameThatNotePage() {
   }
 
   return (
-    <div className="min-h-screen px-5 pt-12 pb-nav">
-      <div className="mx-auto max-w-sm">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <button onClick={() => router.push('/')} className="flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgb(161,161,170)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-sm mx-auto px-4 pt-12">
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+          <button
+            onClick={() => router.push('/dashboard')}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'var(--ios-bg2)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
-          <h1 className="text-base font-semibold" style={{ color: ACCENT }}>Name That Note</h1>
-          <div className="flex items-center gap-2">
-            {isPractice && <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}20`, color: ACCENT }}>Practice</span>}
-            <div className="rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}>{score} pts</div>
+          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Name That Note</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+            {isPractice ? 'Practice' : `${score} pts`}
           </div>
         </div>
 
-        <div className="progress-bar-track mb-8">
-          <div className="progress-bar-fill" style={{ width: `${(round / totalRounds) * 100}%`, backgroundColor: ACCENT }} />
+        <div className="ios-progress-track mb-6">
+          <div className="ios-progress-fill" style={{ width: `${(round / totalRounds) * 100}%`, background: ACCENT }} />
         </div>
 
         {phase === 'idle' && (
-          <div className="flex flex-col items-center text-center animate-fade-in">
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full" style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}25` }}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-              </svg>
-            </div>
-            <h2 className="text-2xl font-semibold text-white" style={{ letterSpacing: '-0.025em' }}>Name That Note</h2>
-            <p className="mt-2 text-sm text-zinc-500">Identify notes on the musical staff</p>
-            <div className="mt-4 flex gap-2">
-              <button onClick={handleStart} className="rounded-full px-6 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:opacity-85 active:scale-95" style={{ background: ACCENT, boxShadow: `0 4px 20px ${ACCENT}40` }}>Timed Mode</button>
-              <button onClick={() => { router.push('/play/name-that-note?timed=false&practice=true'); }} className="rounded-full px-6 py-2.5 text-sm font-medium text-zinc-300 transition-all duration-200 hover:bg-white/10" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}>Practice</button>
+          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+            <div style={{ fontSize: 64, marginBottom: 20 }}>🎼</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Name That Note</div>
+            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 32 }}>Identify notes on the musical staff</div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button
+                onClick={handleStart}
+                style={{
+                  borderRadius: 14, padding: '12px 20px',
+                  fontSize: 15, fontWeight: 600, border: 'none', cursor: 'pointer',
+                  background: ACCENT, color: '#fff',
+                }}
+              >
+                Timed Mode
+              </button>
+              <button
+                onClick={() => { router.push('/play/name-that-note?timed=false&practice=true'); }}
+                style={{
+                  borderRadius: 14, padding: '12px 20px',
+                  fontSize: 15, fontWeight: 600, border: 'none', cursor: 'pointer',
+                  background: 'var(--ios-bg2)', color: 'var(--ios-label2)',
+                }}
+              >
+                Practice
+              </button>
             </div>
           </div>
         )}
 
         {(phase === 'playing' || phase === 'timed-out') && (
-          <div className="animate-fade-in text-center">
+          <div style={{ textAlign: 'center' }}>
             {/* Timer */}
             {isTimed && !isPractice && (
-              <div className="mb-4">
-                <div className="text-xs text-zinc-600 mb-1">Time: {timeLeft}s</div>
-                <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
-                  <motion.div className="h-full rounded-full" style={{ backgroundColor: timeLeft <= 3 ? '#f87171' : ACCENT, width: `${(timeLeft / 10) * 100}%` }} />
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginBottom: 6 }}>Time: {timeLeft}s</div>
+                <div className="ios-progress-track">
+                  <motion.div
+                    className="ios-progress-fill"
+                    style={{ background: timeLeft <= 3 ? 'var(--ios-red)' : ACCENT, width: `${(timeLeft / 10) * 100}%` }}
+                  />
                 </div>
               </div>
             )}
 
             {/* Staff */}
-            <div className="relative mx-auto mb-6" style={{ width: 200, height: 140 }}>
-              {/* Staff lines */}
+            <div style={{ position: 'relative', margin: '0 auto 24px', width: 200, height: 140 }}>
               {[2, 4, 6, 8, 10].map((linePos) => (
-                <div key={linePos} className="absolute left-0 right-0 h-px bg-white/20" style={{ bottom: `${(linePos - 2) * 20}px` }} />
+                <div key={linePos} style={{ position: 'absolute', left: 0, right: 0, height: 1, background: 'rgba(255,255,255,0.2)', bottom: `${(linePos - 2) * 20}px` }} />
               ))}
-              {/* Treble clef indicator */}
-              <div className="absolute -left-1 bottom-4 text-white/30 text-3xl font-serif">𝄞</div>
-              {/* Note head */}
+              <div style={{ position: 'absolute', left: -4, bottom: 16, color: 'rgba(255,255,255,0.3)', fontSize: 30, fontFamily: 'serif' }}>𝄞</div>
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="absolute w-5 h-4 rounded-full"
                 style={{
-                  backgroundColor: feedback === 'correct' ? '#4ADE80' : feedback === 'wrong' ? '#f87171' : ACCENT,
+                  position: 'absolute',
+                  width: 20, height: 16, borderRadius: '50%',
+                  backgroundColor: feedback === 'correct' ? 'var(--ios-green)' : feedback === 'wrong' ? 'var(--ios-red)' : ACCENT,
                   left: '50%',
                   bottom: `${(targetNote.staffPos - 2) * 20}px`,
                   transform: 'translateX(-50%)',
                   boxShadow: feedback === 'none' ? `0 0 10px ${ACCENT}50` : 'none',
                 }}
               />
-              {/* Ledger line for C4 or D5 */}
-              {targetNote.staffPos <= 1 && <div className="absolute left-0 right-0 h-px bg-white/20" style={{ bottom: '0px' }} />}
-              {targetNote.staffPos >= 10 && <div className="absolute left-0 right-0 h-px bg-white/20" style={{ bottom: '160px' }} />}
+              {targetNote.staffPos <= 1 && <div style={{ position: 'absolute', left: 0, right: 0, height: 1, background: 'rgba(255,255,255,0.2)', bottom: '0px' }} />}
+              {targetNote.staffPos >= 10 && <div style={{ position: 'absolute', left: 0, right: 0, height: 1, background: 'rgba(255,255,255,0.2)', bottom: '160px' }} />}
             </div>
 
             {phase === 'timed-out' && (
-              <p className="text-sm text-red-400 mb-4">Time&apos;s up! It was {targetNote.name}</p>
+              <div style={{ fontSize: 14, color: 'var(--ios-red)', marginBottom: 16 }}>Time&apos;s up! It was {targetNote.name}</div>
             )}
 
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-600 mb-4">Tap the correct note</p>
+            <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginBottom: 16 }}>Tap the correct note</div>
 
             {/* Piano keys for answer */}
-            <div className="flex justify-center gap-1 mb-4">
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 16 }}>
               {QUIZ_NOTES.map((note) => (
                 <button
                   key={note.name}
                   onClick={() => handleAnswer(note.name)}
                   disabled={phase !== 'playing'}
-                  className="transition-all duration-100 active:scale-95"
                   style={{
-                    width: 44,
-                    height: 80,
-                    borderRadius: 6,
-                    background: 'rgba(255,255,255,0.1)',
-                    border: `1px solid rgba(255,255,255,0.1)`,
+                    width: 44, height: 80, borderRadius: 6,
+                    background: 'rgba(255,255,255,0.92)',
+                    border: '0.5px solid var(--ios-sep)',
                     opacity: phase === 'playing' ? 1 : 0.4,
                     cursor: phase === 'playing' ? 'pointer' : 'default',
                   }}
                 >
-                  <span className="text-[9px] text-zinc-500">{note.name.replace('4', '').replace('5', '')}</span>
+                  <span style={{ fontSize: 9, color: 'rgba(0,0,0,0.5)' }}>{note.name.replace('4', '').replace('5', '')}</span>
                 </button>
               ))}
             </div>
 
-            <div className="flex items-center justify-center gap-6 text-xs text-zinc-600 mt-4">
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 20, fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px' }}>
               <span>Round {round}/{totalRounds}</span>
-              <span className="h-3 w-px bg-white/10" />
-              <span>Streak: {streak}</span>
+              <span>🔥 {streak}</span>
             </div>
           </div>
         )}

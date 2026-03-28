@@ -3,20 +3,21 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
+type Diff = 'easy' | 'medium' | 'hard';
+type DiffMap = Record<string, Diff>;
+
 const MODES = [
-  { id: 'pitch-match', label: 'Pitch Match', color: '#60A5FA' },
-  { id: 'note-id', label: 'Note ID', color: '#A78BFA' },
-  { id: 'frequency-guess', label: 'Frequency Guess', color: '#FBBF24' },
-  { id: 'note-wordle', label: 'Note Wordle', color: '#4ADE80' },
-  { id: 'frequency-wordle', label: 'Frequency Wordle', color: '#2DD4BF' },
+  { id: 'pitch-match',      label: 'Pitch Match',      icon: '🎤', color: '#0A84FF' },
+  { id: 'note-id',          label: 'Note ID',           icon: '🎵', color: '#BF5AF2' },
+  { id: 'frequency-guess',  label: 'Freq Guess',        icon: '📡', color: '#FF9F0A' },
+  { id: 'note-wordle',      label: 'Note Wordle',       icon: '🟩', color: '#30D158' },
+  { id: 'frequency-wordle', label: 'Freq Wordle',       icon: '🔊', color: '#5AC8FA' },
 ];
 
-type DiffMap = Record<string, 'easy' | 'medium' | 'hard'>;
-
 const SOUND_TYPES = [
-  { id: 'sine', label: 'Sine', desc: 'Pure, clean tone' },
-  { id: 'triangle', label: 'Triangle', desc: 'Softer, mellow' },
-  { id: 'square', label: 'Square', desc: 'Retro, buzzy' },
+  { id: 'sine',     label: 'Sine',     desc: 'Pure, clean' },
+  { id: 'triangle', label: 'Triangle', desc: 'Warm, mellow' },
+  { id: 'square',   label: 'Square',   desc: 'Retro, buzzy' },
   { id: 'sawtooth', label: 'Sawtooth', desc: 'Bright, rich' },
 ];
 
@@ -26,215 +27,220 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
       onClick={onToggle}
       role="switch"
       aria-checked={on}
-      className="toggle-track flex-shrink-0"
-      style={{
-        background: on ? '#30d158' : 'rgba(255,255,255,0.12)',
-      }}
+      className="ios-toggle-wrap"
+      style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
     >
-      <div
-        className="toggle-thumb"
-        style={{ left: on ? '22px' : '2px' }}
-      />
+      <div className={`ios-toggle-track ${on ? 'on' : 'off'}`} />
+      <div className={`ios-toggle-thumb ${on ? 'on' : 'off'}`} />
     </button>
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
-    <p className="section-header px-1 mt-8 mb-2">{children}</p>
+    <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', textTransform: 'uppercase', padding: '24px 4px 8px' }}>
+      {children}
+    </div>
   );
 }
 
+const rowStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  padding: '12px 16px',
+  minHeight: 44,
+  background: 'var(--ios-bg2)',
+  gap: 12,
+};
+
 export default function SettingsPage() {
   const [difficulty, setDifficulty] = useState<DiffMap>({
-    'pitch-match': 'medium',
-    'note-id': 'medium',
-    'frequency-guess': 'medium',
-    'note-wordle': 'medium',
-    'frequency-wordle': 'medium',
+    'pitch-match': 'medium', 'note-id': 'medium',
+    'frequency-guess': 'medium', 'note-wordle': 'medium', 'frequency-wordle': 'medium',
   });
-  const [sound, setSound] = useState(true);
-  const [haptics, setHaptics] = useState(true);
+  const [sound,     setSound]     = useState(true);
+  const [haptics,   setHaptics]   = useState(true);
   const [soundType, setSoundType] = useState('sine');
-  const [volume, setVolume] = useState(70);
+  const [volume,    setVolume]    = useState(70);
 
   return (
-    <div className="min-h-screen pb-nav px-4 pt-12">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="mx-auto max-w-lg"
-      >
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-white" style={{ letterSpacing: '-0.03em' }}>
-            Settings
-          </h1>
-        </div>
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-lg mx-auto px-4 pt-14">
 
-        {/* ── AUDIO ── */}
-        <SectionLabel>Audio</SectionLabel>
-        <div className="glass-card overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(96,165,250,0.12)', border: '1px solid rgba(96,165,250,0.2)' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                </svg>
+        <motion.h1
+          className="ios-large-title mb-2"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          Settings
+        </motion.h1>
+
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.08, duration: 0.4 }}>
+
+          {/* ── AUDIO ── */}
+          <SectionHeader>Audio</SectionHeader>
+          <div className="ios-group">
+            {/* Sound Effects */}
+            <div style={{ ...rowStyle }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(10,132,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🔊</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Sound Effects</div>
+                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>Game audio and tones</div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-white">Sound Effects</p>
-                <p className="text-xs text-zinc-600">Game audio and feedback tones</p>
-              </div>
+              <Toggle on={sound} onToggle={() => setSound(v => !v)} />
             </div>
-            <Toggle on={sound} onToggle={() => setSound((v) => !v)} />
-          </div>
 
-          {/* Volume slider */}
-          <div className="px-5 py-4 border-b border-white/5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)' }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-                  </svg>
+            {/* Volume */}
+            <div style={{ borderTop: '0.5px solid var(--ios-sep)', padding: '14px 16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(94,92,230,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🎚️</div>
+                  <span style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Volume</span>
                 </div>
-                <p className="text-sm font-medium text-white">Volume</p>
+                <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--ios-label2)', fontVariantNumeric: 'tabular-nums' }}>{volume}%</span>
               </div>
-              <span className="text-sm font-medium text-zinc-400 tabular-nums">{volume}%</span>
+              <input
+                type="range" min="0" max="100" value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                style={{ width: '100%', background: `linear-gradient(to right, var(--ios-blue) ${volume}%, var(--ios-bg4) ${volume}%)` }}
+              />
             </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={volume}
-              onChange={(e) => setVolume(Number(e.target.value))}
-              className="w-full accent-[#A78BFA] h-1 rounded-full appearance-none cursor-pointer"
-              style={{ background: `linear-gradient(to right, #A78BFA ${volume}%, rgba(255,255,255,0.08) ${volume}%)` }}
-            />
+
+            {/* Haptics */}
+            <div style={{ ...rowStyle, borderTop: '0.5px solid var(--ios-sep)' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,159,10,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>📳</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Haptic Feedback</div>
+                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>Vibration on answers</div>
+              </div>
+              <Toggle on={haptics} onToggle={() => setHaptics(v => !v)} />
+            </div>
           </div>
 
-          <div className="flex items-center justify-between px-5 py-4">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.2)' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8 18L12 22L16 18"/>
-                  <path d="M8 6L12 2L16 6"/>
-                  <line x1="12" y1="2" x2="12" y2="22"/>
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white">Haptic Feedback</p>
-                <p className="text-xs text-zinc-600">Vibration on answers</p>
-              </div>
-            </div>
-            <Toggle on={haptics} onToggle={() => setHaptics((v) => !v)} />
-          </div>
-        </div>
-
-        {/* ── SOUND TYPE ── */}
-        <SectionLabel>Sound Type</SectionLabel>
-        <div className="glass-card overflow-hidden">
-          <div className="grid grid-cols-2 gap-0">
-            {SOUND_TYPES.map((s, idx) => {
-              const active = soundType === s.id;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => setSoundType(s.id)}
-                  className={`flex flex-col items-center gap-1 py-4 transition-all duration-200 ${idx < 3 && idx % 2 === 0 ? '' : ''} ${active ? '' : 'hover:bg-white/[0.03]'}`}
-                  style={{
-                    background: active ? 'rgba(255,255,255,0.06)' : 'transparent',
-                  }}
-                >
-                  <div
-                    className={`text-xs font-semibold transition-colors ${active ? 'text-white' : 'text-zinc-500'}`}
+          {/* ── SOUND TYPE ── */}
+          <SectionHeader>Sound Type</SectionHeader>
+          <div className="ios-group">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+              {SOUND_TYPES.map((s, idx) => {
+                const active = soundType === s.id;
+                const borders: React.CSSProperties = {};
+                if (idx >= 2) borders.borderTop = '0.5px solid var(--ios-sep)';
+                if (idx % 2 === 1) borders.borderLeft = '0.5px solid var(--ios-sep)';
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => setSoundType(s.id)}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '16px 8px',
+                      background: active ? 'var(--ios-bg3)' : 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      ...borders,
+                    }}
                   >
-                    {s.label}
-                  </div>
-                  <div className="text-[10px] text-zinc-700">{s.desc}</div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ── DIFFICULTY ── */}
-        <SectionLabel>Default Difficulty</SectionLabel>
-        <div className="glass-card overflow-hidden">
-          {MODES.map((m, idx) => (
-            <div
-              key={m.id}
-              className={`flex items-center justify-between px-5 py-3.5 ${idx < MODES.length - 1 ? 'border-b border-white/5' : ''}`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: m.color }} />
-                <span className="text-sm font-medium text-white">{m.label}</span>
-              </div>
-              <div className="flex gap-1">
-                {(['easy', 'medium', 'hard'] as const).map((d) => {
-                  const active = difficulty[m.id] === d;
-                  return (
-                    <button
-                      key={d}
-                      onClick={() => setDifficulty({ ...difficulty, [m.id]: d })}
-                      className="rounded-full px-3 py-1 text-xs font-medium transition-all duration-200"
-                      style={
-                        active
-                          ? { background: m.color, color: '#000', boxShadow: `0 0 8px ${m.color}40` }
-                          : { background: 'rgba(255,255,255,0.05)', color: 'rgb(113,113,122)', border: '1px solid rgba(255,255,255,0.07)' }
-                      }
-                    >
-                      {d.charAt(0).toUpperCase() + d.slice(1)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* ── APPEARANCE ── */}
-        <SectionLabel>Appearance</SectionLabel>
-        <div className="glass-card overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgb(161,161,170)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white">Dark Mode</p>
-                <p className="text-xs text-zinc-600">Only dark mode for now</p>
-              </div>
-            </div>
-            <div className="rounded-full px-3 py-1 text-xs font-semibold text-black" style={{ background: '#ffffff' }}>
-              Active
+                    <div style={{ fontSize: 14, fontWeight: 600, color: active ? 'var(--ios-blue)' : 'var(--ios-label)', letterSpacing: '-0.23px' }}>
+                      {s.label}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 3 }}>
+                      {s.desc}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
-        </div>
 
-        {/* ── ABOUT ── */}
-        <SectionLabel>About</SectionLabel>
-        <div className="glass-card overflow-hidden mb-4">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-            <span className="text-sm font-medium text-white">Version</span>
-            <span className="text-sm text-zinc-500">0.1.0</span>
+          {/* ── DIFFICULTY ── */}
+          <SectionHeader>Default Difficulty</SectionHeader>
+          <div className="ios-group">
+            {MODES.map((m, idx) => (
+              <div
+                key={m.id}
+                style={{
+                  ...rowStyle,
+                  borderTop: idx === 0 ? 'none' : '0.5px solid var(--ios-sep)',
+                  flexWrap: 'wrap',
+                  gap: 0,
+                }}
+              >
+                {/* Left: icon + label */}
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: `${m.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0, marginRight: 12 }}>
+                  {m.icon}
+                </div>
+                <div style={{ flex: 1, fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>
+                  {m.label}
+                </div>
+
+                {/* Right: segmented buttons */}
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {(['easy', 'medium', 'hard'] as Diff[]).map((d) => {
+                    const active = difficulty[m.id] === d;
+                    return (
+                      <button
+                        key={d}
+                        onClick={() => setDifficulty({ ...difficulty, [m.id]: d })}
+                        style={{
+                          height: 28,
+                          borderRadius: 14,
+                          padding: '0 11px',
+                          fontSize: 12,
+                          fontWeight: 600,
+                          border: 'none',
+                          cursor: 'pointer',
+                          background: active ? m.color : 'var(--ios-bg3)',
+                          color: active ? '#000' : 'var(--ios-label3)',
+                          transition: 'background 0.15s, color 0.15s',
+                          letterSpacing: '-0.08px',
+                        }}
+                      >
+                        {d.charAt(0).toUpperCase() + d.slice(1)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-            <span className="text-sm font-medium text-white">Build</span>
-            <span className="text-sm text-zinc-500 font-mono">2025-q1</span>
+
+          {/* ── APPEARANCE ── */}
+          <SectionHeader>Appearance</SectionHeader>
+          <div className="ios-group">
+            <div style={rowStyle}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🌙</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Dark Mode</div>
+                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>Always on</div>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label3)', background: 'var(--ios-bg3)', borderRadius: 8, padding: '4px 10px' }}>
+                On
+              </div>
+            </div>
           </div>
-          <div className="px-5 py-5 text-center">
-            <p className="text-sm font-semibold text-white" style={{ letterSpacing: '-0.01em' }}>Pitch Therapy</p>
-            <p className="mt-0.5 text-xs text-zinc-600">Train Your Ear. Every Day.</p>
+
+          {/* ── ABOUT ── */}
+          <SectionHeader>About</SectionHeader>
+          <div className="ios-group">
+            <div style={{ ...rowStyle }}>
+              <span style={{ flex: 1, fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Version</span>
+              <span style={{ fontSize: 17, color: 'var(--ios-label3)', letterSpacing: '-0.43px' }}>0.1.0</span>
+            </div>
+            <div style={{ ...rowStyle, borderTop: '0.5px solid var(--ios-sep)' }}>
+              <span style={{ flex: 1, fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Build</span>
+              <span style={{ fontFamily: '-apple-system, "SF Mono", monospace', fontSize: 15, color: 'var(--ios-label3)' }}>2025-q1</span>
+            </div>
+            <div style={{ borderTop: '0.5px solid var(--ios-sep)', padding: '20px 16px', textAlign: 'center' }}>
+              <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.23px' }}>Pitch Therapy</div>
+              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginTop: 4 }}>Train Your Ear. Every Day.</div>
+            </div>
           </div>
-        </div>
-      </motion.div>
+
+        </motion.div>
+      </div>
     </div>
   );
 }

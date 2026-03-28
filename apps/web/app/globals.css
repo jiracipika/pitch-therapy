@@ -2,377 +2,818 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   iOS DESIGN SYSTEM — Pitch Therapy
+   Dark mode only. Apple system color palette.
+   ============================================================ */
+
+:root {
+  /* ── iOS System Colors (dark) ── */
+  --ios-bg:           #000000;
+  --ios-bg2:          #1C1C1E;
+  --ios-bg3:          #2C2C2E;
+  --ios-bg4:          #3A3A3C;
+
+  --ios-label:        #FFFFFF;
+  --ios-label2:       rgba(235, 235, 245, 0.6);
+  --ios-label3:       rgba(235, 235, 245, 0.3);
+  --ios-label4:       rgba(235, 235, 245, 0.18);
+
+  --ios-sep:          rgba(84, 84, 88, 0.65);
+  --ios-sep-opaque:   #38383A;
+
+  /* ── iOS Tint Colors ── */
+  --ios-blue:         #0A84FF;
+  --ios-green:        #30D158;
+  --ios-indigo:       #5E5CE6;
+  --ios-orange:       #FF9F0A;
+  --ios-pink:         #FF375F;
+  --ios-purple:       #BF5AF2;
+  --ios-red:          #FF453A;
+  --ios-teal:         #5AC8FA;
+  --ios-yellow:       #FFD60A;
+  --ios-mint:         #63E6E2;
+  --ios-cyan:         #32ADE6;
+
+  /* ── Navigation ── */
+  --nav-bar-height:   44px;
+  --tab-bar-height:   49px;
+
+  /* ── Typography tracking ── */
+  --track-tight:      -0.025em;
+  --track-body:       -0.015em;
+}
+
 @layer base {
+  html {
+    font-family: -apple-system, "SF Pro Display", "SF Pro Text",
+                 "Helvetica Neue", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    background-color: var(--ios-bg);
+    color: var(--ios-label);
+  }
+
   body {
-    @apply antialiased;
-    background-color: #030303;
-    background-image: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99, 102, 241, 0.04) 0%, transparent 70%);
-    color: rgb(161, 161, 170);
+    background-color: var(--ios-bg);
+    color: var(--ios-label);
     min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
-/* ==========================================
+/* ============================================================
    KEYFRAMES
-   ========================================== */
+   ============================================================ */
 
-@keyframes float {
-  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.2; }
-  50% { transform: translateY(-18px) rotate(8deg); opacity: 0.4; }
-}
-
-@keyframes pulse-ring {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(1.5); opacity: 0; }
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fade-in {
+@keyframes ios-fade-in {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
+}
+
+@keyframes ios-slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ios-slide-down {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ios-scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ios-press {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ios-spring-in {
+  0%   { opacity: 0; transform: scale(0.85) translateY(12px); }
+  70%  { opacity: 1; transform: scale(1.02) translateY(-2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
 }
 
 @keyframes note-float-1 {
-  0%, 100% { transform: translateY(0) translateX(0) rotate(-5deg); opacity: 0; }
-  10% { opacity: 0.12; }
-  90% { opacity: 0.10; }
-  50% { transform: translateY(-70px) translateX(18px) rotate(5deg); }
+  0%, 100% { transform: translateY(0) translateX(0) rotate(-3deg); opacity: 0; }
+  10%  { opacity: 0.06; }
+  90%  { opacity: 0.05; }
+  50%  { transform: translateY(-60px) translateX(14px) rotate(4deg); }
 }
 
 @keyframes note-float-2 {
-  0%, 100% { transform: translateY(0) translateX(0) rotate(3deg); opacity: 0; }
-  15% { opacity: 0.08; }
-  85% { opacity: 0.07; }
-  50% { transform: translateY(-55px) translateX(-12px) rotate(-8deg); }
+  0%, 100% { transform: translateY(0) translateX(0) rotate(2deg); opacity: 0; }
+  15%  { opacity: 0.05; }
+  85%  { opacity: 0.04; }
+  50%  { transform: translateY(-48px) translateX(-10px) rotate(-6deg); }
 }
 
 @keyframes note-float-3 {
-  0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
-  20% { opacity: 0.09; }
-  80% { opacity: 0.07; }
-  50% { transform: translateY(-90px) translateX(8px) rotate(6deg); }
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+  20%  { opacity: 0.06; }
+  80%  { opacity: 0.04; }
+  50%  { transform: translateY(-80px) translateX(6px) rotate(5deg); }
 }
 
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.1); }
-  50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.25); }
+@keyframes streak-pulse {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 159, 10, 0.4)); }
+  50%       { filter: drop-shadow(0 0 8px rgba(255, 159, 10, 0.7)); }
 }
 
-/* ==========================================
-   ANIMATION CLASSES
-   ========================================== */
+/* ============================================================
+   ANIMATION HELPERS
+   ============================================================ */
 
-.animate-float { animation: float 4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
-.animate-float-delay { animation: float 4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite 1.3s; }
-.animate-float-delay-2 { animation: float 4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite 2.6s; }
-.animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
-.animate-slide-up { animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.animate-fade-in { animation: fade-in 0.35s ease-out forwards; }
-.animate-glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
+.animate-ios-fade-in   { animation: ios-fade-in   0.3s ease-out forwards; }
+.animate-ios-slide-up  { animation: ios-slide-up  0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-ios-scale-in  { animation: ios-scale-in  0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-ios-spring-in { animation: ios-spring-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-note-1 { animation: note-float-1 8s  cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
+.animate-note-2 { animation: note-float-2 10s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite 2.5s; }
+.animate-note-3 { animation: note-float-3 9s  cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite 5s; }
+.animate-streak { animation: streak-pulse 2s ease-in-out infinite; }
 
-.animate-note-1 { animation: note-float-1 7s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
-.animate-note-2 { animation: note-float-2 9s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite 2.5s; }
-.animate-note-3 { animation: note-float-3 8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite 5s; }
+/* ============================================================
+   TYPOGRAPHY — iOS scale
+   ============================================================ */
 
-/* ==========================================
-   GLASS CARD
-   ========================================== */
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 20px;
-  box-shadow:
-    0 0 0 0.5px rgba(255, 255, 255, 0.04) inset,
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 8px 32px rgba(0, 0, 0, 0.4);
-  transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+.ios-large-title {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  line-height: 1.12;
+  color: var(--ios-label);
 }
 
-.glass-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow:
-    0 0 0 0.5px rgba(255, 255, 255, 0.06) inset,
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 12px 40px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.04);
+.ios-title1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.14;
+  color: var(--ios-label);
 }
 
-/* ==========================================
-   FROSTED NAV
-   ========================================== */
-
-.frosted-nav {
-  background: rgba(3, 3, 3, 0.88);
-  backdrop-filter: blur(30px) saturate(200%);
-  -webkit-backdrop-filter: blur(30px) saturate(200%);
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.03);
+.ios-title2 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.18;
+  color: var(--ios-label);
 }
 
-/* ==========================================
-   TYPOGRAPHY UTILITIES
-   ========================================== */
-
-.gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.75) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.shimmer-text {
-  background: linear-gradient(90deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,1) 40%, rgba(255,255,255,0.6) 80%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 3s linear infinite;
-}
-
-/* ==========================================
-   BUTTONS
-   ========================================== */
-
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  background: #ffffff;
-  color: #000000;
+.ios-title3 {
+  font-size: 20px;
   font-weight: 600;
-  font-size: 0.9375rem;
-  padding: 0.625rem 1.5rem;
-  letter-spacing: -0.01em;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
-  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease, box-shadow 0.15s ease;
+  letter-spacing: -0.45px;
+  line-height: 1.2;
+  color: var(--ios-label);
 }
 
-.btn-primary:hover {
-  background: #f4f4f5;
-  transform: scale(1.03);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255, 255, 255, 0.15) inset;
+.ios-headline {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.43px;
+  line-height: 1.29;
+  color: var(--ios-label);
 }
 
-.btn-primary:active {
-  transform: scale(0.98);
+.ios-body {
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.43px;
+  line-height: 1.47;
+  color: var(--ios-label);
 }
 
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgb(212, 212, 216);
-  font-weight: 500;
-  font-size: 0.9375rem;
-  padding: 0.625rem 1.5rem;
-  letter-spacing: -0.01em;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.03) inset;
-  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+.ios-callout {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: -0.32px;
+  line-height: 1.375;
+  color: var(--ios-label);
 }
 
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.10);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.15);
-  transform: scale(1.02);
+.ios-subhead {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: -0.23px;
+  line-height: 1.33;
+  color: var(--ios-label);
 }
 
-.btn-secondary:active {
-  transform: scale(0.98);
+.ios-footnote {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: -0.08px;
+  line-height: 1.38;
+  color: var(--ios-label2);
 }
 
-/* ==========================================
-   STAT CARDS
-   ========================================== */
-
-.stat-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  padding: 1.25rem;
-  text-align: center;
-  box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.03) inset;
+.ios-caption1 {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.33;
+  color: var(--ios-label2);
 }
 
-/* ==========================================
-   FOCUS GLOW
-   ========================================== */
-
-.focus-glow:focus {
-  box-shadow:
-    0 0 0 2px rgba(255, 255, 255, 0.08),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-  outline: none;
+.ios-caption2 {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.07px;
+  line-height: 1.27;
+  color: var(--ios-label3);
 }
 
-/* ==========================================
-   STREAK RING
-   ========================================== */
+/* ============================================================
+   iOS GROUPED INSET TABLE (core UI primitive)
+   ============================================================ */
 
-.streak-ring {
-  transform: rotate(-90deg);
+.ios-section-header {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: -0.08px;
+  text-transform: uppercase;
+  color: var(--ios-label3);
+  padding: 0 20px;
+  margin-bottom: 8px;
+  margin-top: 28px;
 }
 
-/* ==========================================
-   PROGRESS BAR (Apple thin style)
-   ========================================== */
+.ios-section-footer {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: -0.08px;
+  color: var(--ios-label3);
+  padding: 8px 20px 0;
+}
 
-.progress-bar-track {
-  height: 3px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.08);
+.ios-group {
+  background: var(--ios-bg2);
+  border-radius: 12px;
   overflow: hidden;
 }
 
-.progress-bar-fill {
-  height: 100%;
-  border-radius: 9999px;
-  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+.ios-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  min-height: 44px;
+  background: var(--ios-bg2);
+  transition: background 0.15s ease;
 }
 
-/* ==========================================
-   TOGGLE SWITCH (Apple-style)
-   ========================================== */
+.ios-row + .ios-row {
+  border-top: 1px solid var(--ios-sep);
+}
 
-.toggle-track {
+.ios-row:active {
+  background: var(--ios-bg3);
+}
+
+/* ============================================================
+   iOS NAVIGATION BAR
+   ============================================================ */
+
+.ios-nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: calc(var(--nav-bar-height) + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  background: rgba(28, 28, 30, 0.94);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--ios-sep);
+}
+
+/* ============================================================
+   iOS TAB BAR
+   ============================================================ */
+
+.ios-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(28, 28, 30, 0.94);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 0.5px solid var(--ios-sep);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+}
+
+.ios-tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  height: var(--tab-bar-height);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.ios-tab-item:active {
+  opacity: 0.6;
+}
+
+/* ============================================================
+   iOS CARD
+   ============================================================ */
+
+.ios-card {
+  background: var(--ios-bg2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ios-card-inset {
+  background: var(--ios-bg2);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+/* ============================================================
+   iOS BUTTON STYLES
+   ============================================================ */
+
+.ios-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  border-radius: 14px;
+  background: var(--ios-blue);
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.43px;
+  padding: 0 24px;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+.ios-btn-primary:active {
+  opacity: 0.8;
+  transform: scale(0.97);
+}
+
+.ios-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  border-radius: 14px;
+  background: var(--ios-bg3);
+  color: var(--ios-blue);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.43px;
+  padding: 0 24px;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+.ios-btn-secondary:active {
+  opacity: 0.7;
+  transform: scale(0.97);
+}
+
+.ios-btn-tonal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(10, 132, 255, 0.2);
+  color: var(--ios-blue);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.23px;
+  padding: 0 20px;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.ios-btn-tonal:active {
+  opacity: 0.7;
+  transform: scale(0.97);
+}
+
+.ios-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  border-radius: 14px;
+  background: rgba(255, 69, 58, 0.18);
+  color: var(--ios-red);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.43px;
+  padding: 0 24px;
+  transition: opacity 0.12s ease;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+.ios-btn-danger:active { opacity: 0.7; }
+
+.ios-btn-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  border-radius: 17px;
+  background: rgba(10, 132, 255, 0.18);
+  color: var(--ios-blue);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.23px;
+  padding: 0 16px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: opacity 0.12s ease;
+}
+
+.ios-btn-inline:active { opacity: 0.7; }
+
+/* ============================================================
+   iOS TOGGLE (system style)
+   ============================================================ */
+
+.ios-toggle-wrap {
   position: relative;
   width: 51px;
   height: 31px;
-  border-radius: 9999px;
-  transition: background 0.25s ease;
-  cursor: pointer;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
-.toggle-track.on {
-  background: #30d158;
+.ios-toggle-track {
+  width: 51px;
+  height: 31px;
+  border-radius: 16px;
+  transition: background 0.2s ease;
 }
 
-.toggle-track.off {
-  background: rgba(255, 255, 255, 0.12);
-}
+.ios-toggle-track.on  { background: var(--ios-green); }
+.ios-toggle-track.off { background: rgba(120, 120, 128, 0.32); }
 
-.toggle-thumb {
+.ios-toggle-thumb {
   position: absolute;
   top: 2px;
   width: 27px;
   height: 27px;
-  border-radius: 9999px;
+  border-radius: 14px;
   background: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 0.5px rgba(0, 0, 0, 0.1);
-  transition: left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+  transition: left 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.toggle-thumb.on { left: 22px; }
-.toggle-thumb.off { left: 2px; }
+.ios-toggle-thumb.on  { left: 22px; }
+.ios-toggle-thumb.off { left: 2px; }
 
-/* ==========================================
-   PLAY BUTTON (circular, game)
-   ========================================== */
+/* ============================================================
+   iOS INPUT
+   ============================================================ */
 
-.play-button {
-  width: 80px;
-  height: 80px;
-  border-radius: 9999px;
+.ios-input {
+  background: var(--ios-bg3);
+  border: none;
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.43px;
+  color: var(--ios-label);
+  width: 100%;
+  outline: none;
+  font-family: inherit;
+  transition: background 0.15s ease;
+  -webkit-appearance: none;
+}
+
+.ios-input::placeholder {
+  color: var(--ios-label3);
+}
+
+.ios-input:focus {
+  background: var(--ios-bg4);
+}
+
+/* ============================================================
+   iOS SEGMENTED CONTROL
+   ============================================================ */
+
+.ios-segmented {
+  background: rgba(118, 118, 128, 0.24);
+  border-radius: 9px;
+  padding: 2px;
+  display: flex;
+  gap: 0;
+}
+
+.ios-segment {
+  flex: 1;
+  height: 32px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 0.5px rgba(255, 255, 255, 0.04) inset;
-  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.08px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--ios-label2);
+  border: none;
+  background: transparent;
 }
 
-.play-button:hover {
-  background: rgba(255, 255, 255, 0.10);
-  transform: scale(1.06);
+.ios-segment.active {
+  background: var(--ios-bg2);
+  color: var(--ios-label);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
-.play-button:active {
-  transform: scale(0.96);
+/* ============================================================
+   iOS PROGRESS BAR
+   ============================================================ */
+
+.ios-progress-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ios-bg4);
+  overflow: hidden;
 }
 
-/* ==========================================
-   ACTIVITY GRID
-   ========================================== */
+.ios-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-.activity-cell {
-  width: 12px;
-  height: 12px;
+/* ============================================================
+   iOS ACTIVITY CELL (contribution grid)
+   ============================================================ */
+
+.ios-activity-cell {
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--ios-bg3);
   transition: background 0.2s ease;
 }
 
-.activity-cell.active {
-  background: rgba(99, 102, 241, 0.6);
+.ios-activity-cell.active {
+  background: var(--ios-blue);
+  opacity: 0.85;
 }
 
-/* ==========================================
-   SECTION HEADER
-   ========================================== */
-
-.section-header {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgb(113, 113, 122);
-  margin-bottom: 0.5rem;
-  padding-left: 0.25rem;
+.ios-activity-cell.done {
+  background: var(--ios-green);
 }
 
-/* ==========================================
-   INPUT STYLE
-   ========================================== */
+/* ============================================================
+   iOS STREAK RING
+   ============================================================ */
 
-.input-field {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 0.75rem 1rem;
-  color: #ffffff;
-  font-size: 0.9375rem;
-  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-  width: 100%;
+.ios-streak-ring {
+  transform: rotate(-90deg);
+}
+
+/* ============================================================
+   iOS GAME CARD (app grid style)
+   ============================================================ */
+
+.ios-game-card {
+  background: var(--ios-bg2);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.15s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ios-game-card:active {
+  transform: scale(0.95);
+  background: var(--ios-bg3);
+}
+
+/* ============================================================
+   iOS PLAY BUTTON (circular)
+   ============================================================ */
+
+.ios-play-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 36px;
+  background: var(--ios-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.12s ease;
+  border: none;
   outline: none;
+  box-shadow: 0 4px 16px rgba(10, 132, 255, 0.4);
 }
 
-.input-field::placeholder {
-  color: rgb(82, 82, 91);
+.ios-play-btn:active {
+  transform: scale(0.93);
+  opacity: 0.85;
 }
 
-.input-field:focus {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.20);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+/* ============================================================
+   iOS CENTS METER
+   ============================================================ */
+
+.ios-cents-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--ios-bg3);
+  position: relative;
+  overflow: visible;
 }
 
-/* ==========================================
-   SAFE-AREA BOTTOM PADDING
-   ========================================== */
+/* ============================================================
+   iOS MODAL SHEET
+   ============================================================ */
 
-.pb-nav {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+.ios-sheet {
+  background: var(--ios-bg2);
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
+}
+
+.ios-sheet-handle {
+  width: 36px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--ios-label4);
+  margin: 8px auto 0;
+}
+
+/* ============================================================
+   iOS ICON BADGE
+   ============================================================ */
+
+.ios-app-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 13.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ios-icon-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   iOS ONBOARDING DOT
+   ============================================================ */
+
+.ios-page-dot {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--ios-label4);
+  transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.3s ease;
+}
+
+.ios-page-dot.active {
+  background: var(--ios-label);
+  width: 24px;
+}
+
+/* ============================================================
+   SAFE AREA UTILITIES
+   ============================================================ */
+
+.pt-safe   { padding-top:    env(safe-area-inset-top, 0px); }
+.pb-safe   { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pb-tab    { padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px) + 16px); }
+.pt-nav    { padding-top:    calc(var(--nav-bar-height)  + env(safe-area-inset-top, 0px)  + 8px); }
+
+/* ============================================================
+   SCROLL
+   ============================================================ */
+
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================================
+   FOCUS
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--ios-blue);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ============================================================
+   RANGE INPUT (iOS style)
+   ============================================================ */
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  border: none;
+  cursor: pointer;
+}
+
+/* ============================================================
+   SHIMMER TEXT
+   ============================================================ */
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.5) 0%,
+    rgba(255,255,255,1) 35%,
+    rgba(255,255,255,0.5) 70%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3.5s linear infinite;
 }

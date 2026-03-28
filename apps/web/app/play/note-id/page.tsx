@@ -15,7 +15,7 @@ const DIFFICULTIES: Record<Difficulty, { options: number; rounds: number; timeLi
   hard: { options: 12, rounds: 15, timeLimit: 8 },
 };
 
-const ACCENT = '#A78BFA';
+const ACCENT = '#BF5AF2';
 
 export default function NoteIdPage() {
   const router = useRouter();
@@ -133,109 +133,109 @@ export default function NoteIdPage() {
 
   if (phase === 'done') {
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mx-auto max-w-md text-center"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            className="text-6xl"
-          >
-            🏆
-          </motion.div>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Game Complete!</h1>
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            {[
-              { label: 'Score', value: score },
-              { label: 'Correct', value: `${results.filter(r => r.correct).length}/${config.rounds}` },
-              { label: 'Best Streak', value: `🔥 ${bestStreak}` },
-            ].map((s, i) => (
-              <motion.div
-                key={s.label}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.1 }}
-                className="glass-card p-4"
-              >
-                <div className="text-2xl font-bold text-white">{s.value}</div>
-                <div className="text-xs text-zinc-500">{s.label}</div>
-              </motion.div>
-            ))}
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+            <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+              Game Complete
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{results.filter(r => r.correct).length}/{config.rounds}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Correct</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>🔥 {bestStreak}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Streak</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Play Again</button>
+              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            </div>
           </div>
-          <div className="mt-6 flex gap-3">
-            <button onClick={startGame} className="flex-1 rounded-full py-3 font-semibold text-white transition-all duration-300 ease-out hover:opacity-90" style={{ background: ACCENT }}>Play Again</button>
-            <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-full bg-white/5 py-3 font-medium text-zinc-300 transition-all duration-300 ease-out hover:bg-white/10">Dashboard</button>
-          </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   if (phase === 'setup') {
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mx-auto max-w-md text-center"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
-            className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl"
-            style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}25` }}
-          >
-            <span className="text-4xl">🎵</span>
-          </motion.div>
-          <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Note ID</h1>
-          <p className="mt-2 text-zinc-500">Identify notes by ear</p>
-          <div className="mt-8">
-            <h3 className="text-sm font-medium text-zinc-500 mb-3">Select Difficulty</h3>
-            <div className="flex gap-3 justify-center">
-              {(['easy', 'medium', 'hard'] as const).map((d) => (
-                <button key={d} onClick={() => setDifficulty(d)}
-                  className={`rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 ease-out ${difficulty === d ? 'text-white' : 'bg-white/5 text-zinc-500 hover:bg-white/10 hover:text-zinc-300'}`}
-                  style={difficulty === d ? { background: ACCENT } : {}}
-                >
-                  {d.charAt(0).toUpperCase() + d.slice(1)}
-                </button>
-              ))}
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+            <div style={{ fontSize: 64, marginBottom: 20 }}>🎵</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Note ID</div>
+            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 32 }}>Identify notes by ear</div>
+
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 10 }}>Select Difficulty</div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                {(['easy', 'medium', 'hard'] as const).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDifficulty(d)}
+                    style={{
+                      height: 34, borderRadius: 17, padding: '0 16px',
+                      fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
+                      background: difficulty === d ? ACCENT : 'var(--ios-bg2)',
+                      color: difficulty === d ? '#000' : 'var(--ios-label3)',
+                      transition: 'background 0.15s, color 0.15s',
+                    }}
+                  >
+                    {d.charAt(0).toUpperCase() + d.slice(1)}
+                  </button>
+                ))}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 8 }}>
+                {config.options} notes • {config.rounds} rounds{config.timeLimit ? ` • ${config.timeLimit}s timer` : ''}
+              </div>
             </div>
-            <p className="mt-3 text-xs text-zinc-600">{config.options} notes • {config.rounds} rounds{config.timeLimit ? ` • ${config.timeLimit}s timer` : ''}</p>
+            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+              {isPractice ? '🎓 Start Practicing' : 'Start Game'}
+            </button>
+            {isPractice && (
+              <div style={{ marginTop: 10, fontSize: 12, color: 'var(--ios-label3)' }}>Practice mode — no scores, just learn</div>
+            )}
           </div>
-          <button onClick={startGame} className="mt-8 rounded-full px-6 py-2.5 font-semibold text-white transition-all duration-300 ease-out hover:opacity-90" style={{ background: ACCENT }}>
-            {isPractice ? '🎓 Start Practicing' : 'Start Game'}
-          </button>
-          {isPractice && (
-            <p className="mt-3 text-xs text-zinc-600">Practice mode — no scores, just learn</p>
-          )}
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen px-4 pt-10">
-      <FeedbackOverlay correct={feedback === 'correct'} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-sm mx-auto px-4 pt-12">
+        <FeedbackOverlay correct={feedback === 'correct'} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
 
-      <div className="mx-auto max-w-md">
-        <div className="flex items-center justify-between">
-          <button onClick={() => router.push('/dashboard')} className="text-sm text-zinc-500 hover:text-white transition-colors duration-300">← Back</button>
-          <h1 className="text-lg font-semibold tracking-tight" style={{ color: ACCENT }}>🎵 Note ID</h1>
-          <div className="flex items-center gap-2">
-            {isPractice && <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}20`, color: ACCENT }}>Practice</span>}
-            {!isPractice && <div className="text-sm text-zinc-500">Score: {score}</div>}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+          <button
+            onClick={() => router.push('/dashboard')}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'var(--ios-bg2)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>🎵 Note ID</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+            {isPractice ? 'Practice' : `${score} pts`}
           </div>
         </div>
 
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/5">
+        <div className="ios-progress-track mb-6">
           <motion.div
-            className="h-full rounded-full"
+            className="ios-progress-fill"
             style={{ background: ACCENT }}
             animate={{ width: isPractice ? '100%' : `${(round / config.rounds) * 100}%` }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -243,29 +243,34 @@ export default function NoteIdPage() {
         </div>
 
         {!isPractice && config.timeLimit > 0 && (
-          <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/5">
+          <div className="ios-progress-track mb-4">
             <motion.div
-              className={`h-full rounded-full transition-colors`}
-              style={{ background: timeLeft < 3 ? '#f87171' : ACCENT, width: `${(timeLeft / config.timeLimit) * 100}%` }}
+              className="ios-progress-fill"
+              style={{ background: timeLeft < 3 ? 'var(--ios-red)' : ACCENT, width: `${(timeLeft / config.timeLimit) * 100}%` }}
               transition={{ duration: 0.3 }}
             />
           </div>
         )}
 
-        {/* Wave Visualizer */}
-        <div className="mt-6">
+        <div style={{ marginBottom: 16 }}>
           <WaveVisualizer active={isPlaying} color={ACCENT} height={50} />
         </div>
 
-        <div className="mt-4 text-center">
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
           <motion.button
             onClick={() => playToneWithVisual(NOTE_FREQUENCIES[`${NOTE_NAMES[targetNote]}4`] || 261.63, 0.6)}
             whileTap={{ scale: 0.92 }}
-            className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-4xl transition-all duration-300 ease-out hover:bg-white/10 backdrop-blur-xl"
+            style={{
+              width: 80, height: 80,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto', borderRadius: 20,
+              background: 'var(--ios-bg2)', border: '1px solid var(--ios-sep)',
+              fontSize: 36, cursor: 'pointer',
+            }}
           >
             🔊
           </motion.button>
-          <p className="mt-3 text-sm text-zinc-500">Tap to replay</p>
+          <div style={{ marginTop: 8, fontSize: 13, color: 'var(--ios-label3)' }}>Tap to replay</div>
         </div>
 
         <AnimatePresence mode="popLayout">
@@ -275,19 +280,22 @@ export default function NoteIdPage() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.25 }}
-            className="mt-6 grid grid-cols-2 gap-2"
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}
           >
             {options.map((idx) => {
               const name = NOTE_NAMES[idx];
               const isTarget = idx === targetNote;
-              let btnStyle: React.CSSProperties = {};
-              let btnClass = 'glass-card text-white';
+              let bg = 'var(--ios-bg2)';
+              let border = '1.5px solid transparent';
+              let color = 'var(--ios-label)';
               if (feedback) {
                 if (isTarget) {
-                  btnClass = 'border-2 text-white';
-                  btnStyle = { borderColor: '#4ADE80', background: 'rgba(74,222,128,0.1)' };
+                  bg = 'rgba(48,209,88,0.15)';
+                  border = '1.5px solid var(--ios-green)';
+                  color = 'var(--ios-green)';
                 } else if (!isTarget && feedback === 'wrong') {
-                  btnClass = 'glass-card opacity-40';
+                  bg = 'var(--ios-bg2)';
+                  color = 'var(--ios-label3)';
                 }
               }
               return (
@@ -295,8 +303,12 @@ export default function NoteIdPage() {
                   key={idx}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => phase === 'playing' && handleAnswer(idx)}
-                  className={`rounded-2xl py-4 text-lg font-semibold transition-all duration-300 ease-out ${btnClass}`}
-                  style={btnStyle}
+                  style={{
+                    padding: '16px 8px', borderRadius: 12,
+                    background: bg, border, color,
+                    fontSize: 17, fontWeight: 600, cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
                   disabled={phase === 'feedback'}
                 >
                   {name}
@@ -306,9 +318,10 @@ export default function NoteIdPage() {
           </motion.div>
         </AnimatePresence>
 
-        <div className="mt-6 text-center">
-          {!isPractice && <div className="text-sm text-zinc-500">🔥 Streak: {streak} • Round {round}/{config.rounds}</div>}
-          {isPractice && <div className="text-sm text-zinc-500">🎓 Practice mode • Round {round}</div>}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px' }}>
+          {!isPractice && <span>Round {round}/{config.rounds}</span>}
+          {!isPractice && <span>🔥 {streak}</span>}
+          {isPractice && <span>🎓 Practice • Round {round}</span>}
         </div>
       </div>
     </div>

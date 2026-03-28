@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
-const ACCENT = '#818CF8'; // indigo-400
+const ACCENT = '#5E5CE6';
 const ROUNDS = 8;
 
 function centsToFreq(baseFreq: number, cents: number) {
@@ -49,7 +49,6 @@ function drawWaveform(canvas: HTMLCanvasElement, freq: number, color: string, la
   }
   ctx.stroke();
 
-  // Label
   ctx.fillStyle = color;
   ctx.font = '12px system-ui';
   ctx.textAlign = 'center';
@@ -77,25 +76,24 @@ export default function WaveformMatchPage() {
   const nextRound = useCallback(() => {
     const freqs = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25];
     const f = freqs[Math.floor(Math.random() * freqs.length)];
-    const cents = (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 40) + 10); // ±10-50 cents
+    const cents = (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 40) + 10);
     setBaseFreq(f); setDetuneCents(cents); setSliderCents(0); setRound((r) => r + 1);
     setPhase('playing');
-    playTone(f); // target
-    setTimeout(() => playTone(centsToFreq(f, cents)), 600); // detuned
+    playTone(f);
+    setTimeout(() => playTone(centsToFreq(f, cents)), 600);
   }, []);
 
   const drawCanvases = useCallback(() => {
     if (canvasRef1.current) drawWaveform(canvasRef1.current, baseFreq, ACCENT, 'Target', 0);
-    if (canvasRef2.current) drawWaveform(canvasRef2.current, baseFreq, '#f87171', 'Detuned', detuneCents);
+    if (canvasRef2.current) drawWaveform(canvasRef2.current, baseFreq, 'var(--ios-red)', 'Detuned', detuneCents);
   }, [baseFreq, detuneCents]);
 
   useEffect(() => { if (phase === 'playing') drawCanvases(); }, [phase, drawCanvases]);
 
   const handleSlider = (val: number) => {
     setSliderCents(val);
-    // Redraw with player's correction applied to the detuned waveform
     if (canvasRef2.current) {
-      drawWaveform(canvasRef2.current, baseFreq, val > 0 ? '#fbbf24' : '#60a5fa', 'Your Match', val);
+      drawWaveform(canvasRef2.current, baseFreq, val > 0 ? 'var(--ios-orange)' : 'var(--ios-blue)', 'Your Match', val);
     }
   };
 
@@ -110,105 +108,152 @@ export default function WaveformMatchPage() {
   if (phase === 'done') {
     const avg = results.length > 0 ? Math.round(results.reduce((a, r) => a + r.score, 0) / results.length) : 0;
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15 }} className="text-6xl">🌊</motion.div>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Results</h1>
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            {[
-              { label: 'Total Score', value: score },
-              { label: 'Avg Accuracy', value: `${avg}%` },
-              { label: 'Rounds', value: results.length },
-              { label: 'Best Round', value: `${Math.max(...results.map(r => r.score))}pts` },
-            ].map((s, i) => (
-              <motion.div key={s.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.1 }} className="glass-card p-4">
-                <div className="text-2xl font-bold text-white">{s.value}</div>
-                <div className="text-xs text-zinc-500">{s.label}</div>
-              </motion.div>
-            ))}
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+            <div style={{ fontSize: 60, marginBottom: 12 }}>🌊</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+              Results
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 24 }}>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Total Score</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{avg}%</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Avg Accuracy</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{results.length}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Rounds</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{Math.max(...results.map(r => r.score))}pts</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Round</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Play Again</button>
+              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            </div>
           </div>
-          <div className="mt-6 flex gap-3">
-            <button onClick={startGame} className="flex-1 rounded-full py-3 font-semibold text-white" style={{ background: ACCENT }}>Play Again</button>
-            <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-full bg-white/5 py-3 font-medium text-zinc-300">Dashboard</button>
-          </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   if (phase === 'setup') {
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
-            className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl" style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}25` }}>
-            <span className="text-4xl">🌊</span>
-          </motion.div>
-          <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Waveform Match</h1>
-          <p className="mt-2 text-zinc-500">Align waveforms by ear — identify sharp/flat and correct</p>
-          <p className="mt-4 text-xs text-zinc-600">{ROUNDS} rounds • Drag slider to detune and match the target</p>
-          <button onClick={startGame} className="mt-8 rounded-full px-6 py-2.5 font-semibold text-white" style={{ background: ACCENT }}>
-            Start Matching
-          </button>
-        </motion.div>
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+            <div style={{ fontSize: 64, marginBottom: 20 }}>🌊</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Waveform Match</div>
+            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 8 }}>Align waveforms by ear — identify sharp/flat and correct</div>
+            <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginBottom: 32 }}>{ROUNDS} rounds • Drag slider to detune and match the target</div>
+            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+              Start Matching
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen px-4 pt-10">
-      <div className="mx-auto max-w-md">
-        <div className="flex items-center justify-between">
-          <button onClick={() => router.push('/dashboard')} className="text-sm text-zinc-500 hover:text-white transition-colors">← Back</button>
-          <h1 className="text-lg font-semibold tracking-tight" style={{ color: ACCENT }}>🌊 Waveform Match</h1>
-          <div className="text-sm text-zinc-500">Round {round}/{ROUNDS}</div>
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-sm mx-auto px-4 pt-12">
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+          <button
+            onClick={() => router.push('/dashboard')}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'var(--ios-bg2)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>🌊 Waveform Match</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+            {round}/{ROUNDS}
+          </div>
         </div>
 
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/5">
-          <motion.div className="h-full rounded-full" style={{ background: ACCENT }}
-            animate={{ width: `${(round / ROUNDS) * 100}%` }} transition={{ duration: 0.5 }} />
+        <div className="ios-progress-track mb-6">
+          <motion.div
+            className="ios-progress-fill"
+            style={{ background: ACCENT }}
+            animate={{ width: `${(round / ROUNDS) * 100}%` }}
+            transition={{ duration: 0.5 }}
+          />
         </div>
 
         {/* Waveforms */}
-        <div className="mt-6 space-y-4">
-          <div className="glass-card p-4">
-            <canvas ref={canvasRef1} width={340} height={100} className="w-full rounded-xl" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+          <div className="ios-card" style={{ padding: 16 }}>
+            <canvas ref={canvasRef1} width={340} height={100} style={{ width: '100%', borderRadius: 8 }} />
           </div>
-          <div className="glass-card p-4">
-            <canvas ref={canvasRef2} width={340} height={100} className="w-full rounded-xl" />
+          <div className="ios-card" style={{ padding: 16 }}>
+            <canvas ref={canvasRef2} width={340} height={100} style={{ width: '100%', borderRadius: 8 }} />
           </div>
         </div>
 
         {/* Replay buttons */}
-        <div className="mt-4 flex justify-center gap-4">
-          <motion.button whileTap={{ scale: 0.95 }} onClick={() => playTone(baseFreq)}
-            className="rounded-full px-4 py-2 text-xs font-medium bg-white/5 text-zinc-400 border border-white/10 hover:bg-white/10">
-            ▶ Target
-          </motion.button>
-          <motion.button whileTap={{ scale: 0.95 }} onClick={() => playTone(centsToFreq(baseFreq, detuneCents))}
-            className="rounded-full px-4 py-2 text-xs font-medium bg-white/5 text-zinc-400 border border-white/10 hover:bg-white/10">
-            ▶ Detuned
-          </motion.button>
-          <motion.button whileTap={{ scale: 0.95 }} onClick={() => playTone(centsToFreq(baseFreq, sliderCents))}
-            className="rounded-full px-4 py-2 text-xs font-medium bg-white/5 text-zinc-400 border border-white/10 hover:bg-white/10">
-            ▶ Your Match
-          </motion.button>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 20 }}>
+          {[
+            { label: '▶ Target', onClick: () => playTone(baseFreq) },
+            { label: '▶ Detuned', onClick: () => playTone(centsToFreq(baseFreq, detuneCents)) },
+            { label: '▶ Your Match', onClick: () => playTone(centsToFreq(baseFreq, sliderCents)) },
+          ].map(({ label, onClick }) => (
+            <motion.button
+              key={label}
+              whileTap={{ scale: 0.95 }}
+              onClick={onClick}
+              style={{
+                borderRadius: 20, padding: '6px 12px',
+                fontSize: 12, fontWeight: 600,
+                background: 'var(--ios-bg2)', border: '1px solid var(--ios-sep)',
+                color: 'var(--ios-label2)', cursor: 'pointer',
+              }}
+            >
+              {label}
+            </motion.button>
+          ))}
         </div>
 
         {/* Slider */}
-        <div className="mt-6">
-          <div className="flex justify-between text-xs text-zinc-500 mb-2">
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--ios-label3)', marginBottom: 8 }}>
             <span>♭ -50¢</span>
-            <span className={`font-semibold ${Math.abs(sliderCents) < 5 ? 'text-green-400' : 'text-white'}`}>{sliderCents > 0 ? '+' : ''}{sliderCents}¢</span>
+            <span style={{ fontWeight: 600, color: Math.abs(sliderCents) < 5 ? 'var(--ios-green)' : 'var(--ios-label)' }}>
+              {sliderCents > 0 ? '+' : ''}{sliderCents}¢
+            </span>
             <span>♯ +50¢</span>
           </div>
-          <input type="range" min={-50} max={50} value={sliderCents} onChange={(e) => handleSlider(Number(e.target.value))} ref={sliderRef}
-            className="w-full h-2 rounded-full appearance-none cursor-pointer"
-            style={{ background: `linear-gradient(to right, #60a5fa ${((sliderCents + 50) / 100) * 100}%, rgba(255,255,255,0.1) ${((sliderCents + 50) / 100) * 100}%)` }} />
+          <input
+            type="range" min={-50} max={50} value={sliderCents}
+            onChange={(e) => handleSlider(Number(e.target.value))}
+            ref={sliderRef}
+            style={{
+              width: '100%', height: 8, borderRadius: 4, appearance: 'none', WebkitAppearance: 'none',
+              background: `linear-gradient(to right, var(--ios-blue) ${((sliderCents + 50) / 100) * 100}%, var(--ios-bg3) ${((sliderCents + 50) / 100) * 100}%)`,
+              cursor: 'pointer',
+            }}
+          />
         </div>
 
-        <motion.button whileTap={{ scale: 0.97 }} onClick={submit}
-          className="mt-6 w-full rounded-full py-3.5 font-semibold text-white" style={{ background: ACCENT }}>
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={submit}
+          className="ios-btn-primary"
+          style={{ background: ACCENT }}
+        >
           Submit ({round}/{ROUNDS})
         </motion.button>
       </div>

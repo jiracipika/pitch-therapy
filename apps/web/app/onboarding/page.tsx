@@ -6,123 +6,143 @@ import Link from 'next/link';
 
 const STEPS = [
   {
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 18V5l12-2v13"/>
-        <circle cx="6" cy="18" r="3"/>
-        <circle cx="18" cy="16" r="3"/>
-      </svg>
-    ),
+    emoji: '🎵',
+    color: '#0A84FF',
     title: 'Train Your Ear',
-    desc: 'Five game modes designed to sharpen your sense of pitch, frequency, and musical intervals. From beginner to expert.',
-    color: '#60A5FA',
+    desc: '18 game modes designed to sharpen your pitch, frequency recognition, and musical intervals. From beginner to expert.',
   },
   {
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
-      </svg>
-    ),
+    emoji: '🔥',
+    color: '#FF9F0A',
     title: 'Daily Challenges',
-    desc: 'A fresh challenge every day. Keep your streak alive and compete with yourself to build consistency.',
-    color: '#FBBF24',
+    desc: 'A fresh challenge every day. Keep your streak alive and build the habit of listening closely.',
   },
   {
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="20" x2="18" y2="10"/>
-        <line x1="12" y1="20" x2="12" y2="4"/>
-        <line x1="6" y1="20" x2="6" y2="14"/>
-      </svg>
-    ),
+    emoji: '📊',
+    color: '#30D158',
     title: 'Track Progress',
-    desc: 'Detailed stats, accuracy trends, and streak tracking. See your growth over time and identify areas to improve.',
-    color: '#4ADE80',
+    desc: 'Detailed stats, accuracy trends, and streak tracking. See your growth over time.',
   },
   {
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-        <path d="M2 17l10 5 10-5"/>
-        <path d="M2 12l10 5 10-5"/>
-      </svg>
-    ),
+    emoji: '🎓',
+    color: '#BF5AF2',
     title: 'Practice Mode',
-    desc: 'No pressure, no scoring. Just explore sounds, test your ear, and learn at your own pace.',
-    color: '#A78BFA',
+    desc: 'No pressure, no scoring. Explore sounds and train at your own pace.',
   },
 ];
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(0);
-
-  const currentStep = STEPS[step]!;
+  const cur = STEPS[step]!;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-black px-6 text-center">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={step}
-          initial={{ opacity: 0, x: 60 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -60 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="glass-card w-full max-w-sm p-10"
-        >
+    <div
+      style={{
+        minHeight: '100dvh',
+        background: 'var(--ios-bg)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px 24px',
+        paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))',
+      }}
+    >
+      {/* Card */}
+      <div style={{ width: '100%', maxWidth: 360, position: 'relative' }}>
+        <AnimatePresence mode="wait">
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.15, type: 'spring', stiffness: 250, damping: 20 }}
-            className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl"
-            style={{ background: `${currentStep.color}10`, border: `1px solid ${currentStep.color}25` }}
+            key={step}
+            initial={{ opacity: 0, x: 48 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -48 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
-            {currentStep.icon}
+            {/* Emoji icon */}
+            <motion.div
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.12, type: 'spring', stiffness: 280, damping: 22 }}
+              style={{
+                width: 88,
+                height: 88,
+                borderRadius: '20px',
+                background: `${cur.color}18`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 44,
+                margin: '0 auto 28px',
+              }}
+            >
+              {cur.emoji}
+            </motion.div>
+
+            <h1
+              style={{
+                fontSize: 30,
+                fontWeight: 700,
+                letterSpacing: '-0.45px',
+                color: 'var(--ios-label)',
+                textAlign: 'center',
+                marginBottom: 12,
+                lineHeight: 1.1,
+              }}
+            >
+              {cur.title}
+            </h1>
+
+            <p
+              style={{
+                fontSize: 17,
+                color: 'var(--ios-label2)',
+                textAlign: 'center',
+                letterSpacing: '-0.43px',
+                lineHeight: 1.5,
+              }}
+            >
+              {cur.desc}
+            </p>
           </motion.div>
+        </AnimatePresence>
 
-          <h1 className="text-2xl font-semibold text-white" style={{ letterSpacing: '-0.03em' }}>
-            {currentStep.title}
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-zinc-500">
-            {currentStep.desc}
-          </p>
+        {/* Page dots */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 36 }}>
+          {STEPS.map((_, i) => (
+            <motion.div
+              key={i}
+              animate={{
+                width: i === step ? 24 : 8,
+                background: i === step ? cur.color : 'rgba(235,235,245,0.18)',
+              }}
+              transition={{ duration: 0.28, ease: [0.34, 1.56, 0.64, 1] }}
+              style={{ height: 8, borderRadius: 4 }}
+            />
+          ))}
+        </div>
 
-          {/* Step dots */}
-          <div className="mt-8 flex items-center justify-center gap-2">
-            {STEPS.map((_, i) => (
-              <motion.div
-                key={i}
-                className="h-1.5 rounded-full"
-                animate={{
-                  width: i === step ? 24 : 8,
-                  backgroundColor: i === step ? currentStep.color : 'rgba(255,255,255,0.15)',
-                }}
-                transition={{ duration: 0.3 }}
-              />
-            ))}
-          </div>
-
-          {/* Actions */}
-          <div className="mt-8 flex gap-3">
-            {step < STEPS.length - 1 ? (
-              <>
-                <button
-                  onClick={() => setStep(s => s + 1)}
-                  className="btn-primary flex-1"
-                >
-                  Next
-                </button>
-                <Link href="/dashboard" className="btn-secondary">
-                  Skip
-                </Link>
-              </>
-            ) : (
-              <Link href="/dashboard" className="btn-primary flex-1">
-                Get Started →
+        {/* Actions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 36 }}>
+          {step < STEPS.length - 1 ? (
+            <>
+              <button
+                onClick={() => setStep(s => s + 1)}
+                className="ios-btn-primary"
+                style={{ background: cur.color }}
+              >
+                Next
+              </button>
+              <Link href="/dashboard" className="ios-btn-secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
+                Skip
               </Link>
-            )}
-          </div>
-        </motion.div>
-      </AnimatePresence>
+            </>
+          ) : (
+            <Link href="/dashboard" className="ios-btn-primary" style={{ textDecoration: 'none', textAlign: 'center', background: cur.color }}>
+              Get Started
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

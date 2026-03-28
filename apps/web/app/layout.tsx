@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import { AuthProvider } from "@/components/AuthProvider";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
 export const metadata: Metadata = {
-  title: "Pitch Therapy — Ear Training Gym",
-  description: "Train your ear with five game modes. Daily challenges, streaks, and stats.",
+  title: "Pitch Therapy",
+  description: "Train your ear with 18 game modes. Daily challenges, streaks, and stats.",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -20,11 +20,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.variable} font-sans min-h-screen bg-black text-zinc-300`}>
+    <html lang="en">
+      <body className="min-h-screen min-h-dvh" style={{ background: 'var(--ios-bg)', color: 'var(--ios-label)' }}>
         <AuthProvider>
           <Nav />
-          <main className="pb-24">{children}</main>
+          <main className="pb-tab">{children}</main>
         </AuthProvider>
       </body>
     </html>
