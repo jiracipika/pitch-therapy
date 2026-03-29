@@ -35,6 +35,8 @@ export default function NoteIdPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [results, setResults] = useState<{ round: number; correct: boolean; points: number; target: string; answer: string; timeMs: number }[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const roundRef = useRef(0);
+  const timedOutRef = useRef(false);
 
   const config = DIFFICULTIES[difficulty];
 
@@ -60,17 +62,19 @@ export default function NoteIdPage() {
     setTargetNote(target);
     setFeedback(null);
     setPhase('playing');
-    setRound((r) => r + 1);
+    roundRef.current += 1;
+    setRound(roundRef.current);
     playToneWithVisual(NOTE_FREQUENCIES[`${NOTE_NAMES[target]}4`] || 261.63, 0.6);
 
     if (!isPractice && config.timeLimit > 0) {
       setTimeLeft(config.timeLimit);
+      timedOutRef.current = false;
       if (timerRef.current) clearInterval(timerRef.current);
       timerRef.current = setInterval(() => {
         setTimeLeft((t) => {
           if (t <= 1) {
             clearInterval(timerRef.current!);
-            handleAnswer(-1, true);
+            timedOutRef.current = true;
             return 0;
           }
           return t - 1;
@@ -119,7 +123,7 @@ export default function NoteIdPage() {
     setTimeout(() => {
       if (isPractice) {
         startRound();
-      } else if (round >= config.rounds) {
+      } else if (roundRef.current >= config.rounds) {
         setPhase('done');
       } else {
         startRound();
@@ -130,6 +134,30 @@ export default function NoteIdPage() {
   useEffect(() => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
+
+  useEffect(() => {
+    if (timedOutRef.current && timeLeft === 0 && phase === 'playing') {
+      timedOutRef.current = false;
+      if (timerRef.current) clearInterval(timerRef.current);
+      const correct = false;
+      setFeedback('wrong');
+      setResults((r) => [...r, {
+        round: roundRef.current, correct, points: 0,
+        target: NOTE_NAMES[targetNote] ?? 'A',
+        answer: 'timeout',
+        timeMs: config.timeLimit * 1000,
+      }]);
+      setPhase('feedback');
+      setTimeout(() => {
+        if (roundRef.current >= config.rounds) {
+          setPhase('done');
+        } else {
+          startRound();
+        }
+      }, 1200);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft]);
 
   if (phase === 'done') {
     return (

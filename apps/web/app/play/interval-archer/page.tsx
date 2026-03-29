@@ -49,6 +49,7 @@ export default function IntervalArcherPage() {
   const [showFeedbackOverlay, setShowFeedbackOverlay] = useState(false);
   const [selectedInterval, setSelectedInterval] = useState<string | null>(null);
   const [results, setResults] = useState<{ round: number; root: string; interval: string; answer: string; correct: boolean; points: number; semitonesOff: number }[]>([]);
+  const roundRef = useRef(0);
   const roundStartRef = useRef(0);
 
   const pool = MODE_CONFIG[intervalMode].pool;
@@ -100,6 +101,7 @@ export default function IntervalArcherPage() {
 
   const startGame = () => {
     setRound(0); setScore(0); setStreak(0); setBestStreak(0); setResults([]);
+    roundRef.current = 0;
     nextRound();
   };
 
@@ -107,7 +109,8 @@ export default function IntervalArcherPage() {
     const { freq, interval } = pickRound();
     playInterval(freq, interval.semitones, intervalMode);
     setPhase('playing');
-    setRound(r => r + 1);
+    roundRef.current += 1;
+    setRound(roundRef.current);
     roundStartRef.current = Date.now();
   };
 
@@ -121,7 +124,6 @@ export default function IntervalArcherPage() {
     if (correct) {
       points = Math.max(10, Math.round(120 - elapsed / 100));
     } else {
-      // Partial credit for close intervals (arrow metaphor)
       if (semitonesOff === 1) points = 30;
       else if (semitonesOff === 2) points = 10;
     }
@@ -135,72 +137,92 @@ export default function IntervalArcherPage() {
       setStreak(0);
     }
     setScore(s => s + points);
-    setResults(r => [...r, { round, root: rootNote, interval: targetInterval.name, answer: name, correct, points, semitonesOff }]);
+    setResults(r => [...r, { round: roundRef.current, root: rootNote, interval: targetInterval.name, answer: name, correct, points, semitonesOff }]);
 
     setTimeout(() => {
-      if (round >= TOTAL_ROUNDS) { setPhase('done'); }
+      if (roundRef.current >= TOTAL_ROUNDS) { setPhase('done'); }
       else { nextRound(); }
     }, 1200);
   };
 
   if (phase === 'done') {
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15 }} className="text-6xl">🏹</motion.div>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Interval Archer Complete!</h1>
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            {[
-              { label: 'Score', value: score },
-              { label: 'Hit', value: `${results.filter(r => r.correct).length}/${TOTAL_ROUNDS}` },
-              { label: 'Best Streak', value: `🔥 ${bestStreak}` },
-            ].map((s, i) => (
-              <motion.div key={s.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.1 }} className="glass-card p-4">
-                <div className="text-2xl font-bold text-white">{s.value}</div>
-                <div className="text-xs text-zinc-500">{s.label}</div>
-              </motion.div>
-            ))}
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+            <div style={{ fontSize: 60, marginBottom: 12 }}>🏹</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+              Interval Archer
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{results.filter(r => r.correct).length}/{TOTAL_ROUNDS}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Hit</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>🔥 {bestStreak}</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Streak</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Play Again</button>
+              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            </div>
           </div>
-          <div className="mt-6 flex gap-3">
-            <button onClick={startGame} className="flex-1 rounded-full py-3 font-semibold text-white hover:opacity-90 transition-all" style={{ background: ACCENT }}>Play Again</button>
-            <button onClick={() => router.push('/dashboard')} className="flex-1 rounded-full bg-white/5 py-3 font-medium text-zinc-300 hover:bg-white/10 transition-all">Dashboard</button>
-          </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   if (phase === 'setup') {
     return (
-      <div className="min-h-screen px-4 pt-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-md text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }} className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl" style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}25` }}>
-            <span className="text-4xl">🏹</span>
-          </motion.div>
-          <h1 className="text-3xl font-semibold tracking-tight" style={{ color: ACCENT }}>Interval Archer</h1>
-          <p className="mt-2 text-zinc-500">Identify intervals — closer to bullseye = more points</p>
+      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+        <div className="max-w-sm mx-auto px-4 pt-12">
+          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+            <div style={{ fontSize: 64, marginBottom: 20 }}>🏹</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Interval Archer</div>
+            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 24 }}>Identify intervals — closer to bullseye = more points</div>
 
-          {/* How to play */}
-          <div className="mt-6 rounded-2xl p-4 text-left" style={{ background: 'rgba(217,70,239,0.06)', border: '1px solid rgba(217,70,239,0.15)' }}>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: ACCENT }}>How to Play</p>
-            <ol className="space-y-1.5 text-sm text-zinc-400">
-              <li>1. Hear two notes played in sequence (or together)</li>
-              <li>2. Identify the musical interval between them</li>
-              <li>3. Exact = bullseye (max points), 1 semitone off = partial credit</li>
-              <li>4. Tap 🔊 to replay the interval at any time</li>
-            </ol>
-          </div>
-
-          <div className="mt-6">
-            <h3 className="text-sm font-medium text-zinc-500 mb-3">Mode</h3>
-            <div className="flex gap-2 justify-center">
-              {(Object.keys(MODE_CONFIG) as IntervalMode[]).map(m => (
-                <button key={m} onClick={() => setIntervalMode(m)} className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${intervalMode === m ? 'text-white' : 'bg-white/5 text-zinc-500 hover:bg-white/10'}`} style={intervalMode === m ? { background: ACCENT } : {}}>{MODE_CONFIG[m].label}</button>
-              ))}
+            <div className="ios-card" style={{ padding: 16, textAlign: 'left', marginBottom: 24 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: ACCENT, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>How to Play</div>
+              <ol style={{ fontSize: 14, color: 'var(--ios-label3)', listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <li>1. Hear two notes played in sequence (or together)</li>
+                <li>2. Identify the musical interval between them</li>
+                <li>3. Exact hit = bullseye (max pts), 1 semitone off = partial credit</li>
+                <li>4. Tap 🔊 to replay the interval anytime</li>
+              </ol>
             </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginBottom: 10 }}>Mode</div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                {(Object.keys(MODE_CONFIG) as IntervalMode[]).map(m => (
+                  <button
+                    key={m}
+                    onClick={() => setIntervalMode(m)}
+                    style={{
+                      height: 34, borderRadius: 17, padding: '0 16px',
+                      fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
+                      background: intervalMode === m ? ACCENT : 'var(--ios-bg2)',
+                      color: intervalMode === m ? '#fff' : 'var(--ios-label3)',
+                      transition: 'background 0.15s, color 0.15s',
+                    }}
+                  >
+                    {MODE_CONFIG[m].label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+              Start Game
+            </button>
           </div>
-          <button onClick={startGame} className="mt-8 rounded-full px-6 py-2.5 font-semibold text-white hover:opacity-90 transition-all" style={{ background: ACCENT }}>Start Game</button>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -208,64 +230,96 @@ export default function IntervalArcherPage() {
   const activeIntervals = INTERVALS.filter(i => pool.includes(i.semitones));
 
   return (
-    <div className="min-h-screen px-4 pt-10">
-      <FeedbackOverlay correct={feedback === 'correct'} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
+    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
+      <div className="max-w-sm mx-auto px-4 pt-12">
+        <FeedbackOverlay correct={feedback === 'correct'} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
 
-      <div className="mx-auto max-w-md">
-        <div className="flex items-center justify-between">
-          <button onClick={() => router.push('/dashboard')} className="text-sm text-zinc-500 hover:text-white transition-colors">← Back</button>
-          <h1 className="text-lg font-semibold tracking-tight" style={{ color: ACCENT }}>🏹 Interval Archer</h1>
-          <div className="text-sm text-zinc-500">Score: {score}</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+          <button
+            onClick={() => router.push('/dashboard')}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              background: 'var(--ios-bg2)', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer'
+            }}
+          >
+            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>🏹 Interval Archer</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+            {score} pts
+          </div>
         </div>
 
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/5">
-          <motion.div className="h-full rounded-full" style={{ background: ACCENT }} animate={{ width: `${(round / TOTAL_ROUNDS) * 100}%` }} transition={{ duration: 0.5 }} />
+        <div className="ios-progress-track mb-6">
+          <motion.div
+            className="ios-progress-fill"
+            style={{ background: ACCENT }}
+            animate={{ width: `${(round / TOTAL_ROUNDS) * 100}%` }}
+            transition={{ duration: 0.5 }}
+          />
         </div>
 
         {/* Replay */}
-        <div className="mt-8 text-center">
-          <motion.button onClick={() => playInterval(rootFreq, targetInterval.semitones, intervalMode)} whileTap={{ scale: 0.92 }} className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-3xl hover:bg-white/10 transition-all">
-            🔊
-          </motion.button>
-          <p className="mt-3 text-sm text-zinc-500">Replay interval</p>
-          <p className="mt-1 text-xs text-zinc-600">Root: {rootNote} · {MODE_CONFIG[intervalMode].label}</p>
-        </div>
-
-        {/* Arrow/target visual */}
-        <div className="mt-6 flex justify-center">
-          <div className="relative w-32 h-32">
-            {[48, 36, 24, 12].map((size, i) => (
-              <div key={i} className="absolute rounded-full border" style={{
-                width: size, height: size, top: `calc(50% - ${size / 2}px)`, left: `calc(50% - ${size / 2}px)`,
-                borderColor: `rgba(217,70,239,${0.1 + i * 0.08})`,
-                backgroundColor: i === 3 ? 'rgba(217,70,239,0.15)' : 'transparent',
-              }} />
-            ))}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+          <div style={{ textAlign: 'center' }}>
+            <motion.button
+              onClick={() => playInterval(rootFreq, targetInterval.semitones, intervalMode)}
+              whileTap={{ scale: 0.92 }}
+              style={{
+                width: 80, height: 80,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 24, background: 'var(--ios-bg2)',
+                border: '1px solid var(--ios-sep)', fontSize: 36, cursor: 'pointer',
+              }}
+            >
+              🔊
+            </motion.button>
+            <div style={{ marginTop: 8, fontSize: 13, color: 'var(--ios-label3)' }}>Replay interval</div>
+            <div style={{ marginTop: 2, fontSize: 11, color: 'var(--ios-label4)' }}>Root: {rootNote} · {MODE_CONFIG[intervalMode].label}</div>
           </div>
         </div>
 
         {/* Interval buttons */}
-        <div className="mt-6 grid grid-cols-3 gap-2">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
           {activeIntervals.map(interval => {
             const isTarget = feedback && interval.semitones === targetInterval.semitones;
             const isSelected = selectedInterval === interval.name;
-            let bg = 'rgba(255,255,255,0.04)';
-            let border = 'rgba(255,255,255,0.07)';
+            let bg = 'var(--ios-bg2)';
+            let border = '1.5px solid transparent';
+            let color = 'var(--ios-label2)';
 
-            if (isTarget) { bg = 'rgba(74,222,128,0.15)'; border = '#4ADE80'; }
-            else if (isSelected && feedback === 'wrong') { bg = 'rgba(248,113,113,0.15)'; border = '#F87171'; }
+            if (isTarget) {
+              bg = 'rgba(48,209,88,0.15)';
+              border = '1.5px solid var(--ios-green)';
+              color = 'var(--ios-green)';
+            } else if (isSelected && feedback === 'wrong') {
+              bg = 'rgba(255,69,58,0.15)';
+              border = '1.5px solid var(--ios-red)';
+              color = 'var(--ios-red)';
+            }
 
             return (
               <motion.button
                 key={interval.name}
                 whileTap={{ scale: 0.93 }}
                 onClick={() => handleAnswer(interval.semitones, interval.name)}
-                className="rounded-2xl py-4 font-semibold transition-all"
-                style={{ background: bg, border: `1px solid ${border}` }}
                 disabled={!!feedback}
+                style={{
+                  borderRadius: 12, padding: '14px 8px',
+                  fontSize: 14, fontWeight: 600,
+                  background: bg, border, color,
+                  cursor: feedback ? 'default' : 'pointer',
+                  transition: 'all 0.15s',
+                }}
               >
-                <span className="text-white">{interval.name}</span>
-                <span className="block text-xs text-zinc-500">{interval.semitones === 0 ? '' : interval.semitones === 12 ? '8va' : `${interval.semitones}st`}</span>
+                <div>{interval.name}</div>
+                <div style={{ fontSize: 10, color: 'var(--ios-label4)', marginTop: 2 }}>
+                  {interval.semitones === 0 ? '' : interval.semitones === 12 ? '8va' : `${interval.semitones}st`}
+                </div>
               </motion.button>
             );
           })}
@@ -274,14 +328,25 @@ export default function IntervalArcherPage() {
         {/* Feedback */}
         <AnimatePresence>
           {feedback && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className={`mt-4 rounded-2xl p-4 text-center font-semibold ${feedback === 'correct' ? 'bg-green-500/10 text-green-400 border border-green-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}`}>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              style={{
+                borderRadius: 12, padding: '12px 16px', textAlign: 'center', marginBottom: 12,
+                fontSize: 14, fontWeight: 600,
+                background: feedback === 'correct' ? 'rgba(48,209,88,0.12)' : 'rgba(255,69,58,0.12)',
+                border: `1px solid ${feedback === 'correct' ? 'var(--ios-green)' : 'var(--ios-red)'}`,
+                color: feedback === 'correct' ? 'var(--ios-green)' : 'var(--ios-red)',
+              }}
+            >
               {feedback === 'correct' ? '🎯 Bullseye!' : `It was ${targetInterval.name}`}
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div className="mt-4 text-center text-sm text-zinc-500">
-          🔥 {streak} streak • Round {round}/{TOTAL_ROUNDS}
+        <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--ios-label3)' }}>
+          🔥 {streak} streak · Round {round}/{TOTAL_ROUNDS}
         </div>
       </div>
     </div>

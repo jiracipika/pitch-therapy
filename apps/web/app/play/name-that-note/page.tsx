@@ -46,13 +46,15 @@ export default function NameThatNotePage() {
   const [feedback, setFeedback] = useState<'none' | 'correct' | 'wrong'>('none');
   const [timeLeft, setTimeLeft] = useState(10);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const roundRef = useRef(0);
 
   const clef: Clef = 'treble';
 
   const startRound = () => {
     const note = QUIZ_NOTES[Math.floor(Math.random() * QUIZ_NOTES.length)];
     setTargetNote(note);
-    setRound((r) => r + 1);
+    roundRef.current += 1;
+    setRound(roundRef.current);
     setFeedback('none');
     setPhase('playing');
     if (isTimed && !isPractice) {
@@ -83,11 +85,24 @@ export default function NameThatNotePage() {
     setResults((r) => [...r, { round, correct, points, target: targetNote.name, answer: noteName }]);
     playTone(NOTE_FREQS[targetNote.name], 0.5);
 
-    if (round >= totalRounds) setTimeout(() => setPhase('done'), 1000);
+    if (roundRef.current >= totalRounds) setTimeout(() => setPhase('done'), 1000);
     else setTimeout(startRound, 1200);
   };
 
   useEffect(() => () => clearInterval(timerRef.current), []);
+
+  useEffect(() => {
+    if (phase !== 'timed-out') return;
+    const t = setTimeout(() => {
+      if (roundRef.current >= totalRounds) {
+        setPhase('done');
+      } else {
+        startRound();
+      }
+    }, 1600);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   if (phase === 'done') {
     const correct = results.filter(r => r.correct).length;
@@ -220,7 +235,10 @@ export default function NameThatNotePage() {
             </div>
 
             {phase === 'timed-out' && (
-              <div style={{ fontSize: 14, color: 'var(--ios-red)', marginBottom: 16 }}>Time&apos;s up! It was {targetNote.name}</div>
+              <div style={{ fontSize: 14, color: 'var(--ios-red)', marginBottom: 16 }}>
+                Time&apos;s up! It was <span style={{ fontWeight: 700 }}>{targetNote.name}</span>
+                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 4 }}>Next round starting...</div>
+              </div>
             )}
 
             <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginBottom: 16 }}>Tap the correct note</div>

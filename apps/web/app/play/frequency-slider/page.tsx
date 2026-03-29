@@ -60,8 +60,8 @@ export default function FrequencySliderPage() {
   };
 
   const nextRound = () => {
-    pickTarget();
-    playTone(targetFreq, 1.0);
+    const freq = pickTarget();
+    playTone(freq, 1.0);
     setPhase('playing');
     setRound(r => r + 1);
   };
