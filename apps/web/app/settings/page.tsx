@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useStatsContext } from '@/components/StatsProvider';
 
 type Diff = 'easy' | 'medium' | 'hard';
 type DiffMap = Record<string, Diff>;
@@ -54,6 +55,8 @@ const rowStyle: React.CSSProperties = {
 };
 
 export default function SettingsPage() {
+  const { stats, loaded, clearStats } = useStatsContext();
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [difficulty, setDifficulty] = useState<DiffMap>({
     'pitch-match': 'medium', 'note-id': 'medium',
     'frequency-guess': 'medium', 'note-wordle': 'medium', 'frequency-wordle': 'medium',
@@ -220,6 +223,59 @@ export default function SettingsPage() {
                 On
               </div>
             </div>
+          </div>
+
+          {/* ── DATA ── */}
+          <SectionHeader>Data</SectionHeader>
+          <div className="ios-group">
+            <div style={rowStyle}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(10,132,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>📊</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Game History</div>
+                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>
+                  {loaded ? `${stats.results.length} games recorded` : 'Loading...'}
+                </div>
+              </div>
+            </div>
+            <div style={{ ...rowStyle, borderTop: '0.5px solid var(--ios-sep)' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,149,0,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🔥</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Current Streak</div>
+                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>
+                  {loaded ? `${stats.streak} days (best: ${stats.bestStreak})` : 'Loading...'}
+                </div>
+              </div>
+            </div>
+            {showClearConfirm ? (
+              <div style={{ ...rowStyle, borderTop: '0.5px solid var(--ios-sep)', background: 'rgba(255,59,48,0.06)', gap: 8 }}>
+                <div style={{ flex: 1, fontSize: 14, color: '#FF453A', fontWeight: 500 }}>
+                  Delete all data? This cannot be undone.
+                </div>
+                <button
+                  onClick={() => { clearStats(); setShowClearConfirm(false); }}
+                  style={{ height: 32, borderRadius: 8, padding: '0 14px', background: '#FF453A', color: '#fff', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer' }}
+                >
+                  Delete
+                </button>
+                <button
+                  onClick={() => setShowClearConfirm(false)}
+                  style={{ height: 32, borderRadius: 8, padding: '0 14px', background: 'var(--ios-bg3)', color: 'var(--ios-label)', fontSize: 13, fontWeight: 500, border: 'none', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowClearConfirm(true)}
+                style={{ ...rowStyle, borderTop: '0.5px solid var(--ios-sep)', width: '100%', cursor: 'pointer', textAlign: 'left' }}
+              >
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,59,48,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🗑️</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 17, color: '#FF453A', letterSpacing: '-0.43px' }}>Clear All Data</div>
+                  <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>Remove all game history</div>
+                </div>
+              </button>
+            )}
           </div>
 
           {/* ── ABOUT ── */}

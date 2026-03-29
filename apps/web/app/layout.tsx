@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import { AuthProvider } from "@/components/AuthProvider";
+import { StatsProvider } from "@/components/StatsProvider";
 
 export const metadata: Metadata = {
   title: "Pitch Therapy",
@@ -23,8 +24,10 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen min-h-dvh" style={{ background: 'var(--ios-bg)', color: 'var(--ios-label)' }}>
         <AuthProvider>
-          <Nav />
-          <main className="pb-tab">{children}</main>
+          <StatsProvider>
+            <Nav />
+            <main className="pb-tab">{children}</main>
+          </StatsProvider>
         </AuthProvider>
       </body>
     </html>
