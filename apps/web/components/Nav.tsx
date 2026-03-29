@@ -62,7 +62,7 @@ function IconGear({ filled }: { filled: boolean }) {
 const TABS = [
   { href: '/dashboard', label: 'Home',     Icon: IconHome },
   { href: '/daily',     label: 'Daily',    Icon: IconCalendar },
-  { href: '/progress',  label: 'Progress', Icon: IconChart },
+  { href: '/profile',   label: 'Profile',  Icon: IconChart },
   { href: '/settings',  label: 'Settings', Icon: IconGear },
 ] as const;
 
