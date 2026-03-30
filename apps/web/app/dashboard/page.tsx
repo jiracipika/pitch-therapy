@@ -91,7 +91,7 @@ const stagger = {
 };
 const rowItem = {
   hidden:  { opacity: 0, x: -8 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
 };
 
 export default function Dashboard() {
