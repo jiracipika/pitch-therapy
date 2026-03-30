@@ -62,6 +62,7 @@ export default function ProgressPage() {
     return { ...m, ...ms };
   }).sort((a, b) => b.gamesPlayed - a.gamesPlayed);
 
+  const topMode = modePlayCounts[0];
   const totalGames = stats.results.length;
   const avgAccuracy = totalGames > 0
     ? Math.round((stats.results.reduce((s, r) => s + r.accuracy, 0) / totalGames) * 100)
@@ -173,14 +174,14 @@ export default function ProgressPage() {
         </motion.div>
 
         {/* ── FAVORITE MODE ── */}
-        {loaded && totalGames > 0 && modePlayCounts[0].gamesPlayed > 0 && (
+        {loaded && totalGames > 0 && topMode && topMode.gamesPlayed > 0 && (
           <motion.div
             className="ios-card"
             style={{
               padding: 20,
               marginTop: 12,
-              background: `linear-gradient(135deg, ${modePlayCounts[0].color}12 0%, ${modePlayCounts[0].color}06 100%)`,
-              border: `0.5px solid ${modePlayCounts[0].color}20`,
+              background: `linear-gradient(135deg, ${topMode.color}12 0%, ${topMode.color}06 100%)`,
+              border: `0.5px solid ${topMode.color}20`,
             }}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -190,17 +191,17 @@ export default function ProgressPage() {
               Most Played
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ fontSize: 32 }}>{modePlayCounts[0].icon}</div>
+              <div style={{ fontSize: 32 }}>{topMode.icon}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.4px' }}>
-                  {modePlayCounts[0].label}
+                  {topMode.label}
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--ios-label2)', marginTop: 2 }}>
-                  {modePlayCounts[0].gamesPlayed} games · {Math.round(modePlayCounts[0].avgAccuracy * 100)}% avg accuracy
+                  {topMode.gamesPlayed} games · {Math.round(topMode.avgAccuracy * 100)}% avg accuracy
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 20, fontWeight: 700, color: modePlayCounts[0].color }}>{modePlayCounts[0].bestScore}</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: topMode.color }}>{topMode.bestScore}</div>
                 <div style={{ fontSize: 11, color: 'var(--ios-label3)' }}>Best</div>
               </div>
             </div>

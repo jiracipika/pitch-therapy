@@ -33,7 +33,7 @@ const CATEGORIES = [
 ];
 
 export default function ProfilePage() {
-  const { stats, loaded, getModeStats } = useStatsContext();
+  const { stats, loaded } = useStatsContext();
 
   const totalGames = stats.results.length;
   const totalTimeMin = Math.round(stats.results.reduce((s, r) => s + r.timeMs, 0) / 60000);
