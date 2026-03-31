@@ -9,30 +9,30 @@
    ============================================================ */
 
 :root {
-  /* ── iOS System Colors (dark) ── */
-  --ios-bg:           #000000;
-  --ios-bg2:          #1C1C1E;
-  --ios-bg3:          #2C2C2E;
-  --ios-bg4:          #3A3A3C;
+  /* ── iOS System Colors (light) ── */
+  --ios-bg:           #F2F2F7;
+  --ios-bg2:          #FFFFFF;
+  --ios-bg3:          #F2F2F7;
+  --ios-bg4:          #E5E5EA;
 
-  --ios-label:        #FFFFFF;
-  --ios-label2:       rgba(235, 235, 245, 0.6);
-  --ios-label3:       rgba(235, 235, 245, 0.3);
-  --ios-label4:       rgba(235, 235, 245, 0.18);
+  --ios-label:        #000000;
+  --ios-label2:       rgba(60, 60, 67, 0.60);
+  --ios-label3:       rgba(60, 60, 67, 0.30);
+  --ios-label4:       rgba(60, 60, 67, 0.18);
 
-  --ios-sep:          rgba(84, 84, 88, 0.65);
-  --ios-sep-opaque:   #38383A;
+  --ios-sep:          rgba(60, 60, 67, 0.29);
+  --ios-sep-opaque:   #C6C6C8;
 
-  /* ── iOS Tint Colors ── */
-  --ios-blue:         #0A84FF;
-  --ios-green:        #30D158;
-  --ios-indigo:       #5E5CE6;
-  --ios-orange:       #FF9F0A;
-  --ios-pink:         #FF375F;
-  --ios-purple:       #BF5AF2;
-  --ios-red:          #FF453A;
+  /* ── iOS Tint Colors (light) ── */
+  --ios-blue:         #007AFF;
+  --ios-green:        #34C759;
+  --ios-indigo:       #5856D6;
+  --ios-orange:       #FF9500;
+  --ios-pink:         #FF2D55;
+  --ios-purple:       #AF52DE;
+  --ios-red:          #FF3B30;
   --ios-teal:         #5AC8FA;
-  --ios-yellow:       #FFD60A;
+  --ios-yellow:       #FFCC00;
   --ios-mint:         #63E6E2;
   --ios-cyan:         #32ADE6;
 
@@ -44,26 +44,68 @@
   --track-tight:      -0.025em;
   --track-body:       -0.015em;
 
-  /* ── Shadows (dark-adapted) ── */
-  --ios-shadow-sm:    0 1px 4px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(255,255,255,0.04);
-  --ios-shadow:       0 2px 8px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.04);
-  --ios-shadow-md:    0 4px 16px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.3);
-  --ios-shadow-lg:    0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
-  --ios-shadow-blue:  0 4px 20px rgba(10,132,255,0.35), 0 1px 4px rgba(10,132,255,0.2);
+  /* ── Shadows (light-adapted) ── */
+  --ios-shadow-xs:    0 1px 2px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03);
+  --ios-shadow-sm:    0 1px 4px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(0,0,0,0.03);
+  --ios-shadow:       0 2px 8px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.03);
+  --ios-shadow-md:    0 4px 16px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+  --ios-shadow-lg:    0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+  --ios-shadow-blue:  0 4px 20px rgba(0,122,255,0.22), 0 1px 4px rgba(0,122,255,0.12);
 
-  /* ── Glass ── */
-  --ios-glass-bg:     rgba(28,28,30,0.78);
+  /* ── Glass (light) ── */
+  --ios-glass-bg:     rgba(242,242,247,0.72);
+}
+
+/* ── Dark Mode Override ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ios-bg:           #000000;
+    --ios-bg2:          #1C1C1E;
+    --ios-bg3:          #2C2C2E;
+    --ios-bg4:          #3A3A3C;
+
+    --ios-label:        #FFFFFF;
+    --ios-label2:       rgba(235, 235, 245, 0.6);
+    --ios-label3:       rgba(235, 235, 245, 0.3);
+    --ios-label4:       rgba(235, 235, 245, 0.18);
+
+    --ios-sep:          rgba(84, 84, 88, 0.65);
+    --ios-sep-opaque:   #38383A;
+
+    --ios-blue:         #0A84FF;
+    --ios-green:        #30D158;
+    --ios-indigo:       #5E5CE6;
+    --ios-orange:       #FF9F0A;
+    --ios-pink:         #FF375F;
+    --ios-purple:       #BF5AF2;
+    --ios-red:          #FF453A;
+    --ios-teal:         #5AC8FA;
+    --ios-yellow:       #FFD60A;
+    --ios-mint:         #63E6E2;
+    --ios-cyan:         #32ADE6;
+
+    --ios-shadow-xs:    0 1px 2px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(255,255,255,0.04);
+    --ios-shadow-sm:    0 1px 4px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(255,255,255,0.04);
+    --ios-shadow:       0 2px 8px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.04);
+    --ios-shadow-md:    0 4px 16px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.3);
+    --ios-shadow-lg:    0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
+    --ios-shadow-blue:  0 4px 20px rgba(10,132,255,0.35), 0 1px 4px rgba(10,132,255,0.2);
+
+    --ios-glass-bg:     rgba(28,28,30,0.78);
+  }
 }
 
 @layer base {
   html {
-    font-family: -apple-system, "SF Pro Display", "SF Pro Text",
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
                  "Helvetica Neue", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    background-color: var(--ios-bg);
-    color: var(--ios-label);
+    font-feature-settings: "kern" 1, "liga" 1;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -71,6 +113,10 @@
     color: var(--ios-label);
     min-height: 100vh;
     min-height: 100dvh;
+    font-size: 17px;
+    line-height: 1.47059;
+    letter-spacing: -0.022em;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   * {
@@ -383,11 +429,12 @@
   font-weight: 600;
   letter-spacing: -0.43px;
   padding: 0 24px;
-  transition: opacity 0.12s ease, transform 0.12s ease;
+  transition: opacity 0.12s ease, transform 0.12s ease, box-shadow 0.2s ease;
   cursor: pointer;
   border: none;
   outline: none;
   width: 100%;
+  box-shadow: var(--ios-shadow-blue);
 }
 
 .ios-btn-primary:active {
@@ -836,6 +883,7 @@ input[type="range"]::-moz-range-thumb {
 @media (hover: hover) {
   .ios-btn-primary:hover {
     filter: brightness(1.12);
+    box-shadow: 0 6px 24px rgba(0,122,255,0.35);
   }
 
   .ios-btn-secondary:hover {
@@ -927,7 +975,57 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================================================
-   SMOOTH SCROLLBAR FOR DESKTOP
+   PAGE TRANSITION & STAGGERED ENTRANCE
+   ============================================================ */
+
+@keyframes pt-page-enter {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-pt-page {
+  animation: pt-page-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Staggered children */
+.animate-pt-stagger > * {
+  opacity: 0;
+  animation: pt-page-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.animate-pt-stagger > *:nth-child(1)  { animation-delay: 0s; }
+.animate-pt-stagger > *:nth-child(2)  { animation-delay: 0.04s; }
+.animate-pt-stagger > *:nth-child(3)  { animation-delay: 0.08s; }
+.animate-pt-stagger > *:nth-child(4)  { animation-delay: 0.12s; }
+.animate-pt-stagger > *:nth-child(5)  { animation-delay: 0.16s; }
+.animate-pt-stagger > *:nth-child(6)  { animation-delay: 0.20s; }
+.animate-pt-stagger > *:nth-child(7)  { animation-delay: 0.24s; }
+.animate-pt-stagger > *:nth-child(8)  { animation-delay: 0.28s; }
+.animate-pt-stagger > *:nth-child(9)  { animation-delay: 0.32s; }
+.animate-pt-stagger > *:nth-child(10) { animation-delay: 0.36s; }
+
+/* ============================================================
+   OVERLAY BACKDROP (frosted glass)
+   ============================================================ */
+
+.ios-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  animation: ios-fade-in 0.25s ease-out forwards;
+}
+
+.ios-overlay-center {
+  align-items: center;
+}
+
+/* ============================================================
+   DESKTOP SCROLLBAR (LIGHT MODE AWARE)
    ============================================================ */
 
 @media (hover: hover) and (pointer: fine) {
@@ -939,26 +1037,30 @@ input[type="range"]::-moz-range-thumb {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.15);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,0.22);
+    background: rgba(0,0,0,0.25);
+  }
+  @media (prefers-color-scheme: dark) {
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.12);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.22);
+    }
   }
 }
 
 /* ============================================================
-   GRADIENT ACCENTS
+   SMOOTH TRANSITION UTILITY
    ============================================================ */
 
-.ios-gradient-subtle-blue {
-  background: linear-gradient(135deg, rgba(10,132,255,0.08) 0%, rgba(94,92,230,0.06) 100%);
+.ios-ease {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.ios-gradient-subtle-warm {
-  background: linear-gradient(135deg, rgba(255,159,10,0.08) 0%, rgba(255,55,95,0.06) 100%);
-}
-
-.ios-gradient-subtle-green {
-  background: linear-gradient(135deg, rgba(48,209,88,0.08) 0%, rgba(90,200,250,0.06) 100%);
+.ios-spring {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
