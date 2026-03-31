@@ -28,7 +28,7 @@ export default function SignupPage() {
               justifyContent: 'center',
               fontSize: 34,
               margin: '0 auto 16px',
-              boxShadow: '0 12px 40px rgba(10,132,255,0.25)',
+              boxShadow: '0 16px 48px rgba(10,132,255,0.3), 0 4px 12px rgba(10,132,255,0.15)',
             }}
           >
             🎵

@@ -4,7 +4,8 @@
 
 /* ============================================================
    iOS DESIGN SYSTEM — Pitch Therapy
-   Dark mode only. Apple system color palette.
+   Dark mode primary. Apple system color palette.
+   Supports light mode via class toggle or media query.
    ============================================================ */
 
 :root {
@@ -42,6 +43,16 @@
   /* ── Typography tracking ── */
   --track-tight:      -0.025em;
   --track-body:       -0.015em;
+
+  /* ── Shadows (dark-adapted) ── */
+  --ios-shadow-sm:    0 1px 4px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(255,255,255,0.04);
+  --ios-shadow:       0 2px 8px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.04);
+  --ios-shadow-md:    0 4px 16px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.3);
+  --ios-shadow-lg:    0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
+  --ios-shadow-blue:  0 4px 20px rgba(10,132,255,0.35), 0 1px 4px rgba(10,132,255,0.2);
+
+  /* ── Glass ── */
+  --ios-glass-bg:     rgba(28,28,30,0.78);
 }
 
 @layer base {
@@ -816,4 +827,138 @@ input[type="range"]::-moz-range-thumb {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer 3.5s linear infinite;
+}
+
+/* ============================================================
+   ENHANCED HOVER STATES (desktop)
+   ============================================================ */
+
+@media (hover: hover) {
+  .ios-btn-primary:hover {
+    filter: brightness(1.12);
+  }
+
+  .ios-btn-secondary:hover {
+    background: var(--ios-bg4);
+  }
+
+  .ios-btn-tonal:hover {
+    background: rgba(10, 132, 255, 0.28);
+  }
+
+  .ios-btn-danger:hover {
+    background: rgba(255, 69, 58, 0.26);
+  }
+
+  .ios-btn-inline:hover {
+    background: rgba(10, 132, 255, 0.26);
+  }
+
+  .ios-game-card:hover {
+    background: var(--ios-bg3);
+    transform: scale(1.02);
+  }
+
+  .ios-card:hover {
+    background: var(--ios-bg3);
+  }
+
+  .ios-row:hover {
+    background: var(--ios-bg3);
+  }
+
+  .ios-play-btn:hover {
+    transform: scale(1.06);
+    filter: brightness(1.1);
+  }
+
+  .ios-input:hover {
+    background: var(--ios-bg4);
+  }
+}
+
+/* ============================================================
+   ENHANCED SHADOW UTILITIES
+   ============================================================ */
+
+.ios-shadow-sm  { box-shadow: var(--ios-shadow-sm); }
+.ios-shadow     { box-shadow: var(--ios-shadow); }
+.ios-shadow-md  { box-shadow: var(--ios-shadow-md); }
+.ios-shadow-lg  { box-shadow: var(--ios-shadow-lg); }
+.ios-shadow-blue{ box-shadow: var(--ios-shadow-blue); }
+
+/* ============================================================
+   FROSTED GLASS UTILITIES
+   ============================================================ */
+
+.ios-glass {
+  background: var(--ios-glass-bg);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.ios-glass-heavy {
+  background: var(--ios-glass-bg);
+  backdrop-filter: saturate(200%) blur(40px);
+  -webkit-backdrop-filter: saturate(200%) blur(40px);
+}
+
+/* ============================================================
+   CARD LIFT (hover effect for desktop)
+   ============================================================ */
+
+.ios-card-lift {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.15s ease;
+}
+
+@media (hover: hover) {
+  .ios-card-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ios-shadow-md);
+    background: var(--ios-bg3);
+  }
+
+  .ios-card-lift:active {
+    transform: scale(0.98) translateY(0);
+    box-shadow: none;
+  }
+}
+
+/* ============================================================
+   SMOOTH SCROLLBAR FOR DESKTOP
+   ============================================================ */
+
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.12);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.22);
+  }
+}
+
+/* ============================================================
+   GRADIENT ACCENTS
+   ============================================================ */
+
+.ios-gradient-subtle-blue {
+  background: linear-gradient(135deg, rgba(10,132,255,0.08) 0%, rgba(94,92,230,0.06) 100%);
+}
+
+.ios-gradient-subtle-warm {
+  background: linear-gradient(135deg, rgba(255,159,10,0.08) 0%, rgba(255,55,95,0.06) 100%);
+}
+
+.ios-gradient-subtle-green {
+  background: linear-gradient(135deg, rgba(48,209,88,0.08) 0%, rgba(90,200,250,0.06) 100%);
 }

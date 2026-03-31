@@ -63,7 +63,7 @@ export default function Home() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 20px 60px rgba(10, 132, 255, 0.3)',
+              boxShadow: '0 24px 64px rgba(10, 132, 255, 0.35), 0 8px 24px rgba(10, 132, 255, 0.2)',
             }}
           >
             <span style={{ fontSize: 44 }}>🎵</span>
@@ -170,7 +170,7 @@ export default function Home() {
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.06, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
                   >
-                    <Link href={m.href} className="ios-game-card block h-full" style={{ textDecoration: 'none' }}>
+                    <Link href={m.href} className="ios-game-card ios-card-lift block h-full" style={{ textDecoration: 'none' }}>
                       <div
                         style={{
                           width: 44,

@@ -128,7 +128,7 @@ export default function Dashboard() {
           transition={{ delay: 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
           {/* Streak card */}
-          <div className="ios-card flex items-center gap-4 p-4" style={{ minHeight: 96 }}>
+          <div className="ios-card ios-card-lift flex items-center gap-4 p-4" style={{ minHeight: 96 }}>
             <StreakRing streak={stats.streak} />
             <div>
               <div style={{ fontSize: 36, fontWeight: 700, letterSpacing: '-1px', color: 'var(--ios-label)', lineHeight: 1 }}>
@@ -141,7 +141,7 @@ export default function Dashboard() {
           </div>
 
           {/* Daily card */}
-          <div className="ios-card flex flex-col justify-between p-4" style={{ minHeight: 96 }}>
+          <div className="ios-card ios-card-lift flex flex-col justify-between p-4" style={{ minHeight: 96 }}>
             <div>
               <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 4 }}>
                 Daily Reset
@@ -178,15 +178,15 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.4 }}
           >
-            <div className="ios-card" style={{ padding: '12px', textAlign: 'center' }}>
+            <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-blue)', letterSpacing: '-0.5px' }}>{todayGames}</div>
               <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>Today</div>
             </div>
-            <div className="ios-card" style={{ padding: '12px', textAlign: 'center' }}>
+            <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-purple)', letterSpacing: '-0.5px' }}>{totalGames}</div>
               <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>All Time</div>
             </div>
-            <div className="ios-card" style={{ padding: '12px', textAlign: 'center' }}>
+            <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-green)', letterSpacing: '-0.5px' }}>
                 {totalGames > 0 ? Math.round(stats.results.reduce((s, r) => s + r.accuracy, 0) / totalGames * 100) : 0}%
               </div>
