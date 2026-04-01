@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playTone, getAudioContext, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
@@ -36,6 +36,8 @@ const TOTAL_ROUNDS = 8;
 
 export default function IntervalArcherPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isPractice = searchParams.get('practice') === 'true';
   const [phase, setPhase] = useState<'setup' | 'playing' | 'feedback' | 'done'>('setup');
   const [intervalMode, setIntervalMode] = useState<IntervalMode>('ascending');
   const [round, setRound] = useState(0);
@@ -219,7 +221,7 @@ export default function IntervalArcherPage() {
             </div>
 
             <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
-              Start Game
+              {isPractice ? '🎓 Start Practicing' : 'Start Game'}
             </button>
           </div>
         </div>
@@ -347,6 +349,7 @@ export default function IntervalArcherPage() {
 
         <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--ios-label3)' }}>
           🔥 {streak} streak · Round {round}/{TOTAL_ROUNDS}
+          {isPractice && <span style={{ marginLeft: 8, color: ACCENT }}>Practice</span>}
         </div>
       </div>
     </div>

@@ -24,6 +24,7 @@ export default function TuneInPage() {
   const [centsOff, setCentsOff] = useState(0);
   const [holdProgress, setHoldProgress] = useState(0);
   const [isListening, setIsListening] = useState(false);
+  const [micError, setMicError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [showFeedbackOverlay, setShowFeedbackOverlay] = useState(false);
   const [results, setResults] = useState<{ round: number; correct: boolean; points: number; target: string; accuracy: number; timeMs: number }[]>([]);
@@ -96,6 +97,7 @@ export default function TuneInPage() {
 
   const startMic = async () => {
     try {
+      setMicError(null);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       micStreamRef.current = stream;
       const ctx = new AudioContext();
@@ -107,7 +109,8 @@ export default function TuneInPage() {
       analyserRef.current = analyser;
       setIsListening(true);
     } catch {
-      setUseMidi(false);
+      setMicError('Microphone access denied. Switch to Listen Only mode or grant permission.');
+      setUseMidi(true);
     }
   };
 
@@ -277,6 +280,11 @@ export default function TuneInPage() {
               </div>
             </div>
             <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Start Game</button>
+            {micError && (
+              <div style={{ marginTop: 12, borderRadius: 12, padding: '12px 16px', background: 'rgba(255,69,58,0.12)', border: '1px solid var(--ios-red)', fontSize: 13, color: 'var(--ios-red)', textAlign: 'left' }}>
+                ⚠️ {micError}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -412,18 +420,25 @@ export default function TuneInPage() {
 
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
               <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginBottom: 8 }}>Sing or play into your mic</div>
-              <button
+              <motion.button
                 onClick={handleGiveUp}
-                style={{ fontSize: 14, color: 'var(--ios-label3)', background: 'none', border: 'none', cursor: 'pointer' }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  fontSize: 14, fontWeight: 600, color: 'var(--ios-label3)',
+                  background: 'var(--ios-bg2)', border: '1px solid var(--ios-sep)',
+                  cursor: 'pointer', borderRadius: 12, padding: '8px 20px',
+                  transition: 'opacity 0.12s ease',
+                }}
               >
                 Skip round
-              </button>
+              </motion.button>
             </div>
           </>
         )}
 
         <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--ios-label3)' }}>
           🔥 {streak} streak • Round {round}/{totalRounds}
+          {isPractice && <span style={{ marginLeft: 8, color: ACCENT }}>Practice</span>}
         </div>
       </div>
     </div>

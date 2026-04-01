@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playTone } from '@/lib/audio';
+import FeedbackOverlay from '@/components/FeedbackOverlay';
 
 const ACCENT = '#0A84FF';
 const MIN_FREQ = 80;
@@ -32,16 +33,22 @@ const REFERENCE_NOTES = [
 
 export default function FrequencySliderPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isPractice = searchParams.get('practice') === 'true';
   const [phase, setPhase] = useState<'setup' | 'playing' | 'reveal' | 'done'>('setup');
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
   const [targetFreq, setTargetFreq] = useState(440);
   const [sliderPos, setSliderPos] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [showFeedbackOverlay, setShowFeedbackOverlay] = useState(false);
+  const [lastCorrect, setLastCorrect] = useState(false);
   const [results, setResults] = useState<{ round: number; freq: number; answer: number; centsOff: number; points: number }[]>([]);
   const barRef = useRef<HTMLDivElement>(null);
+  const roundRef = useRef(0);
 
   const pickTarget = () => {
     const min = Math.log(MIN_FREQ);
@@ -55,7 +62,8 @@ export default function FrequencySliderPage() {
   };
 
   const startGame = () => {
-    setRound(0); setScore(0); setStreak(0); setResults([]);
+    setRound(0); setScore(0); setStreak(0); setBestStreak(0); setResults([]);
+    roundRef.current = 0;
     nextRound();
   };
 
@@ -63,7 +71,8 @@ export default function FrequencySliderPage() {
     const freq = pickTarget();
     playTone(freq, 1.0);
     setPhase('playing');
-    setRound(r => r + 1);
+    roundRef.current += 1;
+    setRound(roundRef.current);
   };
 
   const handleSubmit = () => {
@@ -76,8 +85,15 @@ export default function FrequencySliderPage() {
     const correct = Math.abs(centsOff) <= 15;
 
     setScore(s => s + points);
-    if (correct) setStreak(s => s + 1); else setStreak(0);
-    setResults(r => [...r, { round, freq: targetFreq, answer: answerFreq, centsOff, points }]);
+    if (correct) {
+      setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns; });
+      setLastCorrect(true);
+      setShowFeedbackOverlay(true);
+    } else {
+      setStreak(0);
+      setLastCorrect(false);
+    }
+    setResults(r => [...r, { round: roundRef.current, freq: targetFreq, answer: answerFreq, centsOff, points }]);
     setPhase('reveal');
   };
 
@@ -100,14 +116,12 @@ export default function FrequencySliderPage() {
   const handlePointerUp = useCallback(() => {
     if (isDragging) {
       setIsDragging(false);
-      // Play the selected frequency while dragging
-      const freq = posToFreq(sliderPos);
-      playTone(freq, 0.3);
     }
-  }, [isDragging, sliderPos]);
+  }, [isDragging]);
 
   if (phase === 'done') {
     const avgCents = results.length > 0 ? Math.round(results.reduce((s, r) => s + Math.abs(r.centsOff), 0) / results.length) : 0;
+    const bestRound = results.length > 0 ? Math.max(...results.map(r => r.points)) : 0;
     return (
       <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
         <div className="max-w-sm mx-auto px-4 pt-12">
@@ -116,7 +130,7 @@ export default function FrequencySliderPage() {
             <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
               Slider Complete!
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 24 }}>
               <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
                 <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
                 <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
@@ -126,8 +140,12 @@ export default function FrequencySliderPage() {
                 <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Avg Error</div>
               </div>
               <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
-                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>🔥 {streak}</div>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>🔥 {bestStreak}</div>
                 <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Streak</div>
+              </div>
+              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{bestRound}pts</div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Round</div>
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -147,10 +165,21 @@ export default function FrequencySliderPage() {
           <div style={{ textAlign: 'center', paddingTop: 40 }}>
             <div style={{ fontSize: 64, marginBottom: 20 }}>↔️</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Frequency Slider</div>
-            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 4 }}>Drag the slider to match a hidden frequency</div>
-            <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginBottom: 32 }}>80 Hz — 1,200 Hz · Logarithmic scale</div>
+            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 8 }}>Drag the slider to match a hidden frequency</div>
+            <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginBottom: 24 }}>80 Hz — 1,200 Hz · Logarithmic scale</div>
+
+            <div className="ios-card" style={{ padding: 16, textAlign: 'left', marginBottom: 24 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: ACCENT, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>How to Play</div>
+              <ol style={{ fontSize: 14, color: 'var(--ios-label3)', listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <li>1. A tone plays — tap 🔊 to replay it</li>
+                <li>2. Drag the slider to guess its frequency</li>
+                <li>3. Reference lines show note positions on the scale</li>
+                <li>4. Lock in to see how close you were (±15¢ = correct)</li>
+              </ol>
+            </div>
+
             <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
-              Start Game
+              {isPractice ? '🎓 Start Practicing' : 'Start Game'}
             </button>
           </div>
         </div>
@@ -164,6 +193,7 @@ export default function FrequencySliderPage() {
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
       <div className="max-w-sm mx-auto px-4 pt-12">
+        <FeedbackOverlay correct={lastCorrect} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
           <button
@@ -195,23 +225,44 @@ export default function FrequencySliderPage() {
         </div>
 
         {/* Replay */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 24 }}>
           <div style={{ textAlign: 'center' }}>
             <motion.button
               onClick={() => playTone(targetFreq, 1.0)}
               whileTap={{ scale: 0.92 }}
               style={{
-                width: 80, height: 80,
+                width: 72, height: 72,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: 24, background: 'var(--ios-bg2)',
-                border: '1px solid var(--ios-sep)', fontSize: 36, cursor: 'pointer',
+                borderRadius: 22, background: 'var(--ios-bg2)',
+                border: '1px solid var(--ios-sep)', fontSize: 32, cursor: 'pointer',
               }}
             >
               🔊
             </motion.button>
-            <div style={{ marginTop: 8, fontSize: 13, color: 'var(--ios-label3)' }}>Tap to replay tone</div>
-            <div style={{ marginTop: 4, fontSize: 12, color: 'var(--ios-label4)' }}>Your pick: {answerFreq.toFixed(1)} Hz</div>
+            <div style={{ marginTop: 6, fontSize: 12, color: 'var(--ios-label3)' }}>Target</div>
           </div>
+          <div style={{ textAlign: 'center' }}>
+            <motion.button
+              onClick={() => playTone(posToFreq(sliderPos), 0.4)}
+              whileTap={{ scale: 0.92 }}
+              disabled={submitted}
+              style={{
+                width: 72, height: 72,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 22,
+                background: submitted ? 'var(--ios-bg3)' : 'var(--ios-bg2)',
+                border: '1px solid var(--ios-sep)',
+                fontSize: 32, cursor: submitted ? 'default' : 'pointer',
+                opacity: submitted ? 0.5 : 1,
+              }}
+            >
+              🎵
+            </motion.button>
+            <div style={{ marginTop: 6, fontSize: 12, color: 'var(--ios-label3)' }}>Your pick</div>
+          </div>
+        </div>
+        <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--ios-label4)', marginBottom: 20 }}>
+          {answerFreq.toFixed(1)} Hz
         </div>
 
         {/* Slider */}

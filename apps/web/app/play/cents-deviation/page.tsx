@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
+import FeedbackOverlay from '@/components/FeedbackOverlay';
 
 const ACCENT = '#30D158';
 const CENTS_RANGE = 50;
@@ -18,6 +19,8 @@ const DIFF_CONFIG: Record<Difficulty, { label: string; centsRange: number; round
 
 export default function CentsDeviationPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isPractice = searchParams.get('practice') === 'true';
   const [phase, setPhase] = useState<'setup' | 'playing' | 'reveal' | 'done'>('setup');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [round, setRound] = useState(0);
@@ -30,6 +33,8 @@ export default function CentsDeviationPage() {
   const [needlePos, setNeedlePos] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [showFeedbackOverlay, setShowFeedbackOverlay] = useState(false);
+  const [lastCorrect, setLastCorrect] = useState(false);
   const [results, setResults] = useState<{ round: number; note: string; actualCents: number; guessCents: number; points: number }[]>([]);
   const meterRef = useRef<HTMLDivElement>(null);
   const roundRef = useRef(0);
@@ -83,8 +88,14 @@ export default function CentsDeviationPage() {
     const correct = error <= 5;
 
     setScore(s => s + points);
-    if (correct) setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns; });
-    else setStreak(0);
+    if (correct) {
+      setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns; });
+      setLastCorrect(true);
+      setShowFeedbackOverlay(true);
+    } else {
+      setStreak(0);
+      setLastCorrect(false);
+    }
     setResults(r => [...r, { round: roundRef.current, note: baseNote, actualCents, guessCents: needlePos, points }]);
     setPhase('reveal');
   };
@@ -174,7 +185,7 @@ export default function CentsDeviationPage() {
             </div>
 
             <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
-              Start Game
+              {isPractice ? '🎓 Start Practicing' : 'Start Game'}
             </button>
           </div>
         </div>
@@ -188,6 +199,7 @@ export default function CentsDeviationPage() {
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
       <div className="max-w-sm mx-auto px-4 pt-12">
+        <FeedbackOverlay correct={lastCorrect} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
           <button
@@ -249,6 +261,24 @@ export default function CentsDeviationPage() {
             }}
           >
             🔊+🔊 Play Both
+          </motion.button>
+          <motion.button
+            onClick={() => {
+              const guessFreq = baseFreq * Math.pow(2, needlePos / 1200);
+              playTone(baseFreq, 0.6);
+              setTimeout(() => playTone(guessFreq, 0.8), 800);
+            }}
+            whileTap={{ scale: 0.92 }}
+            disabled={submitted}
+            style={{
+              height: 56, borderRadius: 16, padding: '0 14px',
+              background: submitted ? 'var(--ios-bg3)' : 'rgba(48,209,88,0.06)',
+              border: `1px solid ${submitted ? 'var(--ios-sep)' : 'var(--ios-sep)'}`,
+              fontSize: 14, fontWeight: 600, color: submitted ? 'var(--ios-label4)' : 'var(--ios-label2)',
+              cursor: submitted ? 'default' : 'pointer', opacity: submitted ? 0.5 : 1,
+            }}
+          >
+            🎵 Your guess
           </motion.button>
         </div>
 
@@ -315,18 +345,16 @@ export default function CentsDeviationPage() {
               style={{
                 padding: '12px 16px', textAlign: 'center', marginBottom: 16,
                 border: `1px solid ${Math.abs(needlePos - actualCents) <= 5 ? 'var(--ios-green)' : 'var(--ios-orange)'}`,
+                background: Math.abs(needlePos - actualCents) <= 5 ? 'rgba(48,209,88,0.08)' : 'rgba(255,159,10,0.08)',
               }}
             >
-              <div style={{ fontSize: 13, color: 'var(--ios-label3)' }}>
-                Actual: <span style={{ fontWeight: 700, color: 'var(--ios-label)' }}>{actualCents > 0 ? '+' : ''}{actualCents}¢</span>
-                {' · '}
-                Your guess: <span style={{ fontWeight: 700, color: 'var(--ios-label)' }}>{needlePos > 0 ? '+' : ''}{needlePos}¢</span>
-              </div>
-              <div style={{
-                marginTop: 6, fontSize: 18, fontWeight: 700,
+              <div style={{ fontSize: 14, fontWeight: 600,
                 color: Math.abs(needlePos - actualCents) <= 5 ? 'var(--ios-green)' : 'var(--ios-orange)',
               }}>
-                {Math.abs(needlePos - actualCents)}¢ error
+                {Math.abs(needlePos - actualCents) <= 5 ? '✓ Excellent ear!' : Math.abs(needlePos - actualCents) <= 15 ? '~ Close' : '✗ Off'} — {Math.abs(needlePos - actualCents)}¢ error
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 4 }}>
+                Actual: {actualCents > 0 ? '+' : ''}{actualCents}¢ · Your guess: {needlePos > 0 ? '+' : ''}{needlePos}¢
               </div>
             </motion.div>
           )}
@@ -355,6 +383,7 @@ export default function CentsDeviationPage() {
 
         <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--ios-label3)', marginTop: 16 }}>
           🔥 {streak} streak · Round {round}/{totalRounds} · {config.label}
+          {isPractice && <span style={{ marginLeft: 8, color: ACCENT }}>Practice</span>}
         </div>
       </div>
     </div>
