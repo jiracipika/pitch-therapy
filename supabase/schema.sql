@@ -7,19 +7,21 @@
 create extension if not exists "pgcrypto";
 
 -- ============================================================
--- 1. users — mirrors Clerk user data
+-- 1. users — mirrors Supabase Auth user data
 -- ============================================================
 create table public.users (
-  id uuid primary key,                         -- Clerk user ID
+  id uuid primary key,                         -- Supabase Auth user ID
   email text unique not null,
   display_name text,
+  avatar_url text,
   vocal_range_low real,                        -- Hz, for Pitch Match calibration
   vocal_range_high real,                       -- Hz
+  preferred_difficulty text default 'medium',
   created_at timestamptz default now(),
   updated_at timestamptz
 );
 
-comment on table public.users is 'User profiles synced from Clerk auth provider';
+comment on table public.users is 'User profiles linked to Supabase Auth';
 
 -- ============================================================
 -- 2. sessions — one per game played
@@ -27,8 +29,13 @@ comment on table public.users is 'User profiles synced from Clerk auth provider'
 create table public.sessions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.users(id) on delete cascade,
-  mode text not null check (mode in ('pitch_match','note_id','frequency_guess','note_wordle','frequency_wordle')),
-  difficulty text check (difficulty in ('beginner','intermediate','advanced')),
+  mode text not null check (mode in (
+    'pitch_match', 'note_id', 'frequency_guess', 'note_wordle', 'frequency_wordle',
+    'pitch_memory', 'name_that_note', 'frequency_hunt', 'drone_lock', 'speed_round',
+    'chord_detective', 'waveform_match', 'tuning_battle', 'tune_in', 'piano_tap',
+    'frequency_slider', 'cents_deviation', 'interval_archer'
+  )),
+  difficulty text check (difficulty in ('easy','medium','hard')),
   score integer default 0,
   max_possible_score integer,
   rounds_completed integer default 0,
@@ -105,6 +112,28 @@ create table public.rounds (
 comment on table public.rounds is 'Detailed per-round analytics within a session';
 
 -- ============================================================
+-- 7. achievements — gamification
+-- ============================================================
+create table public.achievements (
+  id text primary key,                         -- e.g. 'first_perfect', 'streak_7'
+  label text not null,
+  description text not null,
+  icon text not null,                          -- emoji
+  category text not null check (category in ('streak', 'accuracy', 'speed', 'exploration', 'mastery'))
+);
+
+comment on table public.achievements is 'Available achievements players can unlock';
+
+create table public.user_achievements (
+  user_id uuid not null references public.users(id) on delete cascade,
+  achievement_id text not null references public.achievements(id),
+  unlocked_at timestamptz default now(),
+  primary key (user_id, achievement_id)
+);
+
+comment on table public.user_achievements is 'Achievements unlocked by each user';
+
+-- ============================================================
 -- Indexes
 -- ============================================================
 create index idx_sessions_user_id on public.sessions (user_id);
@@ -129,6 +158,8 @@ alter table public.daily_challenges enable row level security;
 alter table public.leaderboard enable row level security;
 alter table public.streaks enable row level security;
 alter table public.rounds enable row level security;
+alter table public.achievements enable row level security;
+alter table public.user_achievements enable row level security;
 
 -- Users: can only see/edit their own row
 create policy "Users can view own profile"
@@ -152,19 +183,16 @@ create policy "Users can update own sessions"
   on public.sessions for update
   using (auth.uid() = user_id);
 
--- Daily challenges: readable by all, insertable by authenticated
-create policy "Anyone can view daily challenges"
-  on public.daily_challenges for select
-  to authenticated
-  using (true);
+-- Daily challenges: readable by authenticated users
 create policy "Authenticated users can view daily challenges"
   on public.daily_challenges for select
+  to authenticated
   using (true);
 create policy "Service role can insert daily challenges"
   on public.daily_challenges for insert
   with check (true);
 
--- Leaderboard: own rows read/write, all rows readable
+-- Leaderboard: all rows readable, own rows writable
 create policy "Users can view leaderboard"
   on public.leaderboard for select
   using (true);
@@ -197,6 +225,41 @@ create policy "Users can insert own rounds"
   with check (
     session_id in (select id from public.sessions where user_id = auth.uid())
   );
+
+-- Achievements: readable by all authenticated
+create policy "Authenticated users can view achievements"
+  on public.achievements for select
+  to authenticated
+  using (true);
+create policy "Users can view own achievements"
+  on public.user_achievements for select
+  using (auth.uid() = user_id);
+create policy "Users can insert own achievements"
+  on public.user_achievements for insert
+  with check (auth.uid() = user_id);
+
+-- ============================================================
+-- Seed: achievements
+-- ============================================================
+insert into public.achievements (id, label, description, icon, category) values
+  ('first_game',       'First Note',        'Complete your first game',                     '🎵', 'exploration'),
+  ('streak_3',         'On a Roll',          '3-day streak',                                  '🔥', 'streak'),
+  ('streak_7',         'Week Warrior',       '7-day streak',                                  '⚡', 'streak'),
+  ('streak_30',        'Monthly Maestro',    '30-day streak',                                 '👑', 'streak'),
+  ('perfect_round',    'Perfect Round',      'Score 100% on any round',                       '💎', 'accuracy'),
+  ('speed_demon',      'Speed Demon',        'Complete a Speed Round under 30s',              '🏎️', 'speed'),
+  ('note_master',      'Note Master',        'Play all pitch category modes',                 '🎶', 'exploration'),
+  ('freq_whiz',        'Frequency Whiz',     'Play all frequency category modes',             '📡', 'exploration'),
+  ('interval_pro',     'Interval Pro',       'Get 90%+ on Interval Archer hard',              '🏹', 'mastery'),
+  ('chord_pro',        'Chord Pro',          'Get 90%+ on Chord Detective hard',              '🕵️', 'mastery'),
+  ('cent_sensitive',   'Cent Sensitive',     'Get within 5 cents on Cents Deviation',         '📐', 'mastery'),
+  ('ten_games',        'Dedicated',          'Play 10 games',                                 '🎮', 'exploration'),
+  ('fifty_games',      'Committed',          'Play 50 games',                                 '💪', 'exploration'),
+  ('hundred_games',    'Centurion',          'Play 100 games',                                '🏛️', 'exploration'),
+  ('tuning_master',    'Tuning Master',      'Win 5 Tuning Battles',                          '⚔️', 'mastery'),
+  ('piano_virtuoso',   'Piano Virtuoso',     'Score 100% on Piano Tap hard',                  '🎹', 'mastery'),
+  ('wave_wizard',      'Wave Wizard',        'Score 90%+ on Waveform Match',                  '🌊', 'mastery')
+on conflict (id) do nothing;
 
 -- ============================================================
 -- Seed function: generate daily_challenges for next 30 days
@@ -247,3 +310,19 @@ create trigger trg_users_updated_at
 create trigger trg_streaks_updated_at
   before update on public.streaks
   for each row execute function public.set_updated_at();
+
+-- ============================================================
+-- Auto-create user profile on signup
+-- ============================================================
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.users (id, email, display_name)
+  values (new.id, new.email, coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1)));
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
