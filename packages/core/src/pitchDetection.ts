@@ -52,7 +52,7 @@ export class PitchDetector {
    * Returns frequency in Hz or null if no clear pitch detected.
    */
   detect(): PitchDetectionResult {
-    this.analyser.getFloatTimeDomainData(this.buffer as Float32Array);
+    this.analyser.getFloatTimeDomainData(this.buffer as Float32Array<ArrayBuffer>);
 
     // RMS check — skip silence
     let rms = 0;

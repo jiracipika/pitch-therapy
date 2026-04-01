@@ -164,7 +164,6 @@ export function sessionReducer(
           state.mode,
           action.answer,
           state.currentTarget,
-          ALL_NOTES_FOR_WORDLE,
         );
         const newAttempts = [
           ...state.attempts,

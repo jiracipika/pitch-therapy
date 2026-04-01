@@ -11,9 +11,6 @@ export function getDailySeed(date?: Date): { note: string; frequency: number } {
   hash = Math.abs(hash);
 
   const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    'E': 329.63, 'F': 349.23, 'F#': 369.99, 'G': 392.0,
-    'G#': 415.30, 'A': 440.0, 'A#': 466.16, 'B': 493.88,
-  };
 
   const note = NOTE_NAMES[hash % 12]!;
   // Frequency between 200-1000
