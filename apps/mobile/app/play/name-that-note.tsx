@@ -2,6 +2,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
+import NoteComparisonStaff from '@/components/NoteComparisonStaff';
 
 const ACCENT = '#0EA5E9';
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -29,6 +30,7 @@ export default function NameThatNoteScreen() {
   const [streak, setStreak] = useState(0);
   const [targetNote, setTargetNote] = useState(QUIZ_NOTES[0]);
   const [feedback, setFeedback] = useState<'none' | 'correct' | 'wrong'>('none');
+  const [guessedLabel, setGuessedLabel] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(10);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
 
@@ -37,6 +39,7 @@ export default function NameThatNoteScreen() {
     setTargetNote(note);
     setRound((r) => r + 1);
     setFeedback('none');
+    setGuessedLabel(null);
     setPhase('playing');
     setTimeLeft(10);
     clearInterval(timerRef.current);
@@ -56,6 +59,7 @@ export default function NameThatNoteScreen() {
   const handleAnswer = (label: string) => {
     if (phase !== 'playing') return;
     clearInterval(timerRef.current);
+    setGuessedLabel(label);
     const correct = label === targetNote.label;
     const points = correct ? Math.max(100 - (10 - timeLeft) * 8, 20) : 0;
     setScore((s) => s + points);
@@ -146,6 +150,18 @@ export default function NameThatNoteScreen() {
         </View>
 
         {phase === 'timed-out' && <Text style={{ textAlign: 'center', color: '#f87171', fontSize: 13, marginBottom: 16 }}>Time&apos;s up! It was {targetNote.name}</Text>}
+
+        {/* Staff comparison after answer */}
+        {feedback !== 'none' && guessedLabel && (
+          <View style={{ marginBottom: 16 }}>
+            <NoteComparisonStaff
+              guessedNote={guessedLabel}
+              correctNote={targetNote.label}
+              isCorrect={feedback === 'correct'}
+            />
+          </View>
+        )}
+
         <Text style={{ textAlign: 'center', fontSize: 12, color: '#52525b', marginBottom: 16 }}>Tap the correct note</Text>
 
         {/* Answer buttons */}

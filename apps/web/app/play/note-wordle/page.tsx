@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
 import WaveVisualizer from '@/components/WaveVisualizer';
+import NoteComparisonStaff from '@/components/NoteComparisonStaff';
 
 type Feedback = 'correct' | 'close' | 'miss';
 interface GuessRow { note: string; feedback: Feedback }
@@ -153,6 +154,14 @@ export default function NoteWordlePage() {
             <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 20 }}>
               {phase === 'won' ? 'Got it!' : `It was ${targetNote}4`}
             </div>
+
+            {/* Staff comparison showing last guess vs target */}
+            <NoteComparisonStaff
+              guessedNote={guesses[guesses.length - 1]?.note ?? '?'}
+              correctNote={targetNote}
+              isCorrect={phase === 'won'}
+            />
+
             <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
               <button
                 onClick={handleShare}

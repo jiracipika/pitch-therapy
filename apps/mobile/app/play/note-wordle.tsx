@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
+import NoteComparisonStaff from '@/components/NoteComparisonStaff';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 
 const MODE = GAME_MODE_META['note-wordle'];
@@ -104,7 +105,17 @@ export default function NoteWordleScreen() {
         <View style={{ paddingHorizontal: 20, paddingTop: 24, alignItems: 'center' }}>
           <Text style={{ fontSize: 40, marginBottom: 8 }}>{phase === 'won' ? '🎉' : '😔'}</Text>
           <Text style={styles.title}>{phase === 'won' ? 'Got it!' : `It was ${targetNote}4`}</Text>
-          <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
+
+          {/* Staff comparison showing last guess vs target */}
+          <View style={{ width: '100%', marginTop: 12 }}>
+            <NoteComparisonStaff
+              guessedNote={guesses[guesses.length - 1]?.note ?? '?'}
+              correctNote={targetNote}
+              isCorrect={phase === 'won'}
+            />
+          </View>
+
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
             <Pressable onPress={initGame} style={[styles.btnSmall, { backgroundColor: ACCENT }]}>
               <Text style={styles.btnSmallText}>Play Again</Text>
             </Pressable>

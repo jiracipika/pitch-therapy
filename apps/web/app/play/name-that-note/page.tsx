@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
+import NoteComparisonStaff from '@/components/NoteComparisonStaff';
 
 const NOTE_FREQS: Record<string, number> = {};
 (NOTE_NAMES as unknown as string[]).forEach((n) => { NOTE_FREQS[`${n}4`] = NOTE_FREQUENCIES[`${n}4`] ?? 261.63; });
@@ -240,6 +241,20 @@ export default function NameThatNotePage() {
                 <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 4 }}>Next round starting...</div>
               </div>
             )}
+
+            {/* Staff comparison after answer */}
+            {feedback !== 'none' && results.length > 0 && (() => {
+              const last = results[results.length - 1];
+              const guessedLabel = last.answer.replace('4', '').replace('5', '');
+              const correctLabel = last.target.replace('4', '').replace('5', '');
+              return (
+                <NoteComparisonStaff
+                  guessedNote={guessedLabel}
+                  correctNote={correctLabel}
+                  isCorrect={feedback === 'correct'}
+                />
+              );
+            })()}
 
             <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginBottom: 16 }}>Tap the correct note</div>
 
