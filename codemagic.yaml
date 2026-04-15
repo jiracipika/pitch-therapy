@@ -1,59 +1,67 @@
 workflows:
-  release-both:
-    name: "Pitch Therapy: Build iOS (TestFlight) + Android (Play)"
-    max_build_duration: 120
-    instance_type: mac_mini_m2
+  expo_android_eas:
+    name: Expo Android EAS Build
+    max_build_duration: 60
+
     environment:
-      groups:
-        - app_store_connect
-        - google_play
-      vars:
-        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
-        XCODE_SCHEME: "App"
-        BUNDLE_ID: "com.pitchtherapy.app"
-        JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
-        PACKAGE_NAME: "com.pitchtherapy.app"
-        node: 20
-      android_signing:
-        - akey
-      triggering:
-        events:
-          - push
-        branch_patterns:
-          - pattern: 'main'
-            include: true
-          - pattern: 'master'
-            include: true
+      node: 20
+      java: 17
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+
+    cache:
+      cache_paths:
+        - ~/.npm
+        - /tmp/expo-cli
+        - $CM_BUILD_DIR/apps/mobile/node_modules
+        - $CM_BUILD_DIR/node_modules
+
     scripts:
-      - name: Set up keystore
+      - name: Show repo structure
         script: |
-          echo $CM_KEYSTORE | base64 --decode > $CM_KEYSTORE_PATH
-      - name: Install npm dependencies
+          pwd
+          ls
+          ls apps || true
+          ls apps/mobile || true
+
+      - name: Install root dependencies
+        script: |
+          npm ci
+
+      - name: Build shared workspace packages
+        script: |
+          npm run build --workspaces --if-present
+
+      - name: Install EAS CLI
+        script: |
+          npm install -g eas-cli
+
+      - name: Verify Expo app config
         script: |
           cd apps/mobile
-          npm install
-      - name: Build web app and sync with Capacitor
+          npx expo config --type public
+
+      - name: Ensure Expo token exists
+        script: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "EXPO_TOKEN is not set"
+            exit 1
+          fi
+
+      - name: Build Android with EAS
         script: |
           cd apps/mobile
-          npm run build
-          npx cap sync android
-          npx cap sync ios
-      - name: Build Android App Bundle
-        script: |
-          cd apps/mobile/android
-          ./gradlew assembleRelease -Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
-          ./gradlew bundleRelease -Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
+          eas build \
+            --platform android \
+            --profile production \
+            --non-interactive \
+            --wait
+
     artifacts:
-      - apps/mobile/android/app/build/outputs/**/*.aab
-      - apps/mobile/android/app/build/outputs/**/*.apk
-    publishing:
-      email:
-        recipients:
-          - rajingajadhar@gmail.com
-        notify:
-          success: true
-          failure: true
-      google_play:
-        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
-        track: internal
-        submit_as_draft: false
+      - /tmp/xcodebuild_logs/*.log
