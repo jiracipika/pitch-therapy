@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META, DIFFICULTY_CONFIG, type Difficulty } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
+import NoteComparisonStaff from '@/components/NoteComparisonStaff';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 
 const MODE = GAME_MODE_META['note-id'];
@@ -223,6 +224,15 @@ export default function NoteIdScreen() {
               {feedback === 'correct' ? '✓ Correct!' : `✗ It was ${target}`}
             </Text>
           </View>
+        )}
+
+        {/* Staff comparison after reveal */}
+        {feedback && selected && (
+          <NoteComparisonStaff
+            guessedNote={selected}
+            correctNote={target}
+            isCorrect={feedback === 'correct'}
+          />
         )}
 
         {/* Note grid */}

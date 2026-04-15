@@ -277,6 +277,11 @@ export { getDailySeed as getDailyChallengeSeed, calculateStreak, todayDateString
 export type { DailyChallengeResult } from "./dailyChallenge";
 export type { FrequencyToNoteResult } from "./audio";
 
+// ─── Staff Position Mapping ─────────────────────────────────────────────────
+
+export { noteToStaffPos, staffPosToY, STAFF_LINES } from "./staff";
+export type { StaffPosition } from "./staff";
+
 // ─── Shared Game Framework ───────────────────────────────────────────────────
 
 export {

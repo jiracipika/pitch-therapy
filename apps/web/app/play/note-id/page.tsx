@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
 import WaveVisualizer from '@/components/WaveVisualizer';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
+import NoteComparisonStaff from '@/components/NoteComparisonStaff';
 
 type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -345,6 +346,18 @@ export default function NoteIdPage() {
             })}
           </motion.div>
         </AnimatePresence>
+
+        {/* Staff comparison — shown after guess */}
+        {feedback && results.length > 0 && (() => {
+          const last = results[results.length - 1];
+          return (
+            <NoteComparisonStaff
+              guessedNote={last.answer === 'timeout' ? '?' : last.answer}
+              correctNote={last.target}
+              isCorrect={feedback === 'correct'}
+            />
+          );
+        })()}
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 20, fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px' }}>
           {!isPractice && <span>Round {round}/{config.rounds}</span>}
