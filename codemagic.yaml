@@ -6,6 +6,8 @@ workflows:
     environment:
       node: 20
       java: 17
+      groups:
+        - expo_credentials
 
     triggering:
       events:
@@ -19,18 +21,11 @@ workflows:
       cache_paths:
         - ~/.npm
         - /tmp/expo-cli
-        - $CM_BUILD_DIR/apps/mobile/node_modules
         - $CM_BUILD_DIR/node_modules
+        - $CM_BUILD_DIR/apps/mobile/node_modules
 
     scripts:
-      - name: Show repo structure
-        script: |
-          pwd
-          ls
-          ls apps || true
-          ls apps/mobile || true
-
-      - name: Install root dependencies
+      - name: Install dependencies
         script: |
           npm ci
 
@@ -42,15 +37,15 @@ workflows:
         script: |
           npm install -g eas-cli
 
-      - name: Verify Expo app config
+      - name: Verify Expo config
         script: |
           cd apps/mobile
           npx expo config --type public
 
-      - name: Ensure Expo token exists
+      - name: Check Expo token
         script: |
           if [ -z "$EXPO_TOKEN" ]; then
-            echo "EXPO_TOKEN is not set"
+            echo "EXPO_TOKEN is not set. Add it in Codemagic UI under the expo_credentials variable group."
             exit 1
           fi
 
@@ -62,6 +57,3 @@ workflows:
             --profile production \
             --non-interactive \
             --wait
-
-    artifacts:
-      - /tmp/xcodebuild_logs/*.log
