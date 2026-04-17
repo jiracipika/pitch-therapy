@@ -50,11 +50,11 @@ workflows:
 
       - name: Build Android APK locally with EAS
         script: |
+          cd apps/mobile
           EAS_BUILD_NO_EXPO_GO_WARNING=true eas build \
             --platform android \
             --profile preview \
             --local \
-            --project apps/mobile \
             --output $CM_BUILD_DIR/build.apk
 
     artifacts:
