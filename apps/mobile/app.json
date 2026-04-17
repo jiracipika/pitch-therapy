@@ -17,6 +17,11 @@
       },
       "package": "com.pitchtherapy.app"
     },
-    "plugins": ["expo-router", "expo-av"]
+    "plugins": ["expo-router", "expo-av"],
+    "extra": {
+      "eas": {
+        "projectId": "b28d32a2-0fb4-401d-b6e6-f1b39735ed52"
+      }
+    }
   }
 }
