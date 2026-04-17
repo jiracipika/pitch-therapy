@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { GAME_MODE_META, type GameMode } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
@@ -12,32 +12,94 @@ export default function GameScreen() {
 
   if (!meta) {
     return (
-      <View className="flex-1 bg-background items-center justify-center">
-        <Text className="text-muted">Unknown game mode</Text>
-        <Pressable onPress={() => router.back()} className="mt-4">
-          <Text className="text-blue-500">Go back</Text>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Unknown game mode</Text>
+        <Pressable onPress={() => router.back()} style={styles.backLink}>
+          <Text style={styles.backLinkText}>Go back</Text>
         </Pressable>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-background">
+    <View style={styles.container}>
       <GameHeader score={0} round={1} totalRounds={10} streak={0} accent={meta.accentHex} />
-      <View className="flex-1 items-center justify-center px-8">
-        <Text className="text-text text-3xl font-bold mb-2">{meta.label}</Text>
-        <Text className="text-muted text-center mb-8">{meta.description}</Text>
+      <View style={styles.content}>
+        <Text style={styles.modeTitle}>{meta.label}</Text>
+        <Text style={styles.modeDescription}>{meta.description}</Text>
         <Pressable
           onPress={() => playTone('A4', 440)}
-          className="rounded-2xl px-8 py-4 active:opacity-80"
-          style={{ backgroundColor: meta.accentHex }}
+          style={({ pressed }) => [
+            styles.playButton,
+            { backgroundColor: meta.accentHex },
+            pressed && styles.playButtonPressed,
+          ]}
         >
-          <Text className="text-white font-bold text-lg">▶ Play Tone</Text>
+          <Text style={styles.playButtonText}>▶ Play Tone</Text>
         </Pressable>
-        <Pressable onPress={() => router.back()} className="mt-6">
-          <Text className="text-muted text-sm">← Back to Dashboard</Text>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Text style={styles.backButtonText}>← Back to Dashboard</Text>
         </Pressable>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  errorContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    color: colors.muted,
+  },
+  backLink: {
+    marginTop: 16,
+  },
+  backLinkText: {
+    color: '#3B82F6',
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  modeTitle: {
+    color: colors.text,
+    fontSize: 30,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  modeDescription: {
+    color: colors.muted,
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  playButton: {
+    borderRadius: 16,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+  },
+  playButtonPressed: {
+    opacity: 0.8,
+  },
+  playButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  backButton: {
+    marginTop: 24,
+  },
+  backButtonText: {
+    color: colors.muted,
+    fontSize: 14,
+  },
+});

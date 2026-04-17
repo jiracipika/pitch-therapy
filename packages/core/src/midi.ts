@@ -154,7 +154,7 @@ export class MidiManager {
       octave,
       velocity,
       frequency: midiNoteToFrequency(note),
-      timestamp: event.timeStamp ?? Date.now(),
+      timestamp: Date.now(),
     };
   }
 

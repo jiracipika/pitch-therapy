@@ -1,5 +1,5 @@
-import { View, Text, Pressable, StyleSheet, Slider } from 'react-native';
-import { useState, useRef, useCallback } from 'react';
+import { View, Text, Pressable, StyleSheet, PanResponder, Animated } from 'react-native';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { playFrequency } from '@/lib/audio';
 
@@ -22,11 +22,50 @@ export default function FrequencyHuntScreen() {
   const [sliderPos, setSliderPos] = useState(0.5);
   const [results, setResults] = useState<{ diff: number; points: number }[]>([]);
   const previewRef = useRef<ReturnType<typeof setTimeout>>();
+  const sliderAnim = useRef(new Animated.Value(0.5)).current;
+  const sliderWidth = useRef(0);
+  const isTracking = useRef(false);
+
+  useEffect(() => {
+    sliderAnim.addListener(({ value }) => {
+      if (isTracking.current) {
+        setSliderPos(value);
+      }
+    });
+    return () => sliderAnim.removeAllListeners();
+  }, []);
+
+  const panResponder = useMemo(() =>
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => phase === 'hunting',
+      onMoveShouldSetPanResponder: () => phase === 'hunting',
+      onPanResponderGrant: (evt) => {
+        isTracking.current = true;
+        const pos = Math.max(0, Math.min(1, evt.nativeEvent.locationX / (sliderWidth.current || 1)));
+        sliderAnim.setValue(pos);
+        setSliderPos(pos);
+      },
+      onPanResponderMove: (evt) => {
+        const pos = Math.max(0, Math.min(1, evt.nativeEvent.locationX / (sliderWidth.current || 1)));
+        sliderAnim.setValue(pos);
+        setSliderPos(pos);
+        clearTimeout(previewRef.current);
+        previewRef.current = setTimeout(() => {
+          playFrequency(sliderToFreq(pos), 0.2);
+        }, 80);
+      },
+      onPanResponderRelease: () => {
+        isTracking.current = false;
+      },
+    }),
+  [phase]);
 
   const startRound = () => {
     const freq = Math.round((MIN_FREQ + Math.random() * (MAX_FREQ - MIN_FREQ)) / 10) * 10;
     setTargetFreq(freq);
-    setSliderPos(freqToSlider(freq) * 0.3 + Math.random() * 0.4);
+    const startPos = freqToSlider(freq) * 0.3 + Math.random() * 0.4;
+    setSliderPos(startPos);
+    sliderAnim.setValue(startPos);
     setPhase('hunting');
     setRound((r) => r + 1);
     playFrequency(freq, 1.0);
@@ -50,14 +89,6 @@ export default function FrequencyHuntScreen() {
       if (round >= totalRounds) setPhase('done');
       else startRound();
     }, 2000);
-  };
-
-  const handleSliderChange = (value: number) => {
-    setSliderPos(value);
-    clearTimeout(previewRef.current);
-    previewRef.current = setTimeout(() => {
-      playFrequency(sliderToFreq(value), 0.2);
-    }, 80);
   };
 
   if (phase === 'done') {
@@ -96,6 +127,8 @@ export default function FrequencyHuntScreen() {
     );
   }
 
+  const thumbPos = sliderPos;
+
   return (
     <View style={styles.container}>
       <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
@@ -123,23 +156,39 @@ export default function FrequencyHuntScreen() {
           )}
         </View>
 
-        {/* Slider */}
+        {/* Custom Slider */}
         <View style={{ marginBottom: 16 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
             <Text style={{ fontSize: 10, color: '#3f3f46' }}>100 Hz</Text>
             <Text style={{ fontSize: 10, color: '#3f3f46' }}>2000 Hz</Text>
           </View>
-          <Slider
-            value={sliderPos}
-            onValueChange={handleSliderChange}
-            minimumValue={0}
-            maximumValue={1}
-            step={0.001}
-            disabled={phase !== 'hunting'}
-            minimumTrackTintColor={ACCENT}
-            maximumTrackTintColor="rgba(255,255,255,0.1)"
-            thumbTintColor={ACCENT}
-          />
+          <View
+            onLayout={(e) => { sliderWidth.current = e.nativeEvent.layout.width; }}
+            {...panResponder.panHandlers}
+            style={{ height: 40, justifyContent: 'center' }}
+          >
+            {/* Track background */}
+            <View style={{ height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+              {/* Filled track */}
+              <View style={{ height: 4, width: `${thumbPos * 100}%`, backgroundColor: ACCENT, borderRadius: 2 }} />
+            </View>
+            {/* Thumb */}
+            <View style={{
+              position: 'absolute',
+              left: thumbPos * 100 + '%',
+              top: 14,
+              width: 24,
+              height: 24,
+              borderRadius: 12,
+              backgroundColor: ACCENT,
+              marginLeft: -12,
+              elevation: 4,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4,
+            }} />
+          </View>
           <Text style={{ textAlign: 'center', fontSize: 28, fontWeight: '800', color: '#f4f4f5', marginTop: 12 }}>
             {Math.round(sliderToFreq(sliderPos))} Hz
           </Text>

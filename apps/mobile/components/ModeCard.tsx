@@ -1,6 +1,7 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { GameModeMeta } from '@pitch-therapy/core';
+import { colors } from '@/lib/theme';
 
 interface ModeCardProps {
   mode: GameModeMeta;
@@ -13,16 +14,51 @@ export function ModeCard({ mode }: ModeCardProps) {
   return (
     <Pressable
       onPress={() => router.push(route)}
-      className="bg-card rounded-2xl p-5 border border-border active:opacity-80"
+      style={({ pressed }) => [
+        styles.card,
+        pressed && styles.cardPressed,
+      ]}
     >
-      <View className="flex-row items-center gap-3 mb-2">
+      <View style={styles.headerRow}>
         <View
-          className="w-3 h-3 rounded-full"
-          style={{ backgroundColor: mode.accentHex }}
+          style={[styles.dot, { backgroundColor: mode.accentHex }]}
         />
-        <Text className="text-text font-bold text-lg">{mode.label}</Text>
+        <Text style={styles.label}>{mode.label}</Text>
       </View>
-      <Text className="text-muted text-sm">{mode.description}</Text>
+      <Text style={styles.description}>{mode.description}</Text>
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  cardPressed: {
+    opacity: 0.8,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  label: {
+    color: colors.text,
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  description: {
+    color: colors.muted,
+    fontSize: 14,
+  },
+});

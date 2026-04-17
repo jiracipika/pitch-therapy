@@ -154,7 +154,7 @@ export default function ChordDetectiveScreen() {
         <Text style={{ color: '#71717a', fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>CHORD QUALITY</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
           {CHORD_TYPES.map(ct => (
-            <Pressable key={ct.id} onPress={() => setPhase === 'playing' && setSelectedType(ct.id)} style={{
+            <Pressable key={ct.id} onPress={() => phase === 'playing' && setSelectedType(ct.id)} style={{
               backgroundColor: selectedType === ct.id ? `${ACCENT}30` : 'rgba(255,255,255,0.04)', borderRadius: 16, paddingVertical: 14, paddingHorizontal: 20,
               borderWidth: selectedType === ct.id ? 2 : 1, borderColor: selectedType === ct.id ? ACCENT : 'rgba(255,255,255,0.07)',
             }}>

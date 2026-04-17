@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/lib/theme';
 
 interface GameHeaderProps {
@@ -11,16 +11,51 @@ interface GameHeaderProps {
 
 export function GameHeader({ score, round, totalRounds, streak, accent = colors.pitchMatch }: GameHeaderProps) {
   return (
-    <View className="flex-row items-center justify-between px-4 py-3 bg-card border-b border-border">
-      <View className="flex-row items-center gap-2">
-        <Text className="text-muted text-sm">Round</Text>
-        <Text className="text-text font-bold text-lg">{round}/{totalRounds}</Text>
+    <View style={styles.container}>
+      <View style={styles.row}>
+        <Text style={styles.label}>Round</Text>
+        <Text style={styles.roundText}>{round}/{totalRounds}</Text>
       </View>
-      <Text className="font-bold text-2xl" style={{ color: accent }}>{score}</Text>
-      <View className="flex-row items-center gap-2">
-        <Text className="text-muted text-sm">🔥</Text>
-        <Text className="text-text font-bold">{streak}</Text>
+      <Text style={[styles.scoreText, { color: accent }]}>{score}</Text>
+      <View style={styles.row}>
+        <Text style={styles.label}>🔥</Text>
+        <Text style={styles.streakText}>{streak}</Text>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: colors.card,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  label: {
+    color: colors.muted,
+    fontSize: 14,
+  },
+  roundText: {
+    color: colors.text,
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  scoreText: {
+    fontWeight: 'bold',
+    fontSize: 24,
+  },
+  streakText: {
+    color: colors.text,
+    fontWeight: 'bold',
+  },
+});

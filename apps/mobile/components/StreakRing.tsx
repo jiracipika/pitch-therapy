@@ -1,5 +1,5 @@
 import Svg, { Circle } from 'react-native-svg';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/lib/theme';
 
 interface StreakRingProps {
@@ -16,7 +16,7 @@ export function StreakRing({ streak, max = 7, size = 80 }: StreakRingProps) {
   const strokeDashoffset = circumference * (1 - progress);
 
   return (
-    <View className="items-center">
+    <View style={styles.container}>
       <Svg width={size} height={size}>
         <Circle
           cx={size / 2}
@@ -40,9 +40,27 @@ export function StreakRing({ streak, max = 7, size = 80 }: StreakRingProps) {
           origin={`${size / 2}, ${size / 2}`}
         />
       </Svg>
-      <View className="absolute inset-0 items-center justify-center">
-        <Text className="text-text font-bold text-xl">{streak}</Text>
+      <View style={[styles.overlay, { width: size, height: size }]}>
+        <Text style={styles.streakText}>{streak}</Text>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  streakText: {
+    color: colors.text,
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+});
