@@ -52,7 +52,7 @@ workflows:
       - name: Build Android with EAS
         script: |
           cd apps/mobile
-          eas build \
+          EAS_BUILD_NO_EXPO_GO_WARNING=true eas build \
             --platform android \
             --profile production \
             --non-interactive \
