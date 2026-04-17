@@ -60,7 +60,7 @@ workflows:
           cd apps/mobile
           EAS_BUILD_NO_EXPO_GO_WARNING=true eas build \
             --platform android \
-            --profile development \
+            --profile preview \
             --local \
             --output $CM_BUILD_DIR/build.apk
 
