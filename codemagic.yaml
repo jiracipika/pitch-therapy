@@ -39,8 +39,7 @@ workflows:
 
       - name: Verify Expo config
         script: |
-          cd apps/mobile
-          npx expo config --type public
+          npx expo config --project apps/mobile --type public
 
       - name: Check Expo token
         script: |
@@ -49,19 +48,13 @@ workflows:
             exit 1
           fi
 
-      - name: Set Android SDK vars
-        script: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          ls $ANDROID_HOME 2>/dev/null || echo "No ANDROID_HOME dir"
-
       - name: Build Android APK locally with EAS
         script: |
-          cd apps/mobile
           EAS_BUILD_NO_EXPO_GO_WARNING=true eas build \
             --platform android \
             --profile preview \
             --local \
+            --project apps/mobile \
             --output $CM_BUILD_DIR/build.apk
 
     artifacts:
