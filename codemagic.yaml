@@ -49,11 +49,20 @@ workflows:
             exit 1
           fi
 
-      - name: Build Android with EAS
+      - name: Set Android SDK vars
+        script: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          ls $ANDROID_HOME 2>/dev/null || echo "No ANDROID_HOME dir"
+
+      - name: Build Android APK locally with EAS
         script: |
           cd apps/mobile
           EAS_BUILD_NO_EXPO_GO_WARNING=true eas build \
             --platform android \
-            --profile production \
-            --non-interactive \
-            --wait
+            --profile development \
+            --local \
+            --output $CM_BUILD_DIR/build.apk
+
+    artifacts:
+      - build.apk
