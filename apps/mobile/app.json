@@ -17,11 +17,16 @@
       },
       "package": "com.pitchtherapy.app"
     },
+    "splash": {
+      "backgroundColor": "#09090b",
+      "resizeMode": "contain"
+    },
     "plugins": [
       "expo-router",
       "expo-av",
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      "expo-splash-screen"
     ],
     "extra": {
       "eas": {
