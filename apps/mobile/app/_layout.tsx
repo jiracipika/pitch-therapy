@@ -1,18 +1,67 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState, Component } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/lib/theme';
 
 SplashScreen.preventAutoHideAsync();
 
+// ─── Error Boundary ─────────────────────────────────────────────────────────
+class RootErrorBoundary extends Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  state: { hasError: boolean; error: Error | null } = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidMount() {
+    // Always hide splash, even if there's an error
+    SplashScreen.hideAsync().catch(() => {});
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorEmoji}>⚠️</Text>
+          <Text style={styles.errorTitle}>Something went wrong</Text>
+          <Text style={styles.errorMessage}>
+            {this.state.error?.message || 'An unexpected error occurred'}
+          </Text>
+          <Text style={styles.errorHint}>Restart the app to try again</Text>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ─── Root Layout ─────────────────────────────────────────────────────────────
 export default function RootLayout() {
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
-    SplashScreen.hideAsync();
+    // Hide splash after a small delay to ensure the JS bundle is fully loaded
+    const hide = async () => {
+      try {
+        await SplashScreen.hideAsync();
+      } catch {
+        // splash may already be hidden
+      }
+      setReady(true);
+    };
+
+    // Short delay ensures the first frame has rendered
+    const timer = setTimeout(hide, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
-    <>
+    <RootErrorBoundary>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -35,6 +84,36 @@ export default function RootLayout() {
         <Stack.Screen name="play/note-wordle" options={{ headerShown: false }} />
         <Stack.Screen name="play/frequency-wordle" options={{ headerShown: false }} />
       </Stack>
-    </>
+    </RootErrorBoundary>
   );
 }
+
+const styles = StyleSheet.create({
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background,
+    padding: 32,
+  },
+  errorEmoji: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  errorTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  errorMessage: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  errorHint: {
+    color: colors.textTertiary,
+    fontSize: 12,
+  },
+});
