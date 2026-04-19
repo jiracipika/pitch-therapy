@@ -1,8 +1,8 @@
 // ─── Native entry point for @pitch-therapy/core ──────────────────────────────
-// Re-exports everything from index.ts but uses .native stubs for web-only APIs
-// (Web Audio API, Web MIDI API). This is the entry point Metro uses on RN/Android.
+// Imports from specific files to avoid pulling in web-only modules
+// (supabase, Web Audio API, Web MIDI API).
 
-// ─── Game Modes (pure data, no platform deps) ────────────────────────────────
+// ─── Game Data (pure types & constants, no platform deps) ────────────────────
 
 export type {
   GameMode,
@@ -15,13 +15,13 @@ export type {
   SessionState,
   SessionAction,
   RoundResult,
-} from "./index";
+} from "./gameData";
 
 export {
   GAME_MODES,
   GAME_MODE_META,
   DIFFICULTY_CONFIG,
-} from "./index";
+} from "./gameData";
 
 // ─── Audio utilities (pure math, no web deps) ───────────────────────────────
 
