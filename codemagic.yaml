@@ -39,7 +39,7 @@ workflows:
 
       - name: Verify Expo config
         script: |
-          npx expo config apps/mobile --type public
+          cd apps/mobile && npx expo config --type public
 
       - name: Check Expo token
         script: |
