@@ -15,7 +15,7 @@ export type {
   SessionState,
   SessionAction,
   RoundResult,
-};
+} from "./index";
 
 export {
   GAME_MODES,

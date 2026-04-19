@@ -23,9 +23,14 @@ export class MidiManager {
   async connect(): Promise<boolean> { return false; }
   disconnect() {}
   getDevices(): MidiDevice[] { return []; }
-  onNote() {}
+  onNoteOn(_deviceId: string, _handler: (event: MidiNoteEvent) => void): () => void { return () => {}; }
+  onAnyNoteOn(_handler: (event: MidiNoteEvent) => void): () => void { return () => {}; }
+  onNote(_handler: (event: MidiNoteEvent) => void) {}
   offNote() {}
   removeAllListeners() {}
+  sendNoteOn(_deviceId: string, _note: number, _velocity?: number) {}
+  sendNoteOff(_deviceId: string, _note: number, _velocity?: number) {}
+  destroy() {}
 }
 
 export function midiNoteToFrequency(note: number): number {

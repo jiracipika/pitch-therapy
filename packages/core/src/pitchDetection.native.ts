@@ -14,11 +14,12 @@ export interface PitchDetectionResult {
 export type MicPermissionState = 'prompt' | 'granted' | 'denied' | 'unsupported';
 
 export class PitchDetector {
-  constructor() {
-    // no-op
+  constructor(_audioContext?: unknown, _fftSize?: number) {
+    // no-op — Web Audio API not available in RN
   }
   get isListening() { return false; }
-  connect() {}
+  getAnalyser(): null { return null; }
+  connect(_source?: unknown) {}
   disconnect() {}
   start() {}
   stop() {}
@@ -29,6 +30,8 @@ export class PitchDetector {
 }
 
 export class MicrophoneManager {
+  private _detector: PitchDetector | null = null;
+
   async getPermissionState(): Promise<MicPermissionState> {
     return 'unsupported';
   }
@@ -36,12 +39,17 @@ export class MicrophoneManager {
     return false;
   }
   get isRecording() { return false; }
-  onPitch() {}
+  onPitch(_cb: (result: PitchDetectionResult) => void) {}
   async start(): Promise<PitchDetector> {
-    return new PitchDetector();
+    this._detector = new PitchDetector();
+    return this._detector;
   }
   stop() {}
-  destroy() {}
+  getAudioContext(): null { return null; }
+  getDetector(): PitchDetector | null { return this._detector; }
+  destroy() {
+    this.stop();
+  }
 }
 
 export function calculateCentsDeviation(detectedHz: number, targetHz: number): number {
