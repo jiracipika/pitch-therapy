@@ -15,4 +15,11 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, 'node_modules'),
 ];
 
+// Ensure Metro resolves platform-specific extensions (.native.ts, .android.ts)
+// from symlinked/hoisted monorepo packages
+config.resolver.platforms = ['android', 'native', 'web'];
+
+// Make sure source resolution works for monorepo packages
+config.resolver.unstable_enablePackageExports = false;
+
 module.exports = config;
