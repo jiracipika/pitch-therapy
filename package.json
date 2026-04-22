@@ -17,7 +17,7 @@
     "typecheck:ci": "npm run typecheck:core && npm run typecheck:ui && npm run typecheck:mobile",
     "test": "turbo test",
     "doctor:mobile-resolution": "node ./scripts/doctor-mobile-resolution.js",
-    "bundle:android:smoke": "cd apps/mobile && npx expo export --platform android --output-dir /tmp/pitch-therapy-android-export",
+    "bundle:android:smoke": "cd apps/mobile && NODE_PATH=\"$PWD/node_modules${NODE_PATH:+:$NODE_PATH}\" npx expo export --platform android --output-dir /tmp/pitch-therapy-android-export",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
   },
