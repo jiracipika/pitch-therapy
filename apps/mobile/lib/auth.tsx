@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState({ user, loading: false, initialized: true });
     } catch (supabaseError: any) {
       // Fallback: local auth for dev/offline
-      if (supabaseError?.message?.includes('Missing') || supabaseError?.message?.includes('Failed to fetch')) {
+      if (supabaseError?.message?.includes('Missing') || supabaseError?.message?.includes('Failed to fetch') || supabaseError?.message?.includes('not available')) {
         const user: User = {
           id: `local_${email.replace(/[^a-z0-9]/gi, '_')}`,
           email,
@@ -119,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       persistUser(user);
       setState({ user, loading: false, initialized: true });
     } catch (supabaseError: any) {
-      if (supabaseError?.message?.includes('Missing') || supabaseError?.message?.includes('Failed to fetch')) {
+      if (supabaseError?.message?.includes('Missing') || supabaseError?.message?.includes('Failed to fetch') || supabaseError?.message?.includes('not available')) {
         const user: User = {
           id: `local_${email.replace(/[^a-z0-9]/gi, '_')}`,
           email,

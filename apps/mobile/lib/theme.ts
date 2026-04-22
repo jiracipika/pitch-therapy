@@ -15,6 +15,7 @@ export const colors = {
   text: '#FFFFFF',
   textSecondary: '#8E8E93',
   textTertiary: '#636366',
+  muted: '#8E8E93',
 
   // Accent colors (Apple-inspired)
   blue: '#0A84FF',
