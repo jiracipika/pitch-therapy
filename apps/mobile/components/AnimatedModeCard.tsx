@@ -3,14 +3,11 @@ import { useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
   withSequence,
   withTiming,
   runOnJS,
 } from 'react-native-reanimated';
 import type { GameModeMeta } from '@pitch-therapy/core';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface AnimatedModeCardProps {
   mode: GameModeMeta;
@@ -37,35 +34,36 @@ export function AnimatedModeCard({ mode }: AnimatedModeCardProps) {
   }));
 
   return (
-    <AnimatedPressable
-      onPress={handlePress}
-      style={[
-        animatedStyle,
-        {
-          backgroundColor: 'rgba(255,255,255,0.04)',
-          borderRadius: 16,
-          padding: 20,
-          borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.07)',
-        },
-      ]}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 2 }}>
-        <View
-          style={{
-            width: 12,
-            height: 12,
-            borderRadius: 6,
-            backgroundColor: mode.accentHex,
-          }}
-        />
-        <Text style={{ color: '#f4f4f5', fontWeight: '700', fontSize: 18 }}>
-          {mode.label}
+    <Pressable onPress={handlePress}>
+      <Animated.View
+        style={[
+          animatedStyle,
+          {
+            backgroundColor: 'rgba(255,255,255,0.04)',
+            borderRadius: 16,
+            padding: 20,
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.07)',
+          },
+        ]}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 2 }}>
+          <View
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: 6,
+              backgroundColor: mode.accentHex,
+            }}
+          />
+          <Text style={{ color: '#f4f4f5', fontWeight: '700', fontSize: 18 }}>
+            {mode.label}
+          </Text>
+        </View>
+        <Text style={{ color: '#71717a', fontSize: 14, marginLeft: 24 }}>
+          {mode.description}
         </Text>
-      </View>
-      <Text style={{ color: '#71717a', fontSize: 14, marginLeft: 24 }}>
-        {mode.description}
-      </Text>
-    </AnimatedPressable>
+      </Animated.View>
+    </Pressable>
   );
 }
