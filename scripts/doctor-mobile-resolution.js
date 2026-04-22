@@ -14,6 +14,19 @@ const mobilePackageJson = JSON.parse(fs.readFileSync(mobilePackageJsonPath, 'utf
 const expectedReact = mobilePackageJson.dependencies?.react;
 const expectedReactNative = mobilePackageJson.dependencies?.['react-native'];
 
+function getHermescPlatformExecutable() {
+  switch (process.platform) {
+    case 'darwin':
+      return 'osx-bin/hermesc';
+    case 'linux':
+      return 'linux64-bin/hermesc';
+    case 'win32':
+      return 'win64-bin/hermesc.exe';
+    default:
+      throw new Error(`Unsupported platform for Hermes compiler: ${process.platform}`);
+  }
+}
+
 function isInRepo(resolvedPath) {
   const relativePath = path.relative(repoRoot, resolvedPath);
   return !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
@@ -48,12 +61,47 @@ function resolvePackageJson(packageName, searchPaths, options = {}) {
   throw lastError || new Error(`Could not resolve ${lookup}`);
 }
 
+function resolveModulePath(moduleId, searchPaths, options = {}) {
+  const { optional = false, label = moduleId } = options;
+  let lastError = null;
+
+  for (const searchPath of searchPaths) {
+    try {
+      const resolvedPath = require.resolve(moduleId, { paths: [searchPath] });
+      if (!isInRepo(resolvedPath)) {
+        lastError = new Error(`${label} resolved outside repo root: ${resolvedPath}`);
+        continue;
+      }
+      return resolvedPath;
+    } catch (error) {
+      if (error.code !== 'MODULE_NOT_FOUND') {
+        throw error;
+      }
+      lastError = error;
+    }
+  }
+
+  if (optional) {
+    return null;
+  }
+
+  throw lastError || new Error(`Could not resolve ${moduleId}`);
+}
+
 function printResolved(name, resolved) {
   if (!resolved) {
     console.log(`${name}: (not installed)`);
     return;
   }
   console.log(`${name}: ${resolved.version} (${resolved.path})`);
+}
+
+function printResolvedPath(name, resolvedPath) {
+  if (!resolvedPath) {
+    console.log(`${name}: (not installed)`);
+    return;
+  }
+  console.log(`${name}: ${resolvedPath}`);
 }
 
 const mobileReact = resolvePackageJson('react', [mobileRoot], { label: 'mobile react' });
@@ -77,6 +125,12 @@ const rootReactNative = resolvePackageJson('react-native', [repoRoot], {
   label: 'root react-native',
   optional: true,
 });
+const hermescModuleId = `react-native/sdks/hermesc/${getHermescPlatformExecutable()}`;
+const mobileHermesc = resolveModulePath(hermescModuleId, [mobileRoot], { label: 'mobile hermesc' });
+const rootHermesc = resolveModulePath(hermescModuleId, [repoRoot], {
+  label: 'root hermesc',
+  optional: true,
+});
 
 printResolved('mobile react', mobileReact);
 printResolved('expo react', expoReact);
@@ -84,6 +138,8 @@ printResolved('expo-router react', expoRouterReact);
 printResolved('mobile react-native', mobileReactNative);
 printResolved('root react', rootReact);
 printResolved('root react-native', rootReactNative);
+printResolvedPath('mobile hermesc', mobileHermesc);
+printResolvedPath('root hermesc', rootHermesc);
 printResolved('mobile expo', mobileExpo);
 printResolved('mobile expo-router', mobileExpoRouter);
 
