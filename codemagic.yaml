@@ -39,7 +39,16 @@ workflows:
 
       - name: Verify Expo config
         script: |
-          npx expo config apps/mobile --type public
+          cd apps/mobile
+          npx expo config --type public
+
+      - name: Diagnose mobile dependency resolution
+        script: |
+          npm run doctor:mobile-resolution
+
+      - name: Android export smoke check
+        script: |
+          npm run bundle:android:smoke
 
       - name: Check Expo token
         script: |
