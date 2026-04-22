@@ -175,7 +175,7 @@ export default function FrequencyHuntScreen() {
             {/* Thumb */}
             <View style={{
               position: 'absolute',
-              left: thumbPos * 100 + '%',
+              left: `${thumbPos * 100}%` as `${number}%`,
               top: 14,
               width: 24,
               height: 24,
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#09090b' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, marginBottom: 20 },
-  title: { fontSize: 28, fontWeight: '700', color: '#f4f4f5', letterSpacing: '-0.025em' },
+  title: { fontSize: 28, fontWeight: '700', color: '#f4f4f5', letterSpacing: -0.4 },
   subtitle: { fontSize: 14, color: '#71717a', marginTop: 8, marginBottom: 40 },
   statsRow: { flexDirection: 'row', gap: 10, marginTop: 24, marginBottom: 32 },
   statCard: { backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center', flex: 1 },

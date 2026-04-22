@@ -68,22 +68,22 @@ export class MidiManager {
   getDevices(): MidiDevice[] {
     if (!this.access) return [];
     const devices: MidiDevice[] = [];
-    for (const [id, input] of this.access.inputs) {
+    this.access.inputs.forEach((input, id) => {
       devices.push({
         id,
         name: input.name ?? "Unknown",
         manufacturer: input.manufacturer ?? "",
         type: "input",
       });
-    }
-    for (const [id, output] of this.access.outputs) {
+    });
+    this.access.outputs.forEach((output, id) => {
       devices.push({
         id,
         name: output.name ?? "Unknown",
         manufacturer: output.manufacturer ?? "",
         type: "output",
       });
-    }
+    });
     return devices;
   }
 
@@ -114,38 +114,44 @@ export class MidiManager {
   private bindInputs(): void {
     if (!this.access) return;
 
+    const activeInputIds = new Set<string>();
+    this.access.inputs.forEach((_input, id) => {
+      activeInputIds.add(id);
+    });
+
     // Remove old handlers for disconnected inputs
     for (const [id] of this.inputs) {
-      if (!this.access.inputs.has(id)) {
+      if (!activeInputIds.has(id)) {
         this.inputs.delete(id);
       }
     }
 
-    for (const [id, input] of this.access.inputs) {
+    this.access.inputs.forEach((input, id) => {
       if (!this.inputs.has(id)) {
         this.inputs.set(id, input);
-        input.onmidimessage = (e) => this.handleMessage(id, e);
+        input.onmidimessage = (e: MIDIMessageEvent) => this.handleMessage(id, e);
       }
-    }
+    });
   }
 
   private handleMessage(deviceId: string, event: MIDIMessageEvent): void {
-    const [status, note, velocity] = event.data;
+    const data = event.data;
+    if (!data || data.length < 3) return;
+
+    const status = data[0] ?? 0;
+    const note = data[1] ?? 0;
+    const velocity = data[2] ?? 0;
     const command = status & 0xf0;
 
     // noteOn (0x90) or noteOff (0x80)
     if (command === 0x90 && velocity > 0) {
-      const midiEvent = this.createNoteEvent(deviceId, note, velocity);
+      const midiEvent = this.createNoteEvent(note, velocity);
       this.emit("*", midiEvent);
       this.emit(deviceId, midiEvent);
     }
   }
 
-  private createNoteEvent(
-    deviceId: string,
-    note: number,
-    velocity: number,
-  ): MidiNoteEvent {
+  private createNoteEvent(note: number, velocity: number): MidiNoteEvent {
     const octave = Math.floor(note / 12) - 1;
     const name = NOTE_NAMES[note % 12] + octave;
     return {
@@ -177,7 +183,10 @@ export class MidiManager {
   }
 
   private send(deviceId: string, data: number[]): void {
-    const output = this.access?.outputs.get(deviceId);
+    let output: MIDIOutput | undefined;
+    this.access?.outputs.forEach((candidate, id) => {
+      if (id === deviceId) output = candidate;
+    });
     if (output) {
       output.send(data);
     }

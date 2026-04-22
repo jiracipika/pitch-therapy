@@ -39,7 +39,7 @@ export default function DroneLockScreen() {
   const totalRounds = 8;
   const [score, setScore] = useState(0);
   const [droneNote, setDroneNote] = useState(0);
-  const [targetInterval, setTargetInterval] = useState(INTERVALS[0]);
+  const [targetInterval, setTargetInterval] = useState<(typeof INTERVALS)[number]>(INTERVALS[0]);
   const [lastPoints, setLastPoints] = useState(0);
   const [results, setResults] = useState<{ interval: string; points: number }[]>([]);
 

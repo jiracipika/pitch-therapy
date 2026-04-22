@@ -33,7 +33,7 @@ export default function NotFound() {
             letterSpacing: '-0.23px', marginBottom: 24,
           }}
         >
-          This note doesn't exist yet. Head back to the training ground.
+          This note doesn&apos;t exist yet. Head back to the training ground.
         </p>
         <Link
           href="/dashboard"

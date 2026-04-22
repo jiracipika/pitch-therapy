@@ -6,9 +6,10 @@
   "react-native": "./src/index.native.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "lint": "eslint src/",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src/",
     "typecheck": "tsc --noEmit",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "vitest run"
   },
   "devDependencies": {
     "typescript": "^5.7.3",
