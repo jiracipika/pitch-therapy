@@ -27,11 +27,11 @@ workflows:
     scripts:
       - name: Install dependencies
         script: |
-          npm ci
+          npm ci --workspace @pitch-therapy/mobile --workspace @pitch-therapy/core --include-workspace-root
 
       - name: Build shared workspace packages
         script: |
-          npm run build --workspaces --if-present
+          npm run build --workspace @pitch-therapy/core --if-present
 
       - name: Install EAS CLI
         script: |
