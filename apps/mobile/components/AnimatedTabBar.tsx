@@ -8,8 +8,6 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 const TABS = [
   { label: 'Home',       route: '/dashboard',   icon: '⊞' },
   { label: 'Play Modes', route: '/play-modes',  icon: '▶' },
@@ -36,34 +34,35 @@ function TabButton({ tab, active }: { tab: typeof TABS[number]; active: boolean 
   }));
 
   return (
-    <AnimatedPressable
-      onPress={handlePress}
-      style={[
-        animatedStyle,
-        { flex: 1, alignItems: 'center', paddingVertical: 4 },
-      ]}
-    >
-      <Animated.Text
-        style={{
-          fontSize: 18,
-          marginBottom: 2,
-          color: active ? '#a78bfa' : '#71717a',
-          transform: [{ scale: active ? 1.2 : 1 }],
-        }}
+    <Pressable onPress={handlePress} style={{ flex: 1 }}>
+      <Animated.View
+        style={[
+          animatedStyle,
+          { alignItems: 'center', paddingVertical: 4 },
+        ]}
       >
-        {tab.icon}
-      </Animated.Text>
-      <Animated.Text
-        style={{
-          fontSize: 10,
-          fontWeight: '600',
-          color: active ? '#a78bfa' : '#71717a',
-          opacity: active ? 1 : 0.7,
-        }}
-      >
-        {tab.label}
-      </Animated.Text>
-    </AnimatedPressable>
+        <Animated.Text
+          style={{
+            fontSize: 18,
+            marginBottom: 2,
+            color: active ? '#a78bfa' : '#71717a',
+            transform: [{ scale: active ? 1.2 : 1 }],
+          }}
+        >
+          {tab.icon}
+        </Animated.Text>
+        <Animated.Text
+          style={{
+            fontSize: 10,
+            fontWeight: '600',
+            color: active ? '#a78bfa' : '#71717a',
+            opacity: active ? 1 : 0.7,
+          }}
+        >
+          {tab.label}
+        </Animated.Text>
+      </Animated.View>
+    </Pressable>
   );
 }
 
