@@ -5,7 +5,9 @@ import { useEffect, Component, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/lib/theme';
 
-SplashScreen.preventAutoHideAsync();
+void SplashScreen.preventAutoHideAsync().catch(() => {
+  // In some release/startup edge-cases the splash screen may already be controlled.
+});
 
 // ─── Error Boundary ─────────────────────────────────────────────────────────
 class RootErrorBoundary extends Component<
