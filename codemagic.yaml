@@ -60,6 +60,7 @@ workflows:
       - name: Build Android APK locally with EAS
         script: |
           cd apps/mobile
+          export NODE_PATH="$PWD/node_modules${NODE_PATH:+:$NODE_PATH}"
           EAS_BUILD_NO_EXPO_GO_WARNING=true eas build \
             --platform android \
             --profile preview \
