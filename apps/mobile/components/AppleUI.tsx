@@ -11,10 +11,23 @@ interface GlassCardProps {
 }
 
 export function GlassCard({ children, style, onPress, padding = 18 }: GlassCardProps) {
-  const Wrapper = onPress ? Pressable : View;
+  if (onPress) {
+    return (
+      <Pressable
+        onPress={onPress}
+        style={[
+          styles.glass,
+          { padding, borderRadius: radii.lg },
+          style,
+        ]}
+      >
+        {children}
+      </Pressable>
+    );
+  }
+
   return (
-    <Wrapper
-      onPress={onPress}
+    <View
       style={[
         styles.glass,
         { padding, borderRadius: radii.lg },
@@ -22,7 +35,7 @@ export function GlassCard({ children, style, onPress, padding = 18 }: GlassCardP
       ]}
     >
       {children}
-    </Wrapper>
+    </View>
   );
 }
 
