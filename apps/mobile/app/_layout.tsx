@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState, Component } from 'react';
+import { useEffect, Component, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/lib/theme';
 
@@ -9,7 +9,7 @@ SplashScreen.preventAutoHideAsync();
 
 // ─── Error Boundary ─────────────────────────────────────────────────────────
 class RootErrorBoundary extends Component<
-  { children: React.ReactNode },
+  { children: ReactNode },
   { hasError: boolean; error: Error | null }
 > {
   state: { hasError: boolean; error: Error | null } = { hasError: false, error: null };
@@ -23,7 +23,7 @@ class RootErrorBoundary extends Component<
     SplashScreen.hideAsync().catch(() => {});
   }
 
-  render() {
+  render(): ReactNode {
     if (this.state.hasError) {
       return (
         <View style={styles.errorContainer}>
@@ -42,8 +42,6 @@ class RootErrorBoundary extends Component<
 
 // ─── Root Layout ─────────────────────────────────────────────────────────────
 export default function RootLayout() {
-  const [ready, setReady] = useState(false);
-
   useEffect(() => {
     // Hide splash after a small delay to ensure the JS bundle is fully loaded
     const hide = async () => {
@@ -52,7 +50,6 @@ export default function RootLayout() {
       } catch {
         // splash may already be hidden
       }
-      setReady(true);
     };
 
     // Short delay ensures the first frame has rendered
