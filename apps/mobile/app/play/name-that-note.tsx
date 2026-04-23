@@ -32,7 +32,7 @@ export default function NameThatNoteScreen() {
   const [feedback, setFeedback] = useState<'none' | 'correct' | 'wrong'>('none');
   const [guessedLabel, setGuessedLabel] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(10);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
   const startRound = () => {
     const note = QUIZ_NOTES[Math.floor(Math.random() * QUIZ_NOTES.length)];

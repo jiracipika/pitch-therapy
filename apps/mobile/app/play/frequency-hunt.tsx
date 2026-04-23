@@ -21,7 +21,7 @@ export default function FrequencyHuntScreen() {
   const [targetFreq, setTargetFreq] = useState(440);
   const [sliderPos, setSliderPos] = useState(0.5);
   const [results, setResults] = useState<{ diff: number; points: number }[]>([]);
-  const previewRef = useRef<ReturnType<typeof setTimeout>>();
+  const previewRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const sliderAnim = useRef(new Animated.Value(0.5)).current;
   const sliderWidth = useRef(0);
   const isTracking = useRef(false);

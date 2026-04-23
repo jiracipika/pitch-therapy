@@ -1,6 +1,32 @@
-import { Audio } from 'expo-av';
-
 // ─── WAV Tone Generator ───────────────────────────────────────────────────────
+
+let cachedBase64Table: string[] | null = null;
+
+function getBase64Table(): string[] {
+  if (!cachedBase64Table) {
+    cachedBase64Table = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.split('');
+  }
+  return cachedBase64Table;
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  const table = getBase64Table();
+  let output = '';
+
+  for (let i = 0; i < bytes.length; i += 3) {
+    const a = bytes[i] ?? 0;
+    const b = bytes[i + 1] ?? 0;
+    const c = bytes[i + 2] ?? 0;
+    const chunk = (a << 16) | (b << 8) | c;
+
+    output += table[(chunk >> 18) & 63];
+    output += table[(chunk >> 12) & 63];
+    output += i + 1 < bytes.length ? table[(chunk >> 6) & 63] : '=';
+    output += i + 2 < bytes.length ? table[chunk & 63] : '=';
+  }
+
+  return output;
+}
 
 function generateToneDataURL(frequency: number, duration: number = 0.6, sampleRate: number = 44100): string {
   const numSamples = Math.floor(sampleRate * duration);
@@ -36,15 +62,9 @@ function generateToneDataURL(frequency: number, duration: number = 0.6, sampleRa
     view.setInt16(44 + i * 2, Math.floor(sample * 32767), true);
   }
 
-  // Convert ArrayBuffer to base64
+  // Convert ArrayBuffer to base64 without relying on browser-only globals.
   const bytes = new Uint8Array(buffer);
-  let binary = '';
-  const chunkSize = 8192;
-  for (let i = 0; i < bytes.byteLength; i += chunkSize) {
-    const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.byteLength));
-    binary += String.fromCharCode(...chunk);
-  }
-  return 'data:audio/wav;base64,' + btoa(binary);
+  return 'data:audio/wav;base64,' + bytesToBase64(bytes);
 }
 
 // ─── Note Frequencies ────────────────────────────────────────────────────────
@@ -67,9 +87,19 @@ export const NOTE_FREQS_4: Record<string, number> = {
 // ─── Audio Mode Setup ─────────────────────────────────────────────────────────
 
 let audioModeSet = false;
+let expoAvModule: typeof import('expo-av') | null = null;
+
+function getExpoAvModule(): typeof import('expo-av') {
+  if (!expoAvModule) {
+    // Lazy-load native audio module so app startup isn't blocked by AV initialization.
+    expoAvModule = require('expo-av');
+  }
+  return expoAvModule as typeof import('expo-av');
+}
 
 async function ensureAudioMode() {
   if (!audioModeSet) {
+    const { Audio } = getExpoAvModule();
     await Audio.setAudioModeAsync({
       playsInSilentModeIOS: true,
       allowsRecordingIOS: false,
@@ -84,6 +114,7 @@ async function ensureAudioMode() {
 export async function playTone(noteOrLabel: string, hz: number, duration: number = 0.6): Promise<void> {
   try {
     await ensureAudioMode();
+    const { Audio } = getExpoAvModule();
     const dataUrl = generateToneDataURL(hz, duration);
     const { sound } = await Audio.Sound.createAsync({ uri: dataUrl });
     await sound.playAsync();
