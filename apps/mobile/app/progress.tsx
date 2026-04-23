@@ -1,7 +1,7 @@
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text } from 'react-native';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { StreakRing } from '@/components/StreakRing';
-import { AnimatedTabBar } from '@/components/AnimatedTabBar';
+import { AppPage } from '@/components/AppPage';
 
 const STATS = [
   { label: 'Total Sessions', value: '0' },
@@ -12,89 +12,76 @@ const STATS = [
 
 export default function ProgressScreen() {
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
-      <ScrollView style={{ flex: 1, paddingHorizontal: 16 }} contentContainerStyle={{ paddingTop: 56, paddingBottom: 100 }}>
-        <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginBottom: 24 }}>
-          Progress
+    <AppPage title="Progress" subtitle="Track consistency and performance.">
+      <View
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.04)',
+          borderRadius: 18,
+          padding: 20,
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.08)',
+          alignItems: 'center',
+        }}
+      >
+        <Text style={{ color: '#9ca3af', fontSize: 12, textTransform: 'uppercase', fontWeight: '700', marginBottom: 12 }}>
+          Best Streak
         </Text>
+        <StreakRing streak={0} size={104} />
+        <Text style={{ color: '#f5f5f5', fontWeight: '700', marginTop: 8, fontSize: 18 }}>0 days</Text>
+      </View>
 
-        {/* Streak ring */}
-        <View
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.04)',
-            borderRadius: 16,
-            padding: 20,
-            borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.07)',
-            alignItems: 'center',
-            marginBottom: 20,
-          }}
-        >
-          <Text style={{ color: '#71717a', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
-            Best Streak
-          </Text>
-          <StreakRing streak={0} size={100} />
-          <Text style={{ color: '#f4f4f5', fontWeight: '700', marginTop: 8 }}>0 days</Text>
-        </View>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+        {STATS.map((stat) => (
+          <View
+            key={stat.label}
+            style={{
+              flex: 1,
+              minWidth: '47%',
+              backgroundColor: 'rgba(255,255,255,0.04)',
+              borderRadius: 14,
+              padding: 14,
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.08)',
+            }}
+          >
+            <Text style={{ color: '#9ca3af', fontSize: 12, marginBottom: 6 }}>{stat.label}</Text>
+            <Text style={{ color: '#f5f5f5', fontWeight: '700', fontSize: 24, fontVariant: ['tabular-nums'] }}>{stat.value}</Text>
+          </View>
+        ))}
+      </View>
 
-        {/* Stats grid */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
-          {STATS.map((stat) => (
-            <View
-              key={stat.label}
-              style={{
-                flex: 1,
-                minWidth: '45%',
-                backgroundColor: 'rgba(255,255,255,0.04)',
-                borderRadius: 12,
-                padding: 14,
-                borderWidth: 1,
-                borderColor: 'rgba(255,255,255,0.07)',
-              }}
-            >
-              <Text style={{ color: '#71717a', fontSize: 11, marginBottom: 4 }}>{stat.label}</Text>
-              <Text style={{ color: '#f4f4f5', fontWeight: '700', fontSize: 22 }}>{stat.value}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Per-mode breakdown */}
-        <Text style={{ color: '#71717a', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
-          By Mode
-        </Text>
+      <View style={{ gap: 10 }}>
+        <Text style={{ color: '#9ca3af', fontSize: 12, textTransform: 'uppercase', fontWeight: '700' }}>By Mode</Text>
         {Object.values(GAME_MODE_META).map((mode) => (
           <View
             key={mode.id}
             style={{
               backgroundColor: 'rgba(255,255,255,0.04)',
-              borderRadius: 12,
+              borderRadius: 14,
               padding: 14,
               borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.07)',
-              marginBottom: 8,
+              borderColor: 'rgba(255,255,255,0.08)',
               flexDirection: 'row',
               alignItems: 'center',
             }}
           >
             <View
               style={{
-                width: 8,
-                height: 8,
-                borderRadius: 4,
+                width: 10,
+                height: 10,
+                borderRadius: 5,
                 backgroundColor: mode.accentHex,
                 marginRight: 12,
               }}
             />
             <View style={{ flex: 1 }}>
-              <Text style={{ color: '#f4f4f5', fontWeight: '600', fontSize: 14 }}>{mode.label}</Text>
-              <Text style={{ color: '#71717a', fontSize: 12, marginTop: 1 }}>0 sessions played</Text>
+              <Text style={{ color: '#f5f5f5', fontWeight: '700', fontSize: 14 }}>{mode.label}</Text>
+              <Text style={{ color: '#9ca3af', fontSize: 12, marginTop: 2 }}>0 sessions played</Text>
             </View>
-            <Text style={{ color: '#71717a', fontSize: 13, fontWeight: '600' }}>—</Text>
+            <Text style={{ color: '#9ca3af', fontSize: 13, fontWeight: '700' }}>—</Text>
           </View>
         ))}
-      </ScrollView>
-
-      <AnimatedTabBar />
-    </View>
+      </View>
+    </AppPage>
   );
 }

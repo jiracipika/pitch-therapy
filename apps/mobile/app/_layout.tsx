@@ -36,21 +36,25 @@ class RootErrorBoundary extends Component<
 export default function RootLayout() {
   return (
     <RootErrorBoundary>
-      <StatusBar style="light" />
+      <StatusBar style="light" translucent={false} backgroundColor={colors.background} />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: colors.card },
           headerTintColor: colors.text,
           headerShadowVisible: false,
           contentStyle: { backgroundColor: colors.background },
+          animation: 'fade_from_bottom',
+          statusBarStyle: 'light',
+          statusBarAnimation: 'fade',
+          statusBarTranslucent: false,
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="dashboard" options={{ title: 'Dashboard' }} />
-        <Stack.Screen name="play-modes" options={{ title: 'Play Modes' }} />
-        <Stack.Screen name="daily" options={{ title: 'Daily Challenge' }} />
-        <Stack.Screen name="progress" options={{ title: 'Progress' }} />
-        <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+        <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+        <Stack.Screen name="play-modes" options={{ headerShown: false }} />
+        <Stack.Screen name="daily" options={{ headerShown: false }} />
+        <Stack.Screen name="progress" options={{ headerShown: false }} />
+        <Stack.Screen name="settings" options={{ headerShown: false }} />
         <Stack.Screen name="play/[mode]" options={{ headerShown: false }} />
         <Stack.Screen name="play/pitch-match" options={{ headerShown: false }} />
         <Stack.Screen name="play/note-id" options={{ headerShown: false }} />

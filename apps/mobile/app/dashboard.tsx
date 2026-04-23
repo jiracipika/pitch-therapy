@@ -1,54 +1,67 @@
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text } from 'react-native';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
 import { StreakRing } from '@/components/StreakRing';
-import { AnimatedTabBar } from '@/components/AnimatedTabBar';
+import { AppPage } from '@/components/AppPage';
 
 export default function DashboardScreen() {
+  const featuredModes = Object.values(GAME_MODE_META).slice(0, 6);
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
-      <ScrollView style={{ flex: 1, paddingHorizontal: 16 }} contentContainerStyle={{ paddingTop: 56, paddingBottom: 100 }}>
-        <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>
-          Pitch Therapy
-        </Text>
-        <Text style={{ color: '#71717a', fontSize: 14, marginBottom: 24 }}>
-          Choose your training mode
-        </Text>
-
-        {/* Streak card */}
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 24,
-            backgroundColor: 'rgba(255,255,255,0.04)',
-            borderRadius: 16,
-            padding: 16,
-            borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.07)',
-          }}
-        >
-          <View>
-            <Text style={{ color: '#71717a', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>
-              Current Streak
-            </Text>
-            <Text style={{ color: '#f4f4f5', fontWeight: '700', fontSize: 18, marginTop: 4 }}>
-              3 days 🔥
-            </Text>
-          </View>
-          <StreakRing streak={3} />
+    <AppPage title="Pitch Therapy" subtitle="Train daily. Hear better.">
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: 'rgba(255,255,255,0.04)',
+          borderRadius: 18,
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.08)',
+          padding: 16,
+        }}
+      >
+        <View style={{ flex: 1, paddingRight: 12 }}>
+          <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', textTransform: 'uppercase' }}>
+            Current Streak
+          </Text>
+          <Text style={{ color: '#f5f5f5', fontWeight: '700', fontSize: 22, marginTop: 6 }}>3 days</Text>
+          <Text style={{ color: '#a78bfa', marginTop: 4, fontSize: 13 }}>Keep it alive with one session today</Text>
         </View>
+        <StreakRing streak={3} size={86} />
+      </View>
 
-        {/* Mode cards */}
-        {Object.values(GAME_MODE_META).map((mode) => (
+      <View
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.04)',
+          borderRadius: 18,
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.08)',
+          padding: 16,
+        }}
+      >
+        <Text style={{ color: '#f5f5f5', fontSize: 16, fontWeight: '700', marginBottom: 4 }}>Today’s Plan</Text>
+        <Text style={{ color: '#9ca3af', fontSize: 13 }}>Play 2 quick modes and 1 daily challenge to extend your streak.</Text>
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+          <View style={{ backgroundColor: 'rgba(59,130,246,0.2)', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
+            <Text style={{ color: '#93c5fd', fontSize: 12, fontWeight: '600' }}>2 Quick Rounds</Text>
+          </View>
+          <View style={{ backgroundColor: 'rgba(167,139,250,0.2)', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
+            <Text style={{ color: '#ddd6fe', fontSize: 12, fontWeight: '600' }}>Daily Challenge</Text>
+          </View>
+        </View>
+      </View>
+
+      <View>
+        <Text style={{ color: '#9ca3af', fontSize: 12, textTransform: 'uppercase', fontWeight: '700', marginBottom: 12 }}>
+          Featured Modes
+        </Text>
+        {featuredModes.map((mode) => (
           <View key={mode.id} style={{ marginBottom: 12 }}>
             <AnimatedModeCard mode={mode} />
           </View>
         ))}
-      </ScrollView>
-
-      <AnimatedTabBar />
-    </View>
+      </View>
+    </AppPage>
   );
 }

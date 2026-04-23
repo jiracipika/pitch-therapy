@@ -1,50 +1,92 @@
-import { View, Text, Pressable } from 'react-native';
-import { useRouter, usePathname } from 'expo-router';
+import { useEffect, useRef } from 'react';
+import { Animated, Pressable, Text, View } from 'react-native';
+import { type Href, usePathname, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const TABS = [
-  { label: 'Home',       route: '/dashboard',   icon: '⊞' },
-  { label: 'Play Modes', route: '/play-modes',  icon: '▶' },
-  { label: 'Daily',      route: '/daily',       icon: '◉' },
-  { label: 'Progress',   route: '/progress',    icon: '▲' },
-  { label: 'Settings',   route: '/settings',    icon: '⚙' },
+  { label: 'Home', route: '/dashboard', icon: '◈' },
+  { label: 'Play', route: '/play-modes', icon: '▶' },
+  { label: 'Daily', route: '/daily', icon: '◎' },
+  { label: 'Progress', route: '/progress', icon: '◔' },
+  { label: 'Settings', route: '/settings', icon: '⚙︎' },
 ] as const;
 
 // Extracted into its own component so hooks are at the top level (not inside .map())
 function TabButton({ tab, active }: { tab: typeof TABS[number]; active: boolean }) {
   const router = useRouter();
+  const progress = useRef(new Animated.Value(active ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(progress, {
+      toValue: active ? 1 : 0,
+      useNativeDriver: true,
+      stiffness: 240,
+      damping: 22,
+      mass: 0.9,
+    }).start();
+  }, [active, progress]);
+
+  const iconScale = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.06],
+  });
+  const labelOpacity = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.7, 1],
+  });
+  const activeBgOpacity = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
 
   return (
     <Pressable
-      onPress={() => router.push(tab.route)}
+      onPress={() => {
+        if (!active) {
+          router.replace(tab.route as Href);
+        }
+      }}
       style={({ pressed }) => ({
         flex: 1,
-        transform: [{ scale: pressed ? 0.94 : 1 }],
+        transform: [{ scale: pressed ? 0.97 : 1 }],
         opacity: pressed ? 0.9 : 1,
       })}
     >
-      <View
-        style={{ alignItems: 'center', paddingVertical: 4 }}
-      >
-        <Text
+      <View style={{ alignItems: 'center', paddingVertical: 9, paddingHorizontal: 6, position: 'relative' }}>
+        <Animated.View
+          style={{
+            position: 'absolute',
+            top: 4,
+            bottom: 4,
+            left: 4,
+            right: 4,
+            borderRadius: 12,
+            backgroundColor: 'rgba(167,139,250,0.18)',
+            borderWidth: 1,
+            borderColor: 'rgba(167,139,250,0.35)',
+            opacity: activeBgOpacity,
+          }}
+        />
+        <Animated.Text
           style={{
             fontSize: 18,
             marginBottom: 2,
-            color: active ? '#a78bfa' : '#71717a',
-            transform: [{ scale: active ? 1.2 : 1 }],
+            color: active ? '#ddd6fe' : '#71717a',
+            transform: [{ scale: iconScale }],
           }}
         >
           {tab.icon}
-        </Text>
-        <Text
+        </Animated.Text>
+        <Animated.Text
           style={{
             fontSize: 10,
             fontWeight: '600',
-            color: active ? '#a78bfa' : '#71717a',
-            opacity: active ? 1 : 0.7,
+            color: active ? '#ddd6fe' : '#9ca3af',
+            opacity: labelOpacity,
           }}
         >
           {tab.label}
-        </Text>
+        </Animated.Text>
       </View>
     </Pressable>
   );
@@ -52,20 +94,22 @@ function TabButton({ tab, active }: { tab: typeof TABS[number]; active: boolean 
 
 export function AnimatedTabBar() {
   const pathname = usePathname();
+  const insets = useSafeAreaInsets();
 
   return (
     <View
       style={{
         position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
+        bottom: Math.max(insets.bottom, 10),
+        left: 12,
+        right: 12,
         flexDirection: 'row',
-        backgroundColor: 'rgba(24,24,27,0.96)',
+        backgroundColor: 'rgba(24,24,27,0.92)',
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.07)',
-        paddingBottom: 20,
-        paddingTop: 8,
+        borderColor: 'rgba(255,255,255,0.08)',
+        paddingVertical: 6,
+        paddingHorizontal: 6,
+        borderRadius: 16,
       }}
     >
       {TABS.map((tab) => {
