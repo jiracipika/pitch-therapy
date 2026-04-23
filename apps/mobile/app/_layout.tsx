@@ -1,13 +1,8 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, Component, type ReactNode } from 'react';
+import { Component, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/lib/theme';
-
-void SplashScreen.preventAutoHideAsync().catch(() => {
-  // In some release/startup edge-cases the splash screen may already be controlled.
-});
 
 // ─── Error Boundary ─────────────────────────────────────────────────────────
 class RootErrorBoundary extends Component<
@@ -18,11 +13,6 @@ class RootErrorBoundary extends Component<
 
   static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
-  }
-
-  componentDidMount() {
-    // Always hide splash, even if there's an error
-    SplashScreen.hideAsync().catch(() => {});
   }
 
   render(): ReactNode {
@@ -44,21 +34,6 @@ class RootErrorBoundary extends Component<
 
 // ─── Root Layout ─────────────────────────────────────────────────────────────
 export default function RootLayout() {
-  useEffect(() => {
-    // Hide splash after a small delay to ensure the JS bundle is fully loaded
-    const hide = async () => {
-      try {
-        await SplashScreen.hideAsync();
-      } catch {
-        // splash may already be hidden
-      }
-    };
-
-    // Short delay ensures the first frame has rendered
-    const timer = setTimeout(hide, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <RootErrorBoundary>
       <StatusBar style="light" />
