@@ -1,12 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSequence,
-  withTiming,
-  runOnJS,
-} from 'react-native-reanimated';
 
 const TABS = [
   { label: 'Home',       route: '/dashboard',   icon: '⊞' },
@@ -19,29 +12,20 @@ const TABS = [
 // Extracted into its own component so hooks are at the top level (not inside .map())
 function TabButton({ tab, active }: { tab: typeof TABS[number]; active: boolean }) {
   const router = useRouter();
-  const scale = useSharedValue(1);
-
-  const handlePress = () => {
-    scale.value = withSequence(
-      withTiming(0.9, { duration: 100 }),
-      withTiming(1, { duration: 200 })
-    );
-    runOnJS(router.push)(tab.route);
-  };
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
 
   return (
-    <Pressable onPress={handlePress} style={{ flex: 1 }}>
-      <Animated.View
-        style={[
-          animatedStyle,
-          { alignItems: 'center', paddingVertical: 4 },
-        ]}
+    <Pressable
+      onPress={() => router.push(tab.route)}
+      style={({ pressed }) => ({
+        flex: 1,
+        transform: [{ scale: pressed ? 0.94 : 1 }],
+        opacity: pressed ? 0.9 : 1,
+      })}
+    >
+      <View
+        style={{ alignItems: 'center', paddingVertical: 4 }}
       >
-        <Animated.Text
+        <Text
           style={{
             fontSize: 18,
             marginBottom: 2,
@@ -50,8 +34,8 @@ function TabButton({ tab, active }: { tab: typeof TABS[number]; active: boolean 
           }}
         >
           {tab.icon}
-        </Animated.Text>
-        <Animated.Text
+        </Text>
+        <Text
           style={{
             fontSize: 10,
             fontWeight: '600',
@@ -60,8 +44,8 @@ function TabButton({ tab, active }: { tab: typeof TABS[number]; active: boolean 
           }}
         >
           {tab.label}
-        </Animated.Text>
-      </Animated.View>
+        </Text>
+      </View>
     </Pressable>
   );
 }
