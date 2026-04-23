@@ -14,8 +14,8 @@
     "@pitch-therapy/ui": "*",
     "framer-motion": "^12.38.0",
     "next": "^15.1.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
