@@ -39,8 +39,14 @@ function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: b
           router.replace(tab.route as Href);
         }
       }}
+      accessibilityRole="button"
+      accessibilityLabel={`Open ${tab.label}`}
+      accessibilityState={{ selected: active }}
+      hitSlop={8}
       style={({ pressed }) => ({
         flex: 1,
+        minHeight: 48,
+        justifyContent: 'center',
         transform: [{ scale: pressed ? 0.97 : 1 }],
         opacity: pressed ? 0.9 : 1,
       })}

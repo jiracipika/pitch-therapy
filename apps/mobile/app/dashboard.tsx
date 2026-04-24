@@ -8,7 +8,7 @@ export default function DashboardScreen() {
   const featuredModes = Object.values(GAME_MODE_META).slice(0, 6);
 
   return (
-    <AppPage title="Pitch Therapy" subtitle="Train daily. Hear better.">
+    <AppPage title="Pitch Therapy" subtitle="Train daily. Hear better." showSwipeHint>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Image
           source={require('../assets/logo-placeholder.png')}
