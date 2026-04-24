@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '@/lib/theme';
 
@@ -7,7 +7,9 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.emoji}>🎵</Text>
+      <View style={styles.logoShell}>
+        <Image source={require('../assets/logo-placeholder.png')} style={styles.logo} />
+      </View>
       <Text style={styles.title}>Pitch Therapy</Text>
       <Text style={styles.subtitle}>Train your ear. Every day.</Text>
       <Pressable
@@ -31,11 +33,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     paddingHorizontal: 32,
   },
-  emoji: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 8,
+  logoShell: {
+    width: 140,
+    height: 140,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    marginBottom: 14,
+  },
+  logo: {
+    width: 128,
+    height: 128,
+    borderRadius: 999,
   },
   title: {
     color: colors.text,

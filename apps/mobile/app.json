@@ -3,6 +3,7 @@
     "name": "Pitch Therapy",
     "slug": "pitch-therapy",
     "version": "0.1.0",
+    "icon": "./assets/logo-placeholder.png",
     "orientation": "portrait",
     "scheme": "pitch-therapy",
     "userInterfaceStyle": "dark",
@@ -13,13 +14,13 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logo-placeholder.png",
         "backgroundColor": "#09090b"
       },
       "package": "com.pitchtherapy.app"
     },
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logo-placeholder.png",
       "backgroundColor": "#09090b",
       "resizeMode": "contain"
     },

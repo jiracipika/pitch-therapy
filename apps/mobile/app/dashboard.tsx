@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, Image } from 'react-native';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
 import { StreakRing } from '@/components/StreakRing';
@@ -9,6 +9,13 @@ export default function DashboardScreen() {
 
   return (
     <AppPage title="Pitch Therapy" subtitle="Train daily. Hear better.">
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <Image
+          source={require('../assets/logo-placeholder.png')}
+          style={{ width: 38, height: 38, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' }}
+        />
+        <Text style={{ color: '#9ca3af', fontSize: 13 }}>Daily ear training workspace</Text>
+      </View>
       <View
         style={{
           flexDirection: 'row',

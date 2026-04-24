@@ -2,17 +2,10 @@ import { useEffect, useRef } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 import { type Href, usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const TABS = [
-  { label: 'Home', route: '/dashboard', icon: '◈' },
-  { label: 'Play', route: '/play-modes', icon: '▶' },
-  { label: 'Daily', route: '/daily', icon: '◎' },
-  { label: 'Progress', route: '/progress', icon: '◔' },
-  { label: 'Settings', route: '/settings', icon: '⚙︎' },
-] as const;
+import { MAIN_TABS } from '@/lib/main-tabs';
 
 // Extracted into its own component so hooks are at the top level (not inside .map())
-function TabButton({ tab, active }: { tab: typeof TABS[number]; active: boolean }) {
+function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: boolean }) {
   const router = useRouter();
   const progress = useRef(new Animated.Value(active ? 1 : 0)).current;
 
@@ -112,7 +105,7 @@ export function AnimatedTabBar() {
         borderRadius: 16,
       }}
     >
-      {TABS.map((tab) => {
+      {MAIN_TABS.map((tab) => {
         const active = pathname === tab.route || (pathname === '/' && tab.route === '/dashboard');
         return (
           <TabButton key={tab.route} tab={tab} active={active} />
