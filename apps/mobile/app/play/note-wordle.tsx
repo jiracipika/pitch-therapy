@@ -5,6 +5,7 @@ import { GAME_MODE_META } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
 import NoteComparisonStaff from '@/components/NoteComparisonStaff';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const MODE = GAME_MODE_META['note-wordle'];
 const ACCENT = MODE.accentHex;
@@ -43,8 +44,15 @@ export default function NoteWordleScreen() {
     if (freq) playTone(currentGuess, freq);
     const newGuesses = [...guesses, { note: currentGuess, feedback }];
     setGuesses(newGuesses); setCurrentGuess(null);
-    if (feedback === 'correct') setPhase('won');
-    else if (newGuesses.length >= 6) setPhase('lost');
+    if (feedback === 'correct') {
+      void triggerCorrectHaptic();
+      setPhase('won');
+    } else if (newGuesses.length >= 6) {
+      void triggerIncorrectHaptic();
+      setPhase('lost');
+    } else {
+      void triggerIncorrectHaptic();
+    }
   };
 
   const targetNote = NOTE_NAMES[targetIdx];

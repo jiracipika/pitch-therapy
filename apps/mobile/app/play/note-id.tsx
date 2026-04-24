@@ -5,6 +5,7 @@ import { GAME_MODE_META, DIFFICULTY_CONFIG, type Difficulty } from '@pitch-thera
 import { GameHeader } from '@/components/GameHeader';
 import NoteComparisonStaff from '@/components/NoteComparisonStaff';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const MODE = GAME_MODE_META['note-id'];
 const ACCENT = MODE.accentHex;
@@ -68,6 +69,8 @@ export default function NoteIdScreen() {
     const elapsed = Date.now() - roundStart;
     const pts = correct ? Math.max(10, Math.round(100 * Math.max(0, 1 - elapsed / 8000))) : 0;
     const newStreak = correct ? streak + 1 : 0;
+    if (correct) void triggerCorrectHaptic();
+    else void triggerIncorrectHaptic();
 
     setSelected(note);
     setFeedback(correct ? 'correct' : 'wrong');

@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const ACCENT = '#84CC16';
 const CENTS_RANGE = 50;
@@ -74,6 +75,8 @@ export default function CentsDeviationScreen() {
     const error = Math.abs(needleCents - actualCents);
     const points = Math.max(0, Math.round((1 - error / config.centsRange) * 100));
     const correct = error <= 5;
+    if (correct) void triggerCorrectHaptic();
+    else void triggerIncorrectHaptic();
     setScore(s => s + points);
     if (correct) {
       setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns; });

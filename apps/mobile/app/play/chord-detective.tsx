@@ -2,6 +2,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useState, useCallback, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, NOTE_FREQS_4, playFrequency } from '@/lib/audio';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const ACCENT = '#F472B6';
 
@@ -75,10 +76,12 @@ export default function ChordDetectiveScreen() {
     const allCorrect = correctType && correctRoot;
 
     if (allCorrect) {
+      void triggerCorrectHaptic();
       setScore(s => s + (advanced ? 150 : 100));
       setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns; });
       setFeedback('correct');
     } else {
+      void triggerIncorrectHaptic();
       setStreak(0); setFeedback('wrong');
     }
 

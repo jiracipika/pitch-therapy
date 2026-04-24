@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import NoteComparisonStaff from '@/components/NoteComparisonStaff';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const ACCENT = '#0EA5E9';
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -63,8 +64,15 @@ export default function NameThatNoteScreen() {
     const correct = label === targetNote.label;
     const points = correct ? Math.max(100 - (10 - timeLeft) * 8, 20) : 0;
     setScore((s) => s + points);
-    if (correct) { setStreak((s) => s + 1); setFeedback('correct'); }
-    else { setStreak(0); setFeedback('wrong'); }
+    if (correct) {
+      void triggerCorrectHaptic();
+      setStreak((s) => s + 1);
+      setFeedback('correct');
+    } else {
+      void triggerIncorrectHaptic();
+      setStreak(0);
+      setFeedback('wrong');
+    }
     playFrequency(NOTE_FREQS_4[targetNote.label] ?? 440, 0.5);
     if (round >= totalRounds) setTimeout(() => setPhase('done'), 1000);
     else setTimeout(startRound, 1200);

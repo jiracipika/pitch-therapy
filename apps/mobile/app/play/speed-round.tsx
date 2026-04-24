@@ -2,6 +2,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const ACCENT = '#FB923C';
 const ALL_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -45,11 +46,13 @@ export default function SpeedRoundScreen() {
     const freq = NOTE_FREQS_4[note];
     if (freq) playTone(note, freq, 0.15);
     if (isCorrect) {
+      void triggerCorrectHaptic();
       setCorrect(c => c + 1);
       setScore(s => s + 10 + streak * 2);
       setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns; });
       setFeedback('correct');
     } else {
+      void triggerIncorrectHaptic();
       setStreak(0); setFeedback('wrong');
     }
     nextNote();

@@ -1,10 +1,10 @@
 import { View, Text, Switch } from 'react-native';
-import { useState } from 'react';
 import { AppPage } from '@/components/AppPage';
+import { triggerSelectionHaptic } from '@/lib/haptics';
+import { useAppSettings } from '@/lib/settings';
 
 export default function SettingsScreen() {
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [hapticEnabled, setHapticEnabled] = useState(true);
+  const { soundEnabled, hapticEnabled, setSoundEnabled, setHapticEnabled } = useAppSettings();
 
   return (
     <AppPage title="Settings" subtitle="Fine-tune your training experience.">
@@ -26,7 +26,10 @@ export default function SettingsScreen() {
           </View>
           <Switch
             value={soundEnabled}
-            onValueChange={setSoundEnabled}
+            onValueChange={(value) => {
+              setSoundEnabled(value);
+              void triggerSelectionHaptic();
+            }}
             trackColor={{ false: '#27272a', true: '#7c3aed' }}
             thumbColor={soundEnabled ? '#ddd6fe' : '#a1a1aa'}
           />
@@ -38,7 +41,12 @@ export default function SettingsScreen() {
           </View>
           <Switch
             value={hapticEnabled}
-            onValueChange={setHapticEnabled}
+            onValueChange={(value) => {
+              setHapticEnabled(value);
+              if (value) {
+                void triggerSelectionHaptic();
+              }
+            }}
             trackColor={{ false: '#27272a', true: '#7c3aed' }}
             thumbColor={hapticEnabled ? '#ddd6fe' : '#a1a1aa'}
           />

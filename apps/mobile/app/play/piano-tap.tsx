@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const ACCENT = '#6366F1';
 const KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -63,6 +64,8 @@ export default function PianoTapScreen() {
 
     const correct = key === target;
     const points = correct ? 100 : 0;
+    if (correct) void triggerCorrectHaptic();
+    else void triggerIncorrectHaptic();
 
     setSelected(key);
     setFeedback(correct ? 'correct' : 'wrong');

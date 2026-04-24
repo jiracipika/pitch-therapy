@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 import { type Href, usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { triggerSelectionHaptic } from '@/lib/haptics';
 import { MAIN_TABS } from '@/lib/main-tabs';
 
 // Extracted into its own component so hooks are at the top level (not inside .map())
@@ -36,6 +37,7 @@ function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: b
     <Pressable
       onPress={() => {
         if (!active) {
+          void triggerSelectionHaptic();
           router.replace(tab.route as Href);
         }
       }}

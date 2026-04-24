@@ -2,6 +2,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const ACCENT = '#10B981';
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -68,6 +69,8 @@ export default function DroneLockScreen() {
   }, [startRound]);
 
   const handleAssess = useCallback((option: typeof ACCURACY_OPTIONS[number]) => {
+    if (option.points >= 150) void triggerCorrectHaptic();
+    else void triggerIncorrectHaptic();
     setLastPoints(option.points);
     setScore(s => s + option.points);
     setResults(r => [...r, { interval: targetInterval.name, points: option.points }]);

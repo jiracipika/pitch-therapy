@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const ACCENT = '#D946EF';
 
@@ -105,6 +106,8 @@ export default function IntervalArcherScreen() {
     if (correct) points = 120;
     else if (semitonesOff === 1) points = 30;
     else if (semitonesOff === 2) points = 10;
+    if (correct) void triggerCorrectHaptic();
+    else void triggerIncorrectHaptic();
 
     setSelected(name);
     setFeedback(correct ? 'correct' : 'wrong');

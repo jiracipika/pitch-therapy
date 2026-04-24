@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, playFrequency } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const ACCENT = '#06B6D4';
 const MIN_FREQ = 80;
@@ -70,6 +71,8 @@ export default function FrequencySliderScreen() {
     const centsOff = Math.round(1200 * Math.log2(answerFreq / targetFreq));
     const points = Math.max(0, Math.round((1 - Math.abs(centsOff) / 100) * 150));
     const correct = Math.abs(centsOff) <= 15;
+    if (correct) void triggerCorrectHaptic();
+    else void triggerIncorrectHaptic();
     setScore(s => s + points);
     if (correct) setStreak(s => s + 1); else setStreak(0);
     setResults(r => [...r, { round, freq: targetFreq, answer: answerFreq, centsOff, points }]);

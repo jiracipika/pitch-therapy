@@ -1,4 +1,5 @@
 // ─── WAV Tone Generator ───────────────────────────────────────────────────────
+import { getAppSettings } from '@/lib/settings';
 
 let cachedBase64Table: string[] | null = null;
 
@@ -113,6 +114,7 @@ async function ensureAudioMode() {
 
 export async function playTone(noteOrLabel: string, hz: number, duration: number = 0.6): Promise<void> {
   try {
+    if (!getAppSettings().soundEnabled) return;
     await ensureAudioMode();
     const { Audio } = getExpoAvModule();
     const dataUrl = generateToneDataURL(hz, duration);

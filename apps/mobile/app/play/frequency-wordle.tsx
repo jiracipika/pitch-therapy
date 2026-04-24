@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { playFrequency } from '@/lib/audio';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const MODE = GAME_MODE_META['frequency-wordle'];
 const ACCENT = MODE.accentHex;
@@ -38,8 +39,15 @@ export default function FrequencyWordleScreen() {
     const { feedback, direction } = getFeedback(freq, targetFreq);
     const newGuesses = [...guesses, { freq, feedback, direction }];
     setGuesses(newGuesses); setInputVal('');
-    if (feedback === 'correct') setPhase('won');
-    else if (newGuesses.length >= 6) setPhase('lost');
+    if (feedback === 'correct') {
+      void triggerCorrectHaptic();
+      setPhase('won');
+    } else if (newGuesses.length >= 6) {
+      void triggerIncorrectHaptic();
+      setPhase('lost');
+    } else {
+      void triggerIncorrectHaptic();
+    }
   };
 
   const rowStyle = (guess?: GuessRow, isCurrent?: boolean): object => {

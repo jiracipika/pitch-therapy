@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { GAME_MODE_META, DIFFICULTY_CONFIG, type Difficulty } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const MODE = GAME_MODE_META['frequency-guess'];
 const ACCENT = MODE.accentHex;
@@ -133,6 +134,8 @@ export default function FrequencyGuessScreen() {
     const acc = Math.max(0, 1 - err * 2);
     const pts = Math.round(acc * 100 * Math.max(0, 1 - elapsed / 15000));
     const newStreak = correct ? streak + 1 : 0;
+    if (correct) void triggerCorrectHaptic();
+    else void triggerIncorrectHaptic();
 
     setFeedback({ correct, errorPct: err, pts });
     setScore((s) => s + pts);

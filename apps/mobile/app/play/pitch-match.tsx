@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const MODE = GAME_MODE_META['pitch-match'];
 const ACCENT = MODE.accentHex;
@@ -50,6 +51,8 @@ export default function PitchMatchScreen() {
     const targetName = NOTE_NAMES[targetNote];
     const nextScore = score + option.points;
     const nextStreak = option.correct ? streak + 1 : 0;
+    if (option.correct) void triggerCorrectHaptic();
+    else void triggerIncorrectHaptic();
     setScore(nextScore);
     setStreak(nextStreak);
     resultsRef.current = [

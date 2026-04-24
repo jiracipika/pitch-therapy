@@ -2,6 +2,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
+import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 
 const ACCENT = '#F43F5E';
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -64,6 +65,7 @@ export default function PitchMemoryScreen() {
 
     const idx = newInput.length - 1;
     if (newInput[idx] !== sequence[idx]) {
+      void triggerIncorrectHaptic();
       setFeedback('wrong');
       setPhase('feedback');
       const newLives = lives - 1;
@@ -78,6 +80,7 @@ export default function PitchMemoryScreen() {
     }
 
     if (newInput.length === sequence.length) {
+      void triggerCorrectHaptic();
       const points = sequence.length * 50 + level * 20;
       setScore((s) => s + points);
       setStreak((s) => s + 1);
