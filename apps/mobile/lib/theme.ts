@@ -1,57 +1,51 @@
-// ─── Apple-inspired Design System ────────────────────────────────────────────
-// Clean, minimal aesthetic. Frosted glass. SF Pro typography vibes.
-// Subtle gradients. Rounded corners. Smooth transitions.
-
 export const colors = {
-  // Core palette
-  background: '#000000',
-  surface: '#1C1C1E',
-  surfaceElevated: '#2C2C2E',
-  card: '#1C1C1E',
-  border: 'rgba(255,255,255,0.08)',
-  borderLight: 'rgba(255,255,255,0.04)',
+  background: '#08090D',
+  backgroundRaised: '#0F1117',
+  surface: '#151820',
+  surfaceElevated: '#1D222D',
+  card: 'rgba(21,24,32,0.86)',
+  cardPressed: 'rgba(29,34,45,0.92)',
+  border: 'rgba(255,255,255,0.10)',
+  borderStrong: 'rgba(255,255,255,0.16)',
+  divider: 'rgba(255,255,255,0.07)',
 
-  // Text
-  text: '#FFFFFF',
-  textSecondary: '#8E8E93',
-  textTertiary: '#636366',
-  muted: '#8E8E93',
+  text: '#F8FAFC',
+  textSecondary: '#CBD5E1',
+  textTertiary: '#7E8A9A',
+  muted: '#97A3B6',
 
-  // Accent colors (Apple-inspired)
-  blue: '#0A84FF',
-  purple: '#BF5AF2',
-  pink: '#FF375F',
-  red: '#FF453A',
-  orange: '#FF9F0A',
-  yellow: '#FFD60A',
-  green: '#30D158',
-  teal: '#64D2FF',
-  indigo: '#5E5CE6',
+  blue: '#38BDF8',
+  purple: '#A78BFA',
+  pink: '#FB7185',
+  red: '#F87171',
+  orange: '#FDBA74',
+  yellow: '#FACC15',
+  green: '#4ADE80',
+  teal: '#2DD4BF',
+  indigo: '#818CF8',
 
-  // Game mode colors (mapped to accent palette)
-  pitchMatch: '#0A84FF',
-  noteId: '#BF5AF2',
-  frequencyGuess: '#FF9F0A',
-  noteWordle: '#30D158',
-  frequencyWordle: '#64D2FF',
-  pitchMemory: '#FF375F',
-  nameThatNote: '#5E5CE6',
-  frequencyHunt: '#FF9F0A',
-  droneLock: '#30D158',
-  tuneIn: '#FF375F',
-  pianoTap: '#5E5CE6',
-  frequencySlider: '#64D2FF',
-  centsDeviation: '#30D158',
-  intervalArcher: '#BF5AF2',
-  speedRound: '#FF9F0A',
-  chordDetective: '#FF375F',
-  waveformMatch: '#5E5CE6',
-  tuningBattle: '#FF375F',
+  pitchMatch: '#38BDF8',
+  noteId: '#A78BFA',
+  frequencyGuess: '#FDBA74',
+  noteWordle: '#4ADE80',
+  frequencyWordle: '#2DD4BF',
+  pitchMemory: '#FB7185',
+  nameThatNote: '#60A5FA',
+  frequencyHunt: '#F97316',
+  droneLock: '#34D399',
+  tuneIn: '#F472B6',
+  pianoTap: '#818CF8',
+  frequencySlider: '#22D3EE',
+  centsDeviation: '#A3E635',
+  intervalArcher: '#C084FC',
+  speedRound: '#FBBF24',
+  chordDetective: '#F9A8D4',
+  waveformMatch: '#93C5FD',
+  tuningBattle: '#FDA4AF',
 
-  // Frosted glass
-  glass: 'rgba(28,28,30,0.72)',
-  glassLight: 'rgba(255,255,255,0.05)',
-  glassBorder: 'rgba(255,255,255,0.12)',
+  glass: 'rgba(15,17,23,0.78)',
+  glassLight: 'rgba(255,255,255,0.055)',
+  glassBorder: 'rgba(255,255,255,0.13)',
 } as const;
 
 // ─── Spacing ─────────────────────────────────────────────────────────────────
@@ -69,54 +63,38 @@ export const spacing = {
 // ─── Radii ───────────────────────────────────────────────────────────────────
 
 export const radii = {
-  sm: 10,
-  md: 14,
-  lg: 18,
-  xl: 22,
+  sm: 6,
+  md: 8,
+  lg: 8,
+  xl: 8,
   full: 999,
 } as const;
 
-// ─── Shadows (Apple-style subtle) ───────────────────────────────────────────
-
 export const shadows = {
   card: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    boxShadow: '0 10px 24px rgba(0,0,0,0.22)',
   },
   elevated: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
+    boxShadow: '0 18px 38px rgba(0,0,0,0.30)',
   },
   tab: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 12,
+    boxShadow: '0 16px 30px rgba(0,0,0,0.34)',
   },
 } as const;
 
-// ─── Typography Scale (SF Pro-inspired) ──────────────────────────────────────
-
 export const typography = {
-  largeTitle: { fontSize: 34, fontWeight: '700' as const, letterSpacing: 0.37 },
-  title1: { fontSize: 28, fontWeight: '700' as const, letterSpacing: 0.36 },
-  title2: { fontSize: 22, fontWeight: '700' as const, letterSpacing: 0.35 },
-  title3: { fontSize: 20, fontWeight: '600' as const, letterSpacing: 0.38 },
-  headline: { fontSize: 17, fontWeight: '600' as const, letterSpacing: -0.41 },
-  body: { fontSize: 17, fontWeight: '400' as const, letterSpacing: -0.41 },
-  callout: { fontSize: 16, fontWeight: '400' as const, letterSpacing: -0.32 },
-  subhead: { fontSize: 15, fontWeight: '400' as const, letterSpacing: -0.24 },
-  footnote: { fontSize: 13, fontWeight: '400' as const, letterSpacing: -0.08 },
+  largeTitle: { fontSize: 34, fontWeight: '800' as const, letterSpacing: 0 },
+  title1: { fontSize: 28, fontWeight: '800' as const, letterSpacing: 0 },
+  title2: { fontSize: 22, fontWeight: '800' as const, letterSpacing: 0 },
+  title3: { fontSize: 20, fontWeight: '700' as const, letterSpacing: 0 },
+  headline: { fontSize: 17, fontWeight: '700' as const, letterSpacing: 0 },
+  body: { fontSize: 17, fontWeight: '400' as const, letterSpacing: 0 },
+  callout: { fontSize: 16, fontWeight: '500' as const, letterSpacing: 0 },
+  subhead: { fontSize: 15, fontWeight: '500' as const, letterSpacing: 0 },
+  footnote: { fontSize: 13, fontWeight: '500' as const, letterSpacing: 0 },
   caption1: { fontSize: 12, fontWeight: '400' as const, letterSpacing: 0 },
-  caption2: { fontSize: 11, fontWeight: '400' as const, letterSpacing: 0.07 },
-  overline: { fontSize: 11, fontWeight: '600' as const, letterSpacing: 0.06 },
+  caption2: { fontSize: 11, fontWeight: '500' as const, letterSpacing: 0 },
+  overline: { fontSize: 11, fontWeight: '800' as const, letterSpacing: 0 },
 } as const;
 
 export type GameModeColor = keyof typeof colors;

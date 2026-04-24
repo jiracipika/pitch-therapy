@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Component, type ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '@/lib/theme';
+import { colors, typography } from '@/lib/theme';
 
 // ─── Error Boundary ─────────────────────────────────────────────────────────
 class RootErrorBoundary extends Component<
@@ -19,7 +19,6 @@ class RootErrorBoundary extends Component<
     if (this.state.hasError) {
       return (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorEmoji}>⚠️</Text>
           <Text style={styles.errorTitle}>Something went wrong</Text>
           <Text style={styles.errorMessage}>
             {this.state.error?.message || 'An unexpected error occurred'}
@@ -39,11 +38,11 @@ export default function RootLayout() {
       <StatusBar style="light" translucent={false} backgroundColor={colors.background} />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: colors.card },
+          headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
           headerShadowVisible: false,
           contentStyle: { backgroundColor: colors.background },
-          animation: 'fade_from_bottom',
+          animation: 'slide_from_right',
           statusBarStyle: 'light',
           statusBarAnimation: 'fade',
           statusBarTranslucent: false,
@@ -74,24 +73,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     padding: 32,
   },
-  errorEmoji: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
   errorTitle: {
     color: colors.text,
-    fontSize: 22,
-    fontWeight: '700',
+    ...typography.title2,
     marginBottom: 8,
   },
   errorMessage: {
     color: colors.textSecondary,
-    fontSize: 14,
+    ...typography.caption1,
     textAlign: 'center',
     marginBottom: 24,
   },
   errorHint: {
     color: colors.textTertiary,
-    fontSize: 12,
+    ...typography.caption1,
   },
 });

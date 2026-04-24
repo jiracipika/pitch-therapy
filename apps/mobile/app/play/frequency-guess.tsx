@@ -155,37 +155,37 @@ export default function FrequencyGuessScreen() {
   // ── Difficulty Selection ───────────────────────────────────────────────────
   if (phase === 'select-difficulty') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
-          <Text style={{ color: '#f4f4f5', fontSize: 22, fontWeight: '700' }}>{MODE.label}</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700' }}>{MODE.label}</Text>
         </View>
         <View style={{ flex: 1, paddingHorizontal: 20, justifyContent: 'center' }}>
-          <Text style={{ color: '#71717a', fontSize: 14, marginBottom: 8 }}>
+          <Text style={{ color: '#97A3B6', fontSize: 14, marginBottom: 8 }}>
             Hear a tone, then drag to match its frequency.
           </Text>
-          <Text style={{ color: '#f4f4f5', fontSize: 18, fontWeight: '600', marginBottom: 32 }}>Select difficulty</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 18, fontWeight: '600', marginBottom: 32 }}>Select difficulty</Text>
           {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
             <Pressable
               key={d}
               onPress={() => startGame(d)}
               style={({ pressed }) => ({
-                backgroundColor: 'rgba(255,255,255,0.04)',
+                backgroundColor: 'rgba(21,24,32,0.86)',
                 borderRadius: 16,
                 padding: 20,
                 borderWidth: 1,
-                borderColor: 'rgba(255,255,255,0.07)',
+                borderColor: 'rgba(255,255,255,0.10)',
                 marginBottom: 12,
                 opacity: pressed ? 0.75 : 1,
               })}
             >
-              <Text style={{ color: '#f4f4f5', fontWeight: '600', fontSize: 16, textTransform: 'capitalize' }}>{d}</Text>
-              <Text style={{ color: '#71717a', fontSize: 13, marginTop: 3 }}>{DIFFICULTY_CONFIG[d].rounds} rounds</Text>
+              <Text style={{ color: '#F8FAFC', fontWeight: '600', fontSize: 16, textTransform: 'capitalize' }}>{d}</Text>
+              <Text style={{ color: '#97A3B6', fontSize: 13, marginTop: 3 }}>{DIFFICULTY_CONFIG[d].rounds} rounds</Text>
             </Pressable>
           ))}
         </View>
         <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
-          <Text style={{ color: '#71717a', textAlign: 'center' }}>← Back</Text>
+          <Text style={{ color: '#97A3B6', textAlign: 'center' }}>← Back</Text>
         </Pressable>
       </View>
     );
@@ -196,14 +196,14 @@ export default function FrequencyGuessScreen() {
     const correct = results.filter((r) => r.correct).length;
     const avgErr = results.reduce((s, r) => s + r.errorPct, 0) / results.length;
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
-          <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Complete!</Text>
-          <Text style={{ color: '#71717a', marginBottom: 32 }}>{MODE.label} · {difficulty}</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Complete!</Text>
+          <Text style={{ color: '#97A3B6', marginBottom: 32 }}>{MODE.label} · {difficulty}</Text>
 
-          <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', marginBottom: 20, alignItems: 'center' }}>
+          <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 20, alignItems: 'center' }}>
             <Text style={{ color: ACCENT, fontSize: 48, fontWeight: '700' }}>{score}</Text>
-            <Text style={{ color: '#71717a', marginTop: 4 }}>points</Text>
+            <Text style={{ color: '#97A3B6', marginTop: 4 }}>points</Text>
           </View>
 
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
@@ -211,17 +211,17 @@ export default function FrequencyGuessScreen() {
               { label: 'Correct', value: `${correct}/${totalRounds}` },
               { label: 'Avg Error', value: `${Math.round(avgErr * 100)}%` },
             ].map((s) => (
-              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center' }}>
-                <Text style={{ color: '#f4f4f5', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
-                <Text style={{ color: '#71717a', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
+              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center' }}>
+                <Text style={{ color: '#F8FAFC', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
+                <Text style={{ color: '#97A3B6', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
               </View>
             ))}
           </View>
 
           {results.map((r, i) => (
             <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-              <Text style={{ color: '#71717a', fontSize: 13 }}>R{i + 1}</Text>
-              <Text style={{ color: '#f4f4f5', fontSize: 13 }}>{r.targetNote} ({Math.round(r.targetHz)} Hz)</Text>
+              <Text style={{ color: '#97A3B6', fontSize: 13 }}>R{i + 1}</Text>
+              <Text style={{ color: '#F8FAFC', fontSize: 13 }}>{r.targetNote} ({Math.round(r.targetHz)} Hz)</Text>
               <Text style={{ color: r.correct ? '#4ade80' : '#f87171', fontSize: 13 }}>
                 {r.correct ? '✓' : `${Math.round(r.errorPct * 100)}% off`}
               </Text>
@@ -232,7 +232,7 @@ export default function FrequencyGuessScreen() {
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Play Again</Text>
           </Pressable>
           <Pressable onPress={() => router.back()} style={{ padding: 16 }}>
-            <Text style={{ color: '#71717a', textAlign: 'center' }}>← Dashboard</Text>
+            <Text style={{ color: '#97A3B6', textAlign: 'center' }}>← Dashboard</Text>
           </Pressable>
         </ScrollView>
       </View>
@@ -241,7 +241,7 @@ export default function FrequencyGuessScreen() {
 
   // ── Playing ────────────────────────────────────────────────────────────────
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
       <GameHeader score={score} round={round} totalRounds={totalRounds} streak={streak} accent={ACCENT} />
 
       <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: 32, justifyContent: 'center' }}>
@@ -263,26 +263,26 @@ export default function FrequencyGuessScreen() {
           >
             <Text style={{ fontSize: 34 }}>▶</Text>
           </Pressable>
-          <Text style={{ color: '#71717a', marginTop: 10, fontSize: 14 }}>Tap to hear the target</Text>
+          <Text style={{ color: '#97A3B6', marginTop: 10, fontSize: 14 }}>Tap to hear the target</Text>
         </View>
 
         {/* Slider card */}
         <View style={{
-          backgroundColor: 'rgba(255,255,255,0.04)',
+          backgroundColor: 'rgba(21,24,32,0.86)',
           borderRadius: 16,
           padding: 20,
           borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.07)',
+          borderColor: 'rgba(255,255,255,0.10)',
           marginBottom: 20,
         }}>
-          <Text style={{ color: '#71717a', fontSize: 12, textAlign: 'center', marginBottom: 4 }}>Your guess</Text>
-          <Text style={{ color: '#f4f4f5', fontSize: 40, fontWeight: '700', textAlign: 'center', marginBottom: 4 }}>
+          <Text style={{ color: '#97A3B6', fontSize: 12, textAlign: 'center', marginBottom: 4 }}>Your guess</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 40, fontWeight: '700', textAlign: 'center', marginBottom: 4 }}>
             {Math.round(sliderVal)} Hz
           </Text>
           <FreqSlider value={sliderVal} onChange={setSliderVal} accent={ACCENT} />
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: '#71717a', fontSize: 11 }}>{MIN_FREQ} Hz</Text>
-            <Text style={{ color: '#71717a', fontSize: 11 }}>{MAX_FREQ} Hz</Text>
+            <Text style={{ color: '#97A3B6', fontSize: 11 }}>{MIN_FREQ} Hz</Text>
+            <Text style={{ color: '#97A3B6', fontSize: 11 }}>{MAX_FREQ} Hz</Text>
           </View>
           <Pressable onPress={handlePlayGuess} style={{ marginTop: 12, alignItems: 'center' }}>
             <Text style={{ color: ACCENT, fontSize: 13 }}>▶ Preview my guess</Text>
@@ -319,7 +319,7 @@ export default function FrequencyGuessScreen() {
       </View>
 
       <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
-        <Text style={{ color: '#71717a', textAlign: 'center', fontSize: 13 }}>← Dashboard</Text>
+        <Text style={{ color: '#97A3B6', textAlign: 'center', fontSize: 13 }}>← Dashboard</Text>
       </Pressable>
     </View>
   );

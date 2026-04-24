@@ -136,13 +136,13 @@ export default function PitchMatchScreen() {
       <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: 32 }}>
         {/* Target note */}
         <View style={{ alignItems: 'center', marginBottom: 8 }}>
-          <Text style={{ color: '#71717a', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+          <Text style={{ color: '#97A3B6', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
             Match this note
           </Text>
-          <Text style={{ fontSize: 56, fontWeight: '800', color: ACCENT, letterSpacing: -2 }}>
+          <Text style={{ fontSize: 56, fontWeight: '800', color: ACCENT, letterSpacing: 0 }}>
             {NOTE_NAMES[targetNote]}4
           </Text>
-          <Text style={{ color: '#52525b', fontSize: 13, marginTop: 4 }}>
+          <Text style={{ color: '#7E8A9A', fontSize: 13, marginTop: 4 }}>
             {(freq(targetNote)).toFixed(1)} Hz
           </Text>
         </View>
@@ -156,7 +156,7 @@ export default function PitchMatchScreen() {
         </Pressable>
 
         {/* Instructions */}
-        <Text style={{ textAlign: 'center', color: '#52525b', fontSize: 13, marginTop: 40, marginBottom: 24 }}>
+        <Text style={{ textAlign: 'center', color: '#7E8A9A', fontSize: 13, marginTop: 40, marginBottom: 24 }}>
           Sing or play the note, then mark how accurate you were
         </Text>
 
@@ -183,10 +183,10 @@ export default function PitchMatchScreen() {
               })}
             >
               <Text style={{ fontSize: 22 }}>{option.emoji}</Text>
-              <Text style={{ color: '#f4f4f5', fontWeight: '700', fontSize: 16, flex: 1, marginLeft: 14 }}>
+              <Text style={{ color: '#F8FAFC', fontWeight: '700', fontSize: 16, flex: 1, marginLeft: 14 }}>
                 {option.label}
               </Text>
-              <Text style={{ color: '#52525b', fontSize: 13 }}>
+              <Text style={{ color: '#7E8A9A', fontSize: 13 }}>
                 {option.points > 0 ? `+${option.points} pts` : '0 pts'}
               </Text>
             </Pressable>
@@ -202,21 +202,21 @@ export default function PitchMatchScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#09090b' },
+  container: { flex: 1, backgroundColor: '#08090D' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, marginBottom: 20 },
-  title: { fontSize: 28, fontWeight: '700', color: '#f4f4f5', letterSpacing: -0.5 },
-  subtitle: { fontSize: 14, color: '#71717a', marginTop: 8, marginBottom: 24, textAlign: 'center' },
+  title: { fontSize: 28, fontWeight: '700', color: '#F8FAFC', letterSpacing: 0 },
+  subtitle: { fontSize: 14, color: '#97A3B6', marginTop: 8, marginBottom: 24, textAlign: 'center' },
   howToBox: { backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', marginBottom: 32, alignSelf: 'stretch' },
   howToTitle: { fontSize: 10, fontWeight: '700', letterSpacing: 1.5, marginBottom: 10 },
-  howToLine: { color: '#71717a', fontSize: 13, marginBottom: 6 },
+  howToLine: { color: '#97A3B6', fontSize: 13, marginBottom: 6 },
   statsRow: { flexDirection: 'row', gap: 10, marginTop: 24, marginBottom: 32 },
-  statCard: { backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center', flex: 1 },
-  statValue: { fontSize: 24, fontWeight: '700', color: '#f4f4f5' },
-  statLabel: { fontSize: 11, color: '#71717a', marginTop: 4 },
+  statCard: { backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', flex: 1 },
+  statValue: { fontSize: 24, fontWeight: '700', color: '#F8FAFC' },
+  statLabel: { fontSize: 11, color: '#97A3B6', marginTop: 4 },
   btnPrimary: { borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 8, width: '100%' },
   btnPrimaryText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   linkBtn: { padding: 16, marginTop: 4 },
-  linkBtnText: { color: '#71717a', textAlign: 'center', fontSize: 13 },
-  playBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 20, paddingVertical: 10, paddingHorizontal: 20, alignSelf: 'center' },
+  linkBtnText: { color: '#97A3B6', textAlign: 'center', fontSize: 13 },
+  playBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', borderRadius: 20, paddingVertical: 10, paddingHorizontal: 20, alignSelf: 'center' },
 });

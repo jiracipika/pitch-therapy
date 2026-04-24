@@ -110,10 +110,10 @@ export default function TuningBattleScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b', paddingHorizontal: 20, justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D', paddingHorizontal: 20, justifyContent: 'center' }}>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>⚔️</Text>
         <Text style={{ color: ACCENT, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: 16 }}>Tuning Battle</Text>
-        <Text style={{ color: '#71717a', fontSize: 14, textAlign: 'center', marginTop: 8 }}>Two players, one target note. First to lock in wins!</Text>
+        <Text style={{ color: '#97A3B6', fontSize: 14, textAlign: 'center', marginTop: 8 }}>Two players, one target note. First to lock in wins!</Text>
         <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'center', marginTop: 32 }}>
           {[5, 10].map(n => (
             <Pressable key={n} onPress={() => setTotalRounds(n)} style={{
@@ -132,25 +132,25 @@ export default function TuningBattleScreen() {
 
   if (phase === 'countdown') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b', justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: '#71717a', marginBottom: 8 }}>Target: <Text style={{ color: '#f4f4f5', fontWeight: '700', fontSize: 20 }}>{targetNote}</Text></Text>
-        <Text style={{ fontSize: 72, fontWeight: '800', color: '#f4f4f5' }}>{countdown > 0 ? countdown : 'GO!'}</Text>
+      <View style={{ flex: 1, backgroundColor: '#08090D', justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: '#97A3B6', marginBottom: 8 }}>Target: <Text style={{ color: '#F8FAFC', fontWeight: '700', fontSize: 20 }}>{targetNote}</Text></Text>
+        <Text style={{ fontSize: 72, fontWeight: '800', color: '#F8FAFC' }}>{countdown > 0 ? countdown : 'GO!'}</Text>
       </View>
     );
   }
 
   if (phase === 'roundResult') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
         <Text style={{ fontSize: 56 }}>{roundWinner ? '🏆' : '🤝'}</Text>
-        <Text style={{ color: '#f4f4f5', fontSize: 24, fontWeight: '700', marginTop: 16 }}>{roundWinner ? `${roundWinner} wins!` : 'Tie!'}</Text>
-        <Text style={{ color: '#71717a', marginTop: 8 }}>Target was <Text style={{ color: '#f4f4f5', fontWeight: '600' }}>{targetNote}</Text></Text>
+        <Text style={{ color: '#F8FAFC', fontSize: 24, fontWeight: '700', marginTop: 16 }}>{roundWinner ? `${roundWinner} wins!` : 'Tie!'}</Text>
+        <Text style={{ color: '#97A3B6', marginTop: 8 }}>Target was <Text style={{ color: '#F8FAFC', fontWeight: '600' }}>{targetNote}</Text></Text>
         <View style={{ flexDirection: 'row', gap: 12, marginTop: 24 }}>
-          <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center' }}>
-            <Text style={{ color: '#f4f4f5', fontSize: 20, fontWeight: '700' }}>P1: {players[0].score}</Text>
+          <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center' }}>
+            <Text style={{ color: '#F8FAFC', fontSize: 20, fontWeight: '700' }}>P1: {players[0].score}</Text>
           </View>
-          <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center' }}>
-            <Text style={{ color: '#f4f4f5', fontSize: 20, fontWeight: '700' }}>P2: {players[1].score}</Text>
+          <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center' }}>
+            <Text style={{ color: '#F8FAFC', fontSize: 20, fontWeight: '700' }}>P2: {players[1].score}</Text>
           </View>
         </View>
         <Pressable onPress={nextOrEnd} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24 }}>
@@ -163,36 +163,36 @@ export default function TuningBattleScreen() {
   if (phase === 'done') {
     const w = players[0].score > players[1].score ? 'Player 1' : players[1].score > players[0].score ? 'Player 2' : null;
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
         <Text style={{ fontSize: 56 }}>👑</Text>
-        <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginTop: 16 }}>{w ? `${w} Wins!` : "It's a Tie!"}</Text>
+        <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginTop: 16 }}>{w ? `${w} Wins!` : "It's a Tie!"}</Text>
         <View style={{ flexDirection: 'row', gap: 16, marginTop: 24 }}>
           {[{ n: 'Player 1', s: players[0].score }, { n: 'Player 2', s: players[1].score }].map(p => (
-            <View key={p.n} style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center', flex: 1 }}>
-              <Text style={{ color: '#f4f4f5', fontSize: 32, fontWeight: '700' }}>{p.s}</Text>
-              <Text style={{ color: '#71717a', fontSize: 14, marginTop: 4 }}>{p.n}</Text>
+            <View key={p.n} style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', flex: 1 }}>
+              <Text style={{ color: '#F8FAFC', fontSize: 32, fontWeight: '700' }}>{p.s}</Text>
+              <Text style={{ color: '#97A3B6', fontSize: 14, marginTop: 4 }}>{p.n}</Text>
             </View>
           ))}
         </View>
         <Pressable onPress={startGame} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24, width: '100%' }}>
           <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Rematch</Text>
         </Pressable>
-        <Pressable onPress={() => router.back()} style={{ marginTop: 12 }}><Text style={{ color: '#71717a', textAlign: 'center' }}>← Dashboard</Text></Pressable>
+        <Pressable onPress={() => router.back()} style={{ marginTop: 12 }}><Text style={{ color: '#97A3B6', textAlign: 'center' }}>← Dashboard</Text></Pressable>
       </View>
     );
   }
 
   // Playing
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
-        <Pressable onPress={() => router.back()}><Text style={{ color: '#71717a' }}>← Back</Text></Pressable>
+        <Pressable onPress={() => router.back()}><Text style={{ color: '#97A3B6' }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>⚔️ Tuning Battle</Text>
-        <Text style={{ color: '#71717a' }}>R{currentRound}/{totalRounds}</Text>
+        <Text style={{ color: '#97A3B6' }}>R{currentRound}/{totalRounds}</Text>
       </View>
 
       <View style={{ alignItems: 'center', marginTop: 20 }}>
-        <Text style={{ color: '#71717a', fontSize: 14 }}>Target: </Text>
+        <Text style={{ color: '#97A3B6', fontSize: 14 }}>Target: </Text>
         <Text style={{ color: ACCENT, fontSize: 32, fontWeight: '800' }}>{targetNote}</Text>
         <Pressable onPress={() => playTone(targetNote, NOTE_FREQS_4[targetNote] || 440, 0.5)} style={{ marginTop: 8 }}>
           <Text style={{ fontSize: 24 }}>🔊</Text>
@@ -201,9 +201,9 @@ export default function TuningBattleScreen() {
 
       <View style={{ flex: 1, flexDirection: 'row', gap: 8, paddingHorizontal: 12, marginTop: 16 }}>
         {/* Player 1 */}
-        <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)' }}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-            <Text style={{ color: '#f4f4f5', fontWeight: '700', fontSize: 14 }}>P1 • {players[0].score}</Text>
+            <Text style={{ color: '#F8FAFC', fontWeight: '700', fontSize: 14 }}>P1 • {players[0].score}</Text>
           </View>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
             {P1_NOTES.map(note => (
@@ -229,9 +229,9 @@ export default function TuningBattleScreen() {
         </View>
 
         {/* Player 2 */}
-        <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)' }}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-            <Text style={{ color: '#f4f4f5', fontWeight: '700', fontSize: 14 }}>P2 • {players[1].score}</Text>
+            <Text style={{ color: '#F8FAFC', fontWeight: '700', fontSize: 14 }}>P2 • {players[1].score}</Text>
           </View>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
             {P2_NOTES.map(note => (

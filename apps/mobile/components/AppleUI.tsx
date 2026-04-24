@@ -1,45 +1,42 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { colors, radii, shadows } from '@/lib/theme';
-
-// ─── Glass Card ──────────────────────────────────────────────────────────────
+import { type ReactNode } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, radii, shadows, typography } from '@/lib/theme';
 
 interface GlassCardProps {
-  children: React.ReactNode;
-  style?: any;
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
   onPress?: () => void;
   padding?: number;
+  accent?: string;
 }
 
-export function GlassCard({ children, style, onPress, padding = 18 }: GlassCardProps) {
-  if (onPress) {
-    return (
-      <Pressable
-        onPress={onPress}
-        style={[
-          styles.glass,
-          { padding, borderRadius: radii.lg },
-          style,
-        ]}
-      >
-        {children}
-      </Pressable>
-    );
-  }
-
-  return (
-    <View
-      style={[
-        styles.glass,
-        { padding, borderRadius: radii.lg },
-        style,
-      ]}
+export function GlassCard({ children, style, onPress, padding = 16, accent }: GlassCardProps) {
+  const content = (
+    <LinearGradient
+      colors={accent ? [accent + '24', colors.card, colors.card] : [colors.glassLight, colors.card]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.glass, { padding }, style]}
     >
       {children}
-    </View>
+    </LinearGradient>
+  );
+
+  if (!onPress) return content;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.86 : 1,
+        transform: [{ scale: pressed ? 0.985 : 1 }],
+      })}
+    >
+      {content}
+    </Pressable>
   );
 }
-
-// ─── Section Header ──────────────────────────────────────────────────────────
 
 interface SectionHeaderProps {
   title: string;
@@ -50,20 +47,18 @@ interface SectionHeaderProps {
 export function SectionHeader({ title, subtitle, action }: SectionHeaderProps) {
   return (
     <View style={styles.sectionHeader}>
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, gap: 3 }}>
         <Text style={styles.sectionTitle}>{title}</Text>
-        {subtitle && <Text style={styles.sectionSubtitle}>{subtitle}</Text>}
+        {subtitle ? <Text style={styles.sectionSubtitle}>{subtitle}</Text> : null}
       </View>
-      {action && (
-        <Pressable onPress={action.onPress}>
+      {action ? (
+        <Pressable onPress={action.onPress} hitSlop={8}>
           <Text style={styles.sectionAction}>{action.label}</Text>
         </Pressable>
-      )}
+      ) : null}
     </View>
   );
 }
-
-// ─── Apple Button ────────────────────────────────────────────────────────────
 
 interface AppleButtonProps {
   title: string;
@@ -72,7 +67,7 @@ interface AppleButtonProps {
   color?: string;
   loading?: boolean;
   disabled?: boolean;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function AppleButton({
@@ -92,73 +87,37 @@ export function AppleButton({
       onPress={onPress}
       disabled={disabled || loading}
       style={({ pressed }) => [
+        styles.button,
         {
-          backgroundColor: isPrimary
-            ? (disabled ? colors.surfaceElevated : color)
-            : 'transparent',
-          borderRadius: radii.md,
-          paddingVertical: 15,
-          paddingHorizontal: 24,
-          alignItems: 'center',
-          justifyContent: 'center',
+          backgroundColor: isPrimary ? color : 'transparent',
           borderWidth: isSecondary ? 1 : 0,
-          borderColor: isSecondary ? colors.border : 'transparent',
-          opacity: pressed ? 0.7 : disabled ? 0.4 : 1,
+          borderColor: isSecondary ? colors.borderStrong : 'transparent',
+          opacity: pressed ? 0.78 : disabled ? 0.42 : 1,
+          transform: [{ scale: pressed ? 0.985 : 1 }],
         },
         style,
       ]}
     >
-      <Text
-        style={{
-          fontSize: 17,
-          fontWeight: '600',
-          letterSpacing: -0.41,
-          color: isPrimary ? '#FFFFFF' : colors.textSecondary,
-        }}
-      >
+      <Text style={[styles.buttonText, { color: isPrimary ? colors.background : colors.textSecondary }]}>
         {loading ? 'Loading...' : title}
       </Text>
     </Pressable>
   );
 }
 
-// ─── Badge / Pill ────────────────────────────────────────────────────────────
-
 interface PillProps {
   label: string;
   color?: string;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function Pill({ label, color = colors.blue, style }: PillProps) {
   return (
-    <View
-      style={[
-        {
-          backgroundColor: color + '18',
-          borderRadius: radii.full,
-          paddingHorizontal: 10,
-          paddingVertical: 4,
-          alignSelf: 'flex-start',
-        },
-        style,
-      ]}
-    >
-      <Text
-        style={{
-          fontSize: 12,
-          fontWeight: '600',
-          letterSpacing: 0.02,
-          color,
-        }}
-      >
-        {label}
-      </Text>
+    <View style={[styles.pill, { backgroundColor: color + '1F', borderColor: color + '4D' }, style]}>
+      <Text style={[styles.pillText, { color }]}>{label}</Text>
     </View>
   );
 }
-
-// ─── Stat Item ───────────────────────────────────────────────────────────────
 
 interface StatItemProps {
   label: string;
@@ -168,20 +127,12 @@ interface StatItemProps {
 
 export function StatItem({ label, value, color = colors.text }: StatItemProps) {
   return (
-    <View style={{ flex: 1, alignItems: 'center' }}>
-      <Text style={{ fontSize: 24, fontWeight: '700', color, letterSpacing: -0.5 }}>
-        {value}
-      </Text>
-      <Text style={{ fontSize: 12, color: colors.textTertiary, marginTop: 4, letterSpacing: 0.02 }}>
-        {label}
-      </Text>
+    <View style={styles.statItem}>
+      <Text style={[styles.statValue, { color }]}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
-
-// ─── Input Field ─────────────────────────────────────────────────────────────
-
-import { TextInput } from 'react-native';
 
 interface AppleInputProps {
   value: string;
@@ -191,7 +142,7 @@ interface AppleInputProps {
   autoCapitalize?: 'none' | 'sentences' | 'words';
   keyboardType?: 'default' | 'email-address' | 'numeric';
   autoCorrect?: boolean;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function AppleInput({
@@ -214,70 +165,88 @@ export function AppleInput({
       autoCapitalize={autoCapitalize}
       keyboardType={keyboardType}
       autoCorrect={autoCorrect}
-      style={[
-        {
-          backgroundColor: colors.surface,
-          borderRadius: radii.md,
-          borderWidth: 1,
-          borderColor: colors.border,
-          paddingHorizontal: 16,
-          paddingVertical: 15,
-          fontSize: 17,
-          color: colors.text,
-          letterSpacing: -0.41,
-        },
-        style,
-      ]}
+      style={[styles.input, style]}
     />
   );
 }
-
-// ─── Divider ─────────────────────────────────────────────────────────────────
 
 export function Divider() {
-  return (
-    <View
-      style={{
-        height: StyleSheet.hairlineWidth,
-        backgroundColor: colors.border,
-        marginVertical: 1,
-      }}
-    />
-  );
+  return <View style={styles.divider} />;
 }
-
-// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   glass: {
-    backgroundColor: colors.glass,
+    borderRadius: radii.lg,
     borderWidth: 1,
     borderColor: colors.glassBorder,
+    overflow: 'hidden',
     ...shadows.card,
   },
   sectionHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'space-between',
-    marginBottom: 12,
-    marginTop: 8,
+    gap: 12,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
     color: colors.text,
-    letterSpacing: -0.4,
+    ...typography.headline,
   },
   sectionSubtitle: {
-    fontSize: 14,
     color: colors.textTertiary,
-    marginTop: 2,
-    letterSpacing: -0.2,
+    ...typography.caption1,
   },
   sectionAction: {
-    fontSize: 15,
-    fontWeight: '600',
     color: colors.blue,
-    letterSpacing: -0.2,
+    ...typography.subhead,
+  },
+  button: {
+    borderRadius: radii.md,
+    paddingVertical: 15,
+    paddingHorizontal: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    ...typography.headline,
+  },
+  pill: {
+    alignSelf: 'flex-start',
+    borderRadius: radii.full,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  pillText: {
+    ...typography.caption1,
+    fontWeight: '800',
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+  statValue: {
+    ...typography.title2,
+    fontVariant: ['tabular-nums'],
+  },
+  statLabel: {
+    color: colors.textTertiary,
+    ...typography.caption1,
+    textAlign: 'center',
+  },
+  input: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+    color: colors.text,
+    ...typography.body,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.divider,
   },
 });

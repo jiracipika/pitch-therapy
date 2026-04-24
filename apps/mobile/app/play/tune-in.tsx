@@ -87,13 +87,13 @@ export default function TuneInScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
-            <Text style={{ color: '#f4f4f5', fontSize: 22, fontWeight: '700' }}>Tune In</Text>
+            <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700' }}>Tune In</Text>
           </View>
-          <Text style={{ color: '#71717a', fontSize: 14, marginTop: 4 }}>
+          <Text style={{ color: '#97A3B6', fontSize: 14, marginTop: 4 }}>
             Hit the target note with your voice or instrument
           </Text>
         </View>
@@ -102,10 +102,10 @@ export default function TuneInScreen() {
           {/* How to play */}
           <View style={{ backgroundColor: `${ACCENT}0A`, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: `${ACCENT}26`, marginBottom: 32 }}>
             <Text style={{ color: ACCENT, fontSize: 10, fontWeight: '700', letterSpacing: 1.5, marginBottom: 10 }}>HOW TO PLAY</Text>
-            <Text style={{ color: '#71717a', fontSize: 13, marginBottom: 6 }}>1. A target note appears — tap 🔊 to hear it</Text>
-            <Text style={{ color: '#71717a', fontSize: 13, marginBottom: 6 }}>2. Sing or play that note on your instrument</Text>
-            <Text style={{ color: '#71717a', fontSize: 13, marginBottom: 6 }}>3. Mark ✓ if you nailed it or ✗ to skip</Text>
-            <Text style={{ color: '#71717a', fontSize: 13 }}>4. Build a streak for bonus points!</Text>
+            <Text style={{ color: '#97A3B6', fontSize: 13, marginBottom: 6 }}>1. A target note appears — tap 🔊 to hear it</Text>
+            <Text style={{ color: '#97A3B6', fontSize: 13, marginBottom: 6 }}>2. Sing or play that note on your instrument</Text>
+            <Text style={{ color: '#97A3B6', fontSize: 13, marginBottom: 6 }}>3. Mark ✓ if you nailed it or ✗ to skip</Text>
+            <Text style={{ color: '#97A3B6', fontSize: 13 }}>4. Build a streak for bonus points!</Text>
           </View>
 
           <Pressable
@@ -123,7 +123,7 @@ export default function TuneInScreen() {
         </View>
 
         <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
-          <Text style={{ color: '#71717a', textAlign: 'center' }}>← Back</Text>
+          <Text style={{ color: '#97A3B6', textAlign: 'center' }}>← Back</Text>
         </Pressable>
       </View>
     );
@@ -132,13 +132,13 @@ export default function TuneInScreen() {
   if (phase === 'results') {
     const correct = results.filter(r => r.correct).length;
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
-          <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Tune In Complete!</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Tune In Complete!</Text>
 
-          <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', marginBottom: 20, alignItems: 'center' }}>
+          <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 20, alignItems: 'center' }}>
             <Text style={{ color: ACCENT, fontSize: 48, fontWeight: '700' }}>{score}</Text>
-            <Text style={{ color: '#71717a', marginTop: 4 }}>points</Text>
+            <Text style={{ color: '#97A3B6', marginTop: 4 }}>points</Text>
           </View>
 
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
@@ -146,17 +146,17 @@ export default function TuneInScreen() {
               { label: 'Hit', value: `${correct}/${TOTAL_ROUNDS}` },
               { label: 'Best Streak', value: `🔥 ${bestStreak}` },
             ].map(s => (
-              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center' }}>
-                <Text style={{ color: '#f4f4f5', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
-                <Text style={{ color: '#71717a', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
+              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center' }}>
+                <Text style={{ color: '#F8FAFC', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
+                <Text style={{ color: '#97A3B6', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
               </View>
             ))}
           </View>
 
           {results.map((r, i) => (
             <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-              <Text style={{ color: '#71717a', fontSize: 13 }}>Round {i + 1}</Text>
-              <Text style={{ color: '#f4f4f5', fontSize: 13, fontWeight: '600' }}>Target: {r.target}</Text>
+              <Text style={{ color: '#97A3B6', fontSize: 13 }}>Round {i + 1}</Text>
+              <Text style={{ color: '#F8FAFC', fontSize: 13, fontWeight: '600' }}>Target: {r.target}</Text>
               <Text style={{ color: r.correct ? '#4ade80' : '#f87171', fontSize: 13 }}>
                 {r.correct ? `✓ +${r.points}` : '✗ skip'}
               </Text>
@@ -170,7 +170,7 @@ export default function TuneInScreen() {
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Play Again</Text>
           </Pressable>
           <Pressable onPress={() => router.back()} style={{ padding: 16 }}>
-            <Text style={{ color: '#71717a', textAlign: 'center' }}>← Dashboard</Text>
+            <Text style={{ color: '#97A3B6', textAlign: 'center' }}>← Dashboard</Text>
           </Pressable>
         </ScrollView>
       </View>
@@ -179,19 +179,19 @@ export default function TuneInScreen() {
 
   // ── Playing ──────────────────────────────────────────────────────────────────
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
       <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} />
 
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 40, justifyContent: 'space-between', paddingBottom: 40 }}>
         {/* Target note */}
         <View style={{ alignItems: 'center' }}>
-          <Text style={{ color: '#52525b', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 }}>
+          <Text style={{ color: '#7E8A9A', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 }}>
             Target Note
           </Text>
-          <Text style={{ color: ACCENT, fontSize: 72, fontWeight: '800', letterSpacing: -2 }}>
+          <Text style={{ color: ACCENT, fontSize: 72, fontWeight: '800', letterSpacing: 0 }}>
             {target}
           </Text>
-          <Text style={{ color: '#52525b', fontSize: 14, marginTop: 6 }}>
+          <Text style={{ color: '#7E8A9A', fontSize: 14, marginTop: 6 }}>
             {targetFreq.toFixed(1)} Hz
           </Text>
 
@@ -205,7 +205,7 @@ export default function TuneInScreen() {
               borderRadius: 24,
               backgroundColor: 'rgba(255,255,255,0.05)',
               borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.08)',
+              borderColor: 'rgba(255,255,255,0.10)',
               flexDirection: 'row',
               alignItems: 'center',
               gap: 8,

@@ -97,15 +97,15 @@ export default function ChordDetectiveScreen() {
   if (phase === 'results') {
     const c = results.filter(r => r.correct).length;
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40, alignItems: 'center' }}>
           <Text style={{ fontSize: 48 }}>🕵️</Text>
-          <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginTop: 16 }}>Case Closed!</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginTop: 16 }}>Case Closed!</Text>
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
             {[{ l: 'Score', v: String(score) }, { l: 'Correct', v: `${c}/${ROUNDS}` }, { l: 'Best Streak', v: `🔥 ${bestStreak}` }].map(s => (
-              <View key={s.l} style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center', flex: 1 }}>
-                <Text style={{ color: '#f4f4f5', fontSize: 22, fontWeight: '700' }}>{s.v}</Text>
-                <Text style={{ color: '#71717a', fontSize: 12, marginTop: 4 }}>{s.l}</Text>
+              <View key={s.l} style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', flex: 1 }}>
+                <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700' }}>{s.v}</Text>
+                <Text style={{ color: '#97A3B6', fontSize: 12, marginTop: 4 }}>{s.l}</Text>
               </View>
             ))}
           </View>
@@ -119,10 +119,10 @@ export default function ChordDetectiveScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b', paddingHorizontal: 20, justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D', paddingHorizontal: 20, justifyContent: 'center' }}>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>🕵️</Text>
         <Text style={{ color: ACCENT, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: 16 }}>Chord Detective</Text>
-        <Text style={{ color: '#71717a', fontSize: 14, textAlign: 'center', marginTop: 8 }}>Identify chord quality by ear</Text>
+        <Text style={{ color: '#97A3B6', fontSize: 14, textAlign: 'center', marginTop: 8 }}>Identify chord quality by ear</Text>
         <Pressable onPress={() => setAdvanced(!advanced)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 24 }}>
           <Text style={{ color: '#a1a1aa', fontSize: 14 }}>Advanced: Identify root too</Text>
           <View style={{ width: 48, height: 28, borderRadius: 14, backgroundColor: advanced ? ACCENT : 'rgba(255,255,255,0.1)', justifyContent: 'center', paddingHorizontal: 3 }}>
@@ -137,11 +137,11 @@ export default function ChordDetectiveScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
-        <Pressable onPress={() => router.back()}><Text style={{ color: '#71717a' }}>← Back</Text></Pressable>
+        <Pressable onPress={() => router.back()}><Text style={{ color: '#97A3B6' }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>🕵️ Chord Detective</Text>
-        <Text style={{ color: '#71717a' }}>{score}</Text>
+        <Text style={{ color: '#97A3B6' }}>{score}</Text>
       </View>
 
       <View style={{ alignItems: 'center', marginTop: 32 }}>
@@ -150,11 +150,11 @@ export default function ChordDetectiveScreen() {
         }}>
           <Text style={{ fontSize: 36 }}>🔊</Text>
         </Pressable>
-        <Text style={{ color: '#71717a', marginTop: 12, fontSize: 14 }}>Tap to replay chord</Text>
+        <Text style={{ color: '#97A3B6', marginTop: 12, fontSize: 14 }}>Tap to replay chord</Text>
       </View>
 
       <ScrollView style={{ flex: 1, paddingHorizontal: 20, marginTop: 24 }}>
-        <Text style={{ color: '#71717a', fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>CHORD QUALITY</Text>
+        <Text style={{ color: '#97A3B6', fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>CHORD QUALITY</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
           {CHORD_TYPES.map(ct => (
             <Pressable key={ct.id} onPress={() => phase === 'playing' && setSelectedType(ct.id)} style={{
@@ -168,7 +168,7 @@ export default function ChordDetectiveScreen() {
 
         {advanced && (
           <View style={{ marginTop: 16 }}>
-            <Text style={{ color: '#71717a', fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>ROOT NOTE</Text>
+            <Text style={{ color: '#97A3B6', fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>ROOT NOTE</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
               {ALL_NOTES.map(note => (
                 <Pressable key={note} onPress={() => setSelectedRoot(note)} style={{
@@ -199,7 +199,7 @@ export default function ChordDetectiveScreen() {
         }}>
           <Text style={{ color: (selectedType && (!advanced || selectedRoot)) ? '#fff' : '#52525b', fontWeight: '700', fontSize: 16 }}>Submit</Text>
         </Pressable>
-        <Text style={{ textAlign: 'center', color: '#71717a', marginBottom: 20 }}>🔥 {streak} • Round {round}/{ROUNDS}</Text>
+        <Text style={{ textAlign: 'center', color: '#97A3B6', marginBottom: 20 }}>🔥 {streak} • Round {round}/{ROUNDS}</Text>
       </ScrollView>
     </View>
   );

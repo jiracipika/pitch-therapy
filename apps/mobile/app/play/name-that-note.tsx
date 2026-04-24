@@ -127,15 +127,15 @@ export default function NameThatNoteScreen() {
     <View style={styles.container}>
       <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: '#71717a' }}>←</Text></Pressable>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: '#97A3B6' }}>←</Text></Pressable>
           <Text style={{ fontSize: 16, fontWeight: '600', color: ACCENT }}>Name That Note</Text>
           <View style={styles.scoreBadge}><Text style={styles.scoreText}>{score}</Text></View>
         </View>
 
         {/* Timer */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-          <Text style={{ fontSize: 12, color: '#71717a' }}>Time: {timeLeft}s</Text>
-          <Text style={{ fontSize: 12, color: '#71717a' }}>Round {round}/{totalRounds}</Text>
+          <Text style={{ fontSize: 12, color: '#97A3B6' }}>Time: {timeLeft}s</Text>
+          <Text style={{ fontSize: 12, color: '#97A3B6' }}>Round {round}/{totalRounds}</Text>
         </View>
         <View style={{ height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.07)', marginBottom: 24 }}>
           <View style={{ height: '100%', borderRadius: 2, backgroundColor: timeLeft <= 3 ? '#f87171' : ACCENT, width: `${(timeLeft / 10) * 100}%` }} />
@@ -170,7 +170,7 @@ export default function NameThatNoteScreen() {
           </View>
         )}
 
-        <Text style={{ textAlign: 'center', fontSize: 12, color: '#52525b', marginBottom: 16 }}>Tap the correct note</Text>
+        <Text style={{ textAlign: 'center', fontSize: 12, color: '#7E8A9A', marginBottom: 16 }}>Tap the correct note</Text>
 
         {/* Answer buttons */}
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 6, flexWrap: 'wrap' }}>
@@ -187,8 +187,8 @@ export default function NameThatNoteScreen() {
                 opacity: phase === 'playing' ? 1 : 0.4,
               }}
             >
-              <Text style={{ fontSize: 14, fontWeight: '600', color: '#f4f4f5' }}>{note.label}</Text>
-              <Text style={{ fontSize: 9, color: '#52525b' }}>{note.name}</Text>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: '#F8FAFC' }}>{note.label}</Text>
+              <Text style={{ fontSize: 9, color: '#7E8A9A' }}>{note.name}</Text>
             </Pressable>
           ))}
         </View>
@@ -198,20 +198,20 @@ export default function NameThatNoteScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#09090b' },
+  container: { flex: 1, backgroundColor: '#08090D' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, marginBottom: 20 },
-  title: { fontSize: 28, fontWeight: '700', color: '#f4f4f5', letterSpacing: -0.4 },
-  subtitle: { fontSize: 14, color: '#71717a', marginTop: 8, marginBottom: 40 },
+  title: { fontSize: 28, fontWeight: '700', color: '#F8FAFC', letterSpacing: 0 },
+  subtitle: { fontSize: 14, color: '#97A3B6', marginTop: 8, marginBottom: 40 },
   statsRow: { flexDirection: 'row', gap: 10, marginTop: 24, marginBottom: 32 },
-  statCard: { backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center', flex: 1 },
-  statValue: { fontSize: 24, fontWeight: '700', color: '#f4f4f5' },
-  statLabel: { fontSize: 11, color: '#71717a', marginTop: 4 },
+  statCard: { backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', flex: 1 },
+  statValue: { fontSize: 24, fontWeight: '700', color: '#F8FAFC' },
+  statLabel: { fontSize: 11, color: '#97A3B6', marginTop: 4 },
   btnPrimary: { borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 16, width: '100%' },
   btnPrimaryText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   linkBtn: { padding: 16, marginTop: 8 },
-  linkBtnText: { color: '#71717a', textAlign: 'center', fontSize: 13 },
-  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' },
+  linkBtnText: { color: '#97A3B6', textAlign: 'center', fontSize: 13 },
+  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', justifyContent: 'center' },
   scoreBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.09)' },
   scoreText: { fontSize: 12, fontWeight: '600', color: '#fff' },
 });

@@ -1,49 +1,69 @@
-import { View, Text, Pressable } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import type { GameModeMeta } from '@pitch-therapy/core';
+import { triggerSelectionHaptic } from '@/lib/haptics';
+import { colors, radii, shadows, typography } from '@/lib/theme';
 
 interface AnimatedModeCardProps {
   mode: GameModeMeta;
+  compact?: boolean;
 }
 
-export function AnimatedModeCard({ mode }: AnimatedModeCardProps) {
+export function AnimatedModeCard({ mode, compact = false }: AnimatedModeCardProps) {
   const router = useRouter();
   const route = `/play/${mode.id}` as const;
 
   return (
     <Pressable
-      onPress={() => router.push(route)}
+      onPress={() => {
+        void triggerSelectionHaptic();
+        router.push(route);
+      }}
       style={({ pressed }) => ({
-        transform: [{ scale: pressed ? 0.98 : 1 }],
-        opacity: pressed ? 0.9 : 1,
+        transform: [{ scale: pressed ? 0.985 : 1 }],
+        opacity: pressed ? 0.88 : 1,
       })}
     >
-      <View
+      <LinearGradient
+        colors={[mode.accentHex + '24', colors.card, colors.card]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={{
-          backgroundColor: 'rgba(255,255,255,0.04)',
-          borderRadius: 16,
-          padding: 20,
+          borderRadius: radii.lg,
           borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.07)',
+          borderColor: mode.accentHex + '40',
+          padding: compact ? 14 : 16,
+          gap: compact ? 8 : 10,
+          ...shadows.card,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 2 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View
             style={{
-              width: 12,
-              height: 12,
-              borderRadius: 6,
-              backgroundColor: mode.accentHex,
+              width: compact ? 38 : 44,
+              height: compact ? 38 : 44,
+              borderRadius: radii.md,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: mode.accentHex + '22',
+              borderWidth: 1,
+              borderColor: mode.accentHex + '55',
             }}
-          />
-          <Text style={{ color: '#f4f4f5', fontWeight: '700', fontSize: 18 }}>
-            {mode.label}
-          </Text>
+          >
+            <Text style={{ color: mode.accentHex, fontSize: compact ? 16 : 18, fontWeight: '900' }}>♪</Text>
+          </View>
+          <View style={{ flex: 1, gap: 3 }}>
+            <Text style={{ color: colors.text, ...typography.headline }} numberOfLines={1}>
+              {mode.label}
+            </Text>
+            <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 17 }} numberOfLines={2}>
+              {mode.description}
+            </Text>
+          </View>
+          <Text style={{ color: mode.accentHex, fontSize: 22, fontWeight: '700' }}>›</Text>
         </View>
-        <Text style={{ color: '#71717a', fontSize: 14, marginLeft: 24 }}>
-          {mode.description}
-        </Text>
-      </View>
+      </LinearGradient>
     </Pressable>
   );
 }

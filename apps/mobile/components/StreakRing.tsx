@@ -1,6 +1,6 @@
 import Svg, { Circle } from 'react-native-svg';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '@/lib/theme';
+import { colors, typography } from '@/lib/theme';
 
 interface StreakRingProps {
   streak: number;
@@ -22,7 +22,7 @@ export function StreakRing({ streak, max = 7, size = 80 }: StreakRingProps) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={colors.border}
+          stroke={colors.borderStrong}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -30,7 +30,7 @@ export function StreakRing({ streak, max = 7, size = 80 }: StreakRingProps) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={colors.frequencyGuess}
+          stroke={colors.speedRound}
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   streakText: {
     color: colors.text,
-    fontWeight: 'bold',
-    fontSize: 20,
+    ...typography.title3,
+    fontVariant: ['tabular-nums'],
   },
 });

@@ -1,45 +1,53 @@
-import { View, Text, Switch } from 'react-native';
+import { Image, Switch, Text, View } from 'react-native';
+import { GlassCard, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
 import { triggerSelectionHaptic } from '@/lib/haptics';
 import { useAppSettings } from '@/lib/settings';
+import { colors, typography } from '@/lib/theme';
+
+const referenceItems = [
+  { label: 'Reference Pitch', value: 'A4 = 440 Hz' },
+  { label: 'Tuning System', value: '12-TET' },
+];
 
 export default function SettingsScreen() {
   const { soundEnabled, hapticEnabled, setSoundEnabled, setHapticEnabled } = useAppSettings();
 
   return (
-    <AppPage title="Settings" subtitle="Fine-tune your training experience.">
-      <Text style={{ color: '#9ca3af', fontSize: 12, textTransform: 'uppercase', fontWeight: '700' }}>Audio</Text>
-
-      <View
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.04)',
-          borderRadius: 16,
-          borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.08)',
-          overflow: 'hidden',
-        }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' }}>
-          <View style={{ flex: 1, paddingRight: 10 }}>
-            <Text style={{ color: '#f5f5f5', fontWeight: '700' }}>Sound Effects</Text>
-            <Text style={{ color: '#9ca3af', fontSize: 12, marginTop: 2 }}>Play tones and answer feedback</Text>
+    <AppPage title="Settings" subtitle="Make the training loop feel right for you.">
+      <GlassCard accent={colors.pink}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <Image
+            source={require('../assets/logo-placeholder.png')}
+            style={{ width: 58, height: 58, borderRadius: 8, borderWidth: 1, borderColor: colors.borderStrong }}
+          />
+          <View style={{ flex: 1, gap: 3 }}>
+            <Text style={{ color: colors.text, ...typography.headline }}>Pitch Therapy</Text>
+            <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
+              Focused ear training with modern feedback and daily practice.
+            </Text>
           </View>
-          <Switch
+        </View>
+      </GlassCard>
+
+      <SectionHeader title="Feedback" subtitle="Persistent across app restarts." />
+      <GlassCard padding={0}>
+        <View style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: colors.divider }}>
+          <SettingRow
+            title="Sound Effects"
+            subtitle="Play tones and answer feedback"
             value={soundEnabled}
             onValueChange={(value) => {
               setSoundEnabled(value);
               void triggerSelectionHaptic();
             }}
-            trackColor={{ false: '#27272a', true: '#7c3aed' }}
-            thumbColor={soundEnabled ? '#ddd6fe' : '#a1a1aa'}
+            color={colors.blue}
           />
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16 }}>
-          <View style={{ flex: 1, paddingRight: 10 }}>
-            <Text style={{ color: '#f5f5f5', fontWeight: '700' }}>Haptic Feedback</Text>
-            <Text style={{ color: '#9ca3af', fontSize: 12, marginTop: 2 }}>Vibrate on correct and incorrect answers</Text>
-          </View>
-          <Switch
+        <View style={{ padding: 16 }}>
+          <SettingRow
+            title="Haptic Feedback"
+            subtitle="Vibrate on tab switches and answers"
             value={hapticEnabled}
             onValueChange={(value) => {
               setHapticEnabled(value);
@@ -47,58 +55,67 @@ export default function SettingsScreen() {
                 void triggerSelectionHaptic();
               }
             }}
-            trackColor={{ false: '#27272a', true: '#7c3aed' }}
-            thumbColor={hapticEnabled ? '#ddd6fe' : '#a1a1aa'}
+            color={colors.green}
           />
         </View>
-      </View>
+      </GlassCard>
 
-      <Text style={{ color: '#9ca3af', fontSize: 12, textTransform: 'uppercase', fontWeight: '700' }}>Reference</Text>
-      <View
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.04)',
-          borderRadius: 16,
-          borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.08)',
-          overflow: 'hidden',
-        }}
-      >
-        {[
-          { label: 'Reference Pitch', value: 'A4 = 440 Hz' },
-          { label: 'Tuning System', value: '12-TET' },
-        ].map((item, index, array) => (
+      <SectionHeader title="Reference" />
+      <GlassCard padding={0}>
+        {referenceItems.map((item, index) => (
           <View
             key={item.label}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
               padding: 16,
-              borderBottomWidth: index < array.length - 1 ? 1 : 0,
-              borderBottomColor: 'rgba(255,255,255,0.08)',
+              borderBottomWidth: index < referenceItems.length - 1 ? 1 : 0,
+              borderBottomColor: colors.divider,
             }}
           >
-            <Text style={{ color: '#f5f5f5', flex: 1 }}>{item.label}</Text>
-            <Text style={{ color: '#9ca3af', fontSize: 13 }}>{item.value}</Text>
+            <Text style={{ color: colors.text, flex: 1, ...typography.subhead }}>{item.label}</Text>
+            <Text style={{ color: colors.textSecondary, ...typography.caption1 }}>{item.value}</Text>
           </View>
         ))}
-      </View>
+      </GlassCard>
 
-      <Text style={{ color: '#9ca3af', fontSize: 12, textTransform: 'uppercase', fontWeight: '700' }}>About</Text>
-      <View
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.04)',
-          borderRadius: 16,
-          borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.08)',
-          padding: 16,
-        }}
-      >
-        <Text style={{ color: '#f5f5f5', fontWeight: '700', marginBottom: 6 }}>Pitch Therapy</Text>
-        <Text style={{ color: '#9ca3af', fontSize: 13, lineHeight: 20 }}>
-          Train your ear with focused drills. Improve pitch accuracy, interval recognition, and consistency over time.
-        </Text>
-        <Text style={{ color: '#71717a', fontSize: 12, marginTop: 12 }}>Version 0.1.0</Text>
-      </View>
+      <GlassCard accent={colors.teal}>
+        <View style={{ gap: 5 }}>
+          <Text style={{ color: colors.text, ...typography.headline }}>Version 0.1.0</Text>
+          <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
+            Built for quick reps, daily consistency, and sharper pitch intuition.
+          </Text>
+        </View>
+      </GlassCard>
     </AppPage>
+  );
+}
+
+function SettingRow({
+  title,
+  subtitle,
+  value,
+  onValueChange,
+  color,
+}: {
+  title: string;
+  subtitle: string;
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+  color: string;
+}) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+      <View style={{ flex: 1, gap: 3 }}>
+        <Text style={{ color: colors.text, ...typography.subhead }}>{title}</Text>
+        <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>{subtitle}</Text>
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: colors.surfaceElevated, true: color + '99' }}
+        thumbColor={value ? colors.text : colors.textTertiary}
+      />
+    </View>
   );
 }

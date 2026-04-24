@@ -89,23 +89,23 @@ export default function PianoTapScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
-          <Text style={{ color: '#f4f4f5', fontSize: 22, fontWeight: '700', marginTop: 12 }}>Piano Tap</Text>
-          <Text style={{ color: '#71717a', fontSize: 14, marginTop: 4 }}>Tap the correct piano key</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700', marginTop: 12 }}>Piano Tap</Text>
+          <Text style={{ color: '#97A3B6', fontSize: 14, marginTop: 4 }}>Tap the correct piano key</Text>
         </View>
         <View style={{ flex: 1, paddingHorizontal: 20, justifyContent: 'center' }}>
-          <Text style={{ color: '#f4f4f5', fontSize: 18, fontWeight: '600', marginBottom: 16 }}>Keyboard Mode</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 18, fontWeight: '600', marginBottom: 16 }}>Keyboard Mode</Text>
           {(Object.keys(MODE_CONFIG) as KeyboardMode[]).map(m => (
-            <Pressable key={m} onPress={() => startGame(m)} style={({ pressed }) => ({ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', marginBottom: 12, opacity: pressed ? 0.75 : 1 })}>
-              <Text style={{ color: '#f4f4f5', fontWeight: '600', fontSize: 16 }}>{MODE_CONFIG[m].label}</Text>
-              <Text style={{ color: '#71717a', fontSize: 13, marginTop: 3 }}>{MODE_CONFIG[m].keys.length} keys · {TOTAL_ROUNDS} rounds</Text>
+            <Pressable key={m} onPress={() => startGame(m)} style={({ pressed }) => ({ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 12, opacity: pressed ? 0.75 : 1 })}>
+              <Text style={{ color: '#F8FAFC', fontWeight: '600', fontSize: 16 }}>{MODE_CONFIG[m].label}</Text>
+              <Text style={{ color: '#97A3B6', fontSize: 13, marginTop: 3 }}>{MODE_CONFIG[m].keys.length} keys · {TOTAL_ROUNDS} rounds</Text>
             </Pressable>
           ))}
         </View>
         <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
-          <Text style={{ color: '#71717a', textAlign: 'center' }}>← Back</Text>
+          <Text style={{ color: '#97A3B6', textAlign: 'center' }}>← Back</Text>
         </Pressable>
       </View>
     );
@@ -114,18 +114,18 @@ export default function PianoTapScreen() {
   if (phase === 'results') {
     const correct = results.filter(r => r.correct).length;
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
-          <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Piano Tap Complete!</Text>
-          <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', marginBottom: 20, alignItems: 'center' }}>
+          <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Piano Tap Complete!</Text>
+          <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 20, alignItems: 'center' }}>
             <Text style={{ color: ACCENT, fontSize: 48, fontWeight: '700' }}>{score}</Text>
-            <Text style={{ color: '#71717a', marginTop: 4 }}>points</Text>
+            <Text style={{ color: '#97A3B6', marginTop: 4 }}>points</Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
             {[{ label: 'Correct', value: `${correct}/${TOTAL_ROUNDS}` }, { label: 'Streak', value: `🔥 ${streak}` }].map(s => (
-              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center' }}>
-                <Text style={{ color: '#f4f4f5', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
-                <Text style={{ color: '#71717a', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
+              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center' }}>
+                <Text style={{ color: '#F8FAFC', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
+                <Text style={{ color: '#97A3B6', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
               </View>
             ))}
           </View>
@@ -138,13 +138,13 @@ export default function PianoTapScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
       <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
         <Pressable onPress={handlePlay} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
           <Text style={{ fontSize: 28 }}>🔊</Text>
         </Pressable>
-        <Text style={{ textAlign: 'center', color: '#71717a', fontSize: 13, marginBottom: 24 }}>Tap to replay note</Text>
+        <Text style={{ textAlign: 'center', color: '#97A3B6', fontSize: 13, marginBottom: 24 }}>Tap to replay note</Text>
 
         {feedback && (
           <View style={{ backgroundColor: feedback === 'correct' ? 'rgba(74,222,128,0.12)' : 'rgba(248,113,113,0.12)', borderRadius: 12, padding: 12, marginBottom: 20, alignItems: 'center', borderWidth: 1, borderColor: feedback === 'correct' ? '#4ade80' : '#f87171' }}>
@@ -178,7 +178,7 @@ export default function PianoTapScreen() {
           })}
         </View>
 
-        <Text style={{ textAlign: 'center', color: '#52525b', fontSize: 12, marginTop: 24 }}>{MODE_CONFIG[kbMode].label} mode</Text>
+        <Text style={{ textAlign: 'center', color: '#7E8A9A', fontSize: 12, marginTop: 24 }}>{MODE_CONFIG[kbMode].label} mode</Text>
       </View>
     </View>
   );

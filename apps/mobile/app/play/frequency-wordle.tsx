@@ -120,7 +120,7 @@ export default function FrequencyWordleScreen() {
       )}
 
       <View style={styles.legend}>
-        <Text style={{ fontSize: 12, color: '#52525b' }}>🟩 Within 2% · 🟨 Within 10% (▲▼) · 🟥 Far</Text>
+        <Text style={{ fontSize: 12, color: '#7E8A9A' }}>🟩 Within 2% · 🟨 Within 10% (▲▼) · 🟥 Far</Text>
         <Pressable onPress={() => playFrequency(targetFreq)}>
           <Text style={{ fontSize: 12, color: ACCENT, marginTop: 4 }}>🔊 Play target tone</Text>
         </Pressable>
@@ -130,18 +130,18 @@ export default function FrequencyWordleScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#09090b' },
+  container: { flex: 1, backgroundColor: '#08090D' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 12 },
-  headerBtn: { color: '#71717a', fontSize: 13 },
-  title: { fontSize: 22, fontWeight: '600', color: '#f4f4f5' },
+  headerBtn: { color: '#97A3B6', fontSize: 13 },
+  title: { fontSize: 22, fontWeight: '600', color: '#F8FAFC' },
   rowEmpty: { height: 48, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.02)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center' },
-  rowCurrent: { height: 48, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 2, borderColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
+  rowCurrent: { height: 48, borderRadius: 12, backgroundColor: 'rgba(21,24,32,0.86)', borderWidth: 2, borderColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   rowFilled: { height: 48, borderRadius: 12, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   inputRow: { flexDirection: 'row', gap: 10 },
-  input: { flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, color: '#f4f4f5', fontSize: 16, fontWeight: '500' },
+  input: { flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, color: '#F8FAFC', fontSize: 16, fontWeight: '500' },
   goBtn: { borderRadius: 12, paddingHorizontal: 24, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
   goBtnText: { color: '#000', fontWeight: '700', fontSize: 16 },
-  btnSmall: { borderRadius: 12, padding: 12, paddingHorizontal: 24, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  btnSmall: { borderRadius: 12, padding: 12, paddingHorizontal: 24, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' },
   btnSmallText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  legend: { position: 'absolute', bottom: 20, left: 20, right: 20, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', padding: 14, alignItems: 'center' },
+  legend: { position: 'absolute', bottom: 20, left: 20, right: 20, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', padding: 14, alignItems: 'center' },
 });

@@ -136,7 +136,7 @@ export default function NoteWordleScreen() {
 
       {/* Legend */}
       <View style={styles.legend}>
-        <Text style={{ fontSize: 12, color: '#52525b' }}>🟩 Correct · 🟨 Within 2 semitones · 🟥 Far</Text>
+        <Text style={{ fontSize: 12, color: '#7E8A9A' }}>🟩 Correct · 🟨 Within 2 semitones · 🟥 Far</Text>
         <Pressable onPress={() => { const f = NOTE_FREQS_4[targetNote]; if (f) playTone(targetNote, f); }}>
           <Text style={{ fontSize: 12, color: ACCENT, marginTop: 4 }}>🔊 Play target tone</Text>
         </Pressable>
@@ -146,19 +146,19 @@ export default function NoteWordleScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#09090b' },
+  container: { flex: 1, backgroundColor: '#08090D' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 56, paddingBottom: 12 },
-  headerBtn: { color: '#71717a', fontSize: 13 },
-  title: { fontSize: 22, fontWeight: '600', color: '#f4f4f5' },
+  headerBtn: { color: '#97A3B6', fontSize: 13 },
+  title: { fontSize: 22, fontWeight: '600', color: '#F8FAFC' },
   rowEmpty: { height: 48, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.02)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center' },
-  rowCurrent: { height: 48, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 2, borderColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
+  rowCurrent: { height: 48, borderRadius: 12, backgroundColor: 'rgba(21,24,32,0.86)', borderWidth: 2, borderColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   rowFilled: { height: 48, borderRadius: 12, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   noteGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
-  noteBtn: { width: 52, height: 44, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center', justifyContent: 'center' },
+  noteBtn: { width: 52, height: 44, borderRadius: 12, backgroundColor: 'rgba(21,24,32,0.86)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', justifyContent: 'center' },
   noteBtnText: { fontSize: 14, fontWeight: '600', color: '#a1a1aa' },
   submitBtn: { borderRadius: 14, padding: 14, alignItems: 'center', marginTop: 12 },
   submitBtnText: { color: '#000', fontWeight: '700', fontSize: 16 },
-  btnSmall: { borderRadius: 12, padding: 12, paddingHorizontal: 24, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  btnSmall: { borderRadius: 12, padding: 12, paddingHorizontal: 24, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' },
   btnSmallText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  legend: { position: 'absolute', bottom: 20, left: 20, right: 20, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', padding: 14, alignItems: 'center' },
+  legend: { position: 'absolute', bottom: 20, left: 20, right: 20, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', padding: 14, alignItems: 'center' },
 });

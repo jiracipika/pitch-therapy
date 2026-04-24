@@ -131,7 +131,7 @@ export default function PitchMemoryScreen() {
       <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
         {/* Header */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: '#71717a' }}>←</Text></Pressable>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: '#97A3B6' }}>←</Text></Pressable>
           <Text style={{ fontSize: 16, fontWeight: '600', color: ACCENT }}>Pitch Memory</Text>
           <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
             <Text>{lives > 0 ? '❤️'.repeat(lives) : '🖤'.repeat(3)}</Text>
@@ -152,7 +152,7 @@ export default function PitchMemoryScreen() {
           ))}
         </View>
 
-        <Text style={{ textAlign: 'center', color: '#71717a', fontSize: 13, marginBottom: 24 }}>
+        <Text style={{ textAlign: 'center', color: '#97A3B6', fontSize: 13, marginBottom: 24 }}>
           {phase === 'playing' ? '🎵 Listen carefully...' : phase === 'feedback' ? (feedback === 'correct' ? '✅ Correct!' : '❌ Wrong!') : `Tap notes (${playerInput.length}/${sequence.length})`}
         </Text>
 
@@ -170,7 +170,7 @@ export default function PitchMemoryScreen() {
                 alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 6,
               }}
             >
-              <Text style={{ fontSize: 8, color: '#52525b' }}>{name}</Text>
+              <Text style={{ fontSize: 8, color: '#7E8A9A' }}>{name}</Text>
             </Pressable>
           ))}
         </View>
@@ -182,20 +182,20 @@ export default function PitchMemoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#09090b' },
+  container: { flex: 1, backgroundColor: '#08090D' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, marginBottom: 20 },
-  title: { fontSize: 28, fontWeight: '700', color: '#f4f4f5', letterSpacing: -0.4 },
-  subtitle: { fontSize: 14, color: '#71717a', marginTop: 8, marginBottom: 40 },
+  title: { fontSize: 28, fontWeight: '700', color: '#F8FAFC', letterSpacing: 0 },
+  subtitle: { fontSize: 14, color: '#97A3B6', marginTop: 8, marginBottom: 40 },
   statsRow: { flexDirection: 'row', gap: 10, marginTop: 24, marginBottom: 32 },
-  statCard: { backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center', flex: 1 },
-  statValue: { fontSize: 24, fontWeight: '700', color: '#f4f4f5' },
-  statLabel: { fontSize: 11, color: '#71717a', marginTop: 4 },
+  statCard: { backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', flex: 1 },
+  statValue: { fontSize: 24, fontWeight: '700', color: '#F8FAFC' },
+  statLabel: { fontSize: 11, color: '#97A3B6', marginTop: 4 },
   btnPrimary: { borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 16, width: '100%' },
   btnPrimaryText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   linkBtn: { padding: 16, marginTop: 8 },
-  linkBtnText: { color: '#71717a', textAlign: 'center', fontSize: 13 },
-  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' },
+  linkBtnText: { color: '#97A3B6', textAlign: 'center', fontSize: 13 },
+  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', justifyContent: 'center' },
   scoreBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.09)' },
   scoreText: { fontSize: 12, fontWeight: '600', color: '#fff' },
 });

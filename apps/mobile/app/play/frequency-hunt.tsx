@@ -133,24 +133,24 @@ export default function FrequencyHuntScreen() {
     <View style={styles.container}>
       <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: '#71717a' }}>←</Text></Pressable>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: '#97A3B6' }}>←</Text></Pressable>
           <Text style={{ fontSize: 16, fontWeight: '600', color: ACCENT }}>Frequency Hunt</Text>
           <View style={styles.scoreBadge}><Text style={styles.scoreText}>{score}</Text></View>
         </View>
 
-        <Text style={{ textAlign: 'center', fontSize: 12, color: '#52525b', marginBottom: 8 }}>Round {round}/{totalRounds}</Text>
+        <Text style={{ textAlign: 'center', fontSize: 12, color: '#7E8A9A', marginBottom: 8 }}>Round {round}/{totalRounds}</Text>
 
         <View style={{ alignItems: 'center', marginBottom: 32 }}>
           {phase === 'result' ? (
             <View style={{ alignItems: 'center' }}>
               <Text style={{ fontSize: 28, fontWeight: '800', color: ACCENT }}>{targetFreq} Hz</Text>
-              <Text style={{ fontSize: 13, color: '#71717a', marginTop: 4 }}>Your guess: {Math.round(sliderToFreq(sliderPos))} Hz</Text>
+              <Text style={{ fontSize: 13, color: '#97A3B6', marginTop: 4 }}>Your guess: {Math.round(sliderToFreq(sliderPos))} Hz</Text>
             </View>
           ) : (
             <>
-              <Text style={{ fontSize: 11, color: '#52525b', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Find this frequency</Text>
+              <Text style={{ fontSize: 11, color: '#7E8A9A', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Find this frequency</Text>
               <Pressable onPress={() => playFrequency(targetFreq, 1.0)} style={styles.playBtn}>
-                <Text style={{ fontSize: 16, color: '#71717a' }}>▶ Play Target Again</Text>
+                <Text style={{ fontSize: 16, color: '#97A3B6' }}>▶ Play Target Again</Text>
               </Pressable>
             </>
           )}
@@ -189,7 +189,7 @@ export default function FrequencyHuntScreen() {
               shadowRadius: 4,
             }} />
           </View>
-          <Text style={{ textAlign: 'center', fontSize: 28, fontWeight: '800', color: '#f4f4f5', marginTop: 12 }}>
+          <Text style={{ textAlign: 'center', fontSize: 28, fontWeight: '800', color: '#F8FAFC', marginTop: 12 }}>
             {Math.round(sliderToFreq(sliderPos))} Hz
           </Text>
         </View>
@@ -205,21 +205,21 @@ export default function FrequencyHuntScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#09090b' },
+  container: { flex: 1, backgroundColor: '#08090D' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, marginBottom: 20 },
-  title: { fontSize: 28, fontWeight: '700', color: '#f4f4f5', letterSpacing: -0.4 },
-  subtitle: { fontSize: 14, color: '#71717a', marginTop: 8, marginBottom: 40 },
+  title: { fontSize: 28, fontWeight: '700', color: '#F8FAFC', letterSpacing: 0 },
+  subtitle: { fontSize: 14, color: '#97A3B6', marginTop: 8, marginBottom: 40 },
   statsRow: { flexDirection: 'row', gap: 10, marginTop: 24, marginBottom: 32 },
-  statCard: { backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center', flex: 1 },
-  statValue: { fontSize: 24, fontWeight: '700', color: '#f4f4f5' },
-  statLabel: { fontSize: 11, color: '#71717a', marginTop: 4 },
+  statCard: { backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', flex: 1 },
+  statValue: { fontSize: 24, fontWeight: '700', color: '#F8FAFC' },
+  statLabel: { fontSize: 11, color: '#97A3B6', marginTop: 4 },
   btnPrimary: { borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 16, width: '100%' },
   btnPrimaryText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   linkBtn: { padding: 16, marginTop: 8 },
-  linkBtnText: { color: '#71717a', textAlign: 'center', fontSize: 13 },
-  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' },
+  linkBtnText: { color: '#97A3B6', textAlign: 'center', fontSize: 13 },
+  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', justifyContent: 'center' },
   scoreBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.09)' },
   scoreText: { fontSize: 12, fontWeight: '600', color: '#fff' },
-  playBtn: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  playBtn: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' },
 });

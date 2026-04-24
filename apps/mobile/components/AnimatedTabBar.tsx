@@ -4,6 +4,7 @@ import { type Href, usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { triggerSelectionHaptic } from '@/lib/haptics';
 import { MAIN_TABS } from '@/lib/main-tabs';
+import { colors, radii, shadows, typography } from '@/lib/theme';
 
 // Extracted into its own component so hooks are at the top level (not inside .map())
 function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: boolean }) {
@@ -32,6 +33,10 @@ function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: b
     inputRange: [0, 1],
     outputRange: [0, 1],
   });
+  const labelTranslate = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [3, 0],
+  });
 
   return (
     <Pressable
@@ -47,32 +52,32 @@ function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: b
       hitSlop={8}
       style={({ pressed }) => ({
         flex: 1,
-        minHeight: 48,
+        minHeight: 54,
         justifyContent: 'center',
         transform: [{ scale: pressed ? 0.97 : 1 }],
         opacity: pressed ? 0.9 : 1,
       })}
     >
-      <View style={{ alignItems: 'center', paddingVertical: 9, paddingHorizontal: 6, position: 'relative' }}>
+      <View style={{ alignItems: 'center', paddingVertical: 8, paddingHorizontal: 4, position: 'relative' }}>
         <Animated.View
           style={{
             position: 'absolute',
-            top: 4,
-            bottom: 4,
-            left: 4,
-            right: 4,
-            borderRadius: 12,
-            backgroundColor: 'rgba(167,139,250,0.18)',
+            top: 3,
+            bottom: 3,
+            left: 3,
+            right: 3,
+            borderRadius: radii.md,
+            backgroundColor: active ? tab.color + '24' : colors.glassLight,
             borderWidth: 1,
-            borderColor: 'rgba(167,139,250,0.35)',
+            borderColor: active ? tab.color + '66' : colors.border,
             opacity: activeBgOpacity,
           }}
         />
         <Animated.Text
           style={{
-            fontSize: 18,
+            fontSize: 19,
             marginBottom: 2,
-            color: active ? '#ddd6fe' : '#71717a',
+            color: active ? tab.color : colors.textTertiary,
             transform: [{ scale: iconScale }],
           }}
         >
@@ -80,10 +85,11 @@ function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: b
         </Animated.Text>
         <Animated.Text
           style={{
-            fontSize: 10,
-            fontWeight: '600',
-            color: active ? '#ddd6fe' : '#9ca3af',
+            color: active ? colors.text : colors.textTertiary,
             opacity: labelOpacity,
+            transform: [{ translateY: labelTranslate }],
+            ...typography.caption2,
+            fontWeight: active ? '800' : '600',
           }}
         >
           {tab.label}
@@ -105,12 +111,13 @@ export function AnimatedTabBar() {
         left: 12,
         right: 12,
         flexDirection: 'row',
-        backgroundColor: 'rgba(24,24,27,0.92)',
-        borderTopWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        backgroundColor: 'rgba(12,14,19,0.92)',
+        borderWidth: 1,
+        borderColor: colors.glassBorder,
         paddingVertical: 6,
         paddingHorizontal: 6,
-        borderRadius: 16,
+        borderRadius: radii.lg,
+        ...shadows.tab,
       }}
     >
       {MAIN_TABS.map((tab) => {

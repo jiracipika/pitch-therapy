@@ -1,85 +1,62 @@
-import { View, Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { GAME_MODE_META } from '@pitch-therapy/core';
+import { GlassCard, SectionHeader, StatItem } from '@/components/AppleUI';
 import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
+import { colors, radii, typography } from '@/lib/theme';
 
 const STATS = [
-  { label: 'Total Sessions', value: '0' },
-  { label: 'Notes Correct',  value: '0' },
-  { label: 'Avg Accuracy',   value: '—' },
-  { label: 'Best Score',     value: '0' },
+  { label: 'Sessions', value: '0', color: colors.blue },
+  { label: 'Correct', value: '0', color: colors.green },
+  { label: 'Accuracy', value: '--', color: colors.speedRound },
+  { label: 'Best', value: '0', color: colors.pink },
 ];
 
 export default function ProgressScreen() {
   return (
-    <AppPage title="Progress" subtitle="Track consistency and performance.">
-      <View
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.04)',
-          borderRadius: 18,
-          padding: 20,
-          borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.08)',
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ color: '#9ca3af', fontSize: 12, textTransform: 'uppercase', fontWeight: '700', marginBottom: 12 }}>
-          Best Streak
-        </Text>
-        <StreakRing streak={0} size={104} />
-        <Text style={{ color: '#f5f5f5', fontWeight: '700', marginTop: 8, fontSize: 18 }}>0 days</Text>
-      </View>
+    <AppPage title="Progress" subtitle="A clean snapshot of consistency and performance.">
+      <GlassCard accent={colors.purple} padding={20}>
+        <View style={{ alignItems: 'center', gap: 12 }}>
+          <Text style={{ color: colors.textTertiary, ...typography.overline }}>BEST STREAK</Text>
+          <StreakRing streak={0} size={108} />
+          <Text style={{ color: colors.text, ...typography.title3 }}>0 days</Text>
+        </View>
+      </GlassCard>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {STATS.map((stat) => (
-          <View
-            key={stat.label}
-            style={{
-              flex: 1,
-              minWidth: '47%',
-              backgroundColor: 'rgba(255,255,255,0.04)',
-              borderRadius: 14,
-              padding: 14,
-              borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.08)',
-            }}
-          >
-            <Text style={{ color: '#9ca3af', fontSize: 12, marginBottom: 6 }}>{stat.label}</Text>
-            <Text style={{ color: '#f5f5f5', fontWeight: '700', fontSize: 24, fontVariant: ['tabular-nums'] }}>{stat.value}</Text>
-          </View>
+          <GlassCard key={stat.label} style={{ flex: 1, minWidth: '47%' }} padding={14} accent={stat.color}>
+            <StatItem label={stat.label} value={stat.value} color={stat.color} />
+          </GlassCard>
         ))}
       </View>
 
+      <SectionHeader title="By Mode" subtitle="Mode history will fill in as sessions are recorded." />
       <View style={{ gap: 10 }}>
-        <Text style={{ color: '#9ca3af', fontSize: 12, textTransform: 'uppercase', fontWeight: '700' }}>By Mode</Text>
         {Object.values(GAME_MODE_META).map((mode) => (
-          <View
-            key={mode.id}
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.04)',
-              borderRadius: 14,
-              padding: 14,
-              borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.08)',
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
-          >
-            <View
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: mode.accentHex,
-                marginRight: 12,
-              }}
-            />
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: '#f5f5f5', fontWeight: '700', fontSize: 14 }}>{mode.label}</Text>
-              <Text style={{ color: '#9ca3af', fontSize: 12, marginTop: 2 }}>0 sessions played</Text>
+          <GlassCard key={mode.id} padding={13} accent={mode.accentHex}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: radii.md,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: mode.accentHex + '20',
+                  borderWidth: 1,
+                  borderColor: mode.accentHex + '55',
+                }}
+              >
+                <Text style={{ color: mode.accentHex, fontWeight: '900' }}>♪</Text>
+              </View>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text style={{ color: colors.text, ...typography.subhead }}>{mode.label}</Text>
+                <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>0 sessions played</Text>
+              </View>
+              <Text style={{ color: colors.textTertiary, ...typography.subhead }}>--</Text>
             </View>
-            <Text style={{ color: '#9ca3af', fontSize: 13, fontWeight: '700' }}>—</Text>
-          </View>
+          </GlassCard>
         ))}
       </View>
     </AppPage>

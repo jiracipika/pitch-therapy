@@ -64,15 +64,15 @@ export default function SpeedRoundScreen() {
   if (phase === 'results') {
     const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40, alignItems: 'center' }}>
           <Text style={{ fontSize: 48 }}>⚡</Text>
-          <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginTop: 16 }}>Time's Up!</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginTop: 16 }}>Time's Up!</Text>
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
             {[{ l: 'Score', v: String(score) }, { l: 'Accuracy', v: `${accuracy}%` }, { l: 'Best Streak', v: `🔥 ${bestStreak}` }].map(s => (
-              <View key={s.l} style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center', flex: 1 }}>
-                <Text style={{ color: '#f4f4f5', fontSize: 22, fontWeight: '700' }}>{s.v}</Text>
-                <Text style={{ color: '#71717a', fontSize: 12, marginTop: 4 }}>{s.l}</Text>
+              <View key={s.l} style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', flex: 1 }}>
+                <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700' }}>{s.v}</Text>
+                <Text style={{ color: '#97A3B6', fontSize: 12, marginTop: 4 }}>{s.l}</Text>
               </View>
             ))}
           </View>
@@ -80,7 +80,7 @@ export default function SpeedRoundScreen() {
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Play Again</Text>
           </Pressable>
           <Pressable onPress={() => router.back()} style={{ padding: 16 }}>
-            <Text style={{ color: '#71717a', textAlign: 'center' }}>← Dashboard</Text>
+            <Text style={{ color: '#97A3B6', textAlign: 'center' }}>← Dashboard</Text>
           </Pressable>
         </ScrollView>
       </View>
@@ -89,10 +89,10 @@ export default function SpeedRoundScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b', paddingHorizontal: 20, justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D', paddingHorizontal: 20, justifyContent: 'center' }}>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>⚡</Text>
         <Text style={{ color: ACCENT, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: 16 }}>Speed Round</Text>
-        <Text style={{ color: '#71717a', fontSize: 14, textAlign: 'center', marginTop: 8 }}>Identify notes as fast as you can</Text>
+        <Text style={{ color: '#97A3B6', fontSize: 14, textAlign: 'center', marginTop: 8 }}>Identify notes as fast as you can</Text>
         <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'center', marginTop: 32 }}>
           {[30, 60].map(d => (
             <Pressable key={d} onPress={() => setDuration(d)} style={{
@@ -110,11 +110,11 @@ export default function SpeedRoundScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
-        <Pressable onPress={() => { if (timerRef.current) clearInterval(timerRef.current); router.back(); }}><Text style={{ color: '#71717a' }}>← Back</Text></Pressable>
+        <Pressable onPress={() => { if (timerRef.current) clearInterval(timerRef.current); router.back(); }}><Text style={{ color: '#97A3B6' }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>⚡ Speed Round</Text>
-        <Text style={{ color: '#71717a' }}>{score}</Text>
+        <Text style={{ color: '#97A3B6' }}>{score}</Text>
       </View>
 
       <View style={{ paddingHorizontal: 20, marginTop: 8 }}>
@@ -129,7 +129,7 @@ export default function SpeedRoundScreen() {
           borderWidth: 2, borderColor: feedback === 'correct' ? '#4ade80' : feedback === 'wrong' ? '#f87171' : 'rgba(255,255,255,0.1)',
           alignItems: 'center', justifyContent: 'center',
         }}>
-          <Text style={{ fontSize: 44, fontWeight: '800', color: '#f4f4f5' }}>{currentNote}</Text>
+          <Text style={{ fontSize: 44, fontWeight: '800', color: '#F8FAFC' }}>{currentNote}</Text>
         </View>
       </View>
 
@@ -144,12 +144,12 @@ export default function SpeedRoundScreen() {
                 borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
                 alignItems: 'center', justifyContent: 'center', marginBottom: 4,
               }}>
-                <Text style={{ color: '#f4f4f5', fontWeight: '700', fontSize: isBlack ? 13 : 15 }}>{note}</Text>
+                <Text style={{ color: '#F8FAFC', fontWeight: '700', fontSize: isBlack ? 13 : 15 }}>{note}</Text>
               </Pressable>
             );
           })}
         </View>
-        <Text style={{ textAlign: 'center', color: '#71717a', marginTop: 12, fontSize: 13 }}>🔥 {streak} • {correct}/{total} • {timeLeft}s</Text>
+        <Text style={{ textAlign: 'center', color: '#97A3B6', marginTop: 12, fontSize: 13 }}>🔥 {streak} • {correct}/{total} • {timeLeft}s</Text>
       </View>
     </View>
   );

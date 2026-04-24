@@ -88,38 +88,38 @@ export default function FrequencySliderScreen() {
 
   if (phase === 'setup' || phase === 'results') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
           {phase === 'results' ? (
             <>
-              <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Slider Complete!</Text>
-              <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', marginBottom: 20, alignItems: 'center' }}>
+              <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Slider Complete!</Text>
+              <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 20, alignItems: 'center' }}>
                 <Text style={{ color: ACCENT, fontSize: 48, fontWeight: '700' }}>{score}</Text>
-                <Text style={{ color: '#71717a', marginTop: 4 }}>points</Text>
+                <Text style={{ color: '#97A3B6', marginTop: 4 }}>points</Text>
               </View>
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
                 {[
                   { label: 'Avg Error', value: `${Math.round(results.reduce((s, r) => s + Math.abs(r.centsOff), 0) / results.length)}¢` },
                   { label: 'Streak', value: `🔥 ${streak}` },
                 ].map(s => (
-                  <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center' }}>
-                    <Text style={{ color: '#f4f4f5', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
-                    <Text style={{ color: '#71717a', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
+                  <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center' }}>
+                    <Text style={{ color: '#F8FAFC', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
+                    <Text style={{ color: '#97A3B6', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
                   </View>
                 ))}
               </View>
               {results.map((r, i) => (
                 <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-                  <Text style={{ color: '#71717a', fontSize: 13 }}>Round {i + 1}</Text>
-                  <Text style={{ color: '#f4f4f5', fontSize: 13, fontWeight: '600' }}>{r.freq.toFixed(1)} Hz</Text>
+                  <Text style={{ color: '#97A3B6', fontSize: 13 }}>Round {i + 1}</Text>
+                  <Text style={{ color: '#F8FAFC', fontSize: 13, fontWeight: '600' }}>{r.freq.toFixed(1)} Hz</Text>
                   <Text style={{ color: Math.abs(r.centsOff) <= 15 ? '#4ade80' : '#fbbf24', fontSize: 13 }}>{r.centsOff}¢</Text>
                 </View>
               ))}
             </>
           ) : (
             <>
-              <Text style={{ color: '#f4f4f5', fontSize: 22, fontWeight: '700', marginBottom: 4 }}>Frequency Slider</Text>
-              <Text style={{ color: '#71717a', fontSize: 14, marginBottom: 32 }}>Drag to match a hidden frequency</Text>
+              <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700', marginBottom: 4 }}>Frequency Slider</Text>
+              <Text style={{ color: '#97A3B6', fontSize: 14, marginBottom: 32 }}>Drag to match a hidden frequency</Text>
             </>
           )}
           <Pressable onPress={phase === 'results' ? startGame : startGame} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24 }}>
@@ -134,18 +134,18 @@ export default function FrequencySliderScreen() {
   const targetPct = freqToPct(targetFreq);
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
       <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
-        <Pressable onPress={() => playFrequency(targetFreq, 1.0)} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+        <Pressable onPress={() => playFrequency(targetFreq, 1.0)} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: 'rgba(21,24,32,0.86)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
           <Text style={{ fontSize: 28 }}>🔊</Text>
         </Pressable>
-        <Text style={{ textAlign: 'center', color: '#71717a', fontSize: 13, marginBottom: 8 }}>Tap to replay tone</Text>
-        <Text style={{ textAlign: 'center', color: '#52525b', fontSize: 12 }}>Your pick: {answerFreq.toFixed(1)} Hz</Text>
+        <Text style={{ textAlign: 'center', color: '#97A3B6', fontSize: 13, marginBottom: 8 }}>Tap to replay tone</Text>
+        <Text style={{ textAlign: 'center', color: '#7E8A9A', fontSize: 12 }}>Your pick: {answerFreq.toFixed(1)} Hz</Text>
 
         {/* Slider */}
         <View style={{ marginTop: 24 }}>
-          <View style={{ height: 48, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 24, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+          <View style={{ height: 48, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 24, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' }}>
             {REFERENCE_NOTES.map(n => (
               <View key={n.name} style={{ position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: '#27272a', left: `${freqToPct(n.freq)}%` }}>
                 <Text style={{ position: 'absolute', bottom: -16, left: 4, fontSize: 9, color: '#3f3f46' }}>{n.name}</Text>
@@ -164,15 +164,15 @@ export default function FrequencySliderScreen() {
             value={sliderPct.toFixed(0)}
             onChangeText={handleSliderChange}
             keyboardType="numeric"
-            style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 14, color: '#f4f4f5', fontSize: 16, textAlign: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)' }}
+            style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 14, color: '#F8FAFC', fontSize: 16, textAlign: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' }}
           />
-          <Text style={{ textAlign: 'center', color: '#52525b', fontSize: 11, marginTop: 4 }}>Enter position (0–100)</Text>
+          <Text style={{ textAlign: 'center', color: '#7E8A9A', fontSize: 11, marginTop: 4 }}>Enter position (0–100)</Text>
         </View>
 
         {submitted && (
           <View style={{ backgroundColor: 'rgba(6,182,212,0.08)', borderRadius: 12, padding: 14, marginTop: 16, borderWidth: 1, borderColor: 'rgba(6,182,212,0.2)', alignItems: 'center' }}>
-            <Text style={{ color: '#71717a', fontSize: 13 }}>Target: <Text style={{ color: '#f4f4f5', fontWeight: '700' }}>{targetFreq.toFixed(1)} Hz</Text></Text>
-            <Text style={{ color: '#71717a', fontSize: 13 }}>Answer: <Text style={{ color: '#f4f4f5', fontWeight: '700' }}>{answerFreq.toFixed(1)} Hz</Text></Text>
+            <Text style={{ color: '#97A3B6', fontSize: 13 }}>Target: <Text style={{ color: '#F8FAFC', fontWeight: '700' }}>{targetFreq.toFixed(1)} Hz</Text></Text>
+            <Text style={{ color: '#97A3B6', fontSize: 13 }}>Answer: <Text style={{ color: '#F8FAFC', fontWeight: '700' }}>{answerFreq.toFixed(1)} Hz</Text></Text>
             <Text style={{ color: Math.abs(1200 * Math.log2(answerFreq / targetFreq)) <= 15 ? '#4ade80' : '#fbbf24', fontSize: 16, fontWeight: '700', marginTop: 4 }}>
               {Math.abs(Math.round(1200 * Math.log2(answerFreq / targetFreq)))}¢ off
             </Text>

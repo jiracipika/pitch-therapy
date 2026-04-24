@@ -43,15 +43,15 @@ export default function WaveformMatchScreen() {
   if (phase === 'done') {
     const avg = results.length > 0 ? Math.round(results.reduce((a, r) => a + r.pts, 0) / results.length) : 0;
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40, alignItems: 'center' }}>
           <Text style={{ fontSize: 48 }}>🌊</Text>
-          <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginTop: 16 }}>Results</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginTop: 16 }}>Results</Text>
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
             {[{ l: 'Score', v: String(score) }, { l: 'Avg', v: `${avg}%` }, { l: 'Rounds', v: String(results.length) }].map(s => (
-              <View key={s.l} style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center', flex: 1 }}>
-                <Text style={{ color: '#f4f4f5', fontSize: 22, fontWeight: '700' }}>{s.v}</Text>
-                <Text style={{ color: '#71717a', fontSize: 12, marginTop: 4 }}>{s.l}</Text>
+              <View key={s.l} style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', flex: 1 }}>
+                <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700' }}>{s.v}</Text>
+                <Text style={{ color: '#97A3B6', fontSize: 12, marginTop: 4 }}>{s.l}</Text>
               </View>
             ))}
           </View>
@@ -65,11 +65,11 @@ export default function WaveformMatchScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b', paddingHorizontal: 20, justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D', paddingHorizontal: 20, justifyContent: 'center' }}>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>🌊</Text>
         <Text style={{ color: ACCENT, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: 16 }}>Waveform Match</Text>
-        <Text style={{ color: '#71717a', fontSize: 14, textAlign: 'center', marginTop: 8 }}>Align waveforms by detecting sharp/flat</Text>
-        <Text style={{ color: '#52525b', fontSize: 12, textAlign: 'center', marginTop: 16 }}>{ROUNDS} rounds</Text>
+        <Text style={{ color: '#97A3B6', fontSize: 14, textAlign: 'center', marginTop: 8 }}>Align waveforms by detecting sharp/flat</Text>
+        <Text style={{ color: '#7E8A9A', fontSize: 12, textAlign: 'center', marginTop: 16 }}>{ROUNDS} rounds</Text>
         <Pressable onPress={startGame} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 32 }}>
           <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Start Matching</Text>
         </Pressable>
@@ -78,11 +78,11 @@ export default function WaveformMatchScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
-        <Pressable onPress={() => router.back()}><Text style={{ color: '#71717a' }}>← Back</Text></Pressable>
+        <Pressable onPress={() => router.back()}><Text style={{ color: '#97A3B6' }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>🌊 Waveform Match</Text>
-        <Text style={{ color: '#71717a' }}>{round}/{ROUNDS}</Text>
+        <Text style={{ color: '#97A3B6' }}>{round}/{ROUNDS}</Text>
       </View>
 
       <View style={{ paddingHorizontal: 20, marginTop: 8 }}>
@@ -93,7 +93,7 @@ export default function WaveformMatchScreen() {
 
       <View style={{ flex: 1, paddingHorizontal: 20, marginTop: 24 }}>
         {/* Target waveform representation */}
-        <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', marginBottom: 12 }}>
+        <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 12 }}>
           <Text style={{ color: ACCENT, fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>TARGET</Text>
           <View style={{ height: 60, justifyContent: 'center', alignItems: 'center' }}>
             {Array.from({ length: 40 }).map((_, i) => {
@@ -104,7 +104,7 @@ export default function WaveformMatchScreen() {
         </View>
 
         {/* Detuned waveform */}
-        <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', marginBottom: 16 }}>
+        <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 16 }}>
           <Text style={{ color: '#f87171', fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>DETUNED</Text>
           <View style={{ height: 60, justifyContent: 'center', alignItems: 'center' }}>
             {Array.from({ length: 40 }).map((_, i) => {
@@ -116,13 +116,13 @@ export default function WaveformMatchScreen() {
 
         {/* Replay buttons */}
         <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
-          <Pressable onPress={() => playFrequency(baseFreq, 0.4)} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+          <Pressable onPress={() => playFrequency(baseFreq, 0.4)} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' }}>
             <Text style={{ color: '#a1a1aa', fontSize: 12, fontWeight: '600' }}>▶ Target</Text>
           </Pressable>
-          <Pressable onPress={() => playFrequency(centsToFreq(baseFreq, detuneCents), 0.4)} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+          <Pressable onPress={() => playFrequency(centsToFreq(baseFreq, detuneCents), 0.4)} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' }}>
             <Text style={{ color: '#a1a1aa', fontSize: 12, fontWeight: '600' }}>▶ Detuned</Text>
           </Pressable>
-          <Pressable onPress={() => playFrequency(centsToFreq(baseFreq, sliderCents), 0.4)} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+          <Pressable onPress={() => playFrequency(centsToFreq(baseFreq, sliderCents), 0.4)} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' }}>
             <Text style={{ color: '#a1a1aa', fontSize: 12, fontWeight: '600' }}>▶ Yours</Text>
           </Pressable>
         </View>
@@ -130,9 +130,9 @@ export default function WaveformMatchScreen() {
         {/* Slider */}
         <View style={{ marginBottom: 16 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-            <Text style={{ color: '#71717a', fontSize: 12 }}>♭ -50¢</Text>
+            <Text style={{ color: '#97A3B6', fontSize: 12 }}>♭ -50¢</Text>
             <Text style={{ color: Math.abs(sliderCents) < 5 ? '#4ade80' : '#f4f4f5', fontSize: 14, fontWeight: '700' }}>{sliderCents > 0 ? '+' : ''}{sliderCents}¢</Text>
-            <Text style={{ color: '#71717a', fontSize: 12 }}>♯ +50¢</Text>
+            <Text style={{ color: '#97A3B6', fontSize: 12 }}>♯ +50¢</Text>
           </View>
           <View style={{ height: 40, justifyContent: 'center' }}>
             <View style={{ height: 6, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 99 }}>

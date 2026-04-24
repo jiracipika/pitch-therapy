@@ -1,8 +1,10 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { GAME_MODE_META, type GameMode } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
-import { colors } from '@/lib/theme';
+import { GlassCard } from '@/components/AppleUI';
+import { colors, radii, typography } from '@/lib/theme';
 import { playTone } from '@/lib/audio';
 
 export default function GameScreen() {
@@ -23,23 +25,28 @@ export default function GameScreen() {
 
   return (
     <View style={styles.container}>
+      <LinearGradient colors={['#10131A', '#08090D']} style={StyleSheet.absoluteFill} />
       <GameHeader score={0} round={1} totalRounds={10} streak={0} accent={meta.accentHex} />
       <View style={styles.content}>
-        <Text style={styles.modeTitle}>{meta.label}</Text>
-        <Text style={styles.modeDescription}>{meta.description}</Text>
-        <Pressable
-          onPress={() => playTone('A4', 440)}
-          style={({ pressed }) => [
-            styles.playButton,
-            { backgroundColor: meta.accentHex },
-            pressed && styles.playButtonPressed,
-          ]}
-        >
-          <Text style={styles.playButtonText}>▶ Play Tone</Text>
-        </Pressable>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>← Back to Dashboard</Text>
-        </Pressable>
+        <GlassCard accent={meta.accentHex} style={{ width: '100%' }}>
+          <View style={{ alignItems: 'center', gap: 12 }}>
+            <Text style={styles.modeTitle}>{meta.label}</Text>
+            <Text style={styles.modeDescription}>{meta.description}</Text>
+            <Pressable
+              onPress={() => playTone('A4', 440)}
+              style={({ pressed }) => [
+                styles.playButton,
+                { backgroundColor: meta.accentHex },
+                pressed && styles.playButtonPressed,
+              ]}
+            >
+              <Text style={styles.playButtonText}>Play Tone</Text>
+            </Pressable>
+            <Pressable onPress={() => router.back()} style={styles.backButton}>
+              <Text style={styles.backButtonText}>Back to Dashboard</Text>
+            </Pressable>
+          </View>
+        </GlassCard>
       </View>
     </View>
   );
@@ -63,7 +70,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   backLinkText: {
-    color: '#3B82F6',
+    color: colors.blue,
   },
   content: {
     flex: 1,
@@ -73,33 +80,34 @@ const styles = StyleSheet.create({
   },
   modeTitle: {
     color: colors.text,
-    fontSize: 30,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    ...typography.title1,
+    textAlign: 'center',
   },
   modeDescription: {
-    color: colors.muted,
+    color: colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 32,
+    ...typography.callout,
+    lineHeight: 22,
   },
   playButton: {
-    borderRadius: 16,
+    borderRadius: radii.md,
     paddingHorizontal: 32,
     paddingVertical: 16,
+    minWidth: 180,
+    alignItems: 'center',
   },
   playButtonPressed: {
     opacity: 0.8,
   },
   playButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 18,
+    color: colors.background,
+    ...typography.headline,
   },
   backButton: {
-    marginTop: 24,
+    padding: 8,
   },
   backButtonText: {
-    color: colors.muted,
-    fontSize: 14,
+    color: colors.textSecondary,
+    ...typography.caption1,
   },
 });

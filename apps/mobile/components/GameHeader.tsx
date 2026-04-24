@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '@/lib/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, radii, shadows, typography } from '@/lib/theme';
 
 interface GameHeaderProps {
   score: number;
@@ -11,17 +12,25 @@ interface GameHeaderProps {
 
 export function GameHeader({ score, round, totalRounds, streak, accent = colors.pitchMatch }: GameHeaderProps) {
   return (
-    <View style={styles.container}>
-      <View style={styles.row}>
+    <LinearGradient
+      colors={[accent + '22', colors.card, colors.card]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.container, { borderColor: accent + '40' }]}
+    >
+      <View style={styles.metric}>
         <Text style={styles.label}>Round</Text>
-        <Text style={styles.roundText}>{round}/{totalRounds}</Text>
+        <Text style={styles.metricValue}>{round}/{totalRounds}</Text>
       </View>
-      <Text style={[styles.scoreText, { color: accent }]}>{score}</Text>
-      <View style={styles.row}>
-        <Text style={styles.label}>🔥</Text>
-        <Text style={styles.streakText}>{streak}</Text>
+      <View style={styles.scorePill}>
+        <Text style={[styles.scoreText, { color: accent }]}>{score}</Text>
+        <Text style={styles.scoreLabel}>Score</Text>
       </View>
-    </View>
+      <View style={styles.metric}>
+        <Text style={styles.label}>Streak</Text>
+        <Text style={styles.metricValue}>{streak}</Text>
+      </View>
+    </LinearGradient>
   );
 }
 
@@ -30,32 +39,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    marginHorizontal: 14,
+    marginTop: 14,
+    padding: 12,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    ...shadows.card,
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  metric: {
+    flex: 1,
+    gap: 3,
   },
   label: {
-    color: colors.muted,
-    fontSize: 14,
+    color: colors.textTertiary,
+    ...typography.caption1,
   },
-  roundText: {
+  metricValue: {
     color: colors.text,
-    fontWeight: 'bold',
-    fontSize: 18,
+    ...typography.headline,
+    fontVariant: ['tabular-nums'],
+  },
+  scorePill: {
+    minWidth: 96,
+    alignItems: 'center',
+    gap: 1,
   },
   scoreText: {
-    fontWeight: 'bold',
-    fontSize: 24,
+    ...typography.title2,
+    fontVariant: ['tabular-nums'],
   },
-  streakText: {
-    color: colors.text,
-    fontWeight: 'bold',
+  scoreLabel: {
+    color: colors.textTertiary,
+    ...typography.caption2,
   },
 });

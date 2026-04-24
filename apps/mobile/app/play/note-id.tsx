@@ -97,14 +97,14 @@ export default function NoteIdScreen() {
   // ── Select Difficulty ──────────────────────────────────────────────────────
   if (phase === 'select-difficulty') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
-          <Text style={{ color: '#f4f4f5', fontSize: 22, fontWeight: '700' }}>{MODE.label}</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700' }}>{MODE.label}</Text>
         </View>
         <View style={{ flex: 1, paddingHorizontal: 20, justifyContent: 'center' }}>
-          <Text style={{ color: '#71717a', fontSize: 14, marginBottom: 8 }}>Identify the note you hear.</Text>
-          <Text style={{ color: '#f4f4f5', fontSize: 18, fontWeight: '600', marginBottom: 32 }}>
+          <Text style={{ color: '#97A3B6', fontSize: 14, marginBottom: 8 }}>Identify the note you hear.</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 18, fontWeight: '600', marginBottom: 32 }}>
             Select difficulty
           </Text>
           {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
@@ -112,24 +112,24 @@ export default function NoteIdScreen() {
               key={d}
               onPress={() => startGame(d)}
               style={({ pressed }) => ({
-                backgroundColor: 'rgba(255,255,255,0.04)',
+                backgroundColor: 'rgba(21,24,32,0.86)',
                 borderRadius: 16,
                 padding: 20,
                 borderWidth: 1,
-                borderColor: 'rgba(255,255,255,0.07)',
+                borderColor: 'rgba(255,255,255,0.10)',
                 marginBottom: 12,
                 opacity: pressed ? 0.75 : 1,
               })}
             >
-              <Text style={{ color: '#f4f4f5', fontWeight: '600', fontSize: 16, textTransform: 'capitalize' }}>{d}</Text>
-              <Text style={{ color: '#71717a', fontSize: 13, marginTop: 3 }}>
+              <Text style={{ color: '#F8FAFC', fontWeight: '600', fontSize: 16, textTransform: 'capitalize' }}>{d}</Text>
+              <Text style={{ color: '#97A3B6', fontSize: 13, marginTop: 3 }}>
                 {DIFFICULTY_NOTES[d].length} notes · {DIFFICULTY_CONFIG[d].rounds} rounds
               </Text>
             </Pressable>
           ))}
         </View>
         <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
-          <Text style={{ color: '#71717a', textAlign: 'center' }}>← Back</Text>
+          <Text style={{ color: '#97A3B6', textAlign: 'center' }}>← Back</Text>
         </Pressable>
       </View>
     );
@@ -139,14 +139,14 @@ export default function NoteIdScreen() {
   if (phase === 'results') {
     const correct = results.filter((r) => r.correct).length;
     return (
-      <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
-          <Text style={{ color: '#f4f4f5', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Round Complete!</Text>
-          <Text style={{ color: '#71717a', marginBottom: 32 }}>{MODE.label} · {difficulty}</Text>
+          <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Round Complete!</Text>
+          <Text style={{ color: '#97A3B6', marginBottom: 32 }}>{MODE.label} · {difficulty}</Text>
 
-          <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', marginBottom: 20, alignItems: 'center' }}>
+          <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 20, alignItems: 'center' }}>
             <Text style={{ color: ACCENT, fontSize: 48, fontWeight: '700' }}>{score}</Text>
-            <Text style={{ color: '#71717a', marginTop: 4 }}>points</Text>
+            <Text style={{ color: '#97A3B6', marginTop: 4 }}>points</Text>
           </View>
 
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
@@ -154,17 +154,17 @@ export default function NoteIdScreen() {
               { label: 'Correct', value: `${correct}/${totalRounds}` },
               { label: 'Accuracy', value: `${Math.round((correct / totalRounds) * 100)}%` },
             ].map((s) => (
-              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', alignItems: 'center' }}>
-                <Text style={{ color: '#f4f4f5', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
-                <Text style={{ color: '#71717a', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
+              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center' }}>
+                <Text style={{ color: '#F8FAFC', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
+                <Text style={{ color: '#97A3B6', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
               </View>
             ))}
           </View>
 
           {results.map((r, i) => (
             <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-              <Text style={{ color: '#71717a', fontSize: 13 }}>Round {i + 1}</Text>
-              <Text style={{ color: '#f4f4f5', fontSize: 13, fontWeight: '600' }}>Target: {r.target}</Text>
+              <Text style={{ color: '#97A3B6', fontSize: 13 }}>Round {i + 1}</Text>
+              <Text style={{ color: '#F8FAFC', fontSize: 13, fontWeight: '600' }}>Target: {r.target}</Text>
               <Text style={{ color: r.correct ? '#4ade80' : '#f87171', fontSize: 13 }}>
                 {r.correct ? '✓' : `✗ ${r.answer}`}
               </Text>
@@ -178,7 +178,7 @@ export default function NoteIdScreen() {
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Play Again</Text>
           </Pressable>
           <Pressable onPress={() => router.back()} style={{ padding: 16 }}>
-            <Text style={{ color: '#71717a', textAlign: 'center' }}>← Dashboard</Text>
+            <Text style={{ color: '#97A3B6', textAlign: 'center' }}>← Dashboard</Text>
           </Pressable>
         </ScrollView>
       </View>
@@ -187,7 +187,7 @@ export default function NoteIdScreen() {
 
   // ── Playing ────────────────────────────────────────────────────────────────
   return (
-    <View style={{ flex: 1, backgroundColor: '#09090b' }}>
+    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
       <GameHeader score={score} round={round} totalRounds={totalRounds} streak={streak} accent={ACCENT} />
 
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
@@ -209,7 +209,7 @@ export default function NoteIdScreen() {
           >
             <Text style={{ fontSize: 36 }}>▶</Text>
           </Pressable>
-          <Text style={{ color: '#71717a', marginTop: 12, fontSize: 14 }}>Tap to replay tone</Text>
+          <Text style={{ color: '#97A3B6', marginTop: 12, fontSize: 14 }}>Tap to replay tone</Text>
         </View>
 
         {/* Feedback banner */}
@@ -281,7 +281,7 @@ export default function NoteIdScreen() {
       </View>
 
       <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
-        <Text style={{ color: '#71717a', textAlign: 'center', fontSize: 13 }}>← Dashboard</Text>
+        <Text style={{ color: '#97A3B6', textAlign: 'center', fontSize: 13 }}>← Dashboard</Text>
       </Pressable>
     </View>
   );

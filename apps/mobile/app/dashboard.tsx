@@ -1,72 +1,119 @@
-import { View, Text, Image } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
+import { GlassCard, Pill, SectionHeader, StatItem } from '@/components/AppleUI';
 import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
+import { triggerSelectionHaptic } from '@/lib/haptics';
+import { colors, radii, shadows, typography } from '@/lib/theme';
 
 export default function DashboardScreen() {
-  const featuredModes = Object.values(GAME_MODE_META).slice(0, 6);
+  const router = useRouter();
+  const featuredModes = Object.values(GAME_MODE_META).slice(0, 4);
 
   return (
-    <AppPage title="Pitch Therapy" subtitle="Train daily. Hear better." showSwipeHint>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <Image
-          source={require('../assets/logo-placeholder.png')}
-          style={{ width: 38, height: 38, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' }}
-        />
-        <Text style={{ color: '#9ca3af', fontSize: 13 }}>Daily ear training workspace</Text>
-      </View>
-      <View
+    <AppPage title="Pitch Therapy" subtitle="A focused ear-training studio for daily reps." showSwipeHint>
+      <LinearGradient
+        colors={['rgba(56,189,248,0.22)', 'rgba(74,222,128,0.13)', colors.card]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: 'rgba(255,255,255,0.04)',
-          borderRadius: 18,
+          borderRadius: radii.lg,
           borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.08)',
-          padding: 16,
+          borderColor: 'rgba(255,255,255,0.14)',
+          padding: 18,
+          gap: 18,
+          ...shadows.elevated,
         }}
       >
-        <View style={{ flex: 1, paddingRight: 12 }}>
-          <Text style={{ color: '#9ca3af', fontSize: 12, fontWeight: '600', textTransform: 'uppercase' }}>
-            Current Streak
-          </Text>
-          <Text style={{ color: '#f5f5f5', fontWeight: '700', fontSize: 22, marginTop: 6 }}>3 days</Text>
-          <Text style={{ color: '#a78bfa', marginTop: 4, fontSize: 13 }}>Keep it alive with one session today</Text>
-        </View>
-        <StreakRing streak={3} size={86} />
-      </View>
-
-      <View
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.04)',
-          borderRadius: 18,
-          borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.08)',
-          padding: 16,
-        }}
-      >
-        <Text style={{ color: '#f5f5f5', fontSize: 16, fontWeight: '700', marginBottom: 4 }}>Today’s Plan</Text>
-        <Text style={{ color: '#9ca3af', fontSize: 13 }}>Play 2 quick modes and 1 daily challenge to extend your streak.</Text>
-        <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
-          <View style={{ backgroundColor: 'rgba(59,130,246,0.2)', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
-            <Text style={{ color: '#93c5fd', fontSize: 12, fontWeight: '600' }}>2 Quick Rounds</Text>
-          </View>
-          <View style={{ backgroundColor: 'rgba(167,139,250,0.2)', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
-            <Text style={{ color: '#ddd6fe', fontSize: 12, fontWeight: '600' }}>Daily Challenge</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <Image
+            source={require('../assets/logo-placeholder.png')}
+            style={{
+              width: 66,
+              height: 66,
+              borderRadius: radii.lg,
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.18)',
+            }}
+          />
+          <View style={{ flex: 1, gap: 7 }}>
+            <Pill label="Ready for today" color={colors.green} />
+            <Text style={{ color: colors.text, ...typography.title2 }}>Train smarter, not louder.</Text>
+            <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
+              Quick rounds, daily challenges, and precise pitch drills are all one swipe away.
+            </Text>
           </View>
         </View>
+
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <Pressable
+            onPress={() => {
+              void triggerSelectionHaptic();
+              router.push('/play-modes');
+            }}
+            style={({ pressed }) => ({
+              flex: 1,
+              borderRadius: radii.md,
+              backgroundColor: colors.text,
+              paddingVertical: 14,
+              alignItems: 'center',
+              opacity: pressed ? 0.82 : 1,
+            })}
+          >
+            <Text style={{ color: colors.background, ...typography.headline }}>Start Play</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              void triggerSelectionHaptic();
+              router.push('/daily');
+            }}
+            style={({ pressed }) => ({
+              width: 104,
+              borderRadius: radii.md,
+              borderWidth: 1,
+              borderColor: colors.borderStrong,
+              paddingVertical: 14,
+              alignItems: 'center',
+              opacity: pressed ? 0.82 : 1,
+            })}
+          >
+            <Text style={{ color: colors.text, ...typography.headline }}>Daily</Text>
+          </Pressable>
+        </View>
+      </LinearGradient>
+
+      <GlassCard accent={colors.speedRound}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <View style={{ flex: 1, gap: 5 }}>
+            <Text style={{ color: colors.textTertiary, ...typography.overline }}>CURRENT STREAK</Text>
+            <Text style={{ color: colors.text, ...typography.title2 }}>3 days</Text>
+            <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
+              Complete one focused session to keep momentum moving.
+            </Text>
+          </View>
+          <StreakRing streak={3} size={88} />
+        </View>
+      </GlassCard>
+
+      <View style={{ flexDirection: 'row', gap: 10 }}>
+        <GlassCard style={{ flex: 1 }} padding={14} accent={colors.blue}>
+          <StatItem label="Sessions" value="0" color={colors.blue} />
+        </GlassCard>
+        <GlassCard style={{ flex: 1 }} padding={14} accent={colors.green}>
+          <StatItem label="Accuracy" value="--" color={colors.green} />
+        </GlassCard>
+        <GlassCard style={{ flex: 1 }} padding={14} accent={colors.pink}>
+          <StatItem label="Best" value="0" color={colors.pink} />
+        </GlassCard>
       </View>
 
-      <View>
-        <Text style={{ color: '#9ca3af', fontSize: 12, textTransform: 'uppercase', fontWeight: '700', marginBottom: 12 }}>
-          Featured Modes
-        </Text>
+      <SectionHeader title="Featured Modes" subtitle="Fast drills that cover pitch, memory, and frequency." />
+      <View style={{ gap: 10 }}>
         {featuredModes.map((mode) => (
-          <View key={mode.id} style={{ marginBottom: 12 }}>
-            <AnimatedModeCard mode={mode} />
-          </View>
+          <AnimatedModeCard key={mode.id} mode={mode} compact />
         ))}
       </View>
     </AppPage>
