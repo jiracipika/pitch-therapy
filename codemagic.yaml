@@ -59,3 +59,65 @@ workflows:
 
     artifacts:
       - build.apk
+
+  expo_ios_eas:
+    name: Expo iOS EAS Build
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    environment:
+      node: 20
+      xcode: latest
+      groups:
+        - expo_credential
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+
+    cache:
+      cache_paths:
+        - ~/.npm
+        - /tmp/expo-cli
+        - $CM_BUILD_DIR/node_modules
+        - $CM_BUILD_DIR/apps/mobile/node_modules
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm ci
+
+      - name: Build shared workspace packages
+        script: |
+          npm run build --workspaces --if-present
+
+      - name: Install EAS CLI
+        script: |
+          npm install -g eas-cli
+
+      - name: Verify Expo config
+        script: |
+          cd apps/mobile && npx expo config --type public
+
+      - name: Check Expo token
+        script: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "EXPO_TOKEN is not set. Add it in Codemagic UI under the expo_credentials variable group."
+            exit 1
+          fi
+
+      - name: Build iOS IPA locally with EAS
+        script: |
+          cd apps/mobile
+          EAS_BUILD_NO_EXPO_GO_WARNING=true eas build \
+            --platform ios \
+            --profile preview \
+            --local \
+            --output $CM_BUILD_DIR/build.ipa
+
+    artifacts:
+      - build.ipa
