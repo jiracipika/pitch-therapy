@@ -22,5 +22,15 @@
         "buildType": "app-bundle"
       }
     }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "track": "production"
+      },
+      "ios": {
+        "ascAppId": "SET_IN_CI"
+      }
+    }
   }
 }

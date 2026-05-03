@@ -1,6 +1,6 @@
 workflows:
   expo_android_eas:
-    name: Expo Android EAS Build
+    name: Expo Android EAS Build (Preview APK)
     max_build_duration: 60
 
     environment:
@@ -53,7 +53,7 @@ workflows:
       - name: Check Expo token
         script: |
           if [ -z "$EXPO_TOKEN" ]; then
-            echo "EXPO_TOKEN is not set. Add it in Codemagic UI under the expo_credentials variable group."
+            echo "EXPO_TOKEN is not set. Add it in Codemagic UI under the expo_credential variable group."
             exit 1
           fi
 
@@ -69,3 +69,184 @@ workflows:
 
     artifacts:
       - build.apk
+
+  expo_android_playstore_release:
+    name: Expo Android Play Store Release
+    max_build_duration: 120
+
+    environment:
+      node: 20
+      java: 17
+      groups:
+        - expo_credential
+
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: android-release-*
+          include: true
+
+    cache:
+      cache_paths:
+        - ~/.npm
+        - /tmp/expo-cli
+        - $CM_BUILD_DIR/node_modules
+        - $CM_BUILD_DIR/apps/mobile/node_modules
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm ci --workspace @pitch-therapy/mobile --workspace @pitch-therapy/core --include-workspace-root
+
+      - name: Build shared workspace packages
+        script: |
+          npm run build --workspace @pitch-therapy/core --if-present
+
+      - name: Install EAS CLI
+        script: |
+          npm install -g eas-cli
+
+      - name: Check Expo token
+        script: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "EXPO_TOKEN is not set. Add it in Codemagic UI under the expo_credential variable group."
+            exit 1
+          fi
+
+      - name: Build + submit Android production release
+        script: |
+          cd apps/mobile
+          EAS_BUILD_NO_EXPO_GO_WARNING=true eas build \
+            --platform android \
+            --profile production \
+            --auto-submit \
+            --non-interactive
+
+  expo_ios_appstore_release:
+    name: Expo iOS App Store Release
+    max_build_duration: 120
+
+    environment:
+      node: 20
+      java: 17
+      groups:
+        - expo_credential
+
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: ios-release-*
+          include: true
+
+    cache:
+      cache_paths:
+        - ~/.npm
+        - /tmp/expo-cli
+        - $CM_BUILD_DIR/node_modules
+        - $CM_BUILD_DIR/apps/mobile/node_modules
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm ci --workspace @pitch-therapy/mobile --workspace @pitch-therapy/core --include-workspace-root
+
+      - name: Build shared workspace packages
+        script: |
+          npm run build --workspace @pitch-therapy/core --if-present
+
+      - name: Install EAS CLI
+        script: |
+          npm install -g eas-cli
+
+      - name: Check Expo token
+        script: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "EXPO_TOKEN is not set. Add it in Codemagic UI under the expo_credential variable group."
+            exit 1
+          fi
+
+      - name: Check App Store Connect app id
+        script: |
+          if [ -z "$ASC_APP_ID" ]; then
+            echo "ASC_APP_ID is not set. Add it in Codemagic variables."
+            exit 1
+          fi
+
+      - name: Inject ASC app id into EAS submit profile
+        script: |
+          node -e "const fs=require('fs');const p='apps/mobile/eas.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.submit??={};j.submit.production??={};j.submit.production.ios={...(j.submit.production.ios||{}),ascAppId:process.env.ASC_APP_ID};fs.writeFileSync(p,JSON.stringify(j,null,2));console.log('Configured submit.production.ios.ascAppId');"
+
+      - name: Build + submit iOS production release
+        script: |
+          cd apps/mobile
+          EAS_BUILD_NO_EXPO_GO_WARNING=true eas build \
+            --platform ios \
+            --profile production \
+            --auto-submit \
+            --non-interactive
+
+  expo_store_release_all:
+    name: Expo Store Release (Android + iOS)
+    max_build_duration: 120
+
+    environment:
+      node: 20
+      java: 17
+      groups:
+        - expo_credential
+
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: release-*
+          include: true
+
+    cache:
+      cache_paths:
+        - ~/.npm
+        - /tmp/expo-cli
+        - $CM_BUILD_DIR/node_modules
+        - $CM_BUILD_DIR/apps/mobile/node_modules
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm ci --workspace @pitch-therapy/mobile --workspace @pitch-therapy/core --include-workspace-root
+
+      - name: Build shared workspace packages
+        script: |
+          npm run build --workspace @pitch-therapy/core --if-present
+
+      - name: Install EAS CLI
+        script: |
+          npm install -g eas-cli
+
+      - name: Check Expo token
+        script: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "EXPO_TOKEN is not set. Add it in Codemagic UI under the expo_credential variable group."
+            exit 1
+          fi
+
+      - name: Check App Store Connect app id
+        script: |
+          if [ -z "$ASC_APP_ID" ]; then
+            echo "ASC_APP_ID is not set. Add it in Codemagic variables."
+            exit 1
+          fi
+
+      - name: Inject ASC app id into EAS submit profile
+        script: |
+          node -e "const fs=require('fs');const p='apps/mobile/eas.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.submit??={};j.submit.production??={};j.submit.production.ios={...(j.submit.production.ios||{}),ascAppId:process.env.ASC_APP_ID};fs.writeFileSync(p,JSON.stringify(j,null,2));console.log('Configured submit.production.ios.ascAppId');"
+
+      - name: Build + submit Android and iOS production releases
+        script: |
+          cd apps/mobile
+          EAS_BUILD_NO_EXPO_GO_WARNING=true eas build \
+            --platform all \
+            --profile production \
+            --auto-submit \
+            --non-interactive
