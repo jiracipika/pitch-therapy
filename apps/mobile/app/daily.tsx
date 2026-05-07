@@ -4,6 +4,7 @@ import { GAME_MODE_META, getDailySeed } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
 import { GlassCard, Pill, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
+import { useResponsiveLayout } from '@/lib/responsive';
 import { colors, typography } from '@/lib/theme';
 
 const DAILY_MODES = ['note-wordle', 'frequency-wordle'] as const;
@@ -20,6 +21,7 @@ function getTimeUntilMidnight(): string {
 }
 
 export default function DailyScreen() {
+  const { isDesktop } = useResponsiveLayout();
   const seed = getDailySeed();
   const [timeRemaining, setTimeRemaining] = useState(getTimeUntilMidnight);
 
@@ -44,10 +46,14 @@ export default function DailyScreen() {
       </GlassCard>
 
       <SectionHeader title="Today's Modes" subtitle="Complete both for the daily streak." />
-      <View style={{ gap: 10 }}>
+      <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 10 }}>
         {DAILY_MODES.map((modeId) => {
           const mode = GAME_MODE_META[modeId];
-          return <AnimatedModeCard key={modeId} mode={mode} />;
+          return (
+            <View key={modeId} style={{ width: isDesktop ? '49%' : '100%' }}>
+              <AnimatedModeCard mode={mode} />
+            </View>
+          );
         })}
       </View>
 

@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useMemo, useRef } from 'react';
-import { Animated, PanResponder, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, PanResponder, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import { AnimatedTabBar } from '@/components/AnimatedTabBar';
 import { triggerSelectionHaptic } from '@/lib/haptics';
 import { MAIN_TABS } from '@/lib/main-tabs';
 import { colors, typography } from '@/lib/theme';
+import { useResponsiveLayout } from '@/lib/responsive';
 
 interface AppPageProps {
   title: string;
@@ -20,12 +21,13 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
   const { width } = useWindowDimensions();
   const pathname = usePathname();
   const router = useRouter();
+  const { contentMaxWidth, pagePadding, prefersRailNav, isDesktop } = useResponsiveLayout();
   const opacity = useRef(new Animated.Value(0)).current;
   const translateX = useRef(new Animated.Value(0)).current;
   const previousIndex = useRef<number | null>(null);
 
   const activeIndex = MAIN_TABS.findIndex((tab) => tab.route === pathname);
-  const canSwipeTabs = activeIndex >= 0;
+  const canSwipeTabs = activeIndex >= 0 && !prefersRailNav;
 
   const panResponder = useMemo(
     () =>
@@ -99,38 +101,89 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
           backgroundColor: 'rgba(56,189,248,0.08)',
         }}
       />
-      <Animated.View
-        style={{ flex: 1, opacity, transform: [{ translateX }] }}
-        {...(canSwipeTabs ? panResponder.panHandlers : {})}
-      >
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          showsVerticalScrollIndicator={false}
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            paddingTop: insets.top + 18,
-            paddingHorizontal: 16,
-            paddingBottom: insets.bottom + 120,
-            gap: 18,
-          }}
-        >
-          <View style={{ gap: 7 }}>
-            <Text style={{ color: colors.text, ...typography.title1 }}>{title}</Text>
-            {subtitle ? (
-              <Text style={{ color: colors.textSecondary, ...typography.subhead, lineHeight: 21 }}>
-                {subtitle}
-              </Text>
-            ) : null}
-            {showSwipeHint && canSwipeTabs ? (
-              <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>
-                Swipe left or right to move between sections
-              </Text>
-            ) : null}
+      <View style={{ flex: 1, flexDirection: prefersRailNav ? 'row' : 'column' }}>
+        {prefersRailNav ? (
+          <View
+            style={{
+              width: isDesktop ? 116 : 96,
+              borderRightWidth: 1,
+              borderRightColor: colors.divider,
+              paddingTop: insets.top + 14,
+              paddingBottom: insets.bottom + 12,
+              paddingHorizontal: 8,
+              gap: 12,
+              backgroundColor: 'rgba(10,12,16,0.7)',
+            }}
+          >
+            <View style={{ alignItems: 'center', marginBottom: 8 }}>
+              <Text style={{ color: colors.textSecondary, ...typography.caption1, fontWeight: '800' }}>PT</Text>
+            </View>
+            {MAIN_TABS.map((tab) => {
+              const active = pathname === tab.route || (pathname === '/' && tab.route === '/dashboard');
+              return (
+                <View key={tab.route} style={{ alignItems: 'center' }}>
+                  <Pressable
+                    onPress={() => {
+                      if (!active) {
+                        void triggerSelectionHaptic();
+                        router.replace(tab.route as Href);
+                      }
+                    }}
+                    style={{
+                      width: 64,
+                      paddingVertical: 10,
+                      borderRadius: 8,
+                      backgroundColor: active ? tab.color + '24' : 'transparent',
+                      borderWidth: 1,
+                      borderColor: active ? tab.color + '66' : 'transparent',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Text style={{ color: active ? colors.text : colors.textSecondary }}>{tab.icon}</Text>
+                  </Pressable>
+                  <Text style={{ color: active ? colors.text : colors.textTertiary, ...typography.caption2, marginTop: 4 }}>
+                    {tab.label}
+                  </Text>
+                </View>
+              );
+            })}
           </View>
-          {children}
-        </ScrollView>
-      </Animated.View>
-      <AnimatedTabBar />
+        ) : null}
+
+        <Animated.View
+          style={{ flex: 1, opacity, transform: [{ translateX }] }}
+          {...(canSwipeTabs ? panResponder.panHandlers : {})}
+        >
+          <ScrollView
+            contentInsetAdjustmentBehavior="automatic"
+            showsVerticalScrollIndicator={false}
+            style={{ flex: 1 }}
+            contentContainerStyle={{
+              paddingTop: insets.top + 18,
+              paddingHorizontal: pagePadding,
+              paddingBottom: insets.bottom + (prefersRailNav ? 28 : 120),
+            }}
+          >
+            <View style={{ width: '100%', maxWidth: contentMaxWidth, alignSelf: 'center', gap: 18 }}>
+              <View style={{ gap: 7 }}>
+                <Text style={{ color: colors.text, ...typography.title1 }}>{title}</Text>
+                {subtitle ? (
+                  <Text style={{ color: colors.textSecondary, ...typography.subhead, lineHeight: 21 }}>
+                    {subtitle}
+                  </Text>
+                ) : null}
+                {showSwipeHint && canSwipeTabs ? (
+                  <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>
+                    Swipe left or right to move between sections
+                  </Text>
+                ) : null}
+              </View>
+              {children}
+            </View>
+          </ScrollView>
+        </Animated.View>
+      </View>
+      {!prefersRailNav ? <AnimatedTabBar /> : null}
     </View>
   );
 }

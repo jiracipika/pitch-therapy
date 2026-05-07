@@ -26,7 +26,7 @@ export default function RootLayout({
         <AuthProvider>
           <StatsProvider>
             <Nav />
-            <main className="pb-tab">{children}</main>
+            <main className="pt-main-shell">{children}</main>
           </StatsProvider>
         </AuthProvider>
       </body>

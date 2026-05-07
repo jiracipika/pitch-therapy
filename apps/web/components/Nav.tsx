@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { ReactElement } from 'react';
 
 /* ── SF Symbol–equivalent SVG icons ── */
 
@@ -76,32 +77,57 @@ export default function Nav() {
     pathname.startsWith('/auth')
   ) return null;
 
-  return (
-    <nav className="ios-tab-bar">
-      {TABS.map(({ href, label, Icon }) => {
-        const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
-        const color = active ? 'var(--ios-blue)' : 'var(--ios-label3)';
+  const renderItem = (
+    href: string,
+    label: string,
+    Icon: (props: { filled: boolean }) => ReactElement,
+    rail = false,
+  ) => {
+    const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+    const color = active ? 'var(--ios-blue)' : 'var(--ios-label3)';
+    return (
+      <Link
+        key={href}
+        href={href}
+        className={rail ? 'pt-rail-item' : 'ios-tab-item'}
+        style={{
+          textDecoration: 'none',
+          color,
+          background: rail && active ? 'rgba(10,132,255,0.14)' : 'transparent',
+          border: rail ? `1px solid ${active ? 'rgba(10,132,255,0.35)' : 'transparent'}` : 'none',
+        }}
+      >
+        <span style={{ color, transition: 'color 0.15s ease' }}>
+          <Icon filled={active} />
+        </span>
+        <span
+          style={{
+            fontSize: rail ? '11px' : '10px',
+            fontWeight: active ? 700 : 500,
+            letterSpacing: '0.01em',
+            color,
+            transition: 'color 0.15s ease',
+            lineHeight: 1,
+            marginTop: rail ? 6 : 0,
+          }}
+        >
+          {label}
+        </span>
+      </Link>
+    );
+  };
 
-        return (
-          <Link key={href} href={href} className="ios-tab-item" style={{ textDecoration: 'none' }}>
-            <span style={{ color, transition: 'color 0.15s ease' }}>
-              <Icon filled={active} />
-            </span>
-            <span
-              style={{
-                fontSize: '10px',
-                fontWeight: active ? 600 : 500,
-                letterSpacing: '0.01em',
-                color,
-                transition: 'color 0.15s ease',
-                lineHeight: 1,
-              }}
-            >
-              {label}
-            </span>
-          </Link>
-        );
-      })}
-    </nav>
+  return (
+    <>
+      <nav className="pt-nav-mobile">
+        {TABS.map(({ href, label, Icon }) => renderItem(href, label, Icon))}
+      </nav>
+      <aside className="pt-nav-rail">
+        <div className="pt-rail-brand">Pitch Therapy</div>
+        <div className="pt-rail-list">
+          {TABS.map(({ href, label, Icon }) => renderItem(href, label, Icon, true))}
+        </div>
+      </aside>
+    </>
   );
 }

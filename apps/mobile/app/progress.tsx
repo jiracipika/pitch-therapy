@@ -3,6 +3,7 @@ import { GAME_MODE_META } from '@pitch-therapy/core';
 import { GlassCard, SectionHeader, StatItem } from '@/components/AppleUI';
 import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
+import { useResponsiveLayout } from '@/lib/responsive';
 import { colors, radii, typography } from '@/lib/theme';
 
 const STATS = [
@@ -13,6 +14,8 @@ const STATS = [
 ];
 
 export default function ProgressScreen() {
+  const { isDesktop } = useResponsiveLayout();
+
   return (
     <AppPage title="Progress" subtitle="A clean snapshot of consistency and performance.">
       <GlassCard accent={colors.purple} padding={20}>
@@ -32,9 +35,9 @@ export default function ProgressScreen() {
       </View>
 
       <SectionHeader title="By Mode" subtitle="Mode history will fill in as sessions are recorded." />
-      <View style={{ gap: 10 }}>
+      <View style={{ flexDirection: isDesktop ? 'row' : 'column', flexWrap: 'wrap', gap: 10 }}>
         {Object.values(GAME_MODE_META).map((mode) => (
-          <GlassCard key={mode.id} padding={13} accent={mode.accentHex}>
+          <GlassCard key={mode.id} padding={13} accent={mode.accentHex} style={{ width: isDesktop ? '49%' : '100%' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View
                 style={{

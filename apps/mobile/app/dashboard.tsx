@@ -7,10 +7,12 @@ import { GlassCard, Pill, SectionHeader, StatItem } from '@/components/AppleUI';
 import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
 import { triggerSelectionHaptic } from '@/lib/haptics';
+import { useResponsiveLayout } from '@/lib/responsive';
 import { colors, radii, shadows, typography } from '@/lib/theme';
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const { isTablet, isDesktop } = useResponsiveLayout();
   const featuredModes = Object.values(GAME_MODE_META).slice(0, 4);
 
   return (
@@ -28,7 +30,7 @@ export default function DashboardScreen() {
           ...shadows.elevated,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+        <View style={{ flexDirection: isTablet ? 'row' : 'column', alignItems: isTablet ? 'center' : 'flex-start', gap: 14 }}>
           <Image
             source={require('../assets/logo-placeholder.png')}
             style={{
@@ -48,7 +50,7 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        <View style={{ flexDirection: 'row', gap: 10 }}>
+        <View style={{ flexDirection: isTablet ? 'row' : 'column', gap: 10 }}>
           <Pressable
             onPress={() => {
               void triggerSelectionHaptic();
@@ -86,7 +88,7 @@ export default function DashboardScreen() {
       </LinearGradient>
 
       <GlassCard accent={colors.speedRound}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+        <View style={{ flexDirection: isTablet ? 'row' : 'column', alignItems: isTablet ? 'center' : 'flex-start', gap: 14 }}>
           <View style={{ flex: 1, gap: 5 }}>
             <Text style={{ color: colors.textTertiary, ...typography.overline }}>CURRENT STREAK</Text>
             <Text style={{ color: colors.text, ...typography.title2 }}>3 days</Text>
@@ -98,7 +100,7 @@ export default function DashboardScreen() {
         </View>
       </GlassCard>
 
-      <View style={{ flexDirection: 'row', gap: 10 }}>
+      <View style={{ flexDirection: isTablet ? 'row' : 'column', gap: 10 }}>
         <GlassCard style={{ flex: 1 }} padding={14} accent={colors.blue}>
           <StatItem label="Sessions" value="0" color={colors.blue} />
         </GlassCard>
@@ -111,9 +113,11 @@ export default function DashboardScreen() {
       </View>
 
       <SectionHeader title="Featured Modes" subtitle="Fast drills that cover pitch, memory, and frequency." />
-      <View style={{ gap: 10 }}>
+      <View style={{ flexDirection: isDesktop ? 'row' : 'column', flexWrap: 'wrap', gap: 10 }}>
         {featuredModes.map((mode) => (
-          <AnimatedModeCard key={mode.id} mode={mode} compact />
+          <View key={mode.id} style={{ width: isDesktop ? '49%' : '100%' }}>
+            <AnimatedModeCard mode={mode} compact />
+          </View>
         ))}
       </View>
     </AppPage>

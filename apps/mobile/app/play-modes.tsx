@@ -3,6 +3,7 @@ import { GAME_MODE_META } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
 import { GlassCard, Pill, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
+import { useResponsiveLayout } from '@/lib/responsive';
 import { colors, typography } from '@/lib/theme';
 
 const MODE_CATEGORIES = [
@@ -15,6 +16,8 @@ const MODE_CATEGORIES = [
 ] as const;
 
 export default function PlayModesScreen() {
+  const { isTablet, isDesktop } = useResponsiveLayout();
+
   return (
     <AppPage title="Play Modes" subtitle="Choose a track, then jump straight into a focused drill.">
       <GlassCard accent={colors.green}>
@@ -30,10 +33,14 @@ export default function PlayModesScreen() {
       {MODE_CATEGORIES.map((category) => (
         <View key={category.id} style={{ gap: 10 }}>
           <SectionHeader title={category.label} />
-          <View style={{ gap: 10 }}>
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', flexWrap: 'wrap', gap: 10 }}>
             {category.modes.map((modeId) => {
               const mode = GAME_MODE_META[modeId];
-              return <AnimatedModeCard key={modeId} mode={{ ...mode, accentHex: mode.accentHex || category.tone }} compact />;
+              return (
+                <View key={modeId} style={{ width: isDesktop ? '49%' : isTablet ? '100%' : '100%' }}>
+                  <AnimatedModeCard mode={{ ...mode, accentHex: mode.accentHex || category.tone }} compact />
+                </View>
+              );
             })}
           </View>
         </View>

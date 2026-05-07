@@ -1064,3 +1064,104 @@ input[type="range"]::-moz-range-thumb {
 .ios-spring {
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
+/* ============================================================
+   RESPONSIVE NAV + SHELL
+   ============================================================ */
+
+.pt-nav-mobile {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(28, 28, 30, 0.94);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 0.5px solid var(--ios-sep);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+}
+
+.pt-nav-rail {
+  display: none;
+}
+
+.pt-main-shell {
+  padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px) + 16px);
+}
+
+@media (min-width: 768px) {
+  .pt-main-shell {
+    max-width: 980px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px) + 24px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .pt-nav-mobile {
+    display: none;
+  }
+
+  .pt-nav-rail {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 108px;
+    z-index: 55;
+    background: rgba(28, 28, 30, 0.94);
+    border-right: 0.5px solid var(--ios-sep);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 18px;
+    gap: 18px;
+  }
+
+  .pt-rail-brand {
+    color: var(--ios-label2);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .pt-rail-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+  }
+
+  .pt-rail-item {
+    width: 84px;
+    min-height: 64px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .pt-main-shell {
+    max-width: 1200px;
+    margin-left: 108px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 28px;
+  }
+}

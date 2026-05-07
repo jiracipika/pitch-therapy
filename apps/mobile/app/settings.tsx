@@ -2,6 +2,7 @@ import { Image, Switch, Text, View } from 'react-native';
 import { GlassCard, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
 import { triggerSelectionHaptic } from '@/lib/haptics';
+import { useResponsiveLayout } from '@/lib/responsive';
 import { useAppSettings } from '@/lib/settings';
 import { colors, typography } from '@/lib/theme';
 
@@ -11,6 +12,7 @@ const referenceItems = [
 ];
 
 export default function SettingsScreen() {
+  const { isDesktop } = useResponsiveLayout();
   const { soundEnabled, hapticEnabled, setSoundEnabled, setHapticEnabled } = useAppSettings();
 
   return (
@@ -30,54 +32,60 @@ export default function SettingsScreen() {
         </View>
       </GlassCard>
 
-      <SectionHeader title="Feedback" subtitle="Persistent across app restarts." />
-      <GlassCard padding={0}>
-        <View style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: colors.divider }}>
-          <SettingRow
-            title="Sound Effects"
-            subtitle="Play tones and answer feedback"
-            value={soundEnabled}
-            onValueChange={(value) => {
-              setSoundEnabled(value);
-              void triggerSelectionHaptic();
-            }}
-            color={colors.blue}
-          />
+      <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 10 }}>
+        <View style={{ flex: 1, gap: 10 }}>
+          <SectionHeader title="Feedback" subtitle="Persistent across app restarts." />
+          <GlassCard padding={0}>
+            <View style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: colors.divider }}>
+              <SettingRow
+                title="Sound Effects"
+                subtitle="Play tones and answer feedback"
+                value={soundEnabled}
+                onValueChange={(value) => {
+                  setSoundEnabled(value);
+                  void triggerSelectionHaptic();
+                }}
+                color={colors.blue}
+              />
+            </View>
+            <View style={{ padding: 16 }}>
+              <SettingRow
+                title="Haptic Feedback"
+                subtitle="Vibrate on tab switches and answers"
+                value={hapticEnabled}
+                onValueChange={(value) => {
+                  setHapticEnabled(value);
+                  if (value) {
+                    void triggerSelectionHaptic();
+                  }
+                }}
+                color={colors.green}
+              />
+            </View>
+          </GlassCard>
         </View>
-        <View style={{ padding: 16 }}>
-          <SettingRow
-            title="Haptic Feedback"
-            subtitle="Vibrate on tab switches and answers"
-            value={hapticEnabled}
-            onValueChange={(value) => {
-              setHapticEnabled(value);
-              if (value) {
-                void triggerSelectionHaptic();
-              }
-            }}
-            color={colors.green}
-          />
-        </View>
-      </GlassCard>
 
-      <SectionHeader title="Reference" />
-      <GlassCard padding={0}>
-        {referenceItems.map((item, index) => (
-          <View
-            key={item.label}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              padding: 16,
-              borderBottomWidth: index < referenceItems.length - 1 ? 1 : 0,
-              borderBottomColor: colors.divider,
-            }}
-          >
-            <Text style={{ color: colors.text, flex: 1, ...typography.subhead }}>{item.label}</Text>
-            <Text style={{ color: colors.textSecondary, ...typography.caption1 }}>{item.value}</Text>
-          </View>
-        ))}
-      </GlassCard>
+        <View style={{ flex: 1, gap: 10 }}>
+          <SectionHeader title="Reference" />
+          <GlassCard padding={0}>
+            {referenceItems.map((item, index) => (
+              <View
+                key={item.label}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  padding: 16,
+                  borderBottomWidth: index < referenceItems.length - 1 ? 1 : 0,
+                  borderBottomColor: colors.divider,
+                }}
+              >
+                <Text style={{ color: colors.text, flex: 1, ...typography.subhead }}>{item.label}</Text>
+                <Text style={{ color: colors.textSecondary, ...typography.caption1 }}>{item.value}</Text>
+              </View>
+            ))}
+          </GlassCard>
+        </View>
+      </View>
 
       <GlassCard accent={colors.teal}>
         <View style={{ gap: 5 }}>
