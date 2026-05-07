@@ -72,14 +72,14 @@ export default function ProfilePage() {
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-lg mx-auto px-4 pt-14">
+      <div className="pt-page-shell pt-page-profile px-4 pt-14">
 
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-6"
+          className="mb-6 pt-hero"
         >
           <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 2 }}>
             Your ear profile
@@ -87,9 +87,11 @@ export default function ProfilePage() {
           <h1 className="ios-large-title">Ear Profile</h1>
         </motion.div>
 
+        <div className="pt-profile-layout">
+          <div className="pt-profile-main">
         {/* Profile score card */}
         <motion.div
-          className="ios-card"
+          className="ios-card pt-desktop-card"
           style={{
             padding: 24,
             textAlign: 'center',
@@ -160,13 +162,75 @@ export default function ProfilePage() {
           </div>
         </motion.div>
 
+        {/* Tips card */}
+        {loaded && totalGames > 0 && (
+          <motion.div
+            className="ios-card pt-desktop-card"
+            style={{
+              padding: 16,
+              marginTop: 12,
+              marginBottom: 8,
+              background: 'rgba(10,132,255,0.06)',
+              border: '0.5px solid rgba(10,132,255,0.12)',
+            }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+          >
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-blue)', marginBottom: 6 }}>
+              Next Steps
+            </div>
+            <div style={{ fontSize: 14, color: 'var(--ios-label2)', lineHeight: 1.5 }}>
+              {modesPlayed < 5
+                ? 'Try more game modes to discover your strengths! Head to the dashboard and explore.'
+                : avgAccuracy < 60
+                ? 'Focus on accuracy over speed. Try Practice mode to build precision.'
+                : stats.streak < 3
+                ? 'Build your daily streak! Consistency is key to ear training.'
+                : 'Great progress! Challenge yourself with Advanced modes like Chord Detective and Waveform Match.'}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Empty state */}
+        {loaded && totalGames === 0 && (
+          <motion.div
+            className="ios-card pt-desktop-card"
+            style={{ padding: '32px 20px', textAlign: 'center', marginTop: 12, marginBottom: 8 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+          >
+            <div style={{ fontSize: 36, marginBottom: 12 }}>👂</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.23px', marginBottom: 6 }}>
+              Discover Your Ear Profile
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 16 }}>
+              Play games to unlock your personalized ear training profile.
+            </div>
+            <Link
+              href="/dashboard"
+              style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                height: 44, borderRadius: 12, padding: '0 24px',
+                background: 'var(--ios-blue)', color: '#fff',
+                fontSize: 15, fontWeight: 600, textDecoration: 'none',
+              }}
+            >
+              Start Training
+            </Link>
+          </motion.div>
+        )}
+          </div>
+
+          <div className="pt-profile-side">
         {/* Category breakdown */}
         <div style={{ fontSize: 13, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '-0.08px', padding: '20px 4px 8px' }}>
           Skills Breakdown
         </div>
 
         <motion.div
-          className="ios-group"
+          className="ios-group pt-desktop-card"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.14, duration: 0.4 }}
@@ -213,66 +277,8 @@ export default function ProfilePage() {
             </div>
           ))}
         </motion.div>
-
-        {/* Tips card */}
-        {loaded && totalGames > 0 && (
-          <motion.div
-            className="ios-card"
-            style={{
-              padding: 16,
-              marginTop: 12,
-              marginBottom: 8,
-              background: 'rgba(10,132,255,0.06)',
-              border: '0.5px solid rgba(10,132,255,0.12)',
-            }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-          >
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-blue)', marginBottom: 6 }}>
-              Next Steps
-            </div>
-            <div style={{ fontSize: 14, color: 'var(--ios-label2)', lineHeight: 1.5 }}>
-              {modesPlayed < 5
-                ? 'Try more game modes to discover your strengths! Head to the dashboard and explore.'
-                : avgAccuracy < 60
-                ? 'Focus on accuracy over speed. Try Practice mode to build precision.'
-                : stats.streak < 3
-                ? 'Build your daily streak! Consistency is key to ear training.'
-                : 'Great progress! Challenge yourself with Advanced modes like Chord Detective and Waveform Match.'}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Empty state */}
-        {loaded && totalGames === 0 && (
-          <motion.div
-            className="ios-card"
-            style={{ padding: '32px 20px', textAlign: 'center', marginTop: 12, marginBottom: 8 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-          >
-            <div style={{ fontSize: 36, marginBottom: 12 }}>👂</div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.23px', marginBottom: 6 }}>
-              Discover Your Ear Profile
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 16 }}>
-              Play games to unlock your personalized ear training profile.
-            </div>
-            <Link
-              href="/dashboard"
-              style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                height: 44, borderRadius: 12, padding: '0 24px',
-                background: 'var(--ios-blue)', color: '#fff',
-                fontSize: 15, fontWeight: 600, textDecoration: 'none',
-              }}
-            >
-              Start Training
-            </Link>
-          </motion.div>
-        )}
+          </div>
+        </div>
 
         <div style={{ height: 20 }} />
       </div>

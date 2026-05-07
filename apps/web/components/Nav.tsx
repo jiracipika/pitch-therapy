@@ -123,7 +123,11 @@ export default function Nav() {
         {TABS.map(({ href, label, Icon }) => renderItem(href, label, Icon))}
       </nav>
       <aside className="pt-nav-rail">
-        <div className="pt-rail-brand">Pitch Therapy</div>
+        <div className="pt-rail-brand">
+          <div className="pt-rail-brand-mark">♪</div>
+          <div className="pt-rail-brand-text">Pitch Therapy</div>
+          <div className="pt-rail-brand-sub">Ear Training Studio</div>
+        </div>
         <div className="pt-rail-list">
           {TABS.map(({ href, label, Icon }) => renderItem(href, label, Icon, true))}
         </div>

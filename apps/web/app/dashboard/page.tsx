@@ -105,11 +105,11 @@ export default function Dashboard() {
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-lg mx-auto px-4 pt-14">
+      <div className="pt-page-shell pt-page-dashboard px-4 pt-14">
 
         {/* ── GREETING ── */}
         <motion.div
-          className="mb-6"
+          className="mb-6 pt-hero"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
@@ -120,191 +120,196 @@ export default function Dashboard() {
           <h1 className="ios-large-title">Ready to train?</h1>
         </motion.div>
 
-        {/* ── STREAK + DAILY ROW ── */}
-        <motion.div
-          className="grid grid-cols-2 gap-3 mb-3"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {/* Streak card */}
-          <div className="ios-card ios-card-lift flex items-center gap-4 p-4" style={{ minHeight: 96 }}>
-            <StreakRing streak={stats.streak} />
-            <div>
-              <div style={{ fontSize: 36, fontWeight: 700, letterSpacing: '-1px', color: 'var(--ios-label)', lineHeight: 1 }}>
-                {loaded ? stats.streak : '—'}
-              </div>
-              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginTop: 2, letterSpacing: '-0.08px' }}>
-                Day Streak{stats.bestStreak > 0 ? ` · Best: ${stats.bestStreak}` : ''}
-              </div>
-            </div>
-          </div>
-
-          {/* Daily card */}
-          <div className="ios-card ios-card-lift flex flex-col justify-between p-4" style={{ minHeight: 96 }}>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 4 }}>
-                Daily Reset
-              </div>
-              <CountdownTimer />
-            </div>
-            <Link
-              href="/daily"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: 32,
-                borderRadius: 8,
-                background: 'var(--ios-blue)',
-                color: '#fff',
-                fontSize: 13,
-                fontWeight: 600,
-                letterSpacing: '-0.08px',
-                textDecoration: 'none',
-                marginTop: 8,
-              }}
+        <div className="pt-dashboard-layout">
+          <div className="pt-dashboard-main">
+            {/* ── STREAK + DAILY ROW ── */}
+            <motion.div
+              className="grid grid-cols-2 gap-3 mb-3 pt-desktop-card"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             >
-              Play Today
-            </Link>
-          </div>
-        </motion.div>
-
-        {/* ── TODAY'S SUMMARY ── */}
-        {loaded && totalGames > 0 && (
-          <motion.div
-            className="grid grid-cols-3 gap-2 mb-3"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.4 }}
-          >
-            <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-blue)', letterSpacing: '-0.5px' }}>{todayGames}</div>
-              <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>Today</div>
-            </div>
-            <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-purple)', letterSpacing: '-0.5px' }}>{totalGames}</div>
-              <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>All Time</div>
-            </div>
-            <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-green)', letterSpacing: '-0.5px' }}>
-                {totalGames > 0 ? Math.round(stats.results.reduce((s, r) => s + r.accuracy, 0) / totalGames * 100) : 0}%
+              {/* Streak card */}
+              <div className="ios-card ios-card-lift flex items-center gap-4 p-4" style={{ minHeight: 96 }}>
+                <StreakRing streak={stats.streak} />
+                <div>
+                  <div style={{ fontSize: 36, fontWeight: 700, letterSpacing: '-1px', color: 'var(--ios-label)', lineHeight: 1 }}>
+                    {loaded ? stats.streak : '—'}
+                  </div>
+                  <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginTop: 2, letterSpacing: '-0.08px' }}>
+                    Day Streak{stats.bestStreak > 0 ? ` · Best: ${stats.bestStreak}` : ''}
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>Avg Acc</div>
-            </div>
-          </motion.div>
-        )}
 
-        {/* ── RECENTLY PLAYED ── */}
-        {loaded && recentModes.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12, duration: 0.4 }}
-            className="mb-6"
-          >
-            <div style={{ fontSize: 13, fontWeight: 400, letterSpacing: '-0.08px', textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 8, marginTop: 16, paddingLeft: 4 }}>
-              Recently Played
-            </div>
-            <div className="grid grid-cols-3 gap-2.5">
-              {recentModes.map((modeId) => {
-                const m = MODES.find((mode) => mode.id === modeId);
-                if (!m) return null;
-                return (
-                  <Link key={m.id} href={m.href} className="ios-game-card" style={{ textDecoration: 'none', padding: 12 }}>
-                    <div style={{ fontSize: 24, marginBottom: 6 }}>{m.icon}</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.2px', lineHeight: 1.3 }}>{m.label}</div>
-                  </Link>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-
-        {/* ── QUICK PLAY (fallback when no recent) ── */}
-        {loaded && recentModes.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.14, duration: 0.4 }}
-            className="mb-6"
-          >
-            <div style={{ fontSize: 13, fontWeight: 400, letterSpacing: '-0.08px', textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 8, marginTop: 20, paddingLeft: 4 }}>
-              Quick Play
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {MODES.slice(0, 2).map((m) => (
-                <Link key={m.id} href={m.href} className="ios-game-card" style={{ textDecoration: 'none', padding: 14 }}>
-                  <div style={{ fontSize: 26, marginBottom: 8 }}>{m.icon}</div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.23px' }}>{m.label}</div>
+              {/* Daily card */}
+              <div className="ios-card ios-card-lift flex flex-col justify-between p-4" style={{ minHeight: 96 }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 4 }}>
+                    Daily Reset
+                  </div>
+                  <CountdownTimer />
+                </div>
+                <Link
+                  href="/daily"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: 32,
+                    borderRadius: 8,
+                    background: 'var(--ios-blue)',
+                    color: '#fff',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    letterSpacing: '-0.08px',
+                    textDecoration: 'none',
+                    marginTop: 8,
+                  }}
+                >
+                  Play Today
                 </Link>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* ── ALL MODES ── */}
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 400, letterSpacing: '-0.08px', textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 8, paddingLeft: 4 }}>
-            All Modes
-          </div>
-          <div className="ios-group">
-            <motion.div variants={stagger} initial="hidden" animate="visible">
-              {MODES.map((m, idx) => {
-                const modeStats = loaded ? (
-                  stats.results.filter((r) => r.mode === m.id)
-                ) : [];
-                const gamesPlayed = modeStats.length;
-                const bestScore = gamesPlayed > 0 ? Math.max(...modeStats.map((r) => r.score)) : null;
-
-                return (
-                  <motion.div key={m.id} variants={rowItem}>
-                    <Link
-                      href={m.href}
-                      className="ios-row"
-                      style={{
-                        textDecoration: 'none',
-                        borderTop: idx === 0 ? 'none' : '0.5px solid var(--ios-sep)',
-                        padding: '11px 16px',
-                      }}
-                    >
-                      {/* Icon */}
-                      <div
-                        style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: 9,
-                          background: `${m.color}18`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 18,
-                          marginRight: 12,
-                          flexShrink: 0,
-                        }}
-                      >
-                        {m.icon}
-                      </div>
-
-                      {/* Text */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--ios-label)', letterSpacing: '-0.32px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {m.label}
-                        </div>
-                        <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {gamesPlayed > 0 ? `${gamesPlayed} games · Best: ${bestScore}` : m.desc}
-                        </div>
-                      </div>
-
-                      {/* Chevron */}
-                      <svg width="7" height="12" viewBox="0 0 7 12" fill="none" style={{ flexShrink: 0, marginLeft: 8 }}>
-                        <path d="M1 1l5 5-5 5" stroke="var(--ios-label4)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </Link>
-                  </motion.div>
-                );
-              })}
+              </div>
             </motion.div>
+
+            {/* ── TODAY'S SUMMARY ── */}
+            {loaded && totalGames > 0 && (
+              <motion.div
+                className="grid grid-cols-3 gap-2 mb-3 pt-desktop-card"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.4 }}
+              >
+                <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-blue)', letterSpacing: '-0.5px' }}>{todayGames}</div>
+                  <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>Today</div>
+                </div>
+                <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-purple)', letterSpacing: '-0.5px' }}>{totalGames}</div>
+                  <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>All Time</div>
+                </div>
+                <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-green)', letterSpacing: '-0.5px' }}>
+                    {totalGames > 0 ? Math.round(stats.results.reduce((s, r) => s + r.accuracy, 0) / totalGames * 100) : 0}%
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>Avg Acc</div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── RECENTLY PLAYED ── */}
+            {loaded && recentModes.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.12, duration: 0.4 }}
+                className="mb-6 pt-desktop-card"
+              >
+                <div style={{ fontSize: 13, fontWeight: 400, letterSpacing: '-0.08px', textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 8, marginTop: 16, paddingLeft: 4 }}>
+                  Recently Played
+                </div>
+                <div className="grid grid-cols-3 gap-2.5">
+                  {recentModes.map((modeId) => {
+                    const m = MODES.find((mode) => mode.id === modeId);
+                    if (!m) return null;
+                    return (
+                      <Link key={m.id} href={m.href} className="ios-game-card" style={{ textDecoration: 'none', padding: 12 }}>
+                        <div style={{ fontSize: 24, marginBottom: 6 }}>{m.icon}</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.2px', lineHeight: 1.3 }}>{m.label}</div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── QUICK PLAY (fallback when no recent) ── */}
+            {loaded && recentModes.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.14, duration: 0.4 }}
+                className="mb-6 pt-desktop-card"
+              >
+                <div style={{ fontSize: 13, fontWeight: 400, letterSpacing: '-0.08px', textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 8, marginTop: 20, paddingLeft: 4 }}>
+                  Quick Play
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {MODES.slice(0, 2).map((m) => (
+                    <Link key={m.id} href={m.href} className="ios-game-card" style={{ textDecoration: 'none', padding: 14 }}>
+                      <div style={{ fontSize: 26, marginBottom: 8 }}>{m.icon}</div>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.23px' }}>{m.label}</div>
+                    </Link>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
+          <div className="pt-dashboard-side">
+            {/* ── ALL MODES ── */}
+            <div className="pt-desktop-card">
+              <div style={{ fontSize: 13, fontWeight: 400, letterSpacing: '-0.08px', textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 8, paddingLeft: 4 }}>
+                All Modes
+              </div>
+              <div className="ios-group">
+                <motion.div variants={stagger} initial="hidden" animate="visible">
+                  {MODES.map((m, idx) => {
+                    const modeStats = loaded ? (
+                      stats.results.filter((r) => r.mode === m.id)
+                    ) : [];
+                    const gamesPlayed = modeStats.length;
+                    const bestScore = gamesPlayed > 0 ? Math.max(...modeStats.map((r) => r.score)) : null;
+
+                    return (
+                      <motion.div key={m.id} variants={rowItem}>
+                        <Link
+                          href={m.href}
+                          className="ios-row"
+                          style={{
+                            textDecoration: 'none',
+                            borderTop: idx === 0 ? 'none' : '0.5px solid var(--ios-sep)',
+                            padding: '11px 16px',
+                          }}
+                        >
+                          {/* Icon */}
+                          <div
+                            style={{
+                              width: 36,
+                              height: 36,
+                              borderRadius: 9,
+                              background: `${m.color}18`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: 18,
+                              marginRight: 12,
+                              flexShrink: 0,
+                            }}
+                          >
+                            {m.icon}
+                          </div>
+
+                          {/* Text */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--ios-label)', letterSpacing: '-0.32px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {m.label}
+                            </div>
+                            <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {gamesPlayed > 0 ? `${gamesPlayed} games · Best: ${bestScore}` : m.desc}
+                            </div>
+                          </div>
+
+                          {/* Chevron */}
+                          <svg width="7" height="12" viewBox="0 0 7 12" fill="none" style={{ flexShrink: 0, marginLeft: 8 }}>
+                            <path d="M1 1l5 5-5 5" stroke="var(--ios-label4)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -71,14 +71,14 @@ export default function ProgressPage() {
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-lg mx-auto px-4 pt-14">
+      <div className="pt-page-shell pt-page-progress px-4 pt-14">
 
         {/* ── HEADER ── */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-6"
+          className="mb-6 pt-hero"
         >
           <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 2 }}>
             Your journey
@@ -86,9 +86,12 @@ export default function ProgressPage() {
           <h1 className="ios-large-title">Progress</h1>
         </motion.div>
 
+        <div className="pt-progress-layout">
+          <div className="pt-progress-main">
+
         {/* ── SUMMARY STATS ── */}
         <motion.div
-          className="grid grid-cols-4 gap-2 mb-1"
+          className="grid grid-cols-4 gap-2 mb-1 pt-desktop-card"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08, duration: 0.4 }}
@@ -120,7 +123,7 @@ export default function ProgressPage() {
         </div>
 
         <motion.div
-          className="ios-card"
+          className="ios-card pt-desktop-card"
           style={{ padding: '16px', overflowX: 'auto' }}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -176,7 +179,7 @@ export default function ProgressPage() {
         {/* ── FAVORITE MODE ── */}
         {loaded && totalGames > 0 && topMode && topMode.gamesPlayed > 0 && (
           <motion.div
-            className="ios-card"
+            className="ios-card pt-desktop-card"
             style={{
               padding: 20,
               marginTop: 12,
@@ -208,13 +211,45 @@ export default function ProgressPage() {
           </motion.div>
         )}
 
+        {/* ── EMPTY STATE ── */}
+        {loaded && totalGames === 0 && (
+          <motion.div
+            className="ios-card pt-desktop-card"
+            style={{ padding: '32px 20px', textAlign: 'center', marginTop: 12, marginBottom: 8 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+          >
+            <div style={{ fontSize: 36, marginBottom: 12 }}>📊</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.23px', marginBottom: 6 }}>
+              No data yet
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 16 }}>
+              Play games to see your progress charts here.
+            </div>
+            <Link
+              href="/dashboard"
+              style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                height: 44, borderRadius: 12, padding: '0 24px',
+                background: 'var(--ios-blue)', color: '#fff',
+                fontSize: 15, fontWeight: 600, textDecoration: 'none',
+              }}
+            >
+              Start Training
+            </Link>
+          </motion.div>
+        )}
+          </div>
+
+          <div className="pt-progress-side">
         {/* ── PER MODE ── */}
         <div style={{ fontSize: 13, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '-0.08px', padding: '24px 4px 8px' }}>
           Per Mode
         </div>
 
         <motion.div
-          className="ios-group"
+          className="ios-group pt-desktop-card"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
@@ -293,7 +328,7 @@ export default function ProgressPage() {
             <div style={{ fontSize: 13, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '-0.08px', padding: '24px 4px 8px' }}>
               Recent Games
             </div>
-            <div className="ios-group">
+            <div className="ios-group pt-desktop-card">
               {stats.results.slice(-10).reverse().map((r, idx) => {
                 const mode = MODES.find((m) => m.id === r.mode);
                 return (
@@ -335,37 +370,8 @@ export default function ProgressPage() {
             </div>
           </>
         )}
-
-        {/* ── EMPTY STATE ── */}
-        {loaded && totalGames === 0 && (
-          <motion.div
-            className="ios-card"
-            style={{ padding: '32px 20px', textAlign: 'center', marginTop: 12, marginBottom: 8 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-          >
-            <div style={{ fontSize: 36, marginBottom: 12 }}>📊</div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.23px', marginBottom: 6 }}>
-              No data yet
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 16 }}>
-              Play games to see your progress charts here.
-            </div>
-            <Link
-              href="/dashboard"
-              style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                height: 44, borderRadius: 12, padding: '0 24px',
-                background: 'var(--ios-blue)', color: '#fff',
-                fontSize: 15, fontWeight: 600, textDecoration: 'none',
-              }}
-            >
-              Start Training
-            </Link>
-          </motion.div>
-        )}
-
+          </div>
+        </div>
         <div style={{ height: 20 }} />
       </div>
     </div>

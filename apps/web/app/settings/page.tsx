@@ -68,22 +68,27 @@ export default function SettingsPage() {
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-lg mx-auto px-4 pt-14">
+      <div className="pt-page-shell pt-page-settings px-4 pt-14">
 
-        <motion.h1
-          className="ios-large-title mb-2"
+        <motion.div
+          className="mb-3 pt-hero"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          Settings
-        </motion.h1>
+          <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 2 }}>
+            Tune your training
+          </div>
+          <h1 className="ios-large-title">Settings</h1>
+        </motion.div>
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.08, duration: 0.4 }}>
+          <div className="pt-settings-layout">
+            <div className="pt-settings-main">
 
           {/* ── AUDIO ── */}
           <SectionHeader>Audio</SectionHeader>
-          <div className="ios-group">
+          <div className="ios-group pt-desktop-card">
             {/* Sound Effects */}
             <div style={{ ...rowStyle }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(10,132,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🔊</div>
@@ -123,7 +128,7 @@ export default function SettingsPage() {
 
           {/* ── SOUND TYPE ── */}
           <SectionHeader>Sound Type</SectionHeader>
-          <div className="ios-group">
+          <div className="ios-group pt-desktop-card">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
               {SOUND_TYPES.map((s, idx) => {
                 const active = soundType === s.id;
@@ -160,7 +165,7 @@ export default function SettingsPage() {
 
           {/* ── DIFFICULTY ── */}
           <SectionHeader>Default Difficulty</SectionHeader>
-          <div className="ios-group">
+          <div className="ios-group pt-desktop-card">
             {MODES.map((m, idx) => (
               <div
                 key={m.id}
@@ -210,9 +215,12 @@ export default function SettingsPage() {
             ))}
           </div>
 
+          </div>
+          <div className="pt-settings-side">
+
           {/* ── APPEARANCE ── */}
           <SectionHeader>Appearance</SectionHeader>
-          <div className="ios-group">
+          <div className="ios-group pt-desktop-card">
             <div style={rowStyle}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🌙</div>
               <div style={{ flex: 1 }}>
@@ -227,7 +235,7 @@ export default function SettingsPage() {
 
           {/* ── DATA ── */}
           <SectionHeader>Data</SectionHeader>
-          <div className="ios-group">
+          <div className="ios-group pt-desktop-card">
             <div style={rowStyle}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(10,132,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>📊</div>
               <div style={{ flex: 1 }}>
@@ -280,7 +288,7 @@ export default function SettingsPage() {
 
           {/* ── ABOUT ── */}
           <SectionHeader>About</SectionHeader>
-          <div className="ios-group">
+          <div className="ios-group pt-desktop-card">
             <div style={{ ...rowStyle }}>
               <span style={{ flex: 1, fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Version</span>
               <span style={{ fontSize: 17, color: 'var(--ios-label3)', letterSpacing: '-0.43px' }}>0.1.0</span>
@@ -295,6 +303,8 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          </div>
+          </div>
         </motion.div>
       </div>
     </div>
