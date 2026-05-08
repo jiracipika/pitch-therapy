@@ -136,6 +136,7 @@
 .pt-route-page {
   position: relative;
   z-index: 2;
+  will-change: transform, opacity;
 }
 
 .pt-hero-shell {
@@ -190,8 +191,9 @@
 .pt-ambient-glow {
   position: absolute;
   border-radius: 999px;
-  filter: blur(56px);
+  filter: blur(42px);
   opacity: 0.6;
+  will-change: transform, opacity;
 }
 
 .pt-ambient-glow-a {
@@ -219,6 +221,20 @@
   background-size: 44px 44px;
   mask-image: radial-gradient(circle at center, black 30%, transparent 85%);
   opacity: 0.22;
+  will-change: opacity;
+}
+
+body.pt-motion-lite .pt-ambient-glow {
+  filter: blur(28px);
+  opacity: 0.36;
+}
+
+body.pt-motion-lite .pt-ambient-grid {
+  display: none;
+}
+
+body.pt-motion-lite .pt-route-page {
+  will-change: auto;
 }
 
 /* ============================================================
