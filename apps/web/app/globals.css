@@ -1205,11 +1205,17 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .pt-main-shell {
-    max-width: none;
-    margin-left: 132px;
+    max-width: 1320px;
+    margin: 0 auto;
     padding-left: 28px;
     padding-right: 28px;
     padding-bottom: 32px;
+  }
+
+  body.pt-has-nav .pt-main-shell {
+    max-width: none;
+    margin-left: 132px;
+    margin-right: 0;
   }
 
   .pt-page-shell {

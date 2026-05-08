@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 import type { ReactElement } from 'react';
 
 /* ── SF Symbol–equivalent SVG icons ── */
@@ -69,13 +70,23 @@ const TABS = [
 
 export default function Nav() {
   const pathname = usePathname();
-
-  /* Hide nav on landing, onboarding, and auth pages */
-  if (
+  const hideNav = (
     pathname === '/' ||
     pathname.startsWith('/onboarding') ||
     pathname.startsWith('/auth')
-  ) return null;
+  );
+
+  useEffect(() => {
+    if (hideNav) {
+      document.body.classList.remove('pt-has-nav');
+      return;
+    }
+    document.body.classList.add('pt-has-nav');
+    return () => document.body.classList.remove('pt-has-nav');
+  }, [hideNav]);
+
+  /* Hide nav on landing, onboarding, and auth pages */
+  if (hideNav) return null;
 
   const renderItem = (
     href: string,

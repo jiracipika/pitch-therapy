@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const MODES = [
   { id: 'pitch-match',      label: 'Pitch Match',       color: '#0A84FF', icon: '🎤', desc: 'Match pitches with your voice',         href: '/play/pitch-match' },
@@ -32,8 +34,62 @@ const CATEGORIES = [
 ];
 
 export default function Home() {
+  const router = useRouter();
+  const [leavingTo, setLeavingTo] = useState<string | null>(null);
+  const transitionTimeout = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (transitionTimeout.current) {
+        window.clearTimeout(transitionTimeout.current);
+      }
+    };
+  }, []);
+
+  const transitionTo = useCallback((href: string) => {
+    if (leavingTo) return;
+    setLeavingTo(href);
+    transitionTimeout.current = window.setTimeout(() => {
+      router.push(href);
+    }, 420);
+  }, [leavingTo, router]);
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--ios-bg)' }}>
+      <AnimatePresence>
+        {leavingTo && (
+          <motion.div
+            key="page-leave-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+            className="pointer-events-none fixed inset-0 z-[120]"
+            style={{
+              background: 'radial-gradient(140% 100% at 50% 50%, rgba(8, 16, 36, 0.82) 0%, rgba(0, 0, 0, 0.94) 58%, #000 100%)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.78, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.34, ease: [0.34, 1.56, 0.64, 1] }}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+              style={{
+                width: 74,
+                height: 74,
+                borderRadius: 18,
+                background: 'linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 16px 48px rgba(10, 132, 255, 0.28)',
+              }}
+            >
+              <span style={{ fontSize: 34 }}>🎵</span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Floating note symbols */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden select-none" aria-hidden>
@@ -42,10 +98,29 @@ export default function Home() {
         <span className="animate-note-3 absolute left-[20%] top-[55%] text-7xl font-serif" style={{ color: 'rgba(255,255,255,0.03)' }}>♬</span>
         <span className="animate-note-2 absolute left-[65%] top-[45%] text-5xl font-serif" style={{ color: 'rgba(255,255,255,0.03)' }}>♩</span>
         <span className="animate-note-1 absolute left-[45%] top-[72%] text-4xl font-serif" style={{ color: 'rgba(255,255,255,0.03)' }}>♪</span>
+
+        <motion.div
+          className="absolute inset-x-[-10%] top-[14%] h-44"
+          animate={{ x: ['-3%', '3%', '-3%'] }}
+          transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(10,132,255,0.08) 18%, rgba(94,92,230,0.1) 52%, rgba(90,200,250,0.08) 86%, transparent 100%)',
+            filter: 'blur(24px)',
+          }}
+        />
+        <motion.div
+          className="absolute inset-x-[-12%] top-[52%] h-40"
+          animate={{ x: ['4%', '-4%', '4%'] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(191,90,242,0.07) 20%, rgba(10,132,255,0.08) 50%, rgba(48,209,88,0.06) 82%, transparent 100%)',
+            filter: 'blur(22px)',
+          }}
+        />
       </div>
 
       {/* ── HERO ── */}
-      <section className="relative flex min-h-[100dvh] flex-col items-center justify-center px-6 text-center pb-16">
+      <section className="relative flex min-h-[100dvh] flex-col items-center justify-center px-6 text-center pb-16 pt-14">
         {/* App icon */}
         <motion.div
           initial={{ opacity: 0, scale: 0.7 }}
@@ -122,12 +197,24 @@ export default function Home() {
           transition={{ delay: 0.48, duration: 0.45 }}
           className="flex flex-col gap-3 w-full max-w-xs"
         >
-          <Link href="/dashboard" className="ios-btn-primary" style={{ fontSize: 17 }}>
+          <motion.button
+            whileHover={{ scale: 1.015, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => transitionTo('/dashboard')}
+            className="ios-btn-primary"
+            style={{ fontSize: 17 }}
+          >
             Start Training
-          </Link>
-          <Link href="/daily" className="ios-btn-secondary" style={{ fontSize: 17 }}>
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.012 }}
+            whileTap={{ scale: 0.985 }}
+            onClick={() => transitionTo('/daily')}
+            className="ios-btn-secondary"
+            style={{ fontSize: 17 }}
+          >
             Daily Challenge
-          </Link>
+          </motion.button>
         </motion.div>
 
         {/* Scroll indicator */}
@@ -138,7 +225,19 @@ export default function Home() {
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
         >
           <span style={{ fontSize: 11, color: 'var(--ios-label3)', letterSpacing: 1, textTransform: 'uppercase', fontWeight: 500 }}>Scroll</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ios-label3)" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          <motion.svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--ios-label3)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            animate={{ y: [0, 5, 0] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <path d="M12 5v14M5 12l7 7 7-7"/>
+          </motion.svg>
         </motion.div>
       </section>
 
@@ -167,6 +266,7 @@ export default function Home() {
                     key={m.id}
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
+                    whileHover={{ y: -3 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.06, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
                   >
