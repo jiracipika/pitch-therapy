@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
 import { useStatsContext } from '@/components/StatsProvider';
 
 const MODES = [
@@ -74,18 +75,12 @@ export default function ProfilePage() {
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
       <div className="pt-page-shell pt-page-profile px-4 pt-14">
 
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-6 pt-hero"
-        >
-          <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 2 }}>
-            Your ear profile
-          </div>
-          <h1 className="ios-large-title">Ear Profile</h1>
-        </motion.div>
+        <PageHero
+          variant="profile"
+          eyebrow="Your ear profile"
+          title="Ear Profile"
+          subtitle="A dynamic snapshot of where your hearing strengths are evolving."
+        />
 
         <div className="pt-profile-layout">
           <div className="pt-profile-main">
@@ -194,32 +189,26 @@ export default function ProfilePage() {
 
         {/* Empty state */}
         {loaded && totalGames === 0 && (
-          <motion.div
-            className="ios-card pt-desktop-card"
-            style={{ padding: '32px 20px', textAlign: 'center', marginTop: 12, marginBottom: 8 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-          >
-            <div style={{ fontSize: 36, marginBottom: 12 }}>👂</div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.23px', marginBottom: 6 }}>
-              Discover Your Ear Profile
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 16 }}>
-              Play games to unlock your personalized ear training profile.
-            </div>
-            <Link
-              href="/dashboard"
-              style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                height: 44, borderRadius: 12, padding: '0 24px',
-                background: 'var(--ios-blue)', color: '#fff',
-                fontSize: 15, fontWeight: 600, textDecoration: 'none',
-              }}
-            >
-              Start Training
-            </Link>
-          </motion.div>
+          <Reveal delay={0.24}>
+            <StatusCard
+              tone="empty"
+              title="Discover your ear profile"
+              body="Play a few sessions to generate your personalized score, skill breakdown, and next-step guidance."
+              action={(
+                <Link
+                  href="/dashboard"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    height: 36, borderRadius: 10, padding: '0 14px',
+                    background: 'var(--ios-blue)', color: '#fff',
+                    fontSize: 13, fontWeight: 600, textDecoration: 'none',
+                  }}
+                >
+                  Start Training
+                </Link>
+              )}
+            />
+          </Reveal>
         )}
           </div>
 

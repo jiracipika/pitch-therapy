@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { useStatsContext } from '@/components/StatsProvider';
 import Link from 'next/link';
+import { AnimatedStatCard, PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
 
 const MODES = [
   { id: 'pitch-match',      label: 'Pitch Match',      icon: '🎤', color: '#0A84FF' },
@@ -73,49 +74,23 @@ export default function ProgressPage() {
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
       <div className="pt-page-shell pt-page-progress px-4 pt-14">
 
-        {/* ── HEADER ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-6 pt-hero"
-        >
-          <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 2 }}>
-            Your journey
-          </div>
-          <h1 className="ios-large-title">Progress</h1>
-        </motion.div>
+        <PageHero
+          variant="progress"
+          eyebrow="Your journey"
+          title="Progress"
+          subtitle="Track consistency, precision, and growth across every mode."
+        />
 
         <div className="pt-progress-layout">
           <div className="pt-progress-main">
 
         {/* ── SUMMARY STATS ── */}
-        <motion.div
-          className="grid grid-cols-4 gap-2 mb-1 pt-desktop-card"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08, duration: 0.4 }}
-        >
-          {[
-            { label: 'Games', value: loaded ? String(totalGames) : '—', color: 'var(--ios-blue)' },
-            { label: 'Best Streak', value: loaded ? String(stats.bestStreak) : '—', color: 'var(--ios-orange)' },
-            { label: 'Avg Acc', value: loaded ? `${avgAccuracy}%` : '—', color: 'var(--ios-green)' },
-            { label: 'Time', value: loaded ? `${totalTimeMin}m` : '—', color: 'var(--ios-purple)' },
-          ].map((s) => (
-            <div
-              key={s.label}
-              className="ios-card"
-              style={{ padding: '12px 8px', textAlign: 'center' }}
-            >
-              <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px', color: s.color, lineHeight: 1 }}>
-                {s.value}
-              </div>
-              <div style={{ fontSize: 10, color: 'var(--ios-label3)', marginTop: 4, letterSpacing: '-0.08px', lineHeight: 1.3 }}>
-                {s.label}
-              </div>
-            </div>
-          ))}
-        </motion.div>
+        <div className="grid grid-cols-4 gap-2 mb-1 pt-desktop-card">
+          <AnimatedStatCard label="Games" value={loaded ? totalGames : '—'} color="var(--ios-blue)" delay={0.04} />
+          <AnimatedStatCard label="Best Streak" value={loaded ? stats.bestStreak : '—'} color="var(--ios-orange)" delay={0.08} />
+          <AnimatedStatCard label="Avg Acc" value={loaded ? `${avgAccuracy}%` : '—'} color="var(--ios-green)" delay={0.12} />
+          <AnimatedStatCard label="Time" value={loaded ? `${totalTimeMin}m` : '—'} color="var(--ios-purple)" delay={0.16} />
+        </div>
 
         {/* ── ACTIVITY CALENDAR ── */}
         <div style={{ fontSize: 13, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '-0.08px', padding: '20px 4px 8px' }}>
@@ -213,32 +188,26 @@ export default function ProgressPage() {
 
         {/* ── EMPTY STATE ── */}
         {loaded && totalGames === 0 && (
-          <motion.div
-            className="ios-card pt-desktop-card"
-            style={{ padding: '32px 20px', textAlign: 'center', marginTop: 12, marginBottom: 8 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-          >
-            <div style={{ fontSize: 36, marginBottom: 12 }}>📊</div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.23px', marginBottom: 6 }}>
-              No data yet
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 16 }}>
-              Play games to see your progress charts here.
-            </div>
-            <Link
-              href="/dashboard"
-              style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                height: 44, borderRadius: 12, padding: '0 24px',
-                background: 'var(--ios-blue)', color: '#fff',
-                fontSize: 15, fontWeight: 600, textDecoration: 'none',
-              }}
-            >
-              Start Training
-            </Link>
-          </motion.div>
+          <Reveal delay={0.22}>
+            <StatusCard
+              tone="empty"
+              title="No progress data yet"
+              body="Complete your first training session and your charts, trends, and mode breakdowns will appear here."
+              action={(
+                <Link
+                  href="/dashboard"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    height: 36, borderRadius: 10, padding: '0 14px',
+                    background: 'var(--ios-blue)', color: '#fff',
+                    fontSize: 13, fontWeight: 600, textDecoration: 'none',
+                  }}
+                >
+                  Start Training
+                </Link>
+              )}
+            />
+          </Reveal>
         )}
           </div>
 

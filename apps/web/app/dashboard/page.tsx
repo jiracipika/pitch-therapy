@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { AnimatedStatCard, PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
 import { useStatsContext } from '@/components/StatsProvider';
 
 const MODES = [
@@ -107,18 +108,22 @@ export default function Dashboard() {
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
       <div className="pt-page-shell pt-page-dashboard px-4 pt-14">
 
-        {/* ── GREETING ── */}
-        <motion.div
-          className="mb-6 pt-hero"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 2 }}>
-            {greeting()}
-          </div>
-          <h1 className="ios-large-title">Ready to train?</h1>
-        </motion.div>
+        <PageHero
+          variant="dashboard"
+          eyebrow={greeting()}
+          title="Ready to train?"
+          subtitle="Pick up where you left off and keep your ear in shape."
+        />
+
+        {!loaded ? (
+          <Reveal delay={0.04}>
+            <StatusCard
+              tone="loading"
+              title="Syncing your training dashboard"
+              body="Pulling streak, session totals, and your latest mode performance."
+            />
+          </Reveal>
+        ) : null}
 
         <div className="pt-dashboard-layout">
           <div className="pt-dashboard-main">
@@ -174,27 +179,16 @@ export default function Dashboard() {
 
             {/* ── TODAY'S SUMMARY ── */}
             {loaded && totalGames > 0 && (
-              <motion.div
-                className="grid grid-cols-3 gap-2 mb-3 pt-desktop-card"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.4 }}
-              >
-                <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-blue)', letterSpacing: '-0.5px' }}>{todayGames}</div>
-                  <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>Today</div>
-                </div>
-                <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-purple)', letterSpacing: '-0.5px' }}>{totalGames}</div>
-                  <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>All Time</div>
-                </div>
-                <div className="ios-card ios-card-lift" style={{ padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-green)', letterSpacing: '-0.5px' }}>
-                    {totalGames > 0 ? Math.round(stats.results.reduce((s, r) => s + r.accuracy, 0) / totalGames * 100) : 0}%
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>Avg Acc</div>
-                </div>
-              </motion.div>
+              <div className="grid grid-cols-3 gap-2 mb-3 pt-desktop-card">
+                <AnimatedStatCard label="Today" value={todayGames} color="var(--ios-blue)" delay={0.04} />
+                <AnimatedStatCard label="All Time" value={totalGames} color="var(--ios-purple)" delay={0.08} />
+                <AnimatedStatCard
+                  label="Avg Acc"
+                  value={`${totalGames > 0 ? Math.round(stats.results.reduce((s, r) => s + r.accuracy, 0) / totalGames * 100) : 0}%`}
+                  color="var(--ios-green)"
+                  delay={0.12}
+                />
+              </div>
             )}
 
             {/* ── RECENTLY PLAYED ── */}
@@ -244,6 +238,36 @@ export default function Dashboard() {
                 </div>
               </motion.div>
             )}
+
+            {loaded && totalGames === 0 ? (
+              <Reveal delay={0.16}>
+                <StatusCard
+                  tone="empty"
+                  title="Your training log is ready"
+                  body="Start one mode to unlock personalized streaks, accuracy, and progression insights."
+                  action={(
+                    <Link
+                      href="/play-modes"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: 36,
+                        borderRadius: 10,
+                        padding: '0 14px',
+                        background: 'var(--ios-blue)',
+                        color: '#fff',
+                        fontSize: 13,
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                      }}
+                    >
+                      Start First Session
+                    </Link>
+                  )}
+                />
+              </Reveal>
+            ) : null}
           </div>
           <div className="pt-dashboard-side">
             {/* ── ALL MODES ── */}

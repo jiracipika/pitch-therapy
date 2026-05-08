@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { PageHero } from '@/components/PremiumMotion';
 import { useStatsContext } from '@/components/StatsProvider';
 
 type Diff = 'easy' | 'medium' | 'hard';
@@ -70,17 +71,12 @@ export default function SettingsPage() {
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
       <div className="pt-page-shell pt-page-settings px-4 pt-14">
 
-        <motion.div
-          className="mb-3 pt-hero"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 2 }}>
-            Tune your training
-          </div>
-          <h1 className="ios-large-title">Settings</h1>
-        </motion.div>
+        <PageHero
+          variant="settings"
+          eyebrow="Tune your training"
+          title="Settings"
+          subtitle="Shape audio, feedback, and defaults so practice feels effortless."
+        />
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.08, duration: 0.4 }}>
           <div className="pt-settings-layout">

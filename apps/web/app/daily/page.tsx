@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
 
 function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState('');
@@ -59,18 +60,12 @@ export default function DailyPage() {
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
       <div className="pt-page-shell pt-page-daily px-4 pt-14">
 
-        {/* ── HEADER ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-6 pt-hero"
-        >
-          <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', marginBottom: 2 }}>
-            {today}
-          </div>
-          <h1 className="ios-large-title">Daily Challenge</h1>
-        </motion.div>
+        <PageHero
+          variant="daily"
+          eyebrow={today}
+          title="Daily Challenge"
+          subtitle="Two fresh drills each day to keep momentum and consistency strong."
+        />
 
         <div className="pt-daily-layout">
           <div className="pt-daily-main">
@@ -250,6 +245,14 @@ export default function DailyPage() {
                 );
               })}
             </motion.div>
+
+            <Reveal delay={0.24}>
+              <StatusCard
+                tone={Object.values(played).length > 0 ? 'success' : 'empty'}
+                title={Object.values(played).length > 0 ? 'Daily progress saved' : 'No daily drills completed yet'}
+                body={Object.values(played).length > 0 ? 'Great pace. Finish the second challenge to secure today’s streak.' : 'Complete both drills to lock your day and strengthen long-term recall.'}
+              />
+            </Reveal>
 
             <motion.div
               className="ios-card pt-desktop-card"
