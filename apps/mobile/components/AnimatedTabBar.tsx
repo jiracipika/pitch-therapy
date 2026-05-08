@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 import { type Href, usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { triggerSelectionHaptic } from '@/lib/haptics';
 import { MAIN_TABS } from '@/lib/main-tabs';
 import { colors, radii, shadows, typography } from '@/lib/theme';
@@ -102,6 +103,31 @@ function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: b
 export function AnimatedTabBar() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const sheen = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(sheen, {
+          toValue: 1,
+          duration: 5200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(sheen, {
+          toValue: 0,
+          duration: 5200,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [sheen]);
+
+  const sheenTranslate = sheen.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-160, 160],
+  });
 
   return (
     <View
@@ -111,15 +137,34 @@ export function AnimatedTabBar() {
         left: 12,
         right: 12,
         flexDirection: 'row',
-        backgroundColor: 'rgba(12,14,19,0.92)',
+        backgroundColor: 'rgba(12,14,19,0.95)',
         borderWidth: 1,
         borderColor: colors.glassBorder,
         paddingVertical: 6,
         paddingHorizontal: 6,
         borderRadius: radii.lg,
+        overflow: 'hidden',
         ...shadows.tab,
       }}
     >
+      <Animated.View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          width: 120,
+          opacity: 0.35,
+          transform: [{ translateX: sheenTranslate }],
+        }}
+      >
+        <LinearGradient
+          colors={['rgba(10,132,255,0)', 'rgba(10,132,255,0.28)', 'rgba(10,132,255,0)']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
       {MAIN_TABS.map((tab) => {
         const active = pathname === tab.route || (pathname === '/' && tab.route === '/dashboard');
         return (

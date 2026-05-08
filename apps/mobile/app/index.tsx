@@ -1,4 +1,5 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { triggerSelectionHaptic } from '@/lib/haptics';
@@ -6,30 +7,99 @@ import { colors, radii, shadows, typography } from '@/lib/theme';
 
 export default function SplashScreen() {
   const router = useRouter();
+  const reveal = useRef(new Animated.Value(0)).current;
+  const sweep = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(reveal, {
+      toValue: 1,
+      duration: 680,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(sweep, {
+          toValue: 1,
+          duration: 6200,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(sweep, {
+          toValue: 0,
+          duration: 6200,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [reveal, sweep]);
+
+  const sweepTranslate = sweep.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-130, 130],
+  });
+  const revealY = reveal.interpolate({
+    inputRange: [0, 1],
+    outputRange: [16, 0],
+  });
+  const revealScale = reveal.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.96, 1],
+  });
 
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#10131A', '#08090D', '#111827']}
+        colors={['#0F1320', '#08090D', '#121828']}
         locations={[0, 0.55, 1]}
         style={StyleSheet.absoluteFill}
       />
-      <View style={styles.logoShell}>
-        <Image source={require('../assets/logo-placeholder.png')} style={styles.logo} />
-      </View>
-      <View style={styles.copy}>
-        <Text style={styles.title}>Pitch Therapy</Text>
-        <Text style={styles.subtitle}>Train your ear with focused daily reps.</Text>
-      </View>
-      <Pressable
-        onPress={() => {
-          void triggerSelectionHaptic();
-          router.replace('/dashboard');
-        }}
-        style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.sweep,
+          {
+            transform: [{ translateX: sweepTranslate }, { rotate: '-6deg' }],
+          },
+        ]}
       >
-        <Text style={styles.buttonText}>Get Started</Text>
-      </Pressable>
+        <LinearGradient
+          colors={['rgba(10,132,255,0)', 'rgba(10,132,255,0.24)', 'rgba(10,132,255,0)']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+
+      <Animated.View
+        style={{
+          alignItems: 'center',
+          gap: 22,
+          opacity: reveal,
+          transform: [{ translateY: revealY }, { scale: revealScale }],
+        }}
+      >
+        <View style={styles.logoShell}>
+          <Image source={require('../assets/logo-placeholder.png')} style={styles.logo} />
+        </View>
+        <View style={styles.copy}>
+          <Text style={styles.title}>Pitch Therapy</Text>
+          <Text style={styles.subtitle}>Train your ear with focused daily reps.</Text>
+        </View>
+        <Pressable
+          onPress={() => {
+            void triggerSelectionHaptic();
+            router.replace('/dashboard');
+          }}
+          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+        >
+          <Text style={styles.buttonText}>Get Started</Text>
+        </Pressable>
+      </Animated.View>
     </View>
   );
 }
@@ -41,7 +111,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.background,
     paddingHorizontal: 32,
-    gap: 22,
+  },
+  sweep: {
+    position: 'absolute',
+    top: '30%',
+    width: '150%',
+    height: 180,
+    opacity: 0.6,
   },
   logoShell: {
     width: 154,

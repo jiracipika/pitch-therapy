@@ -1,5 +1,5 @@
-import { type ReactNode, useEffect, useMemo, useRef } from 'react';
-import { Animated, PanResponder, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { Children, type ReactNode, useEffect, useMemo, useRef } from 'react';
+import { Animated, Easing, PanResponder, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,7 +24,17 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
   const { contentMaxWidth, pagePadding, prefersRailNav, isDesktop } = useResponsiveLayout();
   const opacity = useRef(new Animated.Value(0)).current;
   const translateX = useRef(new Animated.Value(0)).current;
+  const ambientShiftA = useRef(new Animated.Value(0)).current;
+  const ambientShiftB = useRef(new Animated.Value(0)).current;
+  const childAnimationsRef = useRef<Animated.Value[]>([]);
   const previousIndex = useRef<number | null>(null);
+  const childArray = useMemo(() => Children.toArray(children), [children]);
+
+  if (childAnimationsRef.current.length !== childArray.length) {
+    childAnimationsRef.current = childArray.map(
+      (_, index) => childAnimationsRef.current[index] ?? new Animated.Value(0),
+    );
+  }
 
   const activeIndex = MAIN_TABS.findIndex((tab) => tab.route === pathname);
   const canSwipeTabs = activeIndex >= 0 && !prefersRailNav;
@@ -84,23 +94,117 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
     previousIndex.current = activeIndex;
   }, [activeIndex, opacity, translateX]);
 
+  useEffect(() => {
+    const loopA = Animated.loop(
+      Animated.sequence([
+        Animated.timing(ambientShiftA, {
+          toValue: 1,
+          duration: 14000,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(ambientShiftA, {
+          toValue: 0,
+          duration: 14000,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+
+    const loopB = Animated.loop(
+      Animated.sequence([
+        Animated.timing(ambientShiftB, {
+          toValue: 1,
+          duration: 17000,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(ambientShiftB, {
+          toValue: 0,
+          duration: 17000,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+
+    loopA.start();
+    loopB.start();
+    return () => {
+      loopA.stop();
+      loopB.stop();
+    };
+  }, [ambientShiftA, ambientShiftB]);
+
+  useEffect(() => {
+    childAnimationsRef.current.forEach((value) => value.setValue(0));
+    const stagger = Animated.stagger(
+      56,
+      childAnimationsRef.current.map((value) =>
+        Animated.timing(value, {
+          toValue: 1,
+          duration: 320,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ),
+    );
+    stagger.start();
+  }, [pathname, childArray.length]);
+
+  const ambientTranslateAX = ambientShiftA.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-48, 48],
+  });
+  const ambientTranslateBX = ambientShiftB.interpolate({
+    inputRange: [0, 1],
+    outputRange: [40, -40],
+  });
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <LinearGradient
-        colors={['#10131A', '#08090D', '#0E1016']}
-        locations={[0, 0.48, 1]}
+        colors={['#0B0D14', '#06070C', '#10131D']}
+        locations={[0, 0.52, 1]}
         style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
       />
-      <View
+      <Animated.View
         style={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 130,
-          backgroundColor: 'rgba(56,189,248,0.08)',
+          width: width * 1.4,
+          height: 180,
+          top: 76,
+          left: -width * 0.2,
+          transform: [{ translateX: ambientTranslateAX }, { rotate: '-4deg' }],
+          opacity: 0.62,
         }}
-      />
+      >
+        <LinearGradient
+          colors={['rgba(10,132,255,0)', 'rgba(10,132,255,0.20)', 'rgba(10,132,255,0)']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: width * 1.28,
+          height: 160,
+          top: 174,
+          left: -width * 0.14,
+          transform: [{ translateX: ambientTranslateBX }, { rotate: '3deg' }],
+          opacity: 0.55,
+        }}
+      >
+        <LinearGradient
+          colors={['rgba(191,90,242,0)', 'rgba(191,90,242,0.15)', 'rgba(90,200,250,0)']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
       <View style={{ flex: 1, flexDirection: prefersRailNav ? 'row' : 'column' }}>
         {prefersRailNav ? (
           <View
@@ -112,7 +216,7 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
               paddingBottom: insets.bottom + 12,
               paddingHorizontal: 8,
               gap: 12,
-              backgroundColor: 'rgba(10,12,16,0.7)',
+              backgroundColor: 'rgba(10,12,16,0.78)',
             }}
           >
             <View style={{ alignItems: 'center', marginBottom: 8 }}>
@@ -165,7 +269,19 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
             }}
           >
             <View style={{ width: '100%', maxWidth: contentMaxWidth, alignSelf: 'center', gap: 18 }}>
-              <View style={{ gap: 7 }}>
+              <LinearGradient
+                colors={['rgba(255,255,255,0.055)', 'rgba(255,255,255,0.01)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  borderRadius: 8,
+                  paddingHorizontal: 14,
+                  paddingVertical: 13,
+                  borderWidth: 1,
+                  borderColor: 'rgba(255,255,255,0.13)',
+                  gap: 7,
+                }}
+              >
                 <Text style={{ color: colors.text, ...typography.title1 }}>{title}</Text>
                 {subtitle ? (
                   <Text style={{ color: colors.textSecondary, ...typography.subhead, lineHeight: 21 }}>
@@ -177,8 +293,29 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
                     Swipe left or right to move between sections
                   </Text>
                 ) : null}
-              </View>
-              {children}
+              </LinearGradient>
+              {childArray.map((child, index) => {
+                const animatedValue = childAnimationsRef.current[index];
+                const translateY = animatedValue.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [18, 0],
+                });
+                const scale = animatedValue.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.985, 1],
+                });
+                return (
+                  <Animated.View
+                    key={`section-${index}`}
+                    style={{
+                      opacity: animatedValue,
+                      transform: [{ translateY }, { scale }],
+                    }}
+                  >
+                    {child}
+                  </Animated.View>
+                );
+              })}
             </View>
           </ScrollView>
         </Animated.View>

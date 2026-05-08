@@ -1,5 +1,5 @@
-import { type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
+import { type ReactNode, useEffect, useRef } from 'react';
+import { Animated, Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radii, shadows, typography } from '@/lib/theme';
 
@@ -12,29 +12,66 @@ interface GlassCardProps {
 }
 
 export function GlassCard({ children, style, onPress, padding = 16, accent }: GlassCardProps) {
+  const lift = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.spring(lift, {
+      toValue: 1,
+      useNativeDriver: true,
+      stiffness: 180,
+      damping: 24,
+      mass: 0.9,
+    }).start();
+  }, [lift]);
+
+  const translateY = lift.interpolate({
+    inputRange: [0, 1],
+    outputRange: [10, 0],
+  });
+  const opacity = lift.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.75, 1],
+  });
+
   const content = (
     <LinearGradient
-      colors={accent ? [accent + '24', colors.card, colors.card] : [colors.glassLight, colors.card]}
+      colors={accent ? [accent + '26', colors.card, colors.card] : [colors.glassLight, colors.card]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={[styles.glass, { padding }, style]}
     >
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 40,
+          backgroundColor: 'rgba(255,255,255,0.045)',
+        }}
+      />
       {children}
     </LinearGradient>
   );
 
-  if (!onPress) return content;
+  if (!onPress) {
+    return <Animated.View style={{ opacity, transform: [{ translateY }] }}>{content}</Animated.View>;
+  }
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => ({
-        opacity: pressed ? 0.86 : 1,
-        transform: [{ scale: pressed ? 0.985 : 1 }],
-      })}
+    <Animated.View style={{ opacity, transform: [{ translateY }] }}
     >
-      {content}
-    </Pressable>
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => ({
+          opacity: pressed ? 0.86 : 1,
+          transform: [{ scale: pressed ? 0.985 : 1 }],
+        })}
+      >
+        {content}
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -94,6 +131,10 @@ export function AppleButton({
           borderColor: isSecondary ? colors.borderStrong : 'transparent',
           opacity: pressed ? 0.78 : disabled ? 0.42 : 1,
           transform: [{ scale: pressed ? 0.985 : 1 }],
+          shadowColor: isPrimary ? color : '#000',
+          shadowOpacity: isPrimary ? 0.32 : 0.12,
+          shadowRadius: isPrimary ? 16 : 8,
+          shadowOffset: { width: 0, height: isPrimary ? 7 : 4 },
         },
         style,
       ]}
