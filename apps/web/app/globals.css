@@ -125,6 +125,62 @@
 }
 
 /* ============================================================
+   PREMIUM ROUTE SCENE
+   ============================================================ */
+
+.pt-route-root {
+  position: relative;
+  isolation: isolate;
+}
+
+.pt-route-page {
+  position: relative;
+  z-index: 2;
+}
+
+.pt-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.pt-ambient-glow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(56px);
+  opacity: 0.6;
+}
+
+.pt-ambient-glow-a {
+  width: min(42vw, 540px);
+  height: min(42vw, 540px);
+  left: -10vw;
+  top: -10vh;
+  background: radial-gradient(circle at 42% 42%, rgba(10, 132, 255, 0.24), rgba(10, 132, 255, 0.02) 70%);
+}
+
+.pt-ambient-glow-b {
+  width: min(36vw, 440px);
+  height: min(36vw, 440px);
+  right: -8vw;
+  bottom: -12vh;
+  background: radial-gradient(circle at 52% 52%, rgba(191, 90, 242, 0.18), rgba(90, 200, 250, 0.03) 70%);
+}
+
+.pt-ambient-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at center, black 30%, transparent 85%);
+  opacity: 0.22;
+}
+
+/* ============================================================
    KEYFRAMES
    ============================================================ */
 
@@ -320,9 +376,13 @@
 }
 
 .ios-group {
-  background: var(--ios-bg2);
+  background: color-mix(in srgb, var(--ios-bg2) 88%, transparent);
   border-radius: 12px;
   overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ios-sep) 38%, transparent);
+  box-shadow: var(--ios-shadow-sm);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
 }
 
 .ios-row {
@@ -330,8 +390,8 @@
   align-items: center;
   padding: 12px 16px;
   min-height: 44px;
-  background: var(--ios-bg2);
-  transition: background 0.15s ease;
+  background: transparent;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .ios-row + .ios-row {
@@ -402,9 +462,13 @@
    ============================================================ */
 
 .ios-card {
-  background: var(--ios-bg2);
+  background: color-mix(in srgb, var(--ios-bg2) 90%, transparent);
   border-radius: 12px;
   overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ios-sep) 34%, transparent);
+  box-shadow: var(--ios-shadow-sm);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
 }
 
 .ios-card-inset {
@@ -434,7 +498,7 @@
   border: none;
   outline: none;
   width: 100%;
-  box-shadow: var(--ios-shadow-blue);
+  box-shadow: 0 10px 28px rgba(10,132,255,0.28), 0 2px 8px rgba(10,132,255,0.18), inset 0 -1px 0 rgba(255,255,255,0.2);
 }
 
 .ios-btn-primary:active {
@@ -454,7 +518,7 @@
   font-weight: 600;
   letter-spacing: -0.43px;
   padding: 0 24px;
-  transition: opacity 0.12s ease, transform 0.12s ease;
+  transition: opacity 0.16s ease, transform 0.16s ease, background 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
   border: none;
   outline: none;
@@ -678,7 +742,7 @@
    ============================================================ */
 
 .ios-game-card {
-  background: var(--ios-bg2);
+  background: color-mix(in srgb, var(--ios-bg2) 88%, transparent);
   border-radius: 16px;
   padding: 16px;
   cursor: pointer;
@@ -686,6 +750,8 @@
               background 0.15s ease;
   -webkit-user-select: none;
   user-select: none;
+  border: 1px solid color-mix(in srgb, var(--ios-sep) 34%, transparent);
+  box-shadow: var(--ios-shadow-sm);
 }
 
 .ios-game-card:active {
@@ -887,7 +953,8 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .ios-btn-secondary:hover {
-    background: var(--ios-bg4);
+    background: color-mix(in srgb, var(--ios-bg4) 76%, var(--ios-bg2));
+    box-shadow: var(--ios-shadow-sm);
   }
 
   .ios-btn-tonal:hover {
@@ -903,16 +970,18 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .ios-game-card:hover {
-    background: var(--ios-bg3);
-    transform: scale(1.02);
+    background: color-mix(in srgb, var(--ios-bg3) 90%, transparent);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: var(--ios-shadow-md);
   }
 
   .ios-card:hover {
-    background: var(--ios-bg3);
+    background: color-mix(in srgb, var(--ios-bg3) 92%, transparent);
+    box-shadow: var(--ios-shadow-md);
   }
 
   .ios-row:hover {
-    background: var(--ios-bg3);
+    background: color-mix(in srgb, var(--ios-bg3) 90%, transparent);
   }
 
   .ios-play-btn:hover {
