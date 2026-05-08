@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 import { GAME_MODE_META } from '@pitch-therapy/core';
-import { GlassCard, SectionHeader, StatItem } from '@/components/AppleUI';
+import { GlassCard, MotionStatusCard, SectionHeader, StatItem } from '@/components/AppleUI';
 import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
 import { useResponsiveLayout } from '@/lib/responsive';
@@ -15,9 +15,20 @@ const STATS = [
 
 export default function ProgressScreen() {
   const { isDesktop } = useResponsiveLayout();
+  const hasStats = false;
 
   return (
-    <AppPage title="Progress" subtitle="A clean snapshot of consistency and performance.">
+    <AppPage
+      title="Progress"
+      subtitle="A clean snapshot of consistency and performance."
+      heroVariant="progress"
+      heroHint="Watch trend quality as your repetitions stack"
+    >
+      <MotionStatusCard
+        tone={hasStats ? 'success' : 'error'}
+        title={hasStats ? 'Tracking is active' : 'No sessions recorded yet'}
+        message={hasStats ? 'Performance streams are up to date across all modes.' : 'Complete one round to unlock detailed graphs and mode-level trends.'}
+      />
       <GlassCard accent={colors.purple} padding={20}>
         <View style={{ alignItems: 'center', gap: 12 }}>
           <Text style={{ color: colors.textTertiary, ...typography.overline }}>BEST STREAK</Text>

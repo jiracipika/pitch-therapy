@@ -175,6 +175,71 @@ export function StatItem({ label, value, color = colors.text }: StatItemProps) {
   );
 }
 
+interface MotionStatusCardProps {
+  tone: 'loading' | 'success' | 'error';
+  title: string;
+  message: string;
+}
+
+const toneToColor: Record<MotionStatusCardProps['tone'], string> = {
+  loading: colors.blue,
+  success: colors.green,
+  error: colors.red,
+};
+
+export function MotionStatusCard({ tone, title, message }: MotionStatusCardProps) {
+  const pulse = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (tone === 'loading') {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulse, { toValue: 1, duration: 820, useNativeDriver: true }),
+          Animated.timing(pulse, { toValue: 0, duration: 820, useNativeDriver: true }),
+        ]),
+      );
+      loop.start();
+      return () => loop.stop();
+    }
+
+    Animated.sequence([
+      Animated.timing(pulse, { toValue: 1, duration: 230, useNativeDriver: true }),
+      Animated.timing(pulse, { toValue: 0, duration: 420, useNativeDriver: true }),
+    ]).start();
+  }, [pulse, tone]);
+
+  const scale = pulse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.2],
+  });
+  const opacity = pulse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.5, 1],
+  });
+  const toneColor = toneToColor[tone];
+
+  return (
+    <GlassCard accent={toneColor} padding={14}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <Animated.View
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: 10,
+            backgroundColor: toneColor,
+            opacity,
+            transform: [{ scale }],
+          }}
+        />
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: colors.text, ...typography.subhead }}>{title}</Text>
+          <Text style={{ color: colors.textSecondary, ...typography.caption1, marginTop: 2, lineHeight: 17 }}>{message}</Text>
+        </View>
+      </View>
+    </GlassCard>
+  );
+}
+
 interface AppleInputProps {
   value: string;
   onChangeText: (text: string) => void;

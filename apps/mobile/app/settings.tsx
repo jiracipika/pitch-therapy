@@ -1,5 +1,6 @@
 import { Image, Switch, Text, View } from 'react-native';
-import { GlassCard, SectionHeader } from '@/components/AppleUI';
+import { useMemo } from 'react';
+import { GlassCard, MotionStatusCard, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
 import { triggerSelectionHaptic } from '@/lib/haptics';
 import { useResponsiveLayout } from '@/lib/responsive';
@@ -14,9 +15,38 @@ const referenceItems = [
 export default function SettingsScreen() {
   const { isDesktop } = useResponsiveLayout();
   const { soundEnabled, hapticEnabled, setSoundEnabled, setHapticEnabled } = useAppSettings();
+  const status = useMemo(() => {
+    if (!soundEnabled && !hapticEnabled) {
+      return {
+        tone: 'error' as const,
+        title: 'Low-feedback mode',
+        message: 'Sound and haptics are both off. Training still works, but feedback is minimal.',
+      };
+    }
+
+    if (soundEnabled && hapticEnabled) {
+      return {
+        tone: 'success' as const,
+        title: 'Feedback fully enabled',
+        message: 'Sound and haptics are active for responsive training cues.',
+      };
+    }
+
+    return {
+      tone: 'loading' as const,
+      title: 'Partial feedback',
+      message: 'One feedback channel is active. This keeps sessions quieter but still guided.',
+    };
+  }, [hapticEnabled, soundEnabled]);
 
   return (
-    <AppPage title="Settings" subtitle="Make the training loop feel right for you.">
+    <AppPage
+      title="Settings"
+      subtitle="Make the training loop feel right for you."
+      heroVariant="settings"
+      heroHint="Dial in feedback and defaults for your ideal rhythm"
+    >
+      <MotionStatusCard tone={status.tone} title={status.title} message={status.message} />
       <GlassCard accent={colors.pink}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
           <Image

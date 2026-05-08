@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
-import { GlassCard, Pill, SectionHeader, StatItem } from '@/components/AppleUI';
+import { GlassCard, MotionStatusCard, Pill, SectionHeader, StatItem } from '@/components/AppleUI';
 import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
 import { triggerSelectionHaptic } from '@/lib/haptics';
@@ -16,7 +16,18 @@ export default function DashboardScreen() {
   const featuredModes = Object.values(GAME_MODE_META).slice(0, 4);
 
   return (
-    <AppPage title="Pitch Therapy" subtitle="A focused ear-training studio for daily reps." showSwipeHint>
+    <AppPage
+      title="Pitch Therapy"
+      subtitle="A focused ear-training studio for daily reps."
+      showSwipeHint
+      heroVariant="dashboard"
+      heroHint="Flow: Warm-up -> Featured Mode -> Daily"
+    >
+      <MotionStatusCard
+        tone="success"
+        title="Studio is ready"
+        message="Your personalized dashboard is loaded and tuned for your next session."
+      />
       <LinearGradient
         colors={['rgba(56,189,248,0.22)', 'rgba(74,222,128,0.13)', colors.card]}
         start={{ x: 0, y: 0 }}

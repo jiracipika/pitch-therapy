@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { GAME_MODE_META, getDailySeed } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
-import { GlassCard, Pill, SectionHeader } from '@/components/AppleUI';
+import { GlassCard, MotionStatusCard, Pill, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
 import { useResponsiveLayout } from '@/lib/responsive';
 import { colors, typography } from '@/lib/theme';
@@ -23,9 +23,10 @@ function getTimeUntilMidnight(): string {
 export default function DailyScreen() {
   const { isDesktop } = useResponsiveLayout();
   const seed = getDailySeed();
-  const [timeRemaining, setTimeRemaining] = useState(getTimeUntilMidnight);
+  const [timeRemaining, setTimeRemaining] = useState('');
 
   useEffect(() => {
+    setTimeRemaining(getTimeUntilMidnight());
     const timer = setInterval(() => {
       setTimeRemaining(getTimeUntilMidnight());
     }, 1000);
@@ -34,7 +35,17 @@ export default function DailyScreen() {
   }, []);
 
   return (
-    <AppPage title="Daily Challenge" subtitle="Two fresh runs reset at midnight.">
+    <AppPage
+      title="Daily Challenge"
+      subtitle="Two fresh runs reset at midnight."
+      heroVariant="daily"
+      heroHint="Keep your streak by clearing both drills"
+    >
+      <MotionStatusCard
+        tone={timeRemaining ? 'success' : 'loading'}
+        title={timeRemaining ? 'Challenge synced' : 'Preparing today’s challenge'}
+        message={timeRemaining ? 'Daily seed locked in. Finish both rounds before reset.' : 'Loading timer and challenge seed...'}
+      />
       <GlassCard accent={colors.speedRound} padding={20}>
         <View style={{ alignItems: 'center', gap: 10 }}>
           <Pill label="Next reset" color={colors.speedRound} />

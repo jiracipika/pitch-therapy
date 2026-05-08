@@ -13,19 +13,64 @@ interface AppPageProps {
   title: string;
   subtitle?: string;
   showSwipeHint?: boolean;
+  heroVariant?: 'dashboard' | 'daily' | 'progress' | 'settings';
+  heroHint?: string;
   children: ReactNode;
 }
 
-export function AppPage({ title, subtitle, showSwipeHint = false, children }: AppPageProps) {
+function getHeroSpec(variant: NonNullable<AppPageProps['heroVariant']>) {
+  switch (variant) {
+    case 'dashboard':
+      return {
+        gradient: ['rgba(10,132,255,0.26)', 'rgba(94,92,230,0.16)', 'rgba(255,255,255,0.02)'] as const,
+        ribbonA: ['rgba(10,132,255,0)', 'rgba(10,132,255,0.20)', 'rgba(10,132,255,0)'] as const,
+        ribbonB: ['rgba(191,90,242,0)', 'rgba(191,90,242,0.14)', 'rgba(90,200,250,0)'] as const,
+      };
+    case 'daily':
+      return {
+        gradient: ['rgba(48,209,88,0.24)', 'rgba(90,200,250,0.16)', 'rgba(255,255,255,0.02)'] as const,
+        ribbonA: ['rgba(48,209,88,0)', 'rgba(48,209,88,0.20)', 'rgba(48,209,88,0)'] as const,
+        ribbonB: ['rgba(255,159,10,0)', 'rgba(255,159,10,0.16)', 'rgba(90,200,250,0)'] as const,
+      };
+    case 'progress':
+      return {
+        gradient: ['rgba(191,90,242,0.23)', 'rgba(10,132,255,0.16)', 'rgba(255,255,255,0.02)'] as const,
+        ribbonA: ['rgba(191,90,242,0)', 'rgba(191,90,242,0.18)', 'rgba(191,90,242,0)'] as const,
+        ribbonB: ['rgba(10,132,255,0)', 'rgba(10,132,255,0.15)', 'rgba(94,92,230,0)'] as const,
+      };
+    case 'settings':
+      return {
+        gradient: ['rgba(255,159,10,0.24)', 'rgba(10,132,255,0.13)', 'rgba(255,255,255,0.02)'] as const,
+        ribbonA: ['rgba(255,159,10,0)', 'rgba(255,159,10,0.19)', 'rgba(255,159,10,0)'] as const,
+        ribbonB: ['rgba(10,132,255,0)', 'rgba(10,132,255,0.13)', 'rgba(90,200,250,0)'] as const,
+      };
+    default:
+      return {
+        gradient: ['rgba(255,255,255,0.08)', 'rgba(255,255,255,0.03)', 'rgba(255,255,255,0.01)'] as const,
+        ribbonA: ['rgba(10,132,255,0)', 'rgba(10,132,255,0.18)', 'rgba(10,132,255,0)'] as const,
+        ribbonB: ['rgba(191,90,242,0)', 'rgba(191,90,242,0.15)', 'rgba(90,200,250,0)'] as const,
+      };
+  }
+}
+
+export function AppPage({
+  title,
+  subtitle,
+  showSwipeHint = false,
+  heroVariant = 'dashboard',
+  heroHint,
+  children,
+}: AppPageProps) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const pathname = usePathname();
   const router = useRouter();
-  const { contentMaxWidth, pagePadding, prefersRailNav, isDesktop } = useResponsiveLayout();
+  const { contentMaxWidth, pagePadding, prefersRailNav, isDesktop, motionProfile } = useResponsiveLayout();
   const opacity = useRef(new Animated.Value(0)).current;
   const translateX = useRef(new Animated.Value(0)).current;
   const ambientShiftA = useRef(new Animated.Value(0)).current;
   const ambientShiftB = useRef(new Animated.Value(0)).current;
+  const heroShift = useRef(new Animated.Value(0)).current;
   const childAnimationsRef = useRef<Animated.Value[]>([]);
   const previousIndex = useRef<number | null>(null);
   const childArray = useMemo(() => Children.toArray(children), [children]);
@@ -79,7 +124,7 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
     Animated.parallel([
       Animated.timing(opacity, {
         toValue: 1,
-        duration: 220,
+        duration: motionProfile.routeDuration,
         useNativeDriver: true,
       }),
       Animated.spring(translateX, {
@@ -92,20 +137,20 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
     ]).start();
 
     previousIndex.current = activeIndex;
-  }, [activeIndex, opacity, translateX]);
+  }, [activeIndex, motionProfile.routeDuration, opacity, translateX]);
 
   useEffect(() => {
     const loopA = Animated.loop(
       Animated.sequence([
         Animated.timing(ambientShiftA, {
           toValue: 1,
-          duration: 14000,
+          duration: motionProfile.ambientA,
           easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
         }),
         Animated.timing(ambientShiftA, {
           toValue: 0,
-          duration: 14000,
+          duration: motionProfile.ambientA,
           easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
         }),
@@ -116,13 +161,13 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
       Animated.sequence([
         Animated.timing(ambientShiftB, {
           toValue: 1,
-          duration: 17000,
+          duration: motionProfile.ambientB,
           easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
         }),
         Animated.timing(ambientShiftB, {
           toValue: 0,
-          duration: 17000,
+          duration: motionProfile.ambientB,
           easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
         }),
@@ -135,12 +180,33 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
       loopA.stop();
       loopB.stop();
     };
-  }, [ambientShiftA, ambientShiftB]);
+  }, [ambientShiftA, ambientShiftB, motionProfile.ambientA, motionProfile.ambientB]);
+
+  useEffect(() => {
+    const heroLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(heroShift, {
+          toValue: 1,
+          duration: motionProfile.heroDuration,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(heroShift, {
+          toValue: 0,
+          duration: motionProfile.heroDuration,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    heroLoop.start();
+    return () => heroLoop.stop();
+  }, [heroShift, motionProfile.heroDuration]);
 
   useEffect(() => {
     childAnimationsRef.current.forEach((value) => value.setValue(0));
     const stagger = Animated.stagger(
-      56,
+      motionProfile.staggerDelay,
       childAnimationsRef.current.map((value) =>
         Animated.timing(value, {
           toValue: 1,
@@ -151,7 +217,7 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
       ),
     );
     stagger.start();
-  }, [pathname, childArray.length]);
+  }, [childArray.length, motionProfile.staggerDelay, pathname]);
 
   const ambientTranslateAX = ambientShiftA.interpolate({
     inputRange: [0, 1],
@@ -161,6 +227,32 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
     inputRange: [0, 1],
     outputRange: [40, -40],
   });
+  const heroTranslateX = heroShift.interpolate({
+    inputRange: [0, 1],
+    outputRange:
+      heroVariant === 'progress'
+        ? [-18, 18]
+        : heroVariant === 'settings'
+          ? [-10, 10]
+          : [-14, 14],
+  });
+  const heroTranslateY = heroShift.interpolate({
+    inputRange: [0, 1],
+    outputRange:
+      heroVariant === 'daily'
+        ? [-8, 8]
+        : heroVariant === 'dashboard'
+          ? [0, -7]
+          : [0, -5],
+  });
+  const heroScale = heroShift.interpolate({
+    inputRange: [0, 1],
+    outputRange:
+      heroVariant === 'settings'
+        ? [0.995, 1.005]
+        : [0.985, 1.015],
+  });
+  const heroSpec = getHeroSpec(heroVariant);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -181,7 +273,7 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
         }}
       >
         <LinearGradient
-          colors={['rgba(10,132,255,0)', 'rgba(10,132,255,0.20)', 'rgba(10,132,255,0)']}
+          colors={heroSpec.ribbonA}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={{ flex: 1 }}
@@ -199,7 +291,7 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
         }}
       >
         <LinearGradient
-          colors={['rgba(191,90,242,0)', 'rgba(191,90,242,0.15)', 'rgba(90,200,250,0)']}
+          colors={heroSpec.ribbonB}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={{ flex: 1 }}
@@ -270,7 +362,7 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
           >
             <View style={{ width: '100%', maxWidth: contentMaxWidth, alignSelf: 'center', gap: 18 }}>
               <LinearGradient
-                colors={['rgba(255,255,255,0.055)', 'rgba(255,255,255,0.01)']}
+                colors={heroSpec.gradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={{
@@ -280,12 +372,32 @@ export function AppPage({ title, subtitle, showSwipeHint = false, children }: Ap
                   borderWidth: 1,
                   borderColor: 'rgba(255,255,255,0.13)',
                   gap: 7,
+                  overflow: 'hidden',
                 }}
               >
+                <Animated.View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    width: 180,
+                    height: 180,
+                    borderRadius: 180,
+                    top: -80,
+                    right: -40,
+                    opacity: 0.4,
+                    backgroundColor: 'rgba(255,255,255,0.08)',
+                    transform: [{ translateX: heroTranslateX }, { translateY: heroTranslateY }, { scale: heroScale }],
+                  }}
+                />
                 <Text style={{ color: colors.text, ...typography.title1 }}>{title}</Text>
                 {subtitle ? (
                   <Text style={{ color: colors.textSecondary, ...typography.subhead, lineHeight: 21 }}>
                     {subtitle}
+                  </Text>
+                ) : null}
+                {heroHint ? (
+                  <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>
+                    {heroHint}
                   </Text>
                 ) : null}
                 {showSwipeHint && canSwipeTabs ? (
