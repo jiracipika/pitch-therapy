@@ -163,7 +163,7 @@ export default function NoteIdPage() {
   if (phase === 'done') {
     return (
       <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-        <div className="max-w-sm mx-auto px-4 pt-12">
+        <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
           <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
             <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
             <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
@@ -196,7 +196,7 @@ export default function NoteIdPage() {
   if (phase === 'setup') {
     return (
       <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-        <div className="max-w-sm mx-auto px-4 pt-12">
+        <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
           <div style={{ textAlign: 'center', paddingTop: 40 }}>
             <div style={{ fontSize: 64, marginBottom: 20 }}>🎵</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Note ID</div>
@@ -239,7 +239,7 @@ export default function NoteIdPage() {
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-sm mx-auto px-4 pt-12">
+      <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
         <FeedbackOverlay correct={feedback === 'correct'} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>

@@ -57,7 +57,7 @@ export default function NoteWordlePage() {
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-sm mx-auto px-4 pt-12">
+      <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
           <button
