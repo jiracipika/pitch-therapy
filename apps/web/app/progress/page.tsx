@@ -85,7 +85,7 @@ export default function ProgressPage() {
           <div className="pt-progress-main">
 
         {/* ── SUMMARY STATS ── */}
-        <div className="grid grid-cols-4 gap-2 mb-1 pt-desktop-card">
+        <div className="pt-mobile-stats mb-1 pt-desktop-card">
           <AnimatedStatCard label="Games" value={loaded ? totalGames : '—'} color="var(--ios-blue)" delay={0.04} />
           <AnimatedStatCard label="Best Streak" value={loaded ? stats.bestStreak : '—'} color="var(--ios-orange)" delay={0.08} />
           <AnimatedStatCard label="Avg Acc" value={loaded ? `${avgAccuracy}%` : '—'} color="var(--ios-green)" delay={0.12} />
@@ -126,14 +126,11 @@ export default function ProgressPage() {
                     <div
                       key={d}
                       title={cell ? `${cell.date}: ${cell.count} games` : ''}
+                      className="pt-calendar-cell"
                       style={{
-                        width: 14,
-                        height: 14,
-                        borderRadius: 3,
                         background: intensity === 0
                           ? 'rgba(255,255,255,0.04)'
                           : `rgba(10, 132, 255, ${intensity})`,
-                        transition: 'background 0.3s ease',
                       }}
                     />
                   );

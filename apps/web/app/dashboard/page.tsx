@@ -179,7 +179,7 @@ export default function Dashboard() {
 
             {/* ── TODAY'S SUMMARY ── */}
             {loaded && totalGames > 0 && (
-              <div className="grid grid-cols-3 gap-2 mb-3 pt-desktop-card">
+              <div className="pt-mobile-stats mb-3 pt-desktop-card">
                 <AnimatedStatCard label="Today" value={todayGames} color="var(--ios-blue)" delay={0.04} />
                 <AnimatedStatCard label="All Time" value={totalGames} color="var(--ios-purple)" delay={0.08} />
                 <AnimatedStatCard
@@ -202,7 +202,7 @@ export default function Dashboard() {
                 <div style={{ fontSize: 13, fontWeight: 400, letterSpacing: '-0.08px', textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 8, marginTop: 16, paddingLeft: 4 }}>
                   Recently Played
                 </div>
-                <div className="grid grid-cols-3 gap-2.5">
+                <div className="pt-mobile-recent">
                   {recentModes.map((modeId) => {
                     const m = MODES.find((mode) => mode.id === modeId);
                     if (!m) return null;

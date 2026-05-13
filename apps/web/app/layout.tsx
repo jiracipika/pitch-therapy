@@ -27,8 +27,7 @@ export default function RootLayout({
         <AuthProvider>
           <StatsProvider>
             <Nav />
-            {/* Mobile: bottom-padded for tab bar. Desktop: shifted right for sidebar. */}
-            <main className="pb-tab md:pb-0 md:ml-[240px]">
+            <main className="pt-main-shell">
               <AppTransitionShell>{children}</AppTransitionShell>
             </main>
           </StatsProvider>

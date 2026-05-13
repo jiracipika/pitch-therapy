@@ -140,7 +140,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Quick stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginTop: 8 }}>
+          <div className="pt-profile-stats" style={{ marginTop: 8 }}>
             {[
               { label: 'Games', value: loaded ? String(totalGames) : '—' },
               { label: 'Streak', value: loaded ? String(stats.streak) : '—' },

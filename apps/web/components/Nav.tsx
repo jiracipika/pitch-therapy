@@ -61,10 +61,24 @@ function IconGear({ filled }: { filled: boolean }) {
   );
 }
 
+function IconPerson({ filled }: { filled: boolean }) {
+  return filled ? (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.17.68-2.26 1.76-2.73A9.95 9.95 0 0 1 12 12.75zM12 3.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7z" />
+    </svg>
+  ) : (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+    </svg>
+  );
+}
+
 const TABS = [
   { href: '/dashboard', label: 'Home',     Icon: IconHome },
   { href: '/daily',     label: 'Daily',    Icon: IconCalendar },
-  { href: '/profile',   label: 'Profile',  Icon: IconChart },
+  { href: '/progress',  label: 'Progress', Icon: IconChart },
+  { href: '/profile',   label: 'Profile',  Icon: IconPerson },
   { href: '/settings',  label: 'Settings', Icon: IconGear },
 ] as const;
 

@@ -1375,13 +1375,64 @@ input[type="range"]::-moz-range-thumb {
   z-index: 50;
   height: calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: rgba(28, 28, 30, 0.94);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: rgba(28, 28, 30, 0.72);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
   border-top: 0.5px solid var(--ios-sep);
   display: flex;
   align-items: flex-start;
   justify-content: space-around;
+}
+
+/* Active tab indicator pill */
+.ios-tab-item {
+  position: relative;
+}
+
+.ios-tab-item::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  background: rgba(10, 132, 255, 0.12);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Style the active tab using the color prop approach via [style] */
+.ios-tab-item[style*="var(--ios-blue)"]::before {
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* Mobile card press effect */
+@media (hover: none) and (pointer: coarse) {
+  .ios-card:active {
+    transform: scale(0.985);
+    transition: transform 0.1s ease;
+  }
+  
+  .ios-game-card:active {
+    transform: scale(0.96);
+    opacity: 0.85;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+  }
+
+  .ios-btn-primary:active {
+    transform: scale(0.97);
+    filter: brightness(0.9);
+  }
+
+  .ios-btn-secondary:active {
+    transform: scale(0.97);
+    background: var(--ios-bg4);
+  }
+
+  .ios-row:active {
+    background: var(--ios-bg3);
+  }
 }
 
 .pt-nav-rail {
@@ -1415,6 +1466,129 @@ input[type="range"]::-moz-range-thumb {
 
 .pt-desktop-topbar-wrap {
   display: none;
+}
+
+/* ============================================================
+   MOBILE POLISH (< 768px)
+   ============================================================ */
+
+/* Landing page hero tighter on mobile */
+@media (max-width: 380px) {
+  .pt-page-shell section:first-child h1,
+  .min-h-screen h1 {
+    font-size: 40px !important;
+  }
+}
+
+/* Dashboard: 2-col stats on mobile, 4-col on md+ */
+.pt-mobile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .pt-mobile-stats {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+}
+
+/* Recently played: 2-col on very small, 3-col on wider mobile */
+.pt-mobile-recent {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 360px) {
+  .pt-mobile-recent {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Game grid on landing: 2 cols on mobile, 3 on wider */
+.pt-mobile-game-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (min-width: 420px) {
+  .pt-mobile-game-grid {
+    gap: 12px;
+  }
+}
+
+/* Landing CTA buttons full width on mobile */
+.pt-mobile-cta {
+  width: 100%;
+}
+
+/* Profile stat mini-grid: 2x2 on small mobile, 4-col on wider */
+.pt-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (min-width: 400px) {
+  .pt-profile-stats {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+}
+
+/* Difficulty segmented: wrap on narrow mobile */
+.pt-diff-segments {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 380px) {
+  .pt-diff-segments {
+    gap: 4px;
+  }
+  .pt-diff-segments button {
+    height: 26px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+}
+
+/* Sound type grid: stays 2x2 */
+.pt-sound-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Activity calendar: slightly smaller cells on mobile */
+.pt-calendar-cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+@media (max-width: 380px) {
+  .pt-calendar-cell {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+  }
+}
+
+/* Touch target minimum 44px */
+@media (hover: none) and (pointer: coarse) {
+  .ios-row,
+  .ios-btn-primary,
+  .ios-btn-secondary,
+  .ios-btn-tonal,
+  button,
+  a {
+    min-height: 44px;
+  }
 }
 
 @media (min-width: 768px) {

@@ -269,7 +269,7 @@ export default function Home() {
                   {cat.label}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="pt-mobile-game-grid">
                 {catModes.map((m, i) => (
                   <motion.div
                     key={m.id}

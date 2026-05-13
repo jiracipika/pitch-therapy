@@ -125,7 +125,7 @@ export default function SettingsPage() {
           {/* ── SOUND TYPE ── */}
           <SectionHeader>Sound Type</SectionHeader>
           <div className="ios-group pt-desktop-card">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+            <div className="pt-sound-grid">
               {SOUND_TYPES.map((s, idx) => {
                 const active = soundType === s.id;
                 const borders: React.CSSProperties = {};
@@ -181,7 +181,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Right: segmented buttons */}
-                <div style={{ display: 'flex', gap: 6 }}>
+                <div className="pt-diff-segments">
                   {(['easy', 'medium', 'hard'] as Diff[]).map((d) => {
                     const active = difficulty[m.id] === d;
                     return (
