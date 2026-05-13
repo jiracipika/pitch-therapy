@@ -4,7 +4,6 @@ import Nav from "@/components/Nav";
 import { AuthProvider } from "@/components/AuthProvider";
 import { StatsProvider } from "@/components/StatsProvider";
 import AppTransitionShell from "@/components/AppTransitionShell";
-import DesktopTopBar from "@/components/DesktopTopBar";
 
 export const metadata: Metadata = {
   title: "Pitch Therapy",
@@ -28,8 +27,8 @@ export default function RootLayout({
         <AuthProvider>
           <StatsProvider>
             <Nav />
-            <main className="pt-main-shell">
-              <DesktopTopBar />
+            {/* Mobile: bottom-padded for tab bar. Desktop: shifted right for sidebar. */}
+            <main className="pb-tab md:pb-0 md:ml-[240px]">
               <AppTransitionShell>{children}</AppTransitionShell>
             </main>
           </StatsProvider>
