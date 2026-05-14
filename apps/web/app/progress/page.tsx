@@ -69,6 +69,11 @@ export default function ProgressPage() {
     ? Math.round((stats.results.reduce((s, r) => s + r.accuracy, 0) / totalGames) * 100)
     : 0;
   const totalTimeMin = Math.round(stats.results.reduce((s, r) => s + r.timeMs, 0) / 60000);
+  const consistencyTier =
+    stats.streak >= 14 ? 'Elite consistency' :
+    stats.streak >= 7 ? 'Strong consistency' :
+    stats.streak >= 3 ? 'Building momentum' :
+    'Just getting started';
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
@@ -85,7 +90,7 @@ export default function ProgressPage() {
           <div className="pt-progress-main">
 
         {/* ── SUMMARY STATS ── */}
-        <div className="pt-mobile-stats mb-1 pt-desktop-card">
+        <div className="grid grid-cols-4 gap-2 mb-1 pt-desktop-card">
           <AnimatedStatCard label="Games" value={loaded ? totalGames : '—'} color="var(--ios-blue)" delay={0.04} />
           <AnimatedStatCard label="Best Streak" value={loaded ? stats.bestStreak : '—'} color="var(--ios-orange)" delay={0.08} />
           <AnimatedStatCard label="Avg Acc" value={loaded ? `${avgAccuracy}%` : '—'} color="var(--ios-green)" delay={0.12} />
@@ -126,11 +131,14 @@ export default function ProgressPage() {
                     <div
                       key={d}
                       title={cell ? `${cell.date}: ${cell.count} games` : ''}
-                      className="pt-calendar-cell"
                       style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: 3,
                         background: intensity === 0
                           ? 'rgba(255,255,255,0.04)'
                           : `rgba(10, 132, 255, ${intensity})`,
+                        transition: 'background 0.3s ease',
                       }}
                     />
                   );
@@ -209,6 +217,22 @@ export default function ProgressPage() {
           </div>
 
           <div className="pt-progress-side">
+        <motion.div
+          className="ios-card pt-desktop-card"
+          style={{ padding: 14, marginBottom: 12, background: 'linear-gradient(160deg, rgba(48,209,88,0.12), rgba(10,132,255,0.08))', border: '0.5px solid rgba(48,209,88,0.22)' }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.16, duration: 0.35 }}
+        >
+          <div style={{ fontSize: 12, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>
+            Consistency
+          </div>
+          <div style={{ fontSize: 17, fontWeight: 650, color: 'var(--ios-label)', letterSpacing: '-0.2px' }}>{consistencyTier}</div>
+          <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 4 }}>
+            Current streak: <span style={{ color: 'var(--ios-label2)', fontWeight: 600 }}>{stats.streak} days</span>
+          </div>
+        </motion.div>
+
         {/* ── PER MODE ── */}
         <div style={{ fontSize: 13, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '-0.08px', padding: '24px 4px 8px' }}>
           Per Mode

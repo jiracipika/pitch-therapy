@@ -53,7 +53,10 @@ export default function TuningBattlePage() {
   const startRound = useCallback(() => {
     const note = pickRandom();
     setTargetNote(note);
-    setPlayers(prev => prev.map(p => ({ ...p, ready: false, lockedIn: false, selectedNote: '', lastCents: 0 })));
+    setPlayers(([p1, p2]) => ([
+      { ...p1, ready: false, lockedIn: false, selectedNote: '', lastCents: 0 },
+      { ...p2, ready: false, lockedIn: false, selectedNote: '', lastCents: 0 },
+    ]));
     setRoundWinner(null);
     setPhase('playing');
     playTone(NOTE_FREQS[note] || 440, 0.8);

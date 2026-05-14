@@ -1357,6 +1357,13 @@ input[type="range"]::-moz-range-thumb {
   border: 1px solid rgba(255,255,255,0.08);
 }
 
+.pt-page-dashboard,
+.pt-page-daily,
+.pt-page-progress,
+.pt-page-settings {
+  padding-bottom: 16px;
+}
+
 @media (min-width: 768px) {
   .pt-main-shell {
     max-width: 980px;
@@ -1608,6 +1615,24 @@ input[type="range"]::-moz-range-thumb {
     transform: translateY(-1px);
     border-color: rgba(10,132,255,0.25);
     background: rgba(10,132,255,0.08);
+  }
+
+  .pt-page-dashboard .pt-dashboard-main,
+  .pt-page-daily .pt-daily-main,
+  .pt-page-progress .pt-progress-main,
+  .pt-page-settings .pt-settings-main {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pt-page-dashboard .pt-dashboard-side,
+  .pt-page-daily .pt-daily-side,
+  .pt-page-progress .pt-progress-side,
+  .pt-page-settings .pt-settings-side {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .pt-hero {

@@ -51,6 +51,8 @@ const CHALLENGES = [
 
 export default function DailyPage() {
   const [played] = useState<Record<string, boolean>>({});
+  const completedCount = CHALLENGES.filter((c) => played[c.id]).length;
+  const completionPct = Math.round((completedCount / CHALLENGES.length) * 100);
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric',
@@ -69,6 +71,31 @@ export default function DailyPage() {
 
         <div className="pt-daily-layout">
           <div className="pt-daily-main">
+            <motion.div
+              className="ios-card pt-desktop-card"
+              style={{ padding: 14, marginBottom: 12 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.06, duration: 0.35 }}
+            >
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div style={{ fontSize: 13, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Completion</div>
+                <div style={{ fontSize: 12, color: 'var(--ios-label2)', fontWeight: 600 }}>{completedCount}/{CHALLENGES.length}</div>
+              </div>
+              <div className="ios-progress-track">
+                <motion.div
+                  className="ios-progress-fill"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${completionPct}%` }}
+                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ background: 'linear-gradient(90deg, var(--ios-green), var(--ios-blue))' }}
+                />
+              </div>
+              <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ios-label3)' }}>
+                {completedCount === CHALLENGES.length ? 'Daily challenge complete. Great consistency.' : 'Finish both drills to secure today’s streak.'}
+              </div>
+            </motion.div>
+
             {/* ── STREAK + COUNTDOWN ROW ── */}
             <motion.div
               className="ios-card p-0 mb-1 overflow-hidden pt-desktop-card"

@@ -66,6 +66,26 @@ export default function SettingsPage() {
   const [haptics,   setHaptics]   = useState(true);
   const [soundType, setSoundType] = useState('sine');
   const [volume,    setVolume]    = useState(70);
+  const applyProfile = (profile: 'focus' | 'coach' | 'quiet') => {
+    if (profile === 'focus') {
+      setSound(true);
+      setHaptics(true);
+      setSoundType('triangle');
+      setVolume(72);
+      return;
+    }
+    if (profile === 'coach') {
+      setSound(true);
+      setHaptics(true);
+      setSoundType('sine');
+      setVolume(82);
+      return;
+    }
+    setSound(false);
+    setHaptics(false);
+    setSoundType('sine');
+    setVolume(35);
+  };
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
@@ -125,7 +145,7 @@ export default function SettingsPage() {
           {/* ── SOUND TYPE ── */}
           <SectionHeader>Sound Type</SectionHeader>
           <div className="ios-group pt-desktop-card">
-            <div className="pt-sound-grid">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
               {SOUND_TYPES.map((s, idx) => {
                 const active = soundType === s.id;
                 const borders: React.CSSProperties = {};
@@ -181,7 +201,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Right: segmented buttons */}
-                <div className="pt-diff-segments">
+                <div style={{ display: 'flex', gap: 6 }}>
                   {(['easy', 'medium', 'hard'] as Diff[]).map((d) => {
                     const active = difficulty[m.id] === d;
                     return (
@@ -213,6 +233,34 @@ export default function SettingsPage() {
 
           </div>
           <div className="pt-settings-side">
+          <SectionHeader>Quick Presets</SectionHeader>
+          <div className="ios-group pt-desktop-card">
+            {[
+              { id: 'focus', label: 'Focus Practice', sub: 'Balanced cues for longer sessions' },
+              { id: 'coach', label: 'Coach Mode', sub: 'Louder guidance + tactile feedback' },
+              { id: 'quiet', label: 'Quiet Session', sub: 'Low-volume, distraction-free setup' },
+            ].map((profile, idx) => (
+              <button
+                key={profile.id}
+                onClick={() => applyProfile(profile.id as 'focus' | 'coach' | 'quiet')}
+                style={{
+                  ...rowStyle,
+                  borderTop: idx === 0 ? 'none' : '0.5px solid var(--ios-sep)',
+                  width: '100%',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)' }}>{profile.label}</div>
+                  <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 2 }}>{profile.sub}</div>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--ios-label3)', padding: '4px 8px', borderRadius: 999, border: '1px solid var(--ios-sep)' }}>
+                  Apply
+                </div>
+              </button>
+            ))}
+          </div>
 
           {/* ── APPEARANCE ── */}
           <SectionHeader>Appearance</SectionHeader>

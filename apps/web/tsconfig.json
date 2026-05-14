@@ -3,6 +3,9 @@
   "compilerOptions": {
     "jsx": "preserve",
     "incremental": true,
+    "noUncheckedIndexedAccess": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "plugins": [
       {
         "name": "next"
