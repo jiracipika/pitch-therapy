@@ -56,7 +56,6 @@ export default function PitchMemoryPage() {
   };
 
   const nextLevel = () => {
-    const newLen = Math.min(sequence.length + 1, 12);
     const newSeq = [...sequence, Math.floor(Math.random() * 12)];
     setSequence(newSeq);
     setPlayerInput([]);
@@ -103,7 +102,7 @@ export default function PitchMemoryPage() {
   if (phase === 'done') {
     return (
       <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-        <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
+        <div className="max-w-sm mx-auto px-4 pt-12">
           <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
             <div style={{ fontSize: 60, marginBottom: 12 }}>💔</div>
             <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>
@@ -132,7 +131,7 @@ export default function PitchMemoryPage() {
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
+      <div className="max-w-sm mx-auto px-4 pt-12">
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>

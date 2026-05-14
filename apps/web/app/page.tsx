@@ -33,6 +33,12 @@ const CATEGORIES = [
   { label: 'Advanced', ids: ['chord-detective', 'waveform-match', 'tuning-battle', 'cents-deviation', 'interval-archer'], color: '#FF375F' },
 ];
 
+const QUICK_FLOWS = [
+  { href: '/play-modes', title: 'Explore Modes', subtitle: 'Browse all 18 training experiences', icon: '◫' },
+  { href: '/daily', title: 'Play Daily', subtitle: 'One curated challenge for today', icon: '◷' },
+  { href: '/progress', title: 'Track Progress', subtitle: 'Review streaks and trend lines', icon: '▥' },
+];
+
 export default function Home() {
   const router = useRouter();
   const reduceMotion = useReducedMotion();
@@ -129,109 +135,142 @@ export default function Home() {
       </div>
 
       {/* ── HERO ── */}
-      <section className="relative flex min-h-[100dvh] flex-col items-center justify-center px-6 text-center pb-16 pt-14">
-        {/* App icon */}
-        <motion.div
-          initial={motionLite ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
-          className="mb-6"
-        >
-          <div
-            className="ios-app-icon mx-auto"
-            style={{
-              width: 96,
-              height: 96,
-              borderRadius: '21.6px',
-              background: 'linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 24px 64px rgba(10, 132, 255, 0.35), 0 8px 24px rgba(10, 132, 255, 0.2)',
-            }}
-          >
-            <span style={{ fontSize: 44 }}>🎵</span>
+      <section className="pt-home-hero relative flex min-h-[100dvh] flex-col items-center justify-center px-6 pb-16 pt-14">
+        <div className="pt-home-hero-inner">
+          <div className="pt-home-hero-main text-center">
+            <motion.div
+              initial={motionLite ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
+              className="mb-6"
+            >
+              <div
+                className="ios-app-icon mx-auto"
+                style={{
+                  width: 96,
+                  height: 96,
+                  borderRadius: '21.6px',
+                  background: 'linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 24px 64px rgba(10, 132, 255, 0.35), 0 8px 24px rgba(10, 132, 255, 0.2)',
+                }}
+              >
+                <span style={{ fontSize: 44 }}>🎵</span>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.5 }}
+              className="mb-2"
+            >
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  background: 'rgba(10, 132, 255, 0.15)',
+                  border: '1px solid rgba(10, 132, 255, 0.25)',
+                  borderRadius: 20,
+                  padding: '4px 14px',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: '-0.08px',
+                  color: 'var(--ios-blue)',
+                }}
+              >
+                <span style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--ios-blue)', display: 'inline-block' }} />
+                18 Training Modes
+              </span>
+            </motion.div>
+
+            <motion.h1
+              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              className="ios-large-title mb-3"
+              style={{ fontSize: 52, letterSpacing: '-0.5px', lineHeight: 1.05 }}
+            >
+              Pitch Therapy
+            </motion.h1>
+
+            <motion.p
+              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="ios-callout mb-10 max-w-xs"
+              style={{ color: 'var(--ios-label2)', lineHeight: 1.5 }}
+            >
+              A daily gym for your ears. Train pitch, frequency, intervals, and more.
+            </motion.p>
+
+            <motion.div
+              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.48, duration: 0.45 }}
+              className="flex flex-col gap-3 w-full max-w-xs"
+            >
+              <motion.button
+                whileHover={{ scale: 1.015, y: -1 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => transitionTo('/dashboard')}
+                className="ios-btn-primary"
+                style={{ fontSize: 17 }}
+              >
+                Start Training
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.012 }}
+                whileTap={{ scale: 0.985 }}
+                onClick={() => transitionTo('/daily')}
+                className="ios-btn-secondary"
+                style={{ fontSize: 17 }}
+              >
+                Daily Challenge
+              </motion.button>
+            </motion.div>
           </div>
-        </motion.div>
 
-        <motion.div
-          initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.5 }}
-          className="mb-2"
-        >
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              background: 'rgba(10, 132, 255, 0.15)',
-              border: '1px solid rgba(10, 132, 255, 0.25)',
-              borderRadius: 20,
-              padding: '4px 14px',
-              fontSize: 13,
-              fontWeight: 600,
-              letterSpacing: '-0.08px',
-              color: 'var(--ios-blue)',
-            }}
+          <motion.aside
+            initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.45, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="pt-home-hero-side ios-card"
           >
-            <span style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--ios-blue)', display: 'inline-block' }} />
-            18 Training Modes
-          </span>
-        </motion.div>
+            <div className="pt-home-side-header">
+              <span className="pt-home-side-title">Today&apos;s Training Flow</span>
+            </div>
+            <div className="pt-home-side-list">
+              {QUICK_FLOWS.map((item) => (
+                <Link key={item.href} href={item.href} className="pt-home-side-link">
+                  <span className="pt-home-side-icon">{item.icon}</span>
+                  <span className="pt-home-side-copy">
+                    <span className="pt-home-side-link-title">{item.title}</span>
+                    <span className="pt-home-side-link-subtitle">{item.subtitle}</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <div className="pt-home-category-strip">
+              {CATEGORIES.map((cat) => (
+                <div key={cat.label} className="pt-home-category-row">
+                  <span className="pt-home-category-dot" style={{ background: cat.color }} />
+                  <span className="pt-home-category-name">{cat.label}</span>
+                  <span className="pt-home-category-count">{cat.ids.length}</span>
+                </div>
+              ))}
+            </div>
+          </motion.aside>
+        </div>
 
-        <motion.h1
-          initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="ios-large-title mb-3"
-          style={{ fontSize: 52, letterSpacing: '-0.5px', lineHeight: 1.05 }}
-        >
-          Pitch Therapy
-        </motion.h1>
-
-        <motion.p
-          initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="ios-callout mb-10 max-w-xs"
-          style={{ color: 'var(--ios-label2)', lineHeight: 1.5 }}
-        >
-          A daily gym for your ears. Train pitch, frequency, intervals, and more.
-        </motion.p>
-
-        <motion.div
-          initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.48, duration: 0.45 }}
-          className="flex flex-col gap-3 w-full max-w-xs"
-        >
-          <motion.button
-            whileHover={{ scale: 1.015, y: -1 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => transitionTo('/dashboard')}
-            className="ios-btn-primary"
-            style={{ fontSize: 17 }}
-          >
-            Start Training
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.012 }}
-            whileTap={{ scale: 0.985 }}
-            onClick={() => transitionTo('/daily')}
-            className="ios-btn-secondary"
-            style={{ fontSize: 17 }}
-          >
-            Daily Challenge
-          </motion.button>
-        </motion.div>
-
-        {/* Scroll indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.35 }}
           transition={{ delay: 1.2, duration: 0.8 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
+          className="pt-home-scroll-indicator absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
         >
           <span style={{ fontSize: 11, color: 'var(--ios-label3)', letterSpacing: 1, textTransform: 'uppercase', fontWeight: 500 }}>Scroll</span>
           <motion.svg
@@ -251,7 +290,7 @@ export default function Home() {
       </section>
 
       {/* ── MODE GRID ── */}
-      <section className="px-4 pb-20 max-w-lg mx-auto">
+      <section className="pt-home-modes px-4 pb-20 max-w-6xl mx-auto">
         {CATEGORIES.map((cat, ci) => {
           const catModes = MODES.filter((m) => cat.ids.includes(m.id));
           return (
@@ -261,7 +300,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: ci * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="mb-8"
+              className="pt-home-category-block mb-8"
             >
               <div className="flex items-center gap-2 mb-3 px-1">
                 <div style={{ width: 3, height: 16, borderRadius: 2, background: cat.color }} />
@@ -269,7 +308,7 @@ export default function Home() {
                   {cat.label}
                 </span>
               </div>
-              <div className="pt-mobile-game-grid">
+              <div className="grid grid-cols-2 gap-2.5">
                 {catModes.map((m, i) => (
                   <motion.div
                     key={m.id}
@@ -315,7 +354,7 @@ export default function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="ios-card p-6 text-center mt-4"
+          className="pt-home-cta ios-card p-6 text-center mt-4"
           style={{ background: 'linear-gradient(135deg, rgba(10,132,255,0.12) 0%, rgba(94,92,230,0.12) 100%)', border: '1px solid rgba(10,132,255,0.15)', borderRadius: 16 }}
         >
           <div style={{ fontSize: 36, marginBottom: 10 }}>🔥</div>
@@ -324,7 +363,7 @@ export default function Home() {
             A new challenge every day. Keep your streak alive.
           </div>
           <Link href="/daily" className="ios-btn-tonal" style={{ display: 'inline-flex', width: 'auto' }}>
-            Play Today's Challenge
+            Play Today&apos;s Challenge
           </Link>
         </motion.div>
       </section>
