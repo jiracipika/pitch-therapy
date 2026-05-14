@@ -1872,3 +1872,208 @@ input[type="range"]::-moz-range-thumb {
     gap: 22px;
   }
 }
+
+/* ============================================================
+   PREMIUM ANIMATIONS & EFFECTS
+   ============================================================ */
+
+/* Keyframe Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0px rgba(10, 132, 255, 0.4),
+                0 0 0px rgba(191, 90, 242, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(10, 132, 255, 0.6),
+                0 0 10px rgba(191, 90, 242, 0.5);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Premium Utility Classes */
+.pt-gradient-text {
+  background: linear-gradient(
+    90deg,
+    var(--ios-blue),
+    var(--ios-purple),
+    var(--ios-pink),
+    var(--ios-orange)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: gradient-shift 4s ease infinite;
+}
+
+.pt-card-glow {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ios-bg2) 75%, transparent);
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--ios-sep) 40%, transparent);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.pt-card-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.pt-card-glow:hover::before {
+  opacity: 1;
+}
+
+.pt-card-glow:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--ios-bg2) 85%, transparent);
+  border-color: color-mix(in srgb, var(--ios-sep) 50%, transparent);
+}
+
+.pt-particle {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ios-label) 10%, transparent);
+  animation: float ease-in-out infinite;
+}
+
+.pt-particle::after {
+  content: '♩';
+  position: absolute;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--ios-label) 30%, transparent);
+  text-shadow: 0 0 2px color-mix(in srgb, var(--ios-blue) 50%, transparent);
+  animation: fade-up 3s ease-out infinite;
+}
+
+.pt-hero-premium {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(10, 132, 255, 0.08) 0%,
+    rgba(191, 90, 242, 0.06) 50%,
+    rgba(255, 45, 58, 0.04) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--ios-border) 30%, transparent);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+}
+
+.pt-hero-premium::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  animation: gradient-shift 6s ease infinite;
+  pointer-events: none;
+}
+
+.pt-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: gradient-shift 1.5s ease infinite;
+}
+
+.pt-fade-up {
+  animation: fade-up 0.6s ease-out forwards;
+}
+
+/* Enhanced iOS Card Styles */
+.ios-card {
+  background: color-mix(in srgb, var(--ios-bg2) 85%, transparent);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ios-sep) 30%, transparent);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 0 0 0.5px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.ios-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 0 0 0.5px rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--ios-bg2) 90%, transparent);
+  border-color: color-mix(in srgb, var(--ios-sep) 40%, transparent);
+}
+
+.ios-card:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Enhanced Glass Effect */
+.ios-glass {
+  background: color-mix(in srgb, var(--ios-bg2) 60%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid color-mix(in srgb, var(--ios-border) 20%, transparent);
+}
+
+.ios-glass-heavy {
+  background: color-mix(in srgb, var(--ios-bg2) 40%, transparent);
+  backdrop-filter: saturate(200%) blur(40px);
+  -webkit-backdrop-filter: saturate(200%) blur(40px);
+  border: 1px solid color-mix(in srgb, var(--ios-border) 30%, transparent);
+}
