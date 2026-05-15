@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 
+type GlassMode = 'high' | 'reduced';
+const GLASS_MODE_KEY = 'pt_glass_mode';
+
 function useAmbientEnabled(pathname: string) {
   if (pathname === '/') return true;
   if (pathname.startsWith('/auth')) return false;
@@ -15,6 +18,7 @@ export default function AppTransitionShell({ children }: { children: React.React
   const pathname = usePathname();
   const reducedMotion = useReducedMotion();
   const [isSafari, setIsSafari] = useState(false);
+  const [glassMode, setGlassMode] = useState<GlassMode>('high');
   const showAmbient = useAmbientEnabled(pathname);
   const motionLite = reducedMotion || isSafari;
 
@@ -23,6 +27,41 @@ export default function AppTransitionShell({ children }: { children: React.React
     const safari = /Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|FxiOS/i.test(ua);
     setIsSafari(safari);
   }, []);
+
+  useEffect(() => {
+    const readGlassMode = () => {
+      const next = window.localStorage.getItem(GLASS_MODE_KEY);
+      if (next === 'reduced' || next === 'high') {
+        setGlassMode(next);
+        return;
+      }
+      setGlassMode('high');
+    };
+
+    readGlassMode();
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === GLASS_MODE_KEY) {
+        readGlassMode();
+      }
+    };
+    const handleLocal = () => readGlassMode();
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('pt:glass-mode-changed', handleLocal);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('pt:glass-mode-changed', handleLocal);
+    };
+  }, []);
+
+  useEffect(() => {
+    const reduced = glassMode === 'reduced';
+    document.body.classList.toggle('pt-glass-reduced', reduced);
+    document.body.classList.toggle('pt-glass-high', !reduced);
+    return () => {
+      document.body.classList.remove('pt-glass-reduced');
+      document.body.classList.remove('pt-glass-high');
+    };
+  }, [glassMode]);
 
   useEffect(() => {
     if (motionLite) {
