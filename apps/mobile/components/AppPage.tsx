@@ -8,12 +8,13 @@ import { triggerSelectionHaptic } from '@/lib/haptics';
 import { MAIN_TABS } from '@/lib/main-tabs';
 import { colors, typography } from '@/lib/theme';
 import { useResponsiveLayout } from '@/lib/responsive';
+import { useAppSettings } from '@/lib/settings';
 
 interface AppPageProps {
   title: string;
   subtitle?: string;
   showSwipeHint?: boolean;
-  heroVariant?: 'dashboard' | 'daily' | 'progress' | 'settings';
+  heroVariant?: 'dashboard' | 'daily' | 'progress' | 'settings' | 'play';
   heroHint?: string;
   children: ReactNode;
 }
@@ -31,6 +32,12 @@ function getHeroSpec(variant: NonNullable<AppPageProps['heroVariant']>) {
         gradient: ['rgba(48,209,88,0.24)', 'rgba(90,200,250,0.16)', 'rgba(255,255,255,0.02)'] as const,
         ribbonA: ['rgba(48,209,88,0)', 'rgba(48,209,88,0.20)', 'rgba(48,209,88,0)'] as const,
         ribbonB: ['rgba(255,159,10,0)', 'rgba(255,159,10,0.16)', 'rgba(90,200,250,0)'] as const,
+      };
+    case 'play':
+      return {
+        gradient: ['rgba(74,222,128,0.22)', 'rgba(10,132,255,0.14)', 'rgba(255,255,255,0.02)'] as const,
+        ribbonA: ['rgba(74,222,128,0)', 'rgba(74,222,128,0.18)', 'rgba(74,222,128,0)'] as const,
+        ribbonB: ['rgba(10,132,255,0)', 'rgba(10,132,255,0.15)', 'rgba(90,200,250,0)'] as const,
       };
     case 'progress':
       return {
@@ -66,6 +73,8 @@ export function AppPage({
   const pathname = usePathname();
   const router = useRouter();
   const { contentMaxWidth, pagePadding, prefersRailNav, isDesktop, motionProfile } = useResponsiveLayout();
+  const { glassMode } = useAppSettings();
+  const reducedGlass = glassMode === 'reduced';
   const opacity = useRef(new Animated.Value(0)).current;
   const translateX = useRef(new Animated.Value(0)).current;
   const ambientShiftA = useRef(new Animated.Value(0)).current;
@@ -140,6 +149,12 @@ export function AppPage({
   }, [activeIndex, motionProfile.routeDuration, opacity, translateX]);
 
   useEffect(() => {
+    if (reducedGlass) {
+      ambientShiftA.setValue(0.5);
+      ambientShiftB.setValue(0.5);
+      return;
+    }
+
     const loopA = Animated.loop(
       Animated.sequence([
         Animated.timing(ambientShiftA, {
@@ -180,9 +195,14 @@ export function AppPage({
       loopA.stop();
       loopB.stop();
     };
-  }, [ambientShiftA, ambientShiftB, motionProfile.ambientA, motionProfile.ambientB]);
+  }, [ambientShiftA, ambientShiftB, motionProfile.ambientA, motionProfile.ambientB, reducedGlass]);
 
   useEffect(() => {
+    if (reducedGlass) {
+      heroShift.setValue(0.5);
+      return;
+    }
+
     const heroLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(heroShift, {
@@ -201,7 +221,7 @@ export function AppPage({
     );
     heroLoop.start();
     return () => heroLoop.stop();
-  }, [heroShift, motionProfile.heroDuration]);
+  }, [heroShift, motionProfile.heroDuration, reducedGlass]);
 
   useEffect(() => {
     childAnimationsRef.current.forEach((value) => value.setValue(0));
@@ -234,6 +254,8 @@ export function AppPage({
         ? [-18, 18]
         : heroVariant === 'settings'
           ? [-10, 10]
+          : heroVariant === 'play'
+            ? [-12, 16]
           : [-14, 14],
   });
   const heroTranslateY = heroShift.interpolate({
@@ -241,6 +263,8 @@ export function AppPage({
     outputRange:
       heroVariant === 'daily'
         ? [-8, 8]
+        : heroVariant === 'play'
+          ? [3, -9]
         : heroVariant === 'dashboard'
           ? [0, -7]
           : [0, -5],
@@ -265,11 +289,11 @@ export function AppPage({
         style={{
           position: 'absolute',
           width: width * 1.4,
-          height: 180,
+          height: reducedGlass ? 132 : 180,
           top: 76,
           left: -width * 0.2,
           transform: [{ translateX: ambientTranslateAX }, { rotate: '-4deg' }],
-          opacity: 0.62,
+          opacity: reducedGlass ? 0.28 : 0.62,
         }}
       >
         <LinearGradient
@@ -283,11 +307,11 @@ export function AppPage({
         style={{
           position: 'absolute',
           width: width * 1.28,
-          height: 160,
+          height: reducedGlass ? 118 : 160,
           top: 174,
           left: -width * 0.14,
           transform: [{ translateX: ambientTranslateBX }, { rotate: '3deg' }],
-          opacity: 0.55,
+          opacity: reducedGlass ? 0.24 : 0.55,
         }}
       >
         <LinearGradient
@@ -362,7 +386,11 @@ export function AppPage({
           >
             <View style={{ width: '100%', maxWidth: contentMaxWidth, alignSelf: 'center', gap: 18 }}>
               <LinearGradient
-                colors={heroSpec.gradient}
+                colors={
+                  reducedGlass
+                    ? [heroSpec.gradient[0].replace('0.2', '0.1'), 'rgba(17,22,34,0.84)', 'rgba(255,255,255,0.015)']
+                    : heroSpec.gradient
+                }
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={{
@@ -370,9 +398,10 @@ export function AppPage({
                   paddingHorizontal: 14,
                   paddingVertical: 13,
                   borderWidth: 1,
-                  borderColor: 'rgba(255,255,255,0.13)',
+                  borderColor: reducedGlass ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.13)',
                   gap: 7,
                   overflow: 'hidden',
+                  boxShadow: reducedGlass ? '0 10px 22px rgba(0,0,0,0.24)' : '0 18px 36px rgba(0,0,0,0.34)',
                 }}
               >
                 <Animated.View
@@ -384,8 +413,8 @@ export function AppPage({
                     borderRadius: 180,
                     top: -80,
                     right: -40,
-                    opacity: 0.4,
-                    backgroundColor: 'rgba(255,255,255,0.08)',
+                    opacity: reducedGlass ? 0.2 : 0.4,
+                    backgroundColor: reducedGlass ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.08)',
                     transform: [{ translateX: heroTranslateX }, { translateY: heroTranslateY }, { scale: heroScale }],
                   }}
                 />
