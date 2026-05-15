@@ -1,4 +1,4 @@
-import { Image, Switch, Text, View } from 'react-native';
+import { Image, Pressable, Switch, Text, View } from 'react-native';
 import { useMemo } from 'react';
 import { GlassCard, MotionStatusCard, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
@@ -14,7 +14,7 @@ const referenceItems = [
 
 export default function SettingsScreen() {
   const { isDesktop } = useResponsiveLayout();
-  const { soundEnabled, hapticEnabled, setSoundEnabled, setHapticEnabled } = useAppSettings();
+  const { soundEnabled, hapticEnabled, glassMode, setSoundEnabled, setHapticEnabled, setGlassMode } = useAppSettings();
   const status = useMemo(() => {
     if (!soundEnabled && !hapticEnabled) {
       return {
@@ -96,6 +96,48 @@ export default function SettingsScreen() {
         </View>
 
         <View style={{ flex: 1, gap: 10 }}>
+          <SectionHeader title="Appearance" subtitle="Matches the desktop glass controls." />
+          <GlassCard padding={0}>
+            <View style={{ padding: 16 }}>
+              <View style={{ gap: 10 }}>
+                <View style={{ gap: 3 }}>
+                  <Text style={{ color: colors.text, ...typography.subhead }}>Liquid Glass</Text>
+                  <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>Surface intensity and ambient motion</Text>
+                </View>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  {(['high', 'reduced'] as const).map((mode) => {
+                    const active = glassMode === mode;
+                    return (
+                      <Pressable
+                        key={mode}
+                        onPress={() => {
+                          setGlassMode(mode);
+                          void triggerSelectionHaptic();
+                        }}
+                        style={({ pressed }) => ({
+                          flex: 1,
+                          minHeight: 36,
+                          borderRadius: 8,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderWidth: 1,
+                          borderColor: active ? colors.blue + '80' : colors.border,
+                          backgroundColor: active ? colors.blue + '2E' : 'rgba(255,255,255,0.04)',
+                          opacity: pressed ? 0.78 : 1,
+                          transform: [{ scale: pressed ? 0.985 : 1 }],
+                        })}
+                      >
+                        <Text style={{ color: active ? colors.text : colors.textSecondary, ...typography.caption1, fontWeight: '800' }}>
+                          {mode === 'high' ? 'High' : 'Reduced'}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            </View>
+          </GlassCard>
+
           <SectionHeader title="Reference" />
           <GlassCard padding={0}>
             {referenceItems.map((item, index) => (
