@@ -19,7 +19,12 @@ export default function PlayModesScreen() {
   const { isTablet, isDesktop } = useResponsiveLayout();
 
   return (
-    <AppPage title="Play Modes" subtitle="Choose a track, then jump straight into a focused drill.">
+    <AppPage
+      title="Play Modes"
+      subtitle="Choose a track, then jump straight into a focused drill."
+      heroVariant="play"
+      heroHint="Swipe from here into daily drills or progress when you are ready"
+    >
       <GlassCard accent={colors.green}>
         <View style={{ gap: 9 }}>
           <Pill label="18 modes" color={colors.green} />
