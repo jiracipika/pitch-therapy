@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAppSettings } from '@/lib/settings';
 import { colors, radii, shadows, typography } from '@/lib/theme';
 
 interface GlassCardProps {
@@ -13,6 +14,8 @@ interface GlassCardProps {
 
 export function GlassCard({ children, style, onPress, padding = 16, accent }: GlassCardProps) {
   const lift = useRef(new Animated.Value(0)).current;
+  const { glassMode } = useAppSettings();
+  const reducedGlass = glassMode === 'reduced';
 
   useEffect(() => {
     Animated.spring(lift, {
@@ -35,10 +38,16 @@ export function GlassCard({ children, style, onPress, padding = 16, accent }: Gl
 
   const content = (
     <LinearGradient
-      colors={accent ? [accent + '26', colors.card, colors.card] : [colors.glassLight, colors.card]}
+      colors={
+        reducedGlass
+          ? [accent ? accent + '14' : 'rgba(255,255,255,0.035)', 'rgba(17,22,34,0.92)']
+          : accent
+            ? [accent + '26', colors.card, colors.card]
+            : [colors.glassLight, colors.card]
+      }
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={[styles.glass, { padding }, style]}
+      style={[styles.glass, reducedGlass ? styles.glassReduced : null, { padding }, style]}
     >
       <View
         pointerEvents="none"
@@ -48,7 +57,7 @@ export function GlassCard({ children, style, onPress, padding = 16, accent }: Gl
           left: 0,
           right: 0,
           height: 40,
-          backgroundColor: 'rgba(255,255,255,0.045)',
+          backgroundColor: reducedGlass ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.045)',
         }}
       />
       {children}
@@ -287,6 +296,10 @@ const styles = StyleSheet.create({
     borderColor: colors.glassBorder,
     overflow: 'hidden',
     ...shadows.card,
+  },
+  glassReduced: {
+    borderColor: 'rgba(255,255,255,0.09)',
+    boxShadow: '0 8px 18px rgba(0,0,0,0.22)',
   },
   sectionHeader: {
     flexDirection: 'row',
