@@ -58,12 +58,7 @@ export default function DesktopTopBar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="pt-desktop-action"
-                style={{
-                  borderColor: active ? 'rgba(10,132,255,0.45)' : 'rgba(255,255,255,0.08)',
-                  background: active ? 'rgba(10,132,255,0.16)' : 'rgba(255,255,255,0.03)',
-                  color: active ? 'var(--ios-blue)' : 'var(--ios-label2)',
-                }}
+                className={`pt-desktop-action ${active ? 'is-active' : ''}`}
               >
                 <span className="pt-desktop-action-icon">{item.icon}</span>
                 <span>{item.label}</span>
@@ -75,4 +70,3 @@ export default function DesktopTopBar() {
     </div>
   );
 }
-
