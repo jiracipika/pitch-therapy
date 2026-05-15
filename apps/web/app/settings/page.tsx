@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { PageHero } from '@/components/PremiumMotion';
 import { useStatsContext } from '@/components/StatsProvider';
 
 type Diff = 'easy' | 'medium' | 'hard';
 type DiffMap = Record<string, Diff>;
+type GlassMode = 'high' | 'reduced';
+const GLASS_MODE_KEY = 'pt_glass_mode';
 
 const MODES = [
   { id: 'pitch-match',      label: 'Pitch Match',      icon: '🎤', color: '#0A84FF' },
@@ -66,6 +68,23 @@ export default function SettingsPage() {
   const [haptics,   setHaptics]   = useState(true);
   const [soundType, setSoundType] = useState('sine');
   const [volume,    setVolume]    = useState(70);
+  const [glassMode, setGlassMode] = useState<GlassMode>('high');
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(GLASS_MODE_KEY);
+    if (stored === 'high' || stored === 'reduced') {
+      setGlassMode(stored);
+      return;
+    }
+    window.localStorage.setItem(GLASS_MODE_KEY, 'high');
+  }, []);
+
+  const updateGlassMode = (mode: GlassMode) => {
+    setGlassMode(mode);
+    window.localStorage.setItem(GLASS_MODE_KEY, mode);
+    window.dispatchEvent(new Event('pt:glass-mode-changed'));
+  };
+
   const applyProfile = (profile: 'focus' | 'coach' | 'quiet') => {
     if (profile === 'focus') {
       setSound(true);
@@ -273,6 +292,42 @@ export default function SettingsPage() {
               </div>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label3)', background: 'var(--ios-bg3)', borderRadius: 8, padding: '4px 10px' }}>
                 On
+              </div>
+            </div>
+            <div style={{ ...rowStyle, borderTop: '0.5px solid var(--ios-sep)' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(10,132,255,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>💧</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Liquid Glass</div>
+                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>Surface intensity</div>
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {([
+                  { id: 'high', label: 'High' },
+                  { id: 'reduced', label: 'Reduced' },
+                ] as const).map((mode) => {
+                  const active = glassMode === mode.id;
+                  return (
+                    <button
+                      key={mode.id}
+                      onClick={() => updateGlassMode(mode.id)}
+                      style={{
+                        height: 30,
+                        borderRadius: 15,
+                        padding: '0 12px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        letterSpacing: '-0.08px',
+                        background: active ? 'var(--ios-blue)' : 'var(--ios-bg3)',
+                        color: active ? '#fff' : 'var(--ios-label3)',
+                        transition: 'background 0.18s ease, color 0.18s ease',
+                      }}
+                    >
+                      {mode.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
