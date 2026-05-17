@@ -20,7 +20,7 @@ export default function AppTransitionShell({ children }: { children: React.React
   const [isSafari, setIsSafari] = useState(false);
   const [glassMode, setGlassMode] = useState<GlassMode>('high');
   const showAmbient = useAmbientEnabled(pathname);
-  const motionLite = reducedMotion || isSafari;
+  const motionLite = reducedMotion || isSafari || glassMode === 'reduced';
 
   useEffect(() => {
     const ua = navigator.userAgent;
