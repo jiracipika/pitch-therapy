@@ -124,6 +124,39 @@ body.pt-motion-lite .pt-ambient-grid {
   display: none;
 }
 
+body.pt-motion-lite .pt-hero-glow {
+  opacity: 0.3;
+}
+
+body.pt-motion-lite .pt-shimmer-bar,
+body.pt-motion-lite .shimmer-text {
+  animation: none;
+}
+
+body.pt-motion-lite .ios-glass {
+  backdrop-filter: saturate(130%) blur(10px);
+  -webkit-backdrop-filter: saturate(130%) blur(10px);
+}
+
+body.pt-motion-lite .ios-glass-heavy {
+  backdrop-filter: saturate(120%) blur(12px);
+  -webkit-backdrop-filter: saturate(120%) blur(12px);
+}
+
+@media (hover: hover) {
+  body.pt-motion-lite .ios-card:hover,
+  body.pt-motion-lite .ios-card-lift:hover,
+  body.pt-motion-lite .ios-game-card:hover {
+    transform: none;
+    box-shadow: 0 10px 20px rgba(8, 16, 32, 0.16), 0 2px 8px rgba(8, 16, 32, 0.12);
+  }
+
+  body.pt-motion-lite .ios-btn-primary:hover,
+  body.pt-motion-lite .ios-play-btn:hover {
+    filter: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   body::before {
     animation: none;
