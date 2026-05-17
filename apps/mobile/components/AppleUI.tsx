@@ -69,8 +69,7 @@ export function GlassCard({ children, style, onPress, padding = 16, accent }: Gl
   }
 
   return (
-    <Animated.View style={{ opacity, transform: [{ translateY }] }}
-    >
+    <Animated.View style={{ opacity, transform: [{ translateY }] }}>
       <Pressable
         onPress={onPress}
         style={({ pressed }) => ({
@@ -148,7 +147,7 @@ export function AppleButton({
         style,
       ]}
     >
-      <Text style={[styles.buttonText, { color: isPrimary ? colors.background : colors.textSecondary }]}>
+      <Text style={[styles.buttonText, { color: isPrimary ? colors.background : colors.textSecondary }]}> 
         {loading ? 'Loading...' : title}
       </Text>
     </Pressable>
@@ -198,8 +197,15 @@ const toneToColor: Record<MotionStatusCardProps['tone'], string> = {
 
 export function MotionStatusCard({ tone, title, message }: MotionStatusCardProps) {
   const pulse = useRef(new Animated.Value(0)).current;
+  const { glassMode } = useAppSettings();
+  const reducedGlass = glassMode === 'reduced';
 
   useEffect(() => {
+    if (reducedGlass) {
+      pulse.setValue(tone === 'loading' ? 0.35 : 0);
+      return;
+    }
+
     if (tone === 'loading') {
       const loop = Animated.loop(
         Animated.sequence([
@@ -215,7 +221,7 @@ export function MotionStatusCard({ tone, title, message }: MotionStatusCardProps
       Animated.timing(pulse, { toValue: 1, duration: 230, useNativeDriver: true }),
       Animated.timing(pulse, { toValue: 0, duration: 420, useNativeDriver: true }),
     ]).start();
-  }, [pulse, tone]);
+  }, [pulse, reducedGlass, tone]);
 
   const scale = pulse.interpolate({
     inputRange: [0, 1],
