@@ -1,5 +1,4 @@
 import { Image, Pressable, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
@@ -8,7 +7,7 @@ import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
 import { triggerSelectionHaptic } from '@/lib/haptics';
 import { useResponsiveLayout } from '@/lib/responsive';
-import { colors, radii, shadows, typography } from '@/lib/theme';
+import { colors, radii, typography } from '@/lib/theme';
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -28,19 +27,7 @@ export default function DashboardScreen() {
         title="Studio is ready"
         message="Your personalized dashboard is loaded and tuned for your next session."
       />
-      <LinearGradient
-        colors={['rgba(56,189,248,0.22)', 'rgba(74,222,128,0.13)', colors.card]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{
-          borderRadius: radii.lg,
-          borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.14)',
-          padding: 18,
-          gap: 18,
-          ...shadows.elevated,
-        }}
-      >
+      <GlassCard accent={colors.teal} padding={18} style={{ gap: 18 }}>
         <View style={{ flexDirection: isTablet ? 'row' : 'column', alignItems: isTablet ? 'center' : 'flex-start', gap: 14 }}>
           <Image
             source={require('../assets/logo-placeholder.png')}
@@ -84,7 +71,7 @@ export default function DashboardScreen() {
               router.push('/daily');
             }}
             style={({ pressed }) => ({
-              width: 104,
+              width: isTablet ? 104 : '100%',
               borderRadius: radii.md,
               borderWidth: 1,
               borderColor: colors.borderStrong,
@@ -96,7 +83,7 @@ export default function DashboardScreen() {
             <Text style={{ color: colors.text, ...typography.headline }}>Daily</Text>
           </Pressable>
         </View>
-      </LinearGradient>
+      </GlassCard>
 
       <GlassCard accent={colors.speedRound}>
         <View style={{ flexDirection: isTablet ? 'row' : 'column', alignItems: isTablet ? 'center' : 'flex-start', gap: 14 }}>
