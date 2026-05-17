@@ -60,6 +60,10 @@ function getHeroSpec(variant: NonNullable<AppPageProps['heroVariant']>) {
   }
 }
 
+function reduceRgbaAlpha(value: string, alpha: string) {
+  return value.replace(/,\s*0\.\d+\)$/, `,${alpha})`);
+}
+
 export function AppPage({
   title,
   subtitle,
@@ -224,6 +228,11 @@ export function AppPage({
   }, [heroShift, motionProfile.heroDuration, reducedGlass]);
 
   useEffect(() => {
+    if (reducedGlass) {
+      childAnimationsRef.current.forEach((value) => value.setValue(1));
+      return;
+    }
+
     childAnimationsRef.current.forEach((value) => value.setValue(0));
     const stagger = Animated.stagger(
       motionProfile.staggerDelay,
@@ -237,7 +246,7 @@ export function AppPage({
       ),
     );
     stagger.start();
-  }, [childArray.length, motionProfile.staggerDelay, pathname]);
+  }, [childArray.length, motionProfile.staggerDelay, pathname, reducedGlass]);
 
   const ambientTranslateAX = ambientShiftA.interpolate({
     inputRange: [0, 1],
@@ -388,7 +397,7 @@ export function AppPage({
               <LinearGradient
                 colors={
                   reducedGlass
-                    ? [heroSpec.gradient[0].replace('0.2', '0.1'), 'rgba(17,22,34,0.84)', 'rgba(255,255,255,0.015)']
+                    ? [reduceRgbaAlpha(heroSpec.gradient[0], '0.12'), 'rgba(17,22,34,0.84)', 'rgba(255,255,255,0.015)']
                     : heroSpec.gradient
                 }
                 start={{ x: 0, y: 0 }}
