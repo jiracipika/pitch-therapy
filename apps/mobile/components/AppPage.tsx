@@ -9,6 +9,7 @@ import { MAIN_TABS } from '@/lib/main-tabs';
 import { colors, typography } from '@/lib/theme';
 import { useResponsiveLayout } from '@/lib/responsive';
 import { useAppSettings } from '@/lib/settings';
+import { useReducedMotionPreference } from '@/lib/motion';
 
 interface AppPageProps {
   title: string;
@@ -76,7 +77,8 @@ export function AppPage({
   const { width } = useWindowDimensions();
   const pathname = usePathname();
   const router = useRouter();
-  const { contentMaxWidth, pagePadding, prefersRailNav, isDesktop, motionProfile } = useResponsiveLayout();
+  const reducedMotion = useReducedMotionPreference();
+  const { contentMaxWidth, pagePadding, prefersRailNav, isDesktop, motionProfile } = useResponsiveLayout(reducedMotion);
   const { glassMode } = useAppSettings();
   const reducedGlass = glassMode === 'reduced';
   const opacity = useRef(new Animated.Value(0)).current;
@@ -153,7 +155,7 @@ export function AppPage({
   }, [activeIndex, motionProfile.routeDuration, opacity, translateX]);
 
   useEffect(() => {
-    if (reducedGlass) {
+    if (reducedMotion) {
       ambientShiftA.setValue(0.5);
       ambientShiftB.setValue(0.5);
       return;
@@ -199,10 +201,10 @@ export function AppPage({
       loopA.stop();
       loopB.stop();
     };
-  }, [ambientShiftA, ambientShiftB, motionProfile.ambientA, motionProfile.ambientB, reducedGlass]);
+  }, [ambientShiftA, ambientShiftB, motionProfile.ambientA, motionProfile.ambientB, reducedMotion]);
 
   useEffect(() => {
-    if (reducedGlass) {
+    if (reducedMotion) {
       heroShift.setValue(0.5);
       return;
     }
@@ -225,10 +227,10 @@ export function AppPage({
     );
     heroLoop.start();
     return () => heroLoop.stop();
-  }, [heroShift, motionProfile.heroDuration, reducedGlass]);
+  }, [heroShift, motionProfile.heroDuration, reducedMotion]);
 
   useEffect(() => {
-    if (reducedGlass) {
+    if (reducedMotion) {
       childAnimationsRef.current.forEach((value) => value.setValue(1));
       return;
     }
@@ -246,7 +248,7 @@ export function AppPage({
       ),
     );
     stagger.start();
-  }, [childArray.length, motionProfile.staggerDelay, pathname, reducedGlass]);
+  }, [childArray.length, motionProfile.staggerDelay, pathname, reducedMotion]);
 
   const ambientTranslateAX = ambientShiftA.interpolate({
     inputRange: [0, 1],
@@ -422,7 +424,7 @@ export function AppPage({
                     borderRadius: 180,
                     top: -80,
                     right: -40,
-                    opacity: reducedGlass ? 0.2 : 0.4,
+                    opacity: reducedMotion ? 0.2 : 0.4,
                     backgroundColor: reducedGlass ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.08)',
                     transform: [{ translateX: heroTranslateX }, { translateY: heroTranslateY }, { scale: heroScale }],
                   }}

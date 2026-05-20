@@ -1,5 +1,6 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
-import { GAME_MODE_META } from '@pitch-therapy/core';
+import { GAME_MODE_META, buildProgressInsights, type ProgressResult } from '@pitch-therapy/core';
 import { GlassCard, MotionStatusCard, SectionHeader, StatItem } from '@/components/AppleUI';
 import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
@@ -15,7 +16,33 @@ const STATS = [
 
 export default function ProgressScreen() {
   const { isDesktop } = useResponsiveLayout();
-  const hasStats = false;
+  const [loaded, setLoaded] = useState(false);
+  const sessionResults = useMemo<ProgressResult[]>(() => [], []);
+  const insights = useMemo(() => buildProgressInsights(sessionResults), [sessionResults]);
+  const hasStats = sessionResults.length > 0;
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setLoaded(true), 120);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const status = !loaded
+    ? {
+        tone: 'loading' as const,
+        title: 'Analyzing your sessions',
+        message: 'Pulling mode accuracy and momentum trends.',
+      }
+    : hasStats
+      ? {
+          tone: 'success' as const,
+          title: 'Tracking is active',
+          message: 'Performance streams are up to date across all modes.',
+        }
+      : {
+          tone: 'empty' as const,
+          title: 'No sessions recorded yet',
+          message: 'Complete one round to unlock detailed graphs and mode-level trends.',
+        };
 
   return (
     <AppPage
@@ -24,11 +51,7 @@ export default function ProgressScreen() {
       heroVariant="progress"
       heroHint="Watch trend quality as your repetitions stack"
     >
-      <MotionStatusCard
-        tone={hasStats ? 'success' : 'error'}
-        title={hasStats ? 'Tracking is active' : 'No sessions recorded yet'}
-        message={hasStats ? 'Performance streams are up to date across all modes.' : 'Complete one round to unlock detailed graphs and mode-level trends.'}
-      />
+      <MotionStatusCard tone={status.tone} title={status.title} message={status.message} />
       <GlassCard accent={colors.purple} padding={20}>
         <View style={{ alignItems: 'center', gap: 12 }}>
           <Text style={{ color: colors.textTertiary, ...typography.overline }}>BEST STREAK</Text>
@@ -73,6 +96,13 @@ export default function ProgressScreen() {
           </GlassCard>
         ))}
       </View>
+
+      <GlassCard accent={colors.blue} padding={16}>
+        <View style={{ gap: 6 }}>
+          <Text style={{ color: colors.textTertiary, ...typography.overline }}>FOCUS NEXT</Text>
+          <Text style={{ color: colors.text, ...typography.subhead }}>{insights.focusTip}</Text>
+        </View>
+      </GlassCard>
     </AppPage>
   );
 }

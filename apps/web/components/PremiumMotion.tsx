@@ -182,26 +182,52 @@ export function StatusCard({
   action?: ReactNode;
 }) {
   const color = statusColor[tone];
+  const reduce = useReducedMotion();
+  const symbol = tone === 'success' ? '✓' : tone === 'error' ? '!' : tone === 'empty' ? 'i' : '•••';
   return (
     <motion.div
       className="ios-card pt-status-card"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      initial={reduce ? { opacity: 1 } : { opacity: 0, y: 8 }}
+      animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
       style={{ borderColor: `${color}33` }}
+      role="status"
+      aria-live={tone === 'error' ? 'assertive' : 'polite'}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span
+        <motion.span
           aria-hidden
           style={{
-            width: 9,
-            height: 9,
-            borderRadius: 9,
+            width: 18,
+            height: 18,
+            borderRadius: 18,
             background: color,
-            boxShadow: `0 0 0 6px ${color}1F`,
+            boxShadow: `0 0 0 6px ${color}1A`,
             flexShrink: 0,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 10,
+            color: '#041426',
+            fontWeight: 800,
           }}
-        />
+          animate={
+            reduce
+              ? undefined
+              : tone === 'loading'
+                ? { scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] }
+                : tone === 'error'
+                  ? { x: [0, -1.4, 1.4, -1, 1, 0] }
+                  : { scale: [1, 1.08, 1] }
+          }
+          transition={
+            tone === 'loading'
+              ? { duration: 1.3, repeat: Infinity, ease: 'easeInOut' }
+              : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
+          }
+        >
+          {symbol}
+        </motion.span>
         <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)' }}>{title}</div>
       </div>
       <div style={{ marginTop: 8, fontSize: 13, color: 'var(--ios-label2)', lineHeight: 1.45 }}>{body}</div>

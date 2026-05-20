@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useReducedMotionPreference } from '@/lib/motion';
 import { useAppSettings } from '@/lib/settings';
 import { colors, radii, shadows, typography } from '@/lib/theme';
 
@@ -16,8 +17,13 @@ export function GlassCard({ children, style, onPress, padding = 16, accent }: Gl
   const lift = useRef(new Animated.Value(0)).current;
   const { glassMode } = useAppSettings();
   const reducedGlass = glassMode === 'reduced';
+  const reducedMotion = useReducedMotionPreference();
 
   useEffect(() => {
+    if (reducedMotion) {
+      lift.setValue(1);
+      return;
+    }
     Animated.spring(lift, {
       toValue: 1,
       useNativeDriver: true,
@@ -25,7 +31,7 @@ export function GlassCard({ children, style, onPress, padding = 16, accent }: Gl
       damping: 24,
       mass: 0.9,
     }).start();
-  }, [lift]);
+  }, [lift, reducedMotion]);
 
   const translateY = lift.interpolate({
     inputRange: [0, 1],
@@ -147,7 +153,7 @@ export function AppleButton({
         style,
       ]}
     >
-      <Text style={[styles.buttonText, { color: isPrimary ? colors.background : colors.textSecondary }]}> 
+      <Text style={[styles.buttonText, { color: isPrimary ? colors.background : colors.textSecondary }]}>
         {loading ? 'Loading...' : title}
       </Text>
     </Pressable>
@@ -184,7 +190,7 @@ export function StatItem({ label, value, color = colors.text }: StatItemProps) {
 }
 
 interface MotionStatusCardProps {
-  tone: 'loading' | 'success' | 'error';
+  tone: 'loading' | 'success' | 'error' | 'empty';
   title: string;
   message: string;
 }
@@ -193,15 +199,15 @@ const toneToColor: Record<MotionStatusCardProps['tone'], string> = {
   loading: colors.blue,
   success: colors.green,
   error: colors.red,
+  empty: colors.textTertiary,
 };
 
 export function MotionStatusCard({ tone, title, message }: MotionStatusCardProps) {
   const pulse = useRef(new Animated.Value(0)).current;
-  const { glassMode } = useAppSettings();
-  const reducedGlass = glassMode === 'reduced';
+  const reducedMotion = useReducedMotionPreference();
 
   useEffect(() => {
-    if (reducedGlass) {
+    if (reducedMotion) {
       pulse.setValue(tone === 'loading' ? 0.35 : 0);
       return;
     }
@@ -221,7 +227,7 @@ export function MotionStatusCard({ tone, title, message }: MotionStatusCardProps
       Animated.timing(pulse, { toValue: 1, duration: 230, useNativeDriver: true }),
       Animated.timing(pulse, { toValue: 0, duration: 420, useNativeDriver: true }),
     ]).start();
-  }, [pulse, reducedGlass, tone]);
+  }, [pulse, reducedMotion, tone]);
 
   const scale = pulse.interpolate({
     inputRange: [0, 1],
@@ -232,25 +238,56 @@ export function MotionStatusCard({ tone, title, message }: MotionStatusCardProps
     outputRange: [0.5, 1],
   });
   const toneColor = toneToColor[tone];
+  const toneGlyph = tone === 'success' ? 'check' : tone === 'error' ? '!' : tone === 'empty' ? 'i' : '...';
 
   return (
     <GlassCard accent={toneColor} padding={14}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <Animated.View
           style={{
-            width: 10,
-            height: 10,
-            borderRadius: 10,
+            width: 18,
+            height: 18,
+            borderRadius: 18,
             backgroundColor: toneColor,
             opacity,
             transform: [{ scale }],
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-        />
+        >
+          <Text style={{ color: '#00121f', fontSize: tone === 'loading' ? 8 : 10, fontWeight: '900' }}>{toneGlyph}</Text>
+        </Animated.View>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: colors.text, ...typography.subhead }}>{title}</Text>
-          <Text style={{ color: colors.textSecondary, ...typography.caption1, marginTop: 2, lineHeight: 17 }}>{message}</Text>
+          <Text style={{ color: colors.text, ...typography.subhead }} numberOfLines={2}>
+            {title}
+          </Text>
+          <Text style={{ color: colors.textSecondary, ...typography.caption1, marginTop: 2, lineHeight: 17 }} numberOfLines={3}>
+            {message}
+          </Text>
         </View>
       </View>
+      {tone === 'loading' ? (
+        <View
+          style={{
+            marginTop: 10,
+            height: 6,
+            borderRadius: 999,
+            backgroundColor: 'rgba(255,255,255,0.08)',
+            overflow: 'hidden',
+          }}
+        >
+          <Animated.View
+            style={{
+              width: '45%',
+              height: '100%',
+              borderRadius: 999,
+              backgroundColor: toneColor,
+              opacity: reducedMotion ? 0.45 : opacity,
+              transform: reducedMotion ? undefined : [{ scaleX: scale }],
+            }}
+          />
+        </View>
+      ) : null}
     </GlassCard>
   );
 }

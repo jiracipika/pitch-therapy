@@ -51,8 +51,14 @@ const CHALLENGES = [
 
 export default function DailyPage() {
   const [played] = useState<Record<string, boolean>>({});
+  const [hydrated, setHydrated] = useState(false);
   const completedCount = CHALLENGES.filter((c) => played[c.id]).length;
   const completionPct = Math.round((completedCount / CHALLENGES.length) * 100);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setHydrated(true), 120);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric',
@@ -68,6 +74,19 @@ export default function DailyPage() {
           title="Daily Challenge"
           subtitle="Two fresh drills each day to keep momentum and consistency strong."
         />
+        <Reveal delay={0.04}>
+          <StatusCard
+            tone={!hydrated ? 'loading' : completedCount === CHALLENGES.length ? 'success' : 'loading'}
+            title={!hydrated ? 'Preparing your daily run' : completedCount === CHALLENGES.length ? 'Daily complete' : 'Daily challenge active'}
+            body={
+              !hydrated
+                ? 'Syncing today’s drills and countdown.'
+                : completedCount === CHALLENGES.length
+                  ? 'Great work. Your streak-safe sessions for today are done.'
+                  : 'Complete both drills before reset to keep consistency strong.'
+            }
+          />
+        </Reveal>
 
         <div className="pt-daily-layout">
           <div className="pt-daily-main">

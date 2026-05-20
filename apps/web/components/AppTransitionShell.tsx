@@ -18,14 +18,20 @@ export default function AppTransitionShell({ children }: { children: React.React
   const pathname = usePathname();
   const reducedMotion = useReducedMotion();
   const [isSafari, setIsSafari] = useState(false);
+  const [isLowResourceProfile, setIsLowResourceProfile] = useState(false);
   const [glassMode, setGlassMode] = useState<GlassMode>('high');
   const showAmbient = useAmbientEnabled(pathname);
-  const motionLite = reducedMotion || isSafari || glassMode === 'reduced';
+  const motionLite = reducedMotion || isSafari || isLowResourceProfile || glassMode === 'reduced';
 
   useEffect(() => {
     const ua = navigator.userAgent;
     const safari = /Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|FxiOS/i.test(ua);
     setIsSafari(safari);
+
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    const lowMemory = typeof nav.deviceMemory === 'number' ? nav.deviceMemory <= 4 : false;
+    const lowCoreCount = typeof navigator.hardwareConcurrency === 'number' ? navigator.hardwareConcurrency <= 4 : false;
+    setIsLowResourceProfile(lowMemory || lowCoreCount);
   }, []);
 
   useEffect(() => {

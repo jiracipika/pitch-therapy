@@ -1,6 +1,8 @@
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { buildProgressInsights } from '@pitch-therapy/core';
 import { useStatsContext } from '@/components/StatsProvider';
 import Link from 'next/link';
 import { AnimatedStatCard, PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
@@ -32,6 +34,7 @@ const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
 export default function ProgressPage() {
   const { stats, loaded, getModeStats } = useStatsContext();
+  const insights = useMemo(() => buildProgressInsights(stats.results), [stats.results]);
 
   // Build activity map: date -> count
   const activityMap: Record<string, number> = {};
@@ -74,6 +77,17 @@ export default function ProgressPage() {
     stats.streak >= 7 ? 'Strong consistency' :
     stats.streak >= 3 ? 'Building momentum' :
     'Just getting started';
+  const statusTone = !loaded ? 'loading' : totalGames > 0 ? 'success' : 'empty';
+  const statusTitle = !loaded
+    ? 'Analyzing your training history'
+    : totalGames > 0
+      ? 'Progress intelligence is live'
+      : 'No sessions yet';
+  const statusBody = !loaded
+    ? 'Pulling your mode-level trends and recent momentum.'
+    : totalGames > 0
+      ? insights.focusTip
+      : 'Complete your first session to unlock trend detection and weak-mode insights.';
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
@@ -85,6 +99,35 @@ export default function ProgressPage() {
           title="Progress"
           subtitle="Track consistency, precision, and growth across every mode."
         />
+        <Reveal delay={0.04}>
+          <StatusCard
+            tone={statusTone}
+            title={statusTitle}
+            body={statusBody}
+            action={
+              loaded && totalGames === 0 ? (
+                <Link
+                  href="/dashboard"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: 36,
+                    borderRadius: 10,
+                    padding: '0 14px',
+                    background: 'var(--ios-blue)',
+                    color: '#fff',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                  }}
+                >
+                  Start Training
+                </Link>
+              ) : undefined
+            }
+          />
+        </Reveal>
 
         <div className="pt-progress-layout">
           <div className="pt-progress-main">
@@ -191,29 +234,6 @@ export default function ProgressPage() {
           </motion.div>
         )}
 
-        {/* ── EMPTY STATE ── */}
-        {loaded && totalGames === 0 && (
-          <Reveal delay={0.22}>
-            <StatusCard
-              tone="empty"
-              title="No progress data yet"
-              body="Complete your first training session and your charts, trends, and mode breakdowns will appear here."
-              action={(
-                <Link
-                  href="/dashboard"
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    height: 36, borderRadius: 10, padding: '0 14px',
-                    background: 'var(--ios-blue)', color: '#fff',
-                    fontSize: 13, fontWeight: 600, textDecoration: 'none',
-                  }}
-                >
-                  Start Training
-                </Link>
-              )}
-            />
-          </Reveal>
-        )}
           </div>
 
           <div className="pt-progress-side">
@@ -232,6 +252,34 @@ export default function ProgressPage() {
             Current streak: <span style={{ color: 'var(--ios-label2)', fontWeight: 600 }}>{stats.streak} days</span>
           </div>
         </motion.div>
+
+        {loaded && totalGames > 0 ? (
+          <motion.div
+            className="ios-card pt-desktop-card"
+            style={{ padding: 14, marginBottom: 12, background: 'linear-gradient(160deg, rgba(191,90,242,0.12), rgba(10,132,255,0.09))', border: '0.5px solid rgba(191,90,242,0.24)' }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18, duration: 0.35 }}
+          >
+            <div style={{ fontSize: 12, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>
+              Focus Next
+            </div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.2px' }}>
+              {insights.weakModes[0]?.label ?? 'Balanced training'}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 4, lineHeight: 1.5 }}>
+              {insights.focusTip}
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+              <div style={{ fontSize: 11, color: 'var(--ios-label2)', border: '1px solid var(--ios-sep)', borderRadius: 999, padding: '3px 8px' }}>
+                Sessions 7d: {insights.momentum.sessionsLast7}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--ios-label2)', border: '1px solid var(--ios-sep)', borderRadius: 999, padding: '3px 8px' }}>
+                Accuracy delta: {Math.round(insights.momentum.accuracyDeltaPct)}%
+              </div>
+            </div>
+          </motion.div>
+        ) : null}
 
         {/* ── PER MODE ── */}
         <div style={{ fontSize: 13, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '-0.08px', padding: '24px 4px 8px' }}>
