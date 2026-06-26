@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 /* ── Types ── */
 
 export interface GameResult {
   mode: string;
   score: number;
-  accuracy: number;   // 0–1
+  accuracy: number; // 0–1
   rounds: number;
-  date: string;       // ISO
+  date: string; // ISO
   timeMs: number;
 }
 
@@ -24,11 +24,12 @@ export interface UserStats {
   results: GameResult[];
   streak: number;
   bestStreak: number;
-  lastPlayDate: string | null;  // YYYY-MM-DD
-  dailyCompleted: string[];     // YYYY-MM-DD list of completed dailies
+  lastPlayDate: string | null; // YYYY-MM-DD
+  dailyCompleted: string[]; // YYYY-MM-DD list of completed dailies
 }
 
-const STORAGE_KEY = 'pitch-therapy-stats';
+const STORAGE_KEY = "pitch-therapy-stats";
+const MAX_STORED_RESULTS = 500;
 
 const DEFAULT_STATS: UserStats = {
   results: [],
@@ -39,7 +40,7 @@ const DEFAULT_STATS: UserStats = {
 };
 
 function loadStats(): UserStats {
-  if (typeof window === 'undefined') return DEFAULT_STATS;
+  if (typeof window === "undefined") return DEFAULT_STATS;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_STATS;
@@ -50,13 +51,15 @@ function loadStats(): UserStats {
 }
 
 function saveStats(stats: UserStats) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
   } catch {
     // quota exceeded — trim old results
     const trimmed = { ...stats, results: stats.results.slice(-200) };
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed)); } catch {}
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+    } catch {}
   }
 }
 
@@ -97,7 +100,7 @@ export function useStats() {
       }
 
       const updated: UserStats = {
-        results: [...prev.results, result],
+        results: [...prev.results, result].slice(-MAX_STORED_RESULTS),
         streak: newStreak,
         bestStreak: Math.max(prev.bestStreak, newStreak),
         lastPlayDate: today,
@@ -119,18 +122,22 @@ export function useStats() {
     });
   }, []);
 
-  const getModeStats = useCallback((mode: string): ModeStats => {
-    const modeResults = stats.results.filter((r) => r.mode === mode);
-    if (modeResults.length === 0) {
-      return { gamesPlayed: 0, bestScore: 0, avgAccuracy: 0, lastPlayed: null };
-    }
-    return {
-      gamesPlayed: modeResults.length,
-      bestScore: Math.max(...modeResults.map((r) => r.score)),
-      avgAccuracy: modeResults.reduce((s, r) => s + r.accuracy, 0) / modeResults.length,
-      lastPlayed: modeResults[modeResults.length - 1].date,
-    };
-  }, [stats]);
+  const getModeStats = useCallback(
+    (mode: string): ModeStats => {
+      const modeResults = stats.results.filter((r) => r.mode === mode);
+      if (modeResults.length === 0) {
+        return { gamesPlayed: 0, bestScore: 0, avgAccuracy: 0, lastPlayed: null };
+      }
+      const lastResult = modeResults[modeResults.length - 1] ?? null;
+      return {
+        gamesPlayed: modeResults.length,
+        bestScore: Math.max(...modeResults.map((r) => r.score)),
+        avgAccuracy: modeResults.reduce((s, r) => s + r.accuracy, 0) / modeResults.length,
+        lastPlayed: lastResult?.date ?? null,
+      };
+    },
+    [stats],
+  );
 
   const clearStats = useCallback(() => {
     setStats(DEFAULT_STATS);
