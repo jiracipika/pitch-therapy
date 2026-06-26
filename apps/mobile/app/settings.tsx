@@ -1,10 +1,12 @@
-import { Image, Switch, Text, View } from 'react-native';
-import { useMemo } from 'react';
+import { Image, Pressable, Switch, Text, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
 import { GlassCard, MotionStatusCard, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
 import { triggerSelectionHaptic } from '@/lib/haptics';
+import { useSystemReduceMotion } from '@/lib/motion';
 import { useResponsiveLayout } from '@/lib/responsive';
 import { useAppSettings } from '@/lib/settings';
+import { clearStartupEvents, getStartupEvents, type StartupEvent } from '@/lib/startup-diagnostics';
 import { colors, typography } from '@/lib/theme';
 
 const referenceItems = [
@@ -14,7 +16,22 @@ const referenceItems = [
 
 export default function SettingsScreen() {
   const { isDesktop } = useResponsiveLayout();
-  const { soundEnabled, hapticEnabled, setSoundEnabled, setHapticEnabled } = useAppSettings();
+  const systemReduceMotion = useSystemReduceMotion();
+  const { soundEnabled, hapticEnabled, glassMode, setSoundEnabled, setHapticEnabled, setGlassMode } = useAppSettings();
+  const [startupEvents, setStartupEvents] = useState<StartupEvent[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const events = await getStartupEvents();
+      if (active) {
+        setStartupEvents(events.slice(0, 5));
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
   const status = useMemo(() => {
     if (!soundEnabled && !hapticEnabled) {
       return {
@@ -96,6 +113,51 @@ export default function SettingsScreen() {
         </View>
 
         <View style={{ flex: 1, gap: 10 }}>
+          <SectionHeader title="Appearance" subtitle="Matches the desktop glass controls." />
+          <GlassCard padding={0}>
+            <View style={{ padding: 16 }}>
+              <View style={{ gap: 10 }}>
+                <View style={{ gap: 3 }}>
+                  <Text style={{ color: colors.text, ...typography.subhead }}>Liquid Glass</Text>
+                  <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>
+                    Surface intensity and ambient motion
+                    {systemReduceMotion ? ' (system reduced motion active)' : ''}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  {(['high', 'reduced'] as const).map((mode) => {
+                    const active = glassMode === mode;
+                    return (
+                      <Pressable
+                        key={mode}
+                        onPress={() => {
+                          setGlassMode(mode);
+                          void triggerSelectionHaptic();
+                        }}
+                        style={({ pressed }) => ({
+                          flex: 1,
+                          minHeight: 36,
+                          borderRadius: 8,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderWidth: 1,
+                          borderColor: active ? colors.blue + '80' : colors.border,
+                          backgroundColor: active ? colors.blue + '2E' : 'rgba(255,255,255,0.04)',
+                          opacity: pressed ? 0.78 : 1,
+                          transform: [{ scale: pressed ? 0.985 : 1 }],
+                        })}
+                      >
+                        <Text style={{ color: active ? colors.text : colors.textSecondary, ...typography.caption1, fontWeight: '800' }}>
+                          {mode === 'high' ? 'High' : 'Reduced'}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            </View>
+          </GlassCard>
+
           <SectionHeader title="Reference" />
           <GlassCard padding={0}>
             {referenceItems.map((item, index) => (
@@ -123,6 +185,70 @@ export default function SettingsScreen() {
           <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
             Built for quick reps, daily consistency, and sharper pitch intuition.
           </Text>
+        </View>
+      </GlassCard>
+
+      <SectionHeader title="Startup Diagnostics" subtitle="Recent launch checkpoints and failures." />
+      <GlassCard padding={0}>
+        {startupEvents.length === 0 ? (
+          <View style={{ padding: 16 }}>
+            <Text style={{ color: colors.textSecondary, ...typography.caption1 }}>
+              No diagnostics captured yet.
+            </Text>
+          </View>
+        ) : (
+          startupEvents.map((event, index) => (
+            <View
+              key={`${event.ts}-${event.stage}-${index}`}
+              style={{
+                padding: 14,
+                borderBottomWidth: index < startupEvents.length - 1 ? 1 : 0,
+                borderBottomColor: colors.divider,
+                gap: 3,
+              }}
+            >
+              <Text
+                style={{
+                  color: event.level === 'error' ? colors.red : event.level === 'warn' ? colors.orange : colors.text,
+                  ...typography.caption1,
+                  fontWeight: '700',
+                }}
+              >
+                [{event.level}] {event.stage}
+              </Text>
+              {event.detail ? (
+                <Text style={{ color: colors.textSecondary, ...typography.caption1 }}>
+                  {event.detail}
+                </Text>
+              ) : null}
+              <Text style={{ color: colors.textTertiary, ...typography.caption2 }}>{event.iso}</Text>
+            </View>
+          ))
+        )}
+        <View style={{ padding: 12 }}>
+          <Pressable
+            onPress={() => {
+              void (async () => {
+                await clearStartupEvents();
+                setStartupEvents([]);
+                void triggerSelectionHaptic();
+              })();
+            }}
+            style={({ pressed }) => ({
+              minHeight: 36,
+              borderRadius: 8,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 1,
+              borderColor: colors.border,
+              backgroundColor: 'rgba(255,255,255,0.04)',
+              opacity: pressed ? 0.78 : 1,
+            })}
+          >
+            <Text style={{ color: colors.textSecondary, ...typography.caption1, fontWeight: '700' }}>
+              Clear Diagnostics
+            </Text>
+          </Pressable>
         </View>
       </GlassCard>
     </AppPage>

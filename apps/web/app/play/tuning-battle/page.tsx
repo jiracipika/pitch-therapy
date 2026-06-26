@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
@@ -40,19 +40,6 @@ export default function TuningBattlePage() {
     { name: 'Player 2', score: 0, ready: false, lockedIn: false, selectedNote: '', lastCents: 0 },
   ]);
 
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-
-  const initAudio = useCallback(() => {
-    if (!audioCtxRef.current) {
-      const ctx = new AudioContext();
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
-      audioCtxRef.current = ctx;
-      analyserRef.current = analyser;
-    }
-  }, []);
-
   const startGame = useCallback(() => {
     setPlayers([
       { name: 'Player 1', score: 0, ready: false, lockedIn: false, selectedNote: '', lastCents: 0 },
@@ -66,7 +53,10 @@ export default function TuningBattlePage() {
   const startRound = useCallback(() => {
     const note = pickRandom();
     setTargetNote(note);
-    setPlayers(prev => prev.map(p => ({ ...p, ready: false, lockedIn: false, selectedNote: '', lastCents: 0 })));
+    setPlayers(([p1, p2]) => ([
+      { ...p1, ready: false, lockedIn: false, selectedNote: '', lastCents: 0 },
+      { ...p2, ready: false, lockedIn: false, selectedNote: '', lastCents: 0 },
+    ]));
     setRoundWinner(null);
     setPhase('playing');
     playTone(NOTE_FREQS[note] || 440, 0.8);
@@ -155,7 +145,7 @@ export default function TuningBattlePage() {
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
+      <div className="max-w-sm mx-auto px-4 pt-12">
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
           <button

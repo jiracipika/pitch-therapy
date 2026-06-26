@@ -29,7 +29,6 @@ const STAFF_NOTES = [
 const QUIZ_NOTES = STAFF_NOTES.filter(n => n.staffPos >= 2 && n.staffPos <= 10); // E4 to F5
 
 type Phase = 'idle' | 'playing' | 'timed-out' | 'done';
-type Clef = 'treble' | 'bass';
 
 export default function NameThatNotePage() {
   const router = useRouter();
@@ -46,10 +45,8 @@ export default function NameThatNotePage() {
   const [results, setResults] = useState<{ round: number; correct: boolean; points: number; target: string; answer: string }[]>([]);
   const [feedback, setFeedback] = useState<'none' | 'correct' | 'wrong'>('none');
   const [timeLeft, setTimeLeft] = useState(10);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const roundRef = useRef(0);
-
-  const clef: Clef = 'treble';
 
   const startRound = () => {
     const note = QUIZ_NOTES[Math.floor(Math.random() * QUIZ_NOTES.length)];
@@ -60,10 +57,14 @@ export default function NameThatNotePage() {
     setPhase('playing');
     if (isTimed && !isPractice) {
       setTimeLeft(10);
-      clearInterval(timerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
       timerRef.current = setInterval(() => {
         setTimeLeft((t) => {
-          if (t <= 1) { clearInterval(timerRef.current); setPhase('timed-out'); return 0; }
+          if (t <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            setPhase('timed-out');
+            return 0;
+          }
           return t - 1;
         });
       }, 1000);
@@ -77,7 +78,7 @@ export default function NameThatNotePage() {
 
   const handleAnswer = (noteName: string) => {
     if (phase !== 'playing') return;
-    clearInterval(timerRef.current);
+    if (timerRef.current) clearInterval(timerRef.current);
     const correct = noteName === targetNote.name;
     const points = correct ? (isTimed && !isPractice ? Math.max(100 - (10 - timeLeft) * 8, 20) : 100) : 0;
     setScore((s) => s + points);
@@ -90,7 +91,7 @@ export default function NameThatNotePage() {
     else setTimeout(startRound, 1200);
   };
 
-  useEffect(() => () => clearInterval(timerRef.current), []);
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
   useEffect(() => {
     if (phase !== 'timed-out') return;
@@ -109,7 +110,7 @@ export default function NameThatNotePage() {
     const correct = results.filter(r => r.correct).length;
     return (
       <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-        <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
+        <div className="max-w-sm mx-auto px-4 pt-12">
           <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
             <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
             <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
@@ -141,7 +142,7 @@ export default function NameThatNotePage() {
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
+      <div className="max-w-sm mx-auto px-4 pt-12">
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
           <button

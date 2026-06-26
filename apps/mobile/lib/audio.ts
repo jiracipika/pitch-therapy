@@ -1,5 +1,6 @@
 // ─── WAV Tone Generator ───────────────────────────────────────────────────────
 import { getAppSettings } from '@/lib/settings';
+import { recordStartupError, recordStartupEvent } from '@/lib/startup-diagnostics';
 
 let cachedBase64Table: string[] | null = null;
 
@@ -100,13 +101,19 @@ function getExpoAvModule(): typeof import('expo-av') {
 
 async function ensureAudioMode() {
   if (!audioModeSet) {
-    const { Audio } = getExpoAvModule();
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      allowsRecordingIOS: false,
-      staysActiveInBackground: false,
-    });
-    audioModeSet = true;
+    try {
+      const { Audio } = getExpoAvModule();
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        allowsRecordingIOS: false,
+        staysActiveInBackground: false,
+      });
+      audioModeSet = true;
+      recordStartupEvent('audio_mode_ready', 'ok');
+    } catch (error) {
+      recordStartupError('audio_mode_setup_failed', error);
+      throw error;
+    }
   }
 }
 
@@ -130,4 +137,20 @@ export async function playTone(noteOrLabel: string, hz: number, duration: number
 
 export async function playFrequency(hz: number, duration: number = 0.6): Promise<void> {
   return playTone('', hz, duration);
+}
+
+export async function prewarmAudioSession(): Promise<boolean> {
+  if (!getAppSettings().soundEnabled) {
+    recordStartupEvent('audio_prewarm_skipped', 'warn', 'sound disabled');
+    return false;
+  }
+
+  try {
+    await ensureAudioMode();
+    recordStartupEvent('audio_prewarm_ok', 'ok');
+    return true;
+  } catch (error) {
+    recordStartupError('audio_prewarm_failed', error);
+    return false;
+  }
 }

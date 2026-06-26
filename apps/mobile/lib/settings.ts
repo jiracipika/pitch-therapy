@@ -4,12 +4,14 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react';
 export interface AppSettings {
   soundEnabled: boolean;
   hapticEnabled: boolean;
+  glassMode: 'high' | 'reduced';
 }
 
 const SETTINGS_KEY = 'pitch_therapy_settings_v1';
 const DEFAULT_SETTINGS: AppSettings = {
   soundEnabled: true,
   hapticEnabled: true,
+  glassMode: 'high',
 };
 
 const listeners = new Set<() => void>();
@@ -22,6 +24,7 @@ function normalizeSettings(partial: Partial<AppSettings> | null | undefined): Ap
   return {
     soundEnabled: partial?.soundEnabled ?? DEFAULT_SETTINGS.soundEnabled,
     hapticEnabled: partial?.hapticEnabled ?? DEFAULT_SETTINGS.hapticEnabled,
+    glassMode: partial?.glassMode === 'reduced' ? 'reduced' : DEFAULT_SETTINGS.glassMode,
   };
 }
 
@@ -96,9 +99,14 @@ export function useAppSettings() {
     updateAppSettings({ hapticEnabled: enabled });
   }, []);
 
+  const setGlassMode = useCallback((glassMode: AppSettings['glassMode']) => {
+    updateAppSettings({ glassMode });
+  }, []);
+
   return {
     ...settings,
     setSoundEnabled,
     setHapticEnabled,
+    setGlassMode,
   };
 }

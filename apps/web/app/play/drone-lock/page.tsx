@@ -20,6 +20,7 @@ const INTERVALS = [
   { name: 'Minor 7th', semitones: 10 },
   { name: 'Octave', semitones: 12 },
 ];
+const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
 
 type Phase = 'idle' | 'listening' | 'locking' | 'scored' | 'done';
 
@@ -32,9 +33,9 @@ export default function DroneLockPage() {
   const [droneNote, setDroneNote] = useState(0);
   const [targetInterval, setTargetInterval] = useState(INTERVALS[0]);
   const [cents, setCents] = useState(0);
-  const [detectedFreq, setDetectedFreq] = useState(0);
+  const [, setDetectedFreq] = useState(0);
   const [results, setResults] = useState<{ round: number; interval: string; cents: number; points: number }[]>([]);
-  const [locked, setLocked] = useState(false);
+  const [, setLocked] = useState(false);
 
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number>(0);
@@ -42,7 +43,18 @@ export default function DroneLockPage() {
   const droneGainRef = useRef<GainNode | null>(null);
   const droneCtxRef = useRef<AudioContext | null>(null);
 
-  const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
+  const stopDrone = useCallback(() => {
+    if (droneGainRef.current) {
+      droneGainRef.current.gain.exponentialRampToValueAtTime(0.001, droneCtxRef.current?.currentTime ?? 0 + 0.3);
+      setTimeout(() => {
+        droneOscRef.current?.stop();
+        droneOscRef.current = null;
+        droneGainRef.current = null;
+        droneCtxRef.current?.close();
+        droneCtxRef.current = null;
+      }, 400);
+    }
+  }, []);
 
   const startDrone = useCallback((noteIdx: number) => {
     stopDrone();
@@ -58,20 +70,7 @@ export default function DroneLockPage() {
     osc.start();
     droneOscRef.current = osc;
     droneGainRef.current = gain;
-  }, []);
-
-  const stopDrone = useCallback(() => {
-    if (droneGainRef.current) {
-      droneGainRef.current.gain.exponentialRampToValueAtTime(0.001, droneCtxRef.current?.currentTime ?? 0 + 0.3);
-      setTimeout(() => {
-        droneOscRef.current?.stop();
-        droneOscRef.current = null;
-        droneGainRef.current = null;
-        droneCtxRef.current?.close();
-        droneCtxRef.current = null;
-      }, 400);
-    }
-  }, []);
+  }, [stopDrone]);
 
   const startMic = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -101,11 +100,11 @@ export default function DroneLockPage() {
     detect();
   };
 
-  const stopMic = () => {
+  const stopMic = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
-  };
+  }, []);
 
   const startRound = () => {
     const noteIdx = Math.floor(Math.random() * 7) + 3;
@@ -144,13 +143,13 @@ export default function DroneLockPage() {
     }, 2000);
   };
 
-  useEffect(() => () => { stopMic(); stopDrone(); }, []);
+  useEffect(() => () => { stopMic(); stopDrone(); }, [stopMic, stopDrone]);
 
   if (phase === 'done') {
     const avgCents = Math.round(results.reduce((s, r) => s + Math.abs(r.cents), 0) / results.length);
     return (
       <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-        <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
+        <div className="max-w-sm mx-auto px-4 pt-12">
           <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
             <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
             <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
@@ -182,7 +181,7 @@ export default function DroneLockPage() {
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
+      <div className="max-w-sm mx-auto px-4 pt-12">
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
           <button

@@ -32,6 +32,7 @@ export default function TuneInPage() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const micStreamRef = useRef<MediaStream | null>(null);
+  const handleSuccessRef = useRef<() => void>(() => {});
   const roundStartRef = useRef(0);
   const holdStartRef = useRef<number | null>(null);
   const totalRounds = 5;
@@ -64,36 +65,34 @@ export default function TuneInPage() {
     return sampleRate / bestOffset;
   }, []);
 
-  const detectPitch = useCallback(() => {
-    if (!analyserRef.current) return;
-    const buf = new Float32Array(analyserRef.current.fftSize);
-    analyserRef.current.getFloatTimeDomainData(buf);
-    const freq = autoCorrelate(buf, audioContextRef.current?.sampleRate || 44100);
-    if (freq && freq > 60 && freq < 1200) {
-      const semitones = 12 * Math.log2(freq / targetFreq);
-      const cents = Math.round(semitones * 100);
-      setCentsOff(cents);
-
-      if (Math.abs(cents) <= 10) {
-        if (!holdStartRef.current) holdStartRef.current = Date.now();
-        const held = Date.now() - holdStartRef.current;
-        const needed = 1500;
-        setHoldProgress(Math.min(held / needed, 1));
-        if (held >= needed) {
-          handleSuccess();
-        }
-      } else {
-        holdStartRef.current = null;
-        setHoldProgress(0);
-      }
-    }
-  }, [targetFreq]);
-
   useEffect(() => {
     if (!isListening) return;
-    const interval = setInterval(detectPitch, 50);
+    const interval = setInterval(() => {
+      if (!analyserRef.current) return;
+      const buf = new Float32Array(analyserRef.current.fftSize);
+      analyserRef.current.getFloatTimeDomainData(buf);
+      const freq = autoCorrelate(buf, audioContextRef.current?.sampleRate || 44100);
+      if (freq && freq > 60 && freq < 1200) {
+        const semitones = 12 * Math.log2(freq / targetFreq);
+        const cents = Math.round(semitones * 100);
+        setCentsOff(cents);
+
+        if (Math.abs(cents) <= 10) {
+          if (!holdStartRef.current) holdStartRef.current = Date.now();
+          const held = Date.now() - holdStartRef.current;
+          const needed = 1500;
+          setHoldProgress(Math.min(held / needed, 1));
+          if (held >= needed) {
+            handleSuccessRef.current();
+          }
+        } else {
+          holdStartRef.current = null;
+          setHoldProgress(0);
+        }
+      }
+    }, 50);
     return () => clearInterval(interval);
-  }, [isListening, detectPitch]);
+  }, [isListening, autoCorrelate, targetFreq]);
 
   const startMic = async () => {
     try {
@@ -175,6 +174,7 @@ export default function TuneInPage() {
       }
     }, isPractice ? 1000 : 1500);
   };
+  handleSuccessRef.current = handleSuccess;
 
   const handleGiveUp = () => {
     stopMic();
@@ -198,7 +198,7 @@ export default function TuneInPage() {
   if (phase === 'done') {
     return (
       <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-        <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
+        <div className="max-w-sm mx-auto px-4 pt-12">
           <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
             <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
             <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
@@ -231,7 +231,7 @@ export default function TuneInPage() {
   if (phase === 'setup') {
     return (
       <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-        <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
+        <div className="max-w-sm mx-auto px-4 pt-12">
           <div style={{ textAlign: 'center', paddingTop: 40 }}>
             <div style={{ fontSize: 64, marginBottom: 20 }}>🎤</div>
             <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Tune In</div>
@@ -295,7 +295,7 @@ export default function TuneInPage() {
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
+      <div className="max-w-sm mx-auto px-4 pt-12">
         <FeedbackOverlay correct={feedback === 'correct'} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>

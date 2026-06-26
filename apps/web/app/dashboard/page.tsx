@@ -52,6 +52,12 @@ function AnimatedNumber({ value, delay = 0 }: { value: number; delay?: number })
   return <>{display}</>;
 }
 
+const QUICK_ACTIONS = [
+  { href: '/daily', label: 'Run Daily Drill', sub: '2 focused challenges' },
+  { href: '/progress', label: 'Review Weak Spots', sub: 'See low-accuracy modes' },
+  { href: '/settings', label: 'Tune Audio Profile', sub: 'Adjust cues and feedback' },
+];
+
 function StreakRing({ streak, size = 80 }: { streak: number; size?: number }) {
   const sw = 3.5;
   const r = (size - sw * 2) / 2;
@@ -252,7 +258,7 @@ export default function Dashboard() {
 
             {/* ── TODAY'S SUMMARY ── */}
             {loaded && totalGames > 0 && (
-              <div className="pt-mobile-stats mb-3 pt-desktop-card">
+              <div className="grid grid-cols-3 gap-2 mb-3 pt-desktop-card">
                 <AnimatedStatCard label="Today" value={todayGames} color="var(--ios-blue)" delay={0.04} />
                 <AnimatedStatCard label="All Time" value={totalGames} color="var(--ios-purple)" delay={0.08} />
                 <AnimatedStatCard
@@ -275,7 +281,7 @@ export default function Dashboard() {
                 <div style={{ fontSize: 13, fontWeight: 400, letterSpacing: '-0.08px', textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 8, marginTop: 16, paddingLeft: 4 }}>
                   Recently Played
                 </div>
-                <div className="pt-mobile-recent">
+                <div className="grid grid-cols-3 gap-2.5">
                   {recentModes.map((modeId) => {
                     const m = MODES.find((mode) => mode.id === modeId);
                     if (!m) return null;
@@ -344,6 +350,37 @@ export default function Dashboard() {
             ) : null}
           </div>
           <div className="pt-dashboard-side">
+            <motion.div
+              className="ios-card pt-desktop-card"
+              style={{ padding: 14, marginBottom: 12, background: 'linear-gradient(160deg, rgba(10,132,255,0.12), rgba(94,92,230,0.08))', border: '0.5px solid rgba(10,132,255,0.2)' }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.35 }}
+            >
+              <div style={{ fontSize: 12, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 10 }}>
+                Guided Flow
+              </div>
+              <div style={{ display: 'grid', gap: 8 }}>
+                {QUICK_ACTIONS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    style={{
+                      textDecoration: 'none',
+                      borderRadius: 10,
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      background: 'rgba(255,255,255,0.03)',
+                      padding: '9px 10px',
+                      display: 'block',
+                    }}
+                  >
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.08px' }}>{item.label}</div>
+                    <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>{item.sub}</div>
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+
             {/* ── ALL MODES ── */}
             <div className="pt-desktop-card">
               <div style={{ fontSize: 13, fontWeight: 400, letterSpacing: '-0.08px', textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 8, paddingLeft: 4 }}>

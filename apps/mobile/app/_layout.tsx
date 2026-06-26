@@ -1,7 +1,15 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Component, type ReactNode } from 'react';
+import { Component, type ReactNode, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { prewarmAudioSession } from '@/lib/audio';
+import { preloadAppSettings } from '@/lib/settings';
+import {
+  installGlobalStartupErrorHandler,
+  recordStartupError,
+  recordStartupEvent,
+  runStartupStep,
+} from '@/lib/startup-diagnostics';
 import { colors, typography } from '@/lib/theme';
 
 // ─── Error Boundary ─────────────────────────────────────────────────────────
@@ -13,6 +21,10 @@ class RootErrorBoundary extends Component<
 
   static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: { componentStack?: string }) {
+    recordStartupError('root_error_boundary', error, errorInfo.componentStack);
   }
 
   render(): ReactNode {
@@ -33,6 +45,25 @@ class RootErrorBoundary extends Component<
 
 // ─── Root Layout ─────────────────────────────────────────────────────────────
 export default function RootLayout() {
+  useEffect(() => {
+    recordStartupEvent('root_layout_mounted', 'start');
+    const restoreGlobalHandler = installGlobalStartupErrorHandler();
+
+    void (async () => {
+      await runStartupStep('settings_preload', () => {
+        preloadAppSettings();
+      });
+      await runStartupStep('audio_prewarm', async () => {
+        await prewarmAudioSession();
+      });
+      recordStartupEvent('root_bootstrap_complete', 'ok');
+    })();
+
+    return () => {
+      restoreGlobalHandler();
+    };
+  }, []);
+
   return (
     <RootErrorBoundary>
       <StatusBar style="light" translucent={false} backgroundColor={colors.background} />

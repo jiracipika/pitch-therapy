@@ -109,7 +109,6 @@ export default function NoteComparisonStaff({
               pos={guessed.position}
               accidental={guessed.accidental}
               color={redColor}
-              label={guessedNote}
               centerX={110}
               toBottomPx={toBottomPx}
               isLabel="Your guess"
@@ -122,7 +121,6 @@ export default function NoteComparisonStaff({
           pos={correct.position}
           accidental={correct.accidental}
           color={isCorrect ? successColor : greenColor}
-          label={correctNote}
           centerX={isCorrect ? 140 : 180}
           toBottomPx={toBottomPx}
           isLabel={isCorrect ? 'Correct!' : 'Correct'}
@@ -163,7 +161,6 @@ function NoteHead({
   pos,
   accidental,
   color,
-  label,
   centerX,
   toBottomPx,
   isLabel,
@@ -171,7 +168,6 @@ function NoteHead({
   pos: number;
   accidental: string | null;
   color: string;
-  label: string;
   centerX: number;
   toBottomPx: (p: number) => number;
   isLabel: string;

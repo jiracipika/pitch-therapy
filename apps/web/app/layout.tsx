@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./glass-overrides.css";
 import Nav from "@/components/Nav";
 import { AuthProvider } from "@/components/AuthProvider";
 import { StatsProvider } from "@/components/StatsProvider";
 import AppTransitionShell from "@/components/AppTransitionShell";
+import DesktopTopBar from "@/components/DesktopTopBar";
 
 export const metadata: Metadata = {
   title: "Pitch Therapy",
@@ -28,6 +30,7 @@ export default function RootLayout({
           <StatsProvider>
             <Nav />
             <main className="pt-main-shell">
+              <DesktopTopBar />
               <AppTransitionShell>{children}</AppTransitionShell>
             </main>
           </StatsProvider>
