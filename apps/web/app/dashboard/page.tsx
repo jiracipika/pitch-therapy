@@ -5,27 +5,19 @@ import { useState, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { AnimatedStatCard, PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
 import { useStatsContext } from '@/components/StatsProvider';
+import { GAME_MODE_META, GAME_MODES } from '@pitch-therapy/core';
 
-const MODES = [
-  { id: 'pitch-match',      label: 'Pitch Match',      icon: '🎤', color: '#0A84FF', desc: 'Match pitches with your voice',         href: '/play/pitch-match' },
-  { id: 'note-id',          label: 'Note ID',           icon: '🎵', color: '#BF5AF2', desc: 'Identify notes by ear',                href: '/play/note-id' },
-  { id: 'frequency-guess',  label: 'Freq Guess',        icon: '📡', color: '#FF9F0A', desc: 'Guess the exact frequency',            href: '/play/frequency-guess' },
-  { id: 'note-wordle',      label: 'Note Wordle',       icon: '🟩', color: '#30D158', desc: 'Wordle meets ear training',            href: '/play/note-wordle' },
-  { id: 'frequency-wordle', label: 'Freq Wordle',       icon: '🔊', color: '#5AC8FA', desc: 'Hunt for a hidden frequency',          href: '/play/frequency-wordle' },
-  { id: 'pitch-memory',     label: 'Pitch Memory',      icon: '🧠', color: '#FF375F', desc: 'Reproduce note sequences',            href: '/play/pitch-memory' },
-  { id: 'name-that-note',   label: 'Name That Note',    icon: '🎼', color: '#32ADE6', desc: 'Read the musical staff',              href: '/play/name-that-note' },
-  { id: 'frequency-hunt',   label: 'Freq Hunt',         icon: '🔍', color: '#FF9F0A', desc: 'Scrub to find exact frequency',       href: '/play/frequency-hunt' },
-  { id: 'drone-lock',       label: 'Drone Lock',        icon: '🔒', color: '#63E6E2', desc: 'Sing intervals over a drone',         href: '/play/drone-lock' },
-  { id: 'speed-round',      label: 'Speed Round',       icon: '⚡', color: '#FF9F0A', desc: 'Rapid-fire note identification',      href: '/play/speed-round' },
-  { id: 'chord-detective',  label: 'Chord Detective',   icon: '🕵️', color: '#FF375F', desc: 'Identify chord quality',              href: '/play/chord-detective' },
-  { id: 'waveform-match',   label: 'Waveform Match',    icon: '〰️', color: '#5E5CE6', desc: 'Align waveforms by ear',             href: '/play/waveform-match' },
-  { id: 'tuning-battle',    label: 'Tuning Battle',     icon: '⚔️', color: '#FF453A', desc: '2-player race to lock the note',     href: '/play/tuning-battle' },
-  { id: 'tune-in',          label: 'Tune In',           icon: '📻', color: '#FF375F', desc: 'Hit target notes with tuning meter', href: '/play/tune-in' },
-  { id: 'piano-tap',        label: 'Piano Tap',         icon: '🎹', color: '#5E5CE6', desc: 'Tap correct piano keys',             href: '/play/piano-tap' },
-  { id: 'frequency-slider', label: 'Freq Slider',       icon: '🎚️', color: '#5AC8FA', desc: 'Drag to match hidden frequencies',   href: '/play/frequency-slider' },
-  { id: 'cents-deviation',  label: 'Cents Deviation',   icon: '📐', color: '#30D158', desc: 'Detect microtonal shifts',           href: '/play/cents-deviation' },
-  { id: 'interval-archer',  label: 'Interval Archer',   icon: '🏹', color: '#BF5AF2', desc: 'Identify musical intervals',         href: '/play/interval-archer' },
-];
+const MODES = GAME_MODES.map((id) => {
+  const mode = GAME_MODE_META[id];
+  return {
+    id: mode.id,
+    label: mode.label,
+    icon: mode.icon,
+    color: mode.accentHex,
+    desc: mode.description,
+    href: `/play/${mode.id}`,
+  };
+});
 
 const TIPS = [
   'Train your weakest category first — consistent practice beats cramming.',
@@ -143,7 +135,6 @@ const rowItem = {
 
 export default function Dashboard() {
   const { stats, loaded } = useStatsContext();
-  const reduceMotion = useReducedMotion();
   const tip = TIPS[Math.floor(Date.now() / 86400000) % TIPS.length];
   const recentModes = [...new Set(stats.results.slice(-10).reverse().map((r) => r.mode))].slice(0, 3);
   const totalGames = stats.results.length;

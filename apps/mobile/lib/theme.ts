@@ -13,6 +13,9 @@ export const colors = {
   textSecondary: 'rgba(235,235,245,0.70)',
   textTertiary: 'rgba(235,235,245,0.42)',
   muted: 'rgba(235,235,245,0.54)',
+  success: '#30D158',
+  warning: '#FF9F0A',
+  danger: '#FF453A',
 
   blue: '#0A84FF',
   purple: '#BF5AF2',
@@ -64,9 +67,9 @@ export const spacing = {
 
 export const radii = {
   sm: 6,
-  md: 8,
-  lg: 8,
-  xl: 8,
+  md: 10,
+  lg: 14,
+  xl: 20,
   full: 999,
 } as const;
 

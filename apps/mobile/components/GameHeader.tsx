@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radii, shadows, typography } from '@/lib/theme';
 
 interface GameHeaderProps {
@@ -11,22 +12,24 @@ interface GameHeaderProps {
 }
 
 export function GameHeader({ score, round, totalRounds, streak, accent = colors.pitchMatch }: GameHeaderProps) {
+  const insets = useSafeAreaInsets();
+
   return (
     <LinearGradient
       colors={[accent + '22', colors.card, colors.card]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={[styles.container, { borderColor: accent + '40' }]}
+      style={[styles.container, { borderColor: accent + '40', marginTop: Math.max(14, insets.top + 8) }]}
     >
       <View style={styles.metric}>
         <Text style={styles.label}>Round</Text>
         <Text style={styles.metricValue}>{round}/{totalRounds}</Text>
       </View>
-      <View style={styles.scorePill}>
+      <View style={styles.scorePill} accessibilityLabel={`Score ${score}`}>
         <Text style={[styles.scoreText, { color: accent }]}>{score}</Text>
         <Text style={styles.scoreLabel}>Score</Text>
       </View>
-      <View style={styles.metric}>
+      <View style={[styles.metric, styles.metricRight]}>
         <Text style={styles.label}>Streak</Text>
         <Text style={styles.metricValue}>{streak}</Text>
       </View>
@@ -40,7 +43,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginHorizontal: 14,
-    marginTop: 14,
     padding: 12,
     borderRadius: radii.lg,
     borderWidth: 1,
@@ -49,6 +51,9 @@ const styles = StyleSheet.create({
   metric: {
     flex: 1,
     gap: 3,
+  },
+  metricRight: {
+    alignItems: 'flex-end',
   },
   label: {
     color: colors.textTertiary,

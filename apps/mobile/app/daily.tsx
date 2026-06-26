@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
-import { GAME_MODE_META, getDailySeed } from '@pitch-therapy/core';
+import { GAME_MODE_META } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
 import { GlassCard, MotionStatusCard, Pill, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
@@ -22,7 +22,6 @@ function getTimeUntilMidnight(): string {
 
 export default function DailyScreen() {
   const { isDesktop } = useResponsiveLayout();
-  const seed = getDailySeed();
   const [timeRemaining, setTimeRemaining] = useState('');
 
   useEffect(() => {
@@ -52,7 +51,7 @@ export default function DailyScreen() {
           <Text style={{ color: colors.text, ...typography.largeTitle, fontVariant: ['tabular-nums'] }}>
             {timeRemaining}
           </Text>
-          <Text style={{ color: colors.textSecondary, ...typography.caption1 }}>Seed note: {seed.note}</Text>
+          <Text style={{ color: colors.textSecondary, ...typography.caption1 }}>Daily target stays hidden until you enter the puzzles.</Text>
         </View>
       </GlassCard>
 

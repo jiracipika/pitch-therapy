@@ -11,6 +11,8 @@ export type {
   DifficultyConfig,
   NoteName,
   Note,
+  ModeCategoryId,
+  ModeCategory,
   SessionPhase,
   SessionState,
   SessionAction,
@@ -20,6 +22,7 @@ export type {
 export {
   GAME_MODES,
   GAME_MODE_META,
+  MODE_CATEGORIES,
   DIFFICULTY_CONFIG,
 } from "./gameData";
 

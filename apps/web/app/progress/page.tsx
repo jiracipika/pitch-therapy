@@ -4,27 +4,12 @@ import { motion } from 'framer-motion';
 import { useStatsContext } from '@/components/StatsProvider';
 import Link from 'next/link';
 import { AnimatedStatCard, PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
+import { GAME_MODE_META, GAME_MODES } from '@pitch-therapy/core';
 
-const MODES = [
-  { id: 'pitch-match',      label: 'Pitch Match',      icon: '🎤', color: '#0A84FF' },
-  { id: 'note-id',          label: 'Note ID',           icon: '🎵', color: '#BF5AF2' },
-  { id: 'frequency-guess',  label: 'Freq Guess',        icon: '📡', color: '#FF9F0A' },
-  { id: 'note-wordle',      label: 'Note Wordle',       icon: '🟩', color: '#30D158' },
-  { id: 'frequency-wordle', label: 'Freq Wordle',       icon: '🔊', color: '#5AC8FA' },
-  { id: 'pitch-memory',     label: 'Pitch Memory',      icon: '🧠', color: '#FF375F' },
-  { id: 'name-that-note',   label: 'Name That Note',    icon: '🎼', color: '#32ADE6' },
-  { id: 'frequency-hunt',   label: 'Freq Hunt',         icon: '🔍', color: '#FF9F0A' },
-  { id: 'drone-lock',       label: 'Drone Lock',        icon: '🔒', color: '#63E6E2' },
-  { id: 'speed-round',      label: 'Speed Round',       icon: '⚡', color: '#FF9F0A' },
-  { id: 'chord-detective',  label: 'Chord Detective',   icon: '🕵️', color: '#FF375F' },
-  { id: 'waveform-match',   label: 'Waveform Match',    icon: '〰️', color: '#5E5CE6' },
-  { id: 'tuning-battle',    label: 'Tuning Battle',     icon: '⚔️', color: '#FF453A' },
-  { id: 'tune-in',          label: 'Tune In',           icon: '📻', color: '#FF375F' },
-  { id: 'piano-tap',        label: 'Piano Tap',         icon: '🎹', color: '#5E5CE6' },
-  { id: 'frequency-slider', label: 'Freq Slider',       icon: '🎚️', color: '#5AC8FA' },
-  { id: 'cents-deviation',  label: 'Cents Deviation',   icon: '📐', color: '#30D158' },
-  { id: 'interval-archer',  label: 'Interval Archer',   icon: '🏹', color: '#BF5AF2' },
-];
+const MODES = GAME_MODES.map((id) => {
+  const mode = GAME_MODE_META[id];
+  return { id: mode.id, label: mode.label, icon: mode.icon, color: mode.accentHex };
+});
 
 const WEEKS = 12;
 const DAYS = 7;
