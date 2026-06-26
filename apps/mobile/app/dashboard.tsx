@@ -2,12 +2,18 @@ import { Image, Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
-import { GlassCard, MotionStatusCard, Pill, SectionHeader, StatItem } from '@/components/AppleUI';
+import { GlassCard, MotionStatusCard, Pill, RecommendedPath, SectionHeader, StatItem } from '@/components/AppleUI';
 import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
 import { triggerSelectionHaptic } from '@/lib/haptics';
 import { useResponsiveLayout } from '@/lib/responsive';
 import { colors, radii, typography } from '@/lib/theme';
+
+const DASHBOARD_STEPS = [
+  { label: 'Warm up', detail: 'Start with a short recognition drill.' },
+  { label: 'Focus', detail: 'Pick one featured mode and finish a full round.' },
+  { label: 'Keep streak', detail: 'Close with today\'s daily challenge.' },
+];
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -84,6 +90,8 @@ export default function DashboardScreen() {
           </Pressable>
         </View>
       </GlassCard>
+
+      <RecommendedPath steps={DASHBOARD_STEPS} accent={colors.blue} compact />
 
       <GlassCard accent={colors.speedRound}>
         <View style={{ flexDirection: isTablet ? 'row' : 'column', alignItems: isTablet ? 'center' : 'flex-start', gap: 14 }}>

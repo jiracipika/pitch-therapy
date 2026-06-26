@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
-import { GlassCard, Pill, SectionHeader } from '@/components/AppleUI';
+import { GlassCard, Pill, RecommendedPath, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
 import { useResponsiveLayout } from '@/lib/responsive';
 import { colors, typography } from '@/lib/theme';
@@ -14,6 +14,12 @@ const MODE_CATEGORIES = [
   { id: 'interactive', label: 'Interactive', tone: colors.teal, modes: ['piano-tap', 'frequency-slider', 'frequency-hunt', 'drone-lock', 'tune-in'] as const },
   { id: 'speed', label: 'Speed & Challenge', tone: colors.orange, modes: ['speed-round'] as const },
 ] as const;
+
+const MODE_PICKER_STEPS = [
+  { label: 'Start simple', detail: 'Use foundational modes when you want accuracy reps.' },
+  { label: 'Add pressure', detail: 'Move into Wordle or Speed when the basics feel easy.' },
+  { label: 'Go advanced', detail: 'Use waveform, cents, and chords for precision work.' },
+];
 
 export default function PlayModesScreen() {
   const { isTablet, isDesktop } = useResponsiveLayout();
@@ -34,6 +40,8 @@ export default function PlayModesScreen() {
           </Text>
         </View>
       </GlassCard>
+
+      <RecommendedPath steps={MODE_PICKER_STEPS} accent={colors.green} compact />
 
       {MODE_CATEGORIES.map((category) => (
         <View key={category.id} style={{ gap: 10 }}>

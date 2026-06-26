@@ -1523,6 +1523,71 @@ input[type="range"]::-moz-range-thumb {
   background: color-mix(in srgb, var(--pt-glass-bg-strong) 44%, transparent);
 }
 
+.pt-home-practice-plan {
+  border-top: 1px solid color-mix(in srgb, var(--ios-sep) 40%, transparent);
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.pt-home-mobile-plan {
+  width: min(100%, 360px);
+  margin: 22px auto 0;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--pt-glass-stroke-soft);
+  border-radius: 18px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--pt-glass-bg-strong) 66%, transparent), color-mix(in srgb, var(--pt-glass-bg) 62%, transparent));
+  box-shadow: var(--pt-glass-shadow);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+
+.pt-home-plan-row {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 9px;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid var(--pt-glass-stroke-soft);
+  border-radius: 12px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--pt-glass-bg-strong) 56%, transparent), color-mix(in srgb, var(--pt-glass-bg) 50%, transparent));
+}
+
+.pt-home-plan-index {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #dff0ff;
+  background: linear-gradient(145deg, rgba(10,132,255,0.34), rgba(94,92,230,0.22));
+  border: 1px solid rgba(194,225,255,0.28);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28);
+}
+
+.pt-home-plan-row b,
+.pt-home-plan-row small {
+  display: block;
+}
+
+.pt-home-plan-row b {
+  color: var(--ios-label);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.pt-home-plan-row small {
+  color: var(--ios-label3);
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
 .pt-page-dashboard,
 .pt-page-daily,
 .pt-page-progress,
@@ -1778,6 +1843,10 @@ input[type="range"]::-moz-range-thumb {
 
   .pt-home-hero-main .flex.flex-col.gap-3.w-full.max-w-xs {
     max-width: 340px;
+  }
+
+  .pt-home-mobile-plan {
+    display: none;
   }
 
   .pt-home-hero-side {

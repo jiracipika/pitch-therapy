@@ -41,6 +41,12 @@ const QUICK_FLOWS = [
   },
 ];
 
+const PRACTICE_PLAN = [
+  { step: "Listen", copy: "Start with note ID or pitch match" },
+  { step: "Lock in", copy: "Use daily challenge to build streaks" },
+  { step: "Review", copy: "Check progress and repeat weak modes" },
+];
+
 export default function Home() {
   const router = useRouter();
   const reduceMotion = useReducedMotion();
@@ -274,6 +280,23 @@ export default function Home() {
                 Daily Challenge
               </motion.button>
             </motion.div>
+
+            <motion.div
+              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.58, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className="pt-home-mobile-plan"
+            >
+              {PRACTICE_PLAN.map((item, index) => (
+                <div key={item.step} className="pt-home-plan-row">
+                  <span className="pt-home-plan-index">{index + 1}</span>
+                  <span>
+                    <b>{item.step}</b>
+                    <small>{item.copy}</small>
+                  </span>
+                </div>
+              ))}
+            </motion.div>
           </div>
 
           <motion.aside
@@ -302,6 +325,18 @@ export default function Home() {
                   <span className="pt-home-category-dot" style={{ background: cat.color }} />
                   <span className="pt-home-category-name">{cat.label}</span>
                   <span className="pt-home-category-count">{cat.ids.length}</span>
+                </div>
+              ))}
+            </div>
+            <div className="pt-home-practice-plan">
+              <span className="pt-home-side-title">Recommended path</span>
+              {PRACTICE_PLAN.map((item, index) => (
+                <div key={item.step} className="pt-home-plan-row">
+                  <span className="pt-home-plan-index">{index + 1}</span>
+                  <span>
+                    <b>{item.step}</b>
+                    <small>{item.copy}</small>
+                  </span>
                 </div>
               ))}
             </div>

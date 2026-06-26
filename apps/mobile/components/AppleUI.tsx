@@ -189,6 +189,43 @@ export function StatItem({ label, value, color = colors.text }: StatItemProps) {
   );
 }
 
+interface RecommendedStep {
+  label: string;
+  detail: string;
+}
+
+interface RecommendedPathProps {
+  steps: RecommendedStep[];
+  accent?: string;
+  compact?: boolean;
+}
+
+export function RecommendedPath({ steps, accent = colors.blue, compact }: RecommendedPathProps) {
+  return (
+    <GlassCard accent={accent} padding={compact ? 12 : 14}>
+      <View style={{ gap: 10 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          <Text style={{ color: colors.text, ...typography.headline }}>Recommended path</Text>
+          <Pill label="Apple-like flow" color={accent} />
+        </View>
+        <View style={{ gap: 8 }}>
+          {steps.map((step, index) => (
+            <View key={step.label} style={styles.pathRow}>
+              <View style={[styles.pathIndex, { borderColor: accent + '55', backgroundColor: accent + '24' }]}>
+                <Text style={[styles.pathIndexText, { color: accent }]}>{index + 1}</Text>
+              </View>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={styles.pathLabel}>{step.label}</Text>
+                <Text style={styles.pathDetail}>{step.detail}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+    </GlassCard>
+  );
+}
+
 interface MotionStatusCardProps {
   tone: 'loading' | 'success' | 'error' | 'empty';
   title: string;
@@ -396,6 +433,39 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
     ...typography.caption1,
     textAlign: 'center',
+  },
+  pathRow: {
+    minHeight: 58,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: 'rgba(255,255,255,0.045)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 10,
+  },
+  pathIndex: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pathIndexText: {
+    ...typography.caption1,
+    fontWeight: '900',
+  },
+  pathLabel: {
+    color: colors.text,
+    ...typography.subhead,
+    fontWeight: '800',
+  },
+  pathDetail: {
+    color: colors.textSecondary,
+    ...typography.caption1,
+    lineHeight: 17,
   },
   input: {
     backgroundColor: colors.surface,
