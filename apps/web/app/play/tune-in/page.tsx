@@ -1,33 +1,46 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { playTone, NOTE_FREQUENCIES } from '@/lib/audio';
-import FeedbackOverlay from '@/components/FeedbackOverlay';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { motion } from "framer-motion";
+import { playTone, NOTE_FREQUENCIES } from "@/lib/audio";
+import FeedbackOverlay from "@/components/FeedbackOverlay";
+import { useStatsContext } from "@/components/StatsProvider";
 
-const ACCENT = '#FF2D55';
+const ACCENT = "#FF2D55";
 
-const TARGET_NOTES = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
+const TARGET_NOTES = ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5"];
 
 export default function TuneInPage() {
+  const { recordResult } = useStatsContext();
+  const recordedRef = useRef(false);
+
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isPractice = searchParams.get('practice') === 'true';
-  const [phase, setPhase] = useState<'setup' | 'playing' | 'feedback' | 'done'>('setup');
+  const isPractice = searchParams.get("practice") === "true";
+  const [phase, setPhase] = useState<"setup" | "playing" | "feedback" | "done">("setup");
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
-  const [targetNote, setTargetNote] = useState('A4');
+  const [targetNote, setTargetNote] = useState("A4");
   const [targetFreq, setTargetFreq] = useState(440);
   const [centsOff, setCentsOff] = useState(0);
   const [holdProgress, setHoldProgress] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
+  const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [showFeedbackOverlay, setShowFeedbackOverlay] = useState(false);
-  const [results, setResults] = useState<{ round: number; correct: boolean; points: number; target: string; accuracy: number; timeMs: number }[]>([]);
+  const [results, setResults] = useState<
+    {
+      round: number;
+      correct: boolean;
+      points: number;
+      target: string;
+      accuracy: number;
+      timeMs: number;
+    }[]
+  >([]);
   const [useMidi, setUseMidi] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -108,13 +121,13 @@ export default function TuneInPage() {
       analyserRef.current = analyser;
       setIsListening(true);
     } catch {
-      setMicError('Microphone access denied. Switch to Listen Only mode or grant permission.');
+      setMicError("Microphone access denied. Switch to Listen Only mode or grant permission.");
       setUseMidi(true);
     }
   };
 
   const stopMic = () => {
-    micStreamRef.current?.getTracks().forEach(t => t.stop());
+    micStreamRef.current?.getTracks().forEach((t) => t.stop());
     audioContextRef.current?.close();
     setIsListening(false);
     holdStartRef.current = null;
@@ -144,8 +157,8 @@ export default function TuneInPage() {
     const note = pickTarget();
     playTone(NOTE_FREQUENCIES[note] || 440, 0.8);
     setFeedback(null);
-    setPhase('playing');
-    setRound(r => r + 1);
+    setPhase("playing");
+    setRound((r) => r + 1);
     roundStartRef.current = Date.now();
   };
 
@@ -154,38 +167,54 @@ export default function TuneInPage() {
     const elapsed = Date.now() - roundStartRef.current;
     const accuracy = 1 - Math.abs(centsOff) / 50;
     const points = Math.round(accuracy * 100 + Math.max(0, 50 - elapsed / 100));
-    setScore(s => s + points);
-    setStreak(s => {
+    setScore((s) => s + points);
+    setStreak((s) => {
       const ns = s + 1;
-      setBestStreak(b => Math.max(b, ns));
+      setBestStreak((b) => Math.max(b, ns));
       return ns;
     });
-    setFeedback('correct');
+    setFeedback("correct");
     setShowFeedbackOverlay(true);
-    setResults(r => [...r, { round, correct: true, points, target: targetNote, accuracy, timeMs: elapsed }]);
+    setResults((r) => [
+      ...r,
+      { round, correct: true, points, target: targetNote, accuracy, timeMs: elapsed },
+    ]);
 
-    setTimeout(() => {
-      if (round >= totalRounds) {
-        setPhase('done');
-        stopMic();
-      } else {
-        if (!useMidi) startMic();
-        nextRound();
-      }
-    }, isPractice ? 1000 : 1500);
+    setTimeout(
+      () => {
+        if (round >= totalRounds) {
+          setPhase("done");
+          stopMic();
+        } else {
+          if (!useMidi) startMic();
+          nextRound();
+        }
+      },
+      isPractice ? 1000 : 1500,
+    );
   };
   handleSuccessRef.current = handleSuccess;
 
   const handleGiveUp = () => {
     stopMic();
-    setFeedback('wrong');
+    setFeedback("wrong");
     setShowFeedbackOverlay(false);
     setStreak(0);
-    setResults(r => [...r, { round, correct: false, points: 0, target: targetNote, accuracy: 0, timeMs: Date.now() - roundStartRef.current }]);
+    setResults((r) => [
+      ...r,
+      {
+        round,
+        correct: false,
+        points: 0,
+        target: targetNote,
+        accuracy: 0,
+        timeMs: Date.now() - roundStartRef.current,
+      },
+    ]);
 
     setTimeout(() => {
       if (round >= totalRounds) {
-        setPhase('done');
+        setPhase("done");
       } else {
         if (!useMidi) startMic();
         nextRound();
@@ -193,34 +222,101 @@ export default function TuneInPage() {
     }, 1500);
   };
 
-  useEffect(() => { return () => stopMic(); }, []);
+  useEffect(() => {
+    return () => stopMic();
+  }, []);
 
-  if (phase === 'done') {
+  useEffect(() => {
+    if (!(phase === "done")) {
+      recordedRef.current = false;
+      return;
+    }
+    if (!recordedRef.current) {
+      recordedRef.current = true;
+      recordResult({
+        mode: "tune-in",
+        score: score,
+        accuracy: results.length > 0 ? results.filter((r) => r.correct).length / results.length : 0,
+        rounds: totalRounds,
+        date: new Date().toISOString(),
+        timeMs: totalRounds * 5000,
+      });
+    }
+  }, [phase, recordResult]);
+
+  if (phase === "done") {
     return (
-      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-        <div className="max-w-sm mx-auto px-4 pt-12">
-          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
+        <div className="mx-auto max-w-sm px-4 pt-12">
+          <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
             <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "var(--ios-label)",
+                letterSpacing: "-0.5px",
+                marginBottom: 24,
+              }}
+            >
               Tune In Complete!
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
-              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
-                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
-                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 10,
+                marginBottom: 24,
+              }}
+            >
+              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
+                <div
+                  style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", color: ACCENT }}
+                >
+                  {score}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>Score</div>
               </div>
-              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
-                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{results.filter(r => r.correct).length}/{totalRounds}</div>
-                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Hit</div>
+              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
+                <div
+                  style={{
+                    fontSize: 26,
+                    fontWeight: 700,
+                    letterSpacing: "-0.5px",
+                    color: "var(--ios-label)",
+                  }}
+                >
+                  {results.filter((r) => r.correct).length}/{totalRounds}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>Hit</div>
               </div>
-              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
-                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>🔥 {bestStreak}</div>
-                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Streak</div>
+              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
+                <div
+                  style={{
+                    fontSize: 26,
+                    fontWeight: 700,
+                    letterSpacing: "-0.5px",
+                    color: "var(--ios-label)",
+                  }}
+                >
+                  🔥 {bestStreak}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
+                  Best Streak
+                </div>
               </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Play Again</button>
-              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <button
+                className="ios-btn-primary"
+                style={{ background: ACCENT }}
+                onClick={startGame}
+              >
+                Play Again
+              </button>
+              <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>
+                Dashboard
+              </button>
             </div>
           </div>
         </div>
@@ -228,18 +324,52 @@ export default function TuneInPage() {
     );
   }
 
-  if (phase === 'setup') {
+  if (phase === "setup") {
     return (
-      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-        <div className="max-w-sm mx-auto px-4 pt-12">
-          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
+        <div className="mx-auto max-w-sm px-4 pt-12">
+          <div style={{ textAlign: "center", paddingTop: 40 }}>
             <div style={{ fontSize: 64, marginBottom: 20 }}>🎤</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Tune In</div>
-            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 24 }}>Hit the target note with your voice or instrument</div>
+            <div
+              style={{
+                fontSize: 24,
+                fontWeight: 700,
+                color: "var(--ios-label)",
+                letterSpacing: "-0.5px",
+                marginBottom: 8,
+              }}
+            >
+              Tune In
+            </div>
+            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 24 }}>
+              Hit the target note with your voice or instrument
+            </div>
 
-            <div className="ios-card" style={{ padding: 16, textAlign: 'left', marginBottom: 24 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: ACCENT, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>How to Play</div>
-              <ol style={{ fontSize: 14, color: 'var(--ios-label3)', listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="ios-card" style={{ padding: 16, textAlign: "left", marginBottom: 24 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: ACCENT,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  marginBottom: 12,
+                }}
+              >
+                How to Play
+              </div>
+              <ol
+                style={{
+                  fontSize: 14,
+                  color: "var(--ios-label3)",
+                  listStyle: "none",
+                  padding: 0,
+                  margin: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 6,
+                }}
+              >
                 <li>1. A target note appears — tap 🔊 to hear it</li>
                 <li>2. Sing or play that note into your microphone</li>
                 <li>3. The tuning meter shows how close you are (±50¢)</li>
@@ -248,16 +378,23 @@ export default function TuneInPage() {
             </div>
 
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginBottom: 10 }}>Input Mode</div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+              <div style={{ fontSize: 13, color: "var(--ios-label3)", marginBottom: 10 }}>
+                Input Mode
+              </div>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
                 <button
                   onClick={() => setUseMidi(false)}
                   style={{
-                    height: 34, borderRadius: 17, padding: '0 16px',
-                    fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
-                    background: !useMidi ? ACCENT : 'var(--ios-bg2)',
-                    color: !useMidi ? '#fff' : 'var(--ios-label3)',
-                    transition: 'background 0.15s',
+                    height: 34,
+                    borderRadius: 17,
+                    padding: "0 16px",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    border: "none",
+                    cursor: "pointer",
+                    background: !useMidi ? ACCENT : "var(--ios-bg2)",
+                    color: !useMidi ? "#fff" : "var(--ios-label3)",
+                    transition: "background 0.15s",
                   }}
                 >
                   🎤 Microphone
@@ -265,23 +402,43 @@ export default function TuneInPage() {
                 <button
                   onClick={() => setUseMidi(true)}
                   style={{
-                    height: 34, borderRadius: 17, padding: '0 16px',
-                    fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
-                    background: useMidi ? ACCENT : 'var(--ios-bg2)',
-                    color: useMidi ? '#fff' : 'var(--ios-label3)',
-                    transition: 'background 0.15s',
+                    height: 34,
+                    borderRadius: 17,
+                    padding: "0 16px",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    border: "none",
+                    cursor: "pointer",
+                    background: useMidi ? ACCENT : "var(--ios-bg2)",
+                    color: useMidi ? "#fff" : "var(--ios-label3)",
+                    transition: "background 0.15s",
                   }}
                 >
                   👁️ Listen Only
                 </button>
               </div>
-              <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ios-label3)' }}>
-                {useMidi ? 'Practice without mic — mark rounds yourself' : 'Real-time pitch detection via microphone'}
+              <div style={{ marginTop: 8, fontSize: 12, color: "var(--ios-label3)" }}>
+                {useMidi
+                  ? "Practice without mic — mark rounds yourself"
+                  : "Real-time pitch detection via microphone"}
               </div>
             </div>
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Start Game</button>
+            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+              Start Game
+            </button>
             {micError && (
-              <div style={{ marginTop: 12, borderRadius: 12, padding: '12px 16px', background: 'rgba(255,69,58,0.12)', border: '1px solid var(--ios-red)', fontSize: 13, color: 'var(--ios-red)', textAlign: 'left' }}>
+              <div
+                style={{
+                  marginTop: 12,
+                  borderRadius: 12,
+                  padding: "12px 16px",
+                  background: "rgba(255,69,58,0.12)",
+                  border: "1px solid var(--ios-red)",
+                  fontSize: 13,
+                  color: "var(--ios-red)",
+                  textAlign: "left",
+                }}
+              >
                 ⚠️ {micError}
               </div>
             )}
@@ -291,29 +448,79 @@ export default function TuneInPage() {
     );
   }
 
-  const centsColor = Math.abs(centsOff) <= 10 ? 'var(--ios-green)' : Math.abs(centsOff) <= 25 ? 'var(--ios-orange)' : 'var(--ios-red)';
+  const centsColor =
+    Math.abs(centsOff) <= 10
+      ? "var(--ios-green)"
+      : Math.abs(centsOff) <= 25
+        ? "var(--ios-orange)"
+        : "var(--ios-red)";
 
   return (
-    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-sm mx-auto px-4 pt-12">
-        <FeedbackOverlay correct={feedback === 'correct'} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
+    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
+      <div className="mx-auto max-w-sm px-4 pt-12">
+        <FeedbackOverlay
+          correct={feedback === "correct"}
+          show={showFeedbackOverlay}
+          streak={streak}
+          onDone={() => setShowFeedbackOverlay(false)}
+        />
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 16,
+            minHeight: 44,
+          }}
+        >
           <button
-            onClick={() => { stopMic(); router.push('/dashboard'); }}
+            onClick={() => {
+              stopMic();
+              router.push("/dashboard");
+            }}
             style={{
-              width: 36, height: 36, borderRadius: 18,
-              background: 'var(--ios-bg2)', border: 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer'
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              background: "var(--ios-bg2)",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
             }}
           >
             <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
-              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path
+                d="M8.5 1.5L1.5 8.5L8.5 15.5"
+                stroke="var(--ios-blue)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
-          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>🎤 Tune In</div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+          <div
+            style={{
+              fontSize: 17,
+              fontWeight: 600,
+              color: "var(--ios-label)",
+              letterSpacing: "-0.43px",
+            }}
+          >
+            🎤 Tune In
+          </div>
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--ios-label2)",
+              background: "var(--ios-bg2)",
+              borderRadius: 10,
+              padding: "4px 10px",
+            }}
+          >
             {score} pts
           </div>
         </div>
@@ -328,23 +535,39 @@ export default function TuneInPage() {
         </div>
 
         {/* Target note */}
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            style={{ fontSize: 72, fontWeight: 800, color: ACCENT, letterSpacing: '-2px', lineHeight: 1 }}
+            style={{
+              fontSize: 72,
+              fontWeight: 800,
+              color: ACCENT,
+              letterSpacing: "-2px",
+              lineHeight: 1,
+            }}
           >
             {targetNote}
           </motion.div>
-          <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ios-label3)' }}>{targetFreq.toFixed(1)} Hz</div>
+          <div style={{ marginTop: 6, fontSize: 13, color: "var(--ios-label3)" }}>
+            {targetFreq.toFixed(1)} Hz
+          </div>
           <motion.button
             onClick={() => playTone(targetFreq, 0.8)}
             whileTap={{ scale: 0.92 }}
             style={{
-              marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 6,
-              borderRadius: 12, padding: '8px 16px', fontSize: 14, fontWeight: 500,
-              background: 'var(--ios-bg2)', border: '1px solid var(--ios-sep)',
-              color: 'var(--ios-label2)', cursor: 'pointer',
+              marginTop: 12,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              borderRadius: 12,
+              padding: "8px 16px",
+              fontSize: 14,
+              fontWeight: 500,
+              background: "var(--ios-bg2)",
+              border: "1px solid var(--ios-sep)",
+              color: "var(--ios-label2)",
+              cursor: "pointer",
             }}
           >
             🔊 Hear target
@@ -352,32 +575,42 @@ export default function TuneInPage() {
         </div>
 
         {useMidi ? (
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <div style={{ fontSize: 14, color: 'var(--ios-label3)', marginBottom: 20 }}>Sing or play the note, then mark your result</div>
-            <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <div style={{ fontSize: 14, color: "var(--ios-label3)", marginBottom: 20 }}>
+              Sing or play the note, then mark your result
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
               <motion.button
                 onClick={handleSuccess}
                 whileTap={{ scale: 0.93 }}
                 style={{
-                  flex: 1, borderRadius: 16, padding: '20px 0',
-                  background: 'rgba(48,209,88,0.15)', border: '1px solid rgba(48,209,88,0.4)',
-                  cursor: 'pointer',
+                  flex: 1,
+                  borderRadius: 16,
+                  padding: "20px 0",
+                  background: "rgba(48,209,88,0.15)",
+                  border: "1px solid rgba(48,209,88,0.4)",
+                  cursor: "pointer",
                 }}
               >
-                <span style={{ display: 'block', fontSize: 24, marginBottom: 4 }}>✓</span>
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ios-green)' }}>Got it</span>
+                <span style={{ display: "block", fontSize: 24, marginBottom: 4 }}>✓</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: "var(--ios-green)" }}>
+                  Got it
+                </span>
               </motion.button>
               <motion.button
                 onClick={handleGiveUp}
                 whileTap={{ scale: 0.93 }}
                 style={{
-                  flex: 1, borderRadius: 16, padding: '20px 0',
-                  background: 'rgba(255,69,58,0.1)', border: '1px solid rgba(255,69,58,0.3)',
-                  cursor: 'pointer',
+                  flex: 1,
+                  borderRadius: 16,
+                  padding: "20px 0",
+                  background: "rgba(255,69,58,0.1)",
+                  border: "1px solid rgba(255,69,58,0.3)",
+                  cursor: "pointer",
                 }}
               >
-                <span style={{ display: 'block', fontSize: 24, marginBottom: 4 }}>✗</span>
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ios-red)' }}>Skip</span>
+                <span style={{ display: "block", fontSize: 24, marginBottom: 4 }}>✗</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: "var(--ios-red)" }}>Skip</span>
               </motion.button>
             </div>
           </div>
@@ -385,22 +618,66 @@ export default function TuneInPage() {
           <>
             {/* Tuning meter */}
             <div style={{ marginBottom: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--ios-label3)', marginBottom: 6 }}>
-                <span>-50¢</span><span>0</span><span>+50¢</span>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: 10,
+                  color: "var(--ios-label3)",
+                  marginBottom: 6,
+                }}
+              >
+                <span>-50¢</span>
+                <span>0</span>
+                <span>+50¢</span>
               </div>
-              <div style={{ position: 'relative', height: 8, borderRadius: 4, background: 'var(--ios-bg3)', overflow: 'visible', margin: '0 4px' }}>
-                <div style={{ position: 'absolute', left: '50%', top: -2, bottom: -2, width: 1.5, background: 'var(--ios-green)', transform: 'translateX(-50%)' }} />
-                <div style={{
-                  position: 'absolute', top: 0, width: 12, height: 8, borderRadius: 4,
-                  background: ACCENT,
-                  left: `calc(50% + ${Math.max(-45, Math.min(45, centsOff / 2))}%)`,
-                  transform: 'translateX(-50%)',
-                  transition: 'left 0.1s ease',
-                  boxShadow: `0 0 8px ${ACCENT}60`,
-                }} />
+              <div
+                style={{
+                  position: "relative",
+                  height: 8,
+                  borderRadius: 4,
+                  background: "var(--ios-bg3)",
+                  overflow: "visible",
+                  margin: "0 4px",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "50%",
+                    top: -2,
+                    bottom: -2,
+                    width: 1.5,
+                    background: "var(--ios-green)",
+                    transform: "translateX(-50%)",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    width: 12,
+                    height: 8,
+                    borderRadius: 4,
+                    background: ACCENT,
+                    left: `calc(50% + ${Math.max(-45, Math.min(45, centsOff / 2))}%)`,
+                    transform: "translateX(-50%)",
+                    transition: "left 0.1s ease",
+                    boxShadow: `0 0 8px ${ACCENT}60`,
+                  }}
+                />
               </div>
-              <div style={{ marginTop: 8, textAlign: 'center', fontSize: 18, fontWeight: 700, color: centsColor }}>
-                {centsOff > 0 ? '+' : ''}{centsOff}¢
+              <div
+                style={{
+                  marginTop: 8,
+                  textAlign: "center",
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: centsColor,
+                }}
+              >
+                {centsOff > 0 ? "+" : ""}
+                {centsOff}¢
               </div>
             </div>
 
@@ -410,24 +687,40 @@ export default function TuneInPage() {
                 <div className="ios-progress-track">
                   <motion.div
                     className="ios-progress-fill"
-                    style={{ background: 'var(--ios-green)' }}
+                    style={{ background: "var(--ios-green)" }}
                     animate={{ width: `${holdProgress * 100}%` }}
                   />
                 </div>
-                <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--ios-label3)', marginTop: 4 }}>Hold steady...</div>
+                <div
+                  style={{
+                    textAlign: "center",
+                    fontSize: 12,
+                    color: "var(--ios-label3)",
+                    marginTop: 4,
+                  }}
+                >
+                  Hold steady...
+                </div>
               </div>
             )}
 
-            <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginBottom: 8 }}>Sing or play into your mic</div>
+            <div style={{ textAlign: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 13, color: "var(--ios-label3)", marginBottom: 8 }}>
+                Sing or play into your mic
+              </div>
               <motion.button
                 onClick={handleGiveUp}
                 whileTap={{ scale: 0.95 }}
                 style={{
-                  fontSize: 14, fontWeight: 600, color: 'var(--ios-label3)',
-                  background: 'var(--ios-bg2)', border: '1px solid var(--ios-sep)',
-                  cursor: 'pointer', borderRadius: 12, padding: '8px 20px',
-                  transition: 'opacity 0.12s ease',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "var(--ios-label3)",
+                  background: "var(--ios-bg2)",
+                  border: "1px solid var(--ios-sep)",
+                  cursor: "pointer",
+                  borderRadius: 12,
+                  padding: "8px 20px",
+                  transition: "opacity 0.12s ease",
                 }}
               >
                 Skip round
@@ -436,7 +729,7 @@ export default function TuneInPage() {
           </>
         )}
 
-        <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--ios-label3)' }}>
+        <div style={{ textAlign: "center", fontSize: 13, color: "var(--ios-label3)" }}>
           🔥 {streak} streak • Round {round}/{totalRounds}
           {isPractice && <span style={{ marginLeft: 8, color: ACCENT }}>Practice</span>}
         </div>

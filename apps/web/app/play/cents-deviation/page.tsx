@@ -1,33 +1,37 @@
-'use client';
+"use client";
 
-import { useState, useRef, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
-import FeedbackOverlay from '@/components/FeedbackOverlay';
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import FeedbackOverlay from "@/components/FeedbackOverlay";
+import { useStatsContext } from "@/components/StatsProvider";
 
-const ACCENT = '#30D158';
+const ACCENT = "#30D158";
 const CENTS_RANGE = 50;
 
-type Difficulty = 'easy' | 'medium' | 'hard';
+type Difficulty = "easy" | "medium" | "hard";
 
 const DIFF_CONFIG: Record<Difficulty, { label: string; centsRange: number; rounds: number }> = {
-  easy: { label: 'Easy', centsRange: 50, rounds: 6 },
-  medium: { label: 'Medium', centsRange: 30, rounds: 8 },
-  hard: { label: 'Hard', centsRange: 15, rounds: 10 },
+  easy: { label: "Easy", centsRange: 50, rounds: 6 },
+  medium: { label: "Medium", centsRange: 30, rounds: 8 },
+  hard: { label: "Hard", centsRange: 15, rounds: 10 },
 };
 
 export default function CentsDeviationPage() {
+  const { recordResult } = useStatsContext();
+  const recordedRef = useRef(false);
+
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isPractice = searchParams.get('practice') === 'true';
-  const [phase, setPhase] = useState<'setup' | 'playing' | 'reveal' | 'done'>('setup');
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+  const isPractice = searchParams.get("practice") === "true";
+  const [phase, setPhase] = useState<"setup" | "playing" | "reveal" | "done">("setup");
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
-  const [baseNote, setBaseNote] = useState('A4');
+  const [baseNote, setBaseNote] = useState("A4");
   const [baseFreq, setBaseFreq] = useState(440);
   const [actualCents, setActualCents] = useState(0);
   const [needlePos, setNeedlePos] = useState(0);
@@ -35,7 +39,9 @@ export default function CentsDeviationPage() {
   const [submitted, setSubmitted] = useState(false);
   const [showFeedbackOverlay, setShowFeedbackOverlay] = useState(false);
   const [lastCorrect, setLastCorrect] = useState(false);
-  const [results, setResults] = useState<{ round: number; note: string; actualCents: number; guessCents: number; points: number }[]>([]);
+  const [results, setResults] = useState<
+    { round: number; note: string; actualCents: number; guessCents: number; points: number }[]
+  >([]);
   const meterRef = useRef<HTMLDivElement>(null);
   const roundRef = useRef(0);
 
@@ -68,14 +74,18 @@ export default function CentsDeviationPage() {
   };
 
   const startGame = () => {
-    setRound(0); setScore(0); setStreak(0); setBestStreak(0); setResults([]);
+    setRound(0);
+    setScore(0);
+    setStreak(0);
+    setBestStreak(0);
+    setResults([]);
     roundRef.current = 0;
     nextRound();
   };
 
   const nextRound = () => {
     pickRound();
-    setPhase('playing');
+    setPhase("playing");
     roundRef.current += 1;
     setRound(roundRef.current);
   };
@@ -87,53 +97,133 @@ export default function CentsDeviationPage() {
     const points = Math.max(0, Math.round((1 - error / config.centsRange) * 100));
     const correct = error <= 5;
 
-    setScore(s => s + points);
+    setScore((s) => s + points);
     if (correct) {
-      setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns; });
+      setStreak((s) => {
+        const ns = s + 1;
+        setBestStreak((b) => Math.max(b, ns));
+        return ns;
+      });
       setLastCorrect(true);
       setShowFeedbackOverlay(true);
     } else {
       setStreak(0);
       setLastCorrect(false);
     }
-    setResults(r => [...r, { round: roundRef.current, note: baseNote, actualCents, guessCents: needlePos, points }]);
-    setPhase('reveal');
+    setResults((r) => [
+      ...r,
+      { round: roundRef.current, note: baseNote, actualCents, guessCents: needlePos, points },
+    ]);
+    setPhase("reveal");
   };
 
-  const handleDrag = useCallback((clientX: number) => {
-    if (!meterRef.current || submitted) return;
-    const rect = meterRef.current.getBoundingClientRect();
-    const pct = (clientX - rect.left) / rect.width;
-    const cents = Math.round((pct - 0.5) * 2 * CENTS_RANGE);
-    setNeedlePos(Math.max(-CENTS_RANGE, Math.min(CENTS_RANGE, cents)));
-  }, [submitted]);
+  const handleDrag = useCallback(
+    (clientX: number) => {
+      if (!meterRef.current || submitted) return;
+      const rect = meterRef.current.getBoundingClientRect();
+      const pct = (clientX - rect.left) / rect.width;
+      const cents = Math.round((pct - 0.5) * 2 * CENTS_RANGE);
+      setNeedlePos(Math.max(-CENTS_RANGE, Math.min(CENTS_RANGE, cents)));
+    },
+    [submitted],
+  );
 
-  if (phase === 'done') {
+  useEffect(() => {
+    if (!(phase === "done")) {
+      recordedRef.current = false;
+      return;
+    }
+    if (!recordedRef.current) {
+      recordedRef.current = true;
+      recordResult({
+        mode: "cents-deviation",
+        score: score,
+        accuracy:
+          results.length > 0
+            ? results.filter((r) => Math.abs(r.actualCents - r.guessCents) <= 25).length /
+              results.length
+            : 0,
+        rounds: totalRounds,
+        date: new Date().toISOString(),
+        timeMs: totalRounds * 5000,
+      });
+    }
+  }, [phase, recordResult]);
+
+  if (phase === "done") {
     return (
-      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-        <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
-          <div style={{ textAlign: 'center', paddingTop: 40, paddingBottom: 40 }}>
+      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
+        <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+          <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
             <div style={{ fontSize: 60, marginBottom: 12 }}>📐</div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 24 }}>
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "var(--ios-label)",
+                letterSpacing: "-0.5px",
+                marginBottom: 24,
+              }}
+            >
               Cents Deviation
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
-              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
-                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: ACCENT }}>{score}</div>
-                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Score</div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 10,
+                marginBottom: 24,
+              }}
+            >
+              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
+                <div
+                  style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", color: ACCENT }}
+                >
+                  {score}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>Score</div>
               </div>
-              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
-                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>{results.filter(r => Math.abs(r.guessCents - r.actualCents) <= 5).length}/{totalRounds}</div>
-                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Exact</div>
+              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
+                <div
+                  style={{
+                    fontSize: 26,
+                    fontWeight: 700,
+                    letterSpacing: "-0.5px",
+                    color: "var(--ios-label)",
+                  }}
+                >
+                  {results.filter((r) => Math.abs(r.guessCents - r.actualCents) <= 5).length}/
+                  {totalRounds}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>Exact</div>
               </div>
-              <div className="ios-card" style={{ padding: '14px 12px', textAlign: 'center' }}>
-                <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>🔥 {bestStreak}</div>
-                <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 4 }}>Best Streak</div>
+              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
+                <div
+                  style={{
+                    fontSize: 26,
+                    fontWeight: 700,
+                    letterSpacing: "-0.5px",
+                    color: "var(--ios-label)",
+                  }}
+                >
+                  🔥 {bestStreak}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
+                  Best Streak
+                </div>
               </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>Play Again</button>
-              <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <button
+                className="ios-btn-primary"
+                style={{ background: ACCENT }}
+                onClick={startGame}
+              >
+                Play Again
+              </button>
+              <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>
+                Dashboard
+              </button>
             </div>
           </div>
         </div>
@@ -141,18 +231,52 @@ export default function CentsDeviationPage() {
     );
   }
 
-  if (phase === 'setup') {
+  if (phase === "setup") {
     return (
-      <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-        <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
-          <div style={{ textAlign: 'center', paddingTop: 40 }}>
+      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
+        <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+          <div style={{ textAlign: "center", paddingTop: 40 }}>
             <div style={{ fontSize: 64, marginBottom: 20 }}>📐</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 8 }}>Cents Deviation</div>
-            <div style={{ fontSize: 15, color: 'var(--ios-label3)', marginBottom: 24 }}>Detect microtonal sharp/flat deviations</div>
+            <div
+              style={{
+                fontSize: 24,
+                fontWeight: 700,
+                color: "var(--ios-label)",
+                letterSpacing: "-0.5px",
+                marginBottom: 8,
+              }}
+            >
+              Cents Deviation
+            </div>
+            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 24 }}>
+              Detect microtonal sharp/flat deviations
+            </div>
 
-            <div className="ios-card" style={{ padding: 16, textAlign: 'left', marginBottom: 24 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: ACCENT, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>How to Play</div>
-              <ol style={{ fontSize: 14, color: 'var(--ios-label3)', listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="ios-card" style={{ padding: 16, textAlign: "left", marginBottom: 24 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: ACCENT,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  marginBottom: 12,
+                }}
+              >
+                How to Play
+              </div>
+              <ol
+                style={{
+                  fontSize: 14,
+                  color: "var(--ios-label3)",
+                  listStyle: "none",
+                  padding: 0,
+                  margin: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 6,
+                }}
+              >
                 <li>1. Hear a reference note, then a slightly detuned version</li>
                 <li>2. Drag the needle to match the deviation in cents</li>
                 <li>3. Within ±5¢ = correct; wider = partial credit</li>
@@ -161,31 +285,38 @@ export default function CentsDeviationPage() {
             </div>
 
             <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginBottom: 10 }}>Difficulty</div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                {(Object.keys(DIFF_CONFIG) as Difficulty[]).map(d => (
+              <div style={{ fontSize: 13, color: "var(--ios-label3)", marginBottom: 10 }}>
+                Difficulty
+              </div>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+                {(Object.keys(DIFF_CONFIG) as Difficulty[]).map((d) => (
                   <button
                     key={d}
                     onClick={() => setDifficulty(d)}
                     style={{
-                      height: 34, borderRadius: 17, padding: '0 16px',
-                      fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
-                      background: difficulty === d ? ACCENT : 'var(--ios-bg2)',
-                      color: difficulty === d ? '#000' : 'var(--ios-label3)',
-                      transition: 'background 0.15s, color 0.15s',
+                      height: 34,
+                      borderRadius: 17,
+                      padding: "0 16px",
+                      fontSize: 14,
+                      fontWeight: 600,
+                      border: "none",
+                      cursor: "pointer",
+                      background: difficulty === d ? ACCENT : "var(--ios-bg2)",
+                      color: difficulty === d ? "#000" : "var(--ios-label3)",
+                      transition: "background 0.15s, color 0.15s",
                     }}
                   >
                     {DIFF_CONFIG[d].label}
                   </button>
                 ))}
               </div>
-              <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 8 }}>
+              <div style={{ fontSize: 12, color: "var(--ios-label3)", marginTop: 8 }}>
                 ±{config.centsRange} cents · {config.rounds} rounds
               </div>
             </div>
 
             <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
-              {isPractice ? '🎓 Start Practicing' : 'Start Game'}
+              {isPractice ? "🎓 Start Practicing" : "Start Game"}
             </button>
           </div>
         </div>
@@ -197,26 +328,68 @@ export default function CentsDeviationPage() {
   const actualPct = 50 + (actualCents / CENTS_RANGE) * 45;
 
   return (
-    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
-        <FeedbackOverlay correct={lastCorrect} show={showFeedbackOverlay} streak={streak} onDone={() => setShowFeedbackOverlay(false)} />
+    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
+      <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+        <FeedbackOverlay
+          correct={lastCorrect}
+          show={showFeedbackOverlay}
+          streak={streak}
+          onDone={() => setShowFeedbackOverlay(false)}
+        />
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 16,
+            minHeight: 44,
+          }}
+        >
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push("/dashboard")}
             style={{
-              width: 36, height: 36, borderRadius: 18,
-              background: 'var(--ios-bg2)', border: 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer'
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              background: "var(--ios-bg2)",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
             }}
           >
             <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
-              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path
+                d="M8.5 1.5L1.5 8.5L8.5 15.5"
+                stroke="var(--ios-blue)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
-          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>📐 Cents Deviation</div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label2)', background: 'var(--ios-bg2)', borderRadius: 10, padding: '4px 10px' }}>
+          <div
+            style={{
+              fontSize: 17,
+              fontWeight: 600,
+              color: "var(--ios-label)",
+              letterSpacing: "-0.43px",
+            }}
+          >
+            📐 Cents Deviation
+          </div>
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--ios-label2)",
+              background: "var(--ios-bg2)",
+              borderRadius: 10,
+              padding: "4px 10px",
+            }}
+          >
             {score} pts
           </div>
         </div>
@@ -231,22 +404,32 @@ export default function CentsDeviationPage() {
         </div>
 
         {/* Info */}
-        <div style={{ textAlign: 'center', marginBottom: 20 }}>
-          <div style={{ fontSize: 13, color: 'var(--ios-label3)' }}>
-            Reference note: <span style={{ fontWeight: 700, color: 'var(--ios-label)' }}>{baseNote}</span>
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <div style={{ fontSize: 13, color: "var(--ios-label3)" }}>
+            Reference note:{" "}
+            <span style={{ fontWeight: 700, color: "var(--ios-label)" }}>{baseNote}</span>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--ios-label4)', marginTop: 2 }}>Listen to both notes, then set the needle</div>
+          <div style={{ fontSize: 11, color: "var(--ios-label4)", marginTop: 2 }}>
+            Listen to both notes, then set the needle
+          </div>
         </div>
 
         {/* Play buttons */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 24 }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 24 }}>
           <motion.button
             onClick={() => playTone(baseFreq, 0.8)}
             whileTap={{ scale: 0.92 }}
             style={{
-              width: 56, height: 56, borderRadius: 16,
-              background: 'var(--ios-bg2)', border: '1px solid var(--ios-sep)',
-              fontSize: 24, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 56,
+              height: 56,
+              borderRadius: 16,
+              background: "var(--ios-bg2)",
+              border: "1px solid var(--ios-sep)",
+              fontSize: 24,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             🔊
@@ -255,9 +438,15 @@ export default function CentsDeviationPage() {
             onClick={() => playRefAndDeviation(baseFreq, actualCents)}
             whileTap={{ scale: 0.92 }}
             style={{
-              height: 56, borderRadius: 16, padding: '0 20px',
-              background: `rgba(48,209,88,0.12)`, border: `1px solid ${ACCENT}`,
-              fontSize: 14, fontWeight: 600, color: ACCENT, cursor: 'pointer',
+              height: 56,
+              borderRadius: 16,
+              padding: "0 20px",
+              background: `rgba(48,209,88,0.12)`,
+              border: `1px solid ${ACCENT}`,
+              fontSize: 14,
+              fontWeight: 600,
+              color: ACCENT,
+              cursor: "pointer",
             }}
           >
             🔊+🔊 Play Both
@@ -271,11 +460,16 @@ export default function CentsDeviationPage() {
             whileTap={{ scale: 0.92 }}
             disabled={submitted}
             style={{
-              height: 56, borderRadius: 16, padding: '0 14px',
-              background: submitted ? 'var(--ios-bg3)' : 'rgba(48,209,88,0.06)',
-              border: `1px solid ${submitted ? 'var(--ios-sep)' : 'var(--ios-sep)'}`,
-              fontSize: 14, fontWeight: 600, color: submitted ? 'var(--ios-label4)' : 'var(--ios-label2)',
-              cursor: submitted ? 'default' : 'pointer', opacity: submitted ? 0.5 : 1,
+              height: 56,
+              borderRadius: 16,
+              padding: "0 14px",
+              background: submitted ? "var(--ios-bg3)" : "rgba(48,209,88,0.06)",
+              border: `1px solid ${submitted ? "var(--ios-sep)" : "var(--ios-sep)"}`,
+              fontSize: 14,
+              fontWeight: 600,
+              color: submitted ? "var(--ios-label4)" : "var(--ios-label2)",
+              cursor: submitted ? "default" : "pointer",
+              opacity: submitted ? 0.5 : 1,
             }}
           >
             🎵 Your guess
@@ -284,7 +478,15 @@ export default function CentsDeviationPage() {
 
         {/* Cents meter */}
         <div className="ios-card" style={{ padding: 16, marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--ios-label4)', marginBottom: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: 10,
+              color: "var(--ios-label4)",
+              marginBottom: 8,
+            }}
+          >
             <span>♭ Flat -{CENTS_RANGE}¢</span>
             <span>Perfect 0¢</span>
             <span>♯ Sharp +{CENTS_RANGE}¢</span>
@@ -292,29 +494,64 @@ export default function CentsDeviationPage() {
           <div
             ref={meterRef}
             style={{
-              position: 'relative', height: 72, borderRadius: 12,
-              background: 'var(--ios-bg3)', cursor: 'pointer', overflow: 'hidden',
+              position: "relative",
+              height: 72,
+              borderRadius: 12,
+              background: "var(--ios-bg3)",
+              cursor: "pointer",
+              overflow: "hidden",
             }}
-            onPointerDown={(e) => { setIsDragging(true); handleDrag(e.clientX); }}
-            onPointerMove={(e) => { if (isDragging) handleDrag(e.clientX); }}
+            onPointerDown={(e) => {
+              setIsDragging(true);
+              handleDrag(e.clientX);
+            }}
+            onPointerMove={(e) => {
+              if (isDragging) handleDrag(e.clientX);
+            }}
             onPointerUp={() => setIsDragging(false)}
             onPointerLeave={() => setIsDragging(false)}
           >
             {/* Center line */}
-            <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'var(--ios-sep)' }} />
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: "50%",
+                width: 1,
+                background: "var(--ios-sep)",
+              }}
+            />
             {/* Zone markers */}
-            {[-40, -30, -20, -10, 10, 20, 30, 40].map(c => (
-              <div key={c} style={{ position: 'absolute', top: 0, bottom: 0, width: 1, background: 'var(--ios-sep)', opacity: 0.5, left: `${50 + (c / CENTS_RANGE) * 45}%` }} />
+            {[-40, -30, -20, -10, 10, 20, 30, 40].map((c) => (
+              <div
+                key={c}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  bottom: 0,
+                  width: 1,
+                  background: "var(--ios-sep)",
+                  opacity: 0.5,
+                  left: `${50 + (c / CENTS_RANGE) * 45}%`,
+                }}
+              />
             ))}
             {/* Needle */}
             <motion.div
               style={{
-                position: 'absolute', top: 8, bottom: 8, width: 3, borderRadius: 2, zIndex: 10,
-                left: `${needlePct}%`, marginLeft: -1.5,
+                position: "absolute",
+                top: 8,
+                bottom: 8,
+                width: 3,
+                borderRadius: 2,
+                zIndex: 10,
+                left: `${needlePct}%`,
+                marginLeft: -1.5,
                 background: ACCENT,
                 boxShadow: `0 0 8px ${ACCENT}80`,
               }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
             />
             {/* Actual (revealed) */}
             {submitted && (
@@ -322,15 +559,29 @@ export default function CentsDeviationPage() {
                 initial={{ opacity: 0, scaleY: 0 }}
                 animate={{ opacity: 1, scaleY: 1 }}
                 style={{
-                  position: 'absolute', top: 12, bottom: 12, width: 3, borderRadius: 2,
-                  left: `${actualPct}%`, marginLeft: -1.5,
-                  background: 'var(--ios-red)',
+                  position: "absolute",
+                  top: 12,
+                  bottom: 12,
+                  width: 3,
+                  borderRadius: 2,
+                  left: `${actualPct}%`,
+                  marginLeft: -1.5,
+                  background: "var(--ios-red)",
                 }}
               />
             )}
           </div>
-          <div style={{ textAlign: 'center', marginTop: 10, fontSize: 20, fontWeight: 700, color: ACCENT }}>
-            {needlePos > 0 ? '+' : ''}{needlePos}¢
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: 10,
+              fontSize: 20,
+              fontWeight: 700,
+              color: ACCENT,
+            }}
+          >
+            {needlePos > 0 ? "+" : ""}
+            {needlePos}¢
           </div>
         </div>
 
@@ -343,18 +594,37 @@ export default function CentsDeviationPage() {
               exit={{ opacity: 0 }}
               className="ios-card"
               style={{
-                padding: '12px 16px', textAlign: 'center', marginBottom: 16,
-                border: `1px solid ${Math.abs(needlePos - actualCents) <= 5 ? 'var(--ios-green)' : 'var(--ios-orange)'}`,
-                background: Math.abs(needlePos - actualCents) <= 5 ? 'rgba(48,209,88,0.08)' : 'rgba(255,159,10,0.08)',
+                padding: "12px 16px",
+                textAlign: "center",
+                marginBottom: 16,
+                border: `1px solid ${Math.abs(needlePos - actualCents) <= 5 ? "var(--ios-green)" : "var(--ios-orange)"}`,
+                background:
+                  Math.abs(needlePos - actualCents) <= 5
+                    ? "rgba(48,209,88,0.08)"
+                    : "rgba(255,159,10,0.08)",
               }}
             >
-              <div style={{ fontSize: 14, fontWeight: 600,
-                color: Math.abs(needlePos - actualCents) <= 5 ? 'var(--ios-green)' : 'var(--ios-orange)',
-              }}>
-                {Math.abs(needlePos - actualCents) <= 5 ? '✓ Excellent ear!' : Math.abs(needlePos - actualCents) <= 15 ? '~ Close' : '✗ Off'} — {Math.abs(needlePos - actualCents)}¢ error
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color:
+                    Math.abs(needlePos - actualCents) <= 5
+                      ? "var(--ios-green)"
+                      : "var(--ios-orange)",
+                }}
+              >
+                {Math.abs(needlePos - actualCents) <= 5
+                  ? "✓ Excellent ear!"
+                  : Math.abs(needlePos - actualCents) <= 15
+                    ? "~ Close"
+                    : "✗ Off"}{" "}
+                — {Math.abs(needlePos - actualCents)}¢ error
               </div>
-              <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 4 }}>
-                Actual: {actualCents > 0 ? '+' : ''}{actualCents}¢ · Your guess: {needlePos > 0 ? '+' : ''}{needlePos}¢
+              <div style={{ fontSize: 12, color: "var(--ios-label3)", marginTop: 4 }}>
+                Actual: {actualCents > 0 ? "+" : ""}
+                {actualCents}¢ · Your guess: {needlePos > 0 ? "+" : ""}
+                {needlePos}¢
               </div>
             </motion.div>
           )}
@@ -373,15 +643,23 @@ export default function CentsDeviationPage() {
         ) : (
           <motion.button
             whileTap={{ scale: 0.97 }}
-            onClick={() => { if (roundRef.current >= totalRounds) { setPhase('done'); } else { nextRound(); } }}
+            onClick={() => {
+              if (roundRef.current >= totalRounds) {
+                setPhase("done");
+              } else {
+                nextRound();
+              }
+            }}
             className="ios-btn-primary"
             style={{ background: ACCENT }}
           >
-            {roundRef.current >= totalRounds ? 'See Results' : 'Next Round →'}
+            {roundRef.current >= totalRounds ? "See Results" : "Next Round →"}
           </motion.button>
         )}
 
-        <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--ios-label3)', marginTop: 16 }}>
+        <div
+          style={{ textAlign: "center", fontSize: 13, color: "var(--ios-label3)", marginTop: 16 }}
+        >
           🔥 {streak} streak · Round {round}/{totalRounds} · {config.label}
           {isPractice && <span style={{ marginLeft: 8, color: ACCENT }}>Practice</span>}
         </div>

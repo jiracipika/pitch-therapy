@@ -1,82 +1,151 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from '@/lib/audio';
-import WaveVisualizer from '@/components/WaveVisualizer';
-import NoteComparisonStaff from '@/components/NoteComparisonStaff';
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import WaveVisualizer from "@/components/WaveVisualizer";
+import NoteComparisonStaff from "@/components/NoteComparisonStaff";
+import { useStatsContext } from "@/components/StatsProvider";
 
-type Feedback = 'correct' | 'close' | 'miss';
-interface GuessRow { note: string; feedback: Feedback }
+type Feedback = "correct" | "close" | "miss";
+interface GuessRow {
+  note: string;
+  feedback: Feedback;
+}
 
 export default function NoteWordlePage() {
+  const { recordResult } = useStatsContext();
+  const recordedRef = useRef(false);
+
   const router = useRouter();
   const [targetIdx, setTargetIdx] = useState(0);
   const [guesses, setGuesses] = useState<GuessRow[]>([]);
   const [currentGuess, setCurrentGuess] = useState<string | null>(null);
-  const [phase, setPhase] = useState<'playing' | 'won' | 'lost'>('playing');
+  const [phase, setPhase] = useState<"playing" | "won" | "lost">("playing");
   const [copied, setCopied] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const ACCENT = '#30D158';
+  const ACCENT = "#30D158";
 
   const initGame = () => {
     setTargetIdx(Math.floor(Math.random() * 12));
-    setGuesses([]); setCurrentGuess(null); setPhase('playing');
+    setGuesses([]);
+    setCurrentGuess(null);
+    setPhase("playing");
   };
 
-  useEffect(() => { initGame(); }, []);
+  useEffect(() => {
+    initGame();
+  }, []);
 
   const getFeedback = (guess: string): Feedback => {
-    const guessIdx = NOTE_NAMES.indexOf(guess as typeof NOTE_NAMES[number]);
+    const guessIdx = NOTE_NAMES.indexOf(guess as (typeof NOTE_NAMES)[number]);
     const diff = Math.abs(guessIdx - targetIdx);
-    if (diff === 0) return 'correct';
-    if (diff <= 2 || diff >= 10) return 'close';
-    return 'miss';
+    if (diff === 0) return "correct";
+    if (diff <= 2 || diff >= 10) return "close";
+    return "miss";
   };
 
+  useEffect(() => {
+    if (!(phase === "won" || phase === "lost")) {
+      recordedRef.current = false;
+      return;
+    }
+    if (!recordedRef.current) {
+      recordedRef.current = true;
+      recordResult({
+        mode: "note-wordle",
+        score: phase === "won" ? Math.max(100, 700 - guesses.length * 100) : 0,
+        accuracy: phase === "won" ? Math.max(0.1, 1 - (guesses.length - 1) * 0.15) : 0,
+        rounds: Math.max(guesses.length, 1),
+        date: new Date().toISOString(),
+        timeMs: Math.max(guesses.length, 1) * 5000,
+      });
+    }
+  }, [phase, recordResult]);
+
   const submitGuess = () => {
-    if (!currentGuess || guesses.length >= 6 || phase !== 'playing') return;
+    if (!currentGuess || guesses.length >= 6 || phase !== "playing") return;
     const feedback = getFeedback(currentGuess);
     setIsPlaying(true);
     playTone(NOTE_FREQUENCIES[`${currentGuess}4`] || 261.63, 0.3);
     setTimeout(() => setIsPlaying(false), 300);
     const newGuesses = [...guesses, { note: currentGuess, feedback }];
-    setGuesses(newGuesses); setCurrentGuess(null);
-    if (feedback === 'correct') setPhase('won');
-    else if (newGuesses.length >= 6) setPhase('lost');
+    setGuesses(newGuesses);
+    setCurrentGuess(null);
+    if (feedback === "correct") setPhase("won");
+    else if (newGuesses.length >= 6) setPhase("lost");
   };
 
   const handleShare = () => {
-    const grid = guesses.map(g => g.feedback === 'correct' ? '🟩' : g.feedback === 'close' ? '🟨' : '🟥').join('\n');
-    navigator.clipboard.writeText(`🎵 Note Wordle ${phase === 'won' ? guesses.length : 'X'}/6\n${grid}`);
-    setCopied(true); setTimeout(() => setCopied(false), 2000);
+    const grid = guesses
+      .map((g) => (g.feedback === "correct" ? "🟩" : g.feedback === "close" ? "🟨" : "🟥"))
+      .join("\n");
+    navigator.clipboard.writeText(
+      `🎵 Note Wordle ${phase === "won" ? guesses.length : "X"}/6\n${grid}`,
+    );
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const targetNote = NOTE_NAMES[targetIdx];
 
   return (
-    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="max-w-sm md:max-w-lg mx-auto px-4 pt-12">
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, minHeight: 44 }}>
+    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
+      <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 16,
+            minHeight: 44,
+          }}
+        >
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push("/dashboard")}
             style={{
-              width: 36, height: 36, borderRadius: 18,
-              background: 'var(--ios-bg2)', border: 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer'
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              background: "var(--ios-bg2)",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
             }}
           >
             <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
-              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path
+                d="M8.5 1.5L1.5 8.5L8.5 15.5"
+                stroke="var(--ios-blue)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
-          <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>🟩 Note Wordle</div>
+          <div
+            style={{
+              fontSize: 17,
+              fontWeight: 600,
+              color: "var(--ios-label)",
+              letterSpacing: "-0.43px",
+            }}
+          >
+            🟩 Note Wordle
+          </div>
           <button
             onClick={initGame}
-            style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-blue)', background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--ios-blue)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
             🔄 New
           </button>
@@ -87,50 +156,87 @@ export default function NoteWordlePage() {
         </div>
 
         {/* Guess rows */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 20,
+          }}
+        >
           {Array.from({ length: 6 }).map((_, i) => {
             const guess = guesses[i];
-            let bg = 'var(--ios-bg2)';
-            let border = '1.5px solid var(--ios-sep)';
-            let color = 'var(--ios-label3)';
+            let bg = "var(--ios-bg2)";
+            let border = "1.5px solid var(--ios-sep)";
+            let color = "var(--ios-label3)";
             if (guess) {
-              if (guess.feedback === 'correct') { bg = 'rgba(48,209,88,0.15)'; border = '2px solid var(--ios-green)'; color = 'var(--ios-green)'; }
-              else if (guess.feedback === 'close') { bg = 'rgba(255,159,10,0.15)'; border = '2px solid var(--ios-orange)'; color = 'var(--ios-orange)'; }
-              else { bg = 'rgba(255,69,58,0.12)'; border = '2px solid var(--ios-red)'; color = 'var(--ios-red)'; }
+              if (guess.feedback === "correct") {
+                bg = "rgba(48,209,88,0.15)";
+                border = "2px solid var(--ios-green)";
+                color = "var(--ios-green)";
+              } else if (guess.feedback === "close") {
+                bg = "rgba(255,159,10,0.15)";
+                border = "2px solid var(--ios-orange)";
+                color = "var(--ios-orange)";
+              } else {
+                bg = "rgba(255,69,58,0.12)";
+                border = "2px solid var(--ios-red)";
+                color = "var(--ios-red)";
+              }
             } else if (i === guesses.length) {
-              bg = 'var(--ios-bg2)'; border = '2px solid var(--ios-sep)'; color = 'var(--ios-label)';
+              bg = "var(--ios-bg2)";
+              border = "2px solid var(--ios-sep)";
+              color = "var(--ios-label)";
             }
             return (
               <div
                 key={i}
                 style={{
-                  width: '100%', height: 52, borderRadius: 12,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 18, fontWeight: 700,
-                  background: bg, border, color,
-                  transition: 'all 0.2s ease',
+                  width: "100%",
+                  height: 52,
+                  borderRadius: 12,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 18,
+                  fontWeight: 700,
+                  background: bg,
+                  border,
+                  color,
+                  transition: "all 0.2s ease",
                 }}
               >
-                {guess ? guess.note : i === guesses.length ? currentGuess ?? '' : ''}
+                {guess ? guess.note : i === guesses.length ? (currentGuess ?? "") : ""}
               </div>
             );
           })}
         </div>
 
-        {phase === 'playing' && (
+        {phase === "playing" && (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, marginBottom: 12 }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(6, 1fr)",
+                gap: 6,
+                marginBottom: 12,
+              }}
+            >
               {NOTE_NAMES.map((n) => (
                 <button
                   key={n}
                   onClick={() => setCurrentGuess(n)}
                   style={{
-                    borderRadius: 10, padding: '10px 4px',
-                    fontSize: 13, fontWeight: 700,
-                    background: currentGuess === n ? ACCENT : 'var(--ios-bg2)',
-                    color: currentGuess === n ? '#000' : 'var(--ios-label2)',
-                    border: 'none', cursor: 'pointer',
-                    transition: 'background 0.12s',
+                    borderRadius: 10,
+                    padding: "10px 4px",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    background: currentGuess === n ? ACCENT : "var(--ios-bg2)",
+                    color: currentGuess === n ? "#000" : "var(--ios-label2)",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "background 0.12s",
                   }}
                 >
                   {n}
@@ -148,30 +254,44 @@ export default function NoteWordlePage() {
           </div>
         )}
 
-        {(phase === 'won' || phase === 'lost') && (
-          <div style={{ textAlign: 'center', paddingTop: 16 }}>
-            <div style={{ fontSize: 40, marginBottom: 8 }}>{phase === 'won' ? '🎉' : '😔'}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-0.5px', marginBottom: 20 }}>
-              {phase === 'won' ? 'Got it!' : `It was ${targetNote}4`}
+        {(phase === "won" || phase === "lost") && (
+          <div style={{ textAlign: "center", paddingTop: 16 }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>{phase === "won" ? "🎉" : "😔"}</div>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 700,
+                color: "var(--ios-label)",
+                letterSpacing: "-0.5px",
+                marginBottom: 20,
+              }}
+            >
+              {phase === "won" ? "Got it!" : `It was ${targetNote}4`}
             </div>
 
             {/* Staff comparison showing last guess vs target */}
             <NoteComparisonStaff
-              guessedNote={guesses[guesses.length - 1]?.note ?? '?'}
+              guessedNote={guesses[guesses.length - 1]?.note ?? "?"}
               correctNote={targetNote}
-              isCorrect={phase === 'won'}
+              isCorrect={phase === "won"}
             />
 
-            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
               <button
                 onClick={handleShare}
                 style={{
-                  flex: 1, borderRadius: 14, height: 50,
-                  fontSize: 15, fontWeight: 600, border: 'none', cursor: 'pointer',
-                  background: 'var(--ios-bg2)', color: 'var(--ios-label2)',
+                  flex: 1,
+                  borderRadius: 14,
+                  height: 50,
+                  fontSize: 15,
+                  fontWeight: 600,
+                  border: "none",
+                  cursor: "pointer",
+                  background: "var(--ios-bg2)",
+                  color: "var(--ios-label2)",
                 }}
               >
-                {copied ? '✅ Copied!' : '📋 Share'}
+                {copied ? "✅ Copied!" : "📋 Share"}
               </button>
               <button
                 onClick={initGame}
@@ -181,17 +301,26 @@ export default function NoteWordlePage() {
                 Play Again
               </button>
             </div>
-            <button className="ios-btn-secondary" onClick={() => router.push('/dashboard')}>Dashboard</button>
+            <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>
+              Dashboard
+            </button>
           </div>
         )}
 
-        <div className="ios-card" style={{ padding: 16, textAlign: 'center', marginTop: 16 }}>
-          <div style={{ fontSize: 12, color: 'var(--ios-label3)' }}>
+        <div className="ios-card" style={{ padding: 16, textAlign: "center", marginTop: 16 }}>
+          <div style={{ fontSize: 12, color: "var(--ios-label3)" }}>
             🟩 Correct • 🟨 Within 2 semitones • 🟥 More than 2 semitones
           </div>
           <button
             onClick={() => playTone(NOTE_FREQUENCIES[`${targetNote}4`] || 261.63, 0.6)}
-            style={{ marginTop: 8, fontSize: 12, color: ACCENT, background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{
+              marginTop: 8,
+              fontSize: 12,
+              color: ACCENT,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
             🔊 Play target tone
           </button>
