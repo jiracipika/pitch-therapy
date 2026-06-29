@@ -231,7 +231,7 @@ export default function Home() {
                     display: "inline-block",
                   }}
                 />
-                18 Training Modes
+                Simple daily ear training
               </span>
             </motion.div>
 
@@ -252,8 +252,19 @@ export default function Home() {
               className="ios-callout mb-10 max-w-xs"
               style={{ color: "var(--ios-label2)", lineHeight: 1.5 }}
             >
-              A daily gym for your ears. Train pitch, frequency, intervals, and more.
+              A clearer, faster way to train pitch, intervals, frequency, and musical memory — one guided drill at a time.
             </motion.p>
+
+            <motion.div
+              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.42, duration: 0.45 }}
+              className="pt-home-benefits"
+            >
+              <span>2-minute sessions</span>
+              <span>Clear progress</span>
+              <span>No setup needed</span>
+            </motion.div>
 
             <motion.div
               initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
@@ -268,7 +279,7 @@ export default function Home() {
                 className="ios-btn-primary"
                 style={{ fontSize: 17 }}
               >
-                Start Training
+                Start with Guided Training
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.012 }}
@@ -277,7 +288,7 @@ export default function Home() {
                 className="ios-btn-secondary"
                 style={{ fontSize: 17 }}
               >
-                Daily Challenge
+                Do Today's Challenge
               </motion.button>
             </motion.div>
 
@@ -477,7 +488,7 @@ export default function Home() {
           }}
         >
           <div style={{ fontSize: 36, marginBottom: 10 }}>🔥</div>
-          <div className="ios-title3 mb-2">Daily Challenge</div>
+          <div className="ios-title3 mb-2">Do Today's Challenge</div>
           <div
             style={{
               fontSize: 15,

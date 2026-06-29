@@ -2207,3 +2207,126 @@ input[type="range"]::-moz-range-thumb {
   -webkit-backdrop-filter: saturate(200%) blur(40px);
   border: 1px solid color-mix(in srgb, var(--ios-border) 30%, transparent);
 }
+
+/* ============================================================
+   Usability refresh: higher contrast, clearer hierarchy, and
+   larger tap targets across the web app.
+   ============================================================ */
+:root {
+  --pt-focus-ring: 0 0 0 4px color-mix(in srgb, var(--ios-blue) 24%, transparent);
+  --pt-readable-card: color-mix(in srgb, var(--ios-bg2) 94%, transparent);
+}
+
+body {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(10,132,255,0.18), transparent 34rem),
+    radial-gradient(circle at 82% 18%, rgba(191,90,242,0.14), transparent 28rem),
+    var(--ios-bg);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: none;
+  box-shadow: var(--pt-focus-ring) !important;
+}
+
+.ios-large-title {
+  text-wrap: balance;
+}
+
+.ios-callout,
+.pt-home-side-link-subtitle,
+.pt-home-plan-row small,
+.ios-game-card div,
+.ios-row div {
+  text-wrap: pretty;
+}
+
+.ios-btn-primary,
+.ios-btn-secondary,
+.ios-btn-tonal {
+  min-height: 52px;
+  border-radius: 16px !important;
+  font-weight: 760 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.ios-btn-primary {
+  background: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 52%, #bf5af2 100%) !important;
+  box-shadow: 0 16px 34px rgba(10,132,255,0.34) !important;
+}
+
+.ios-btn-secondary,
+.ios-btn-tonal {
+  background: var(--pt-readable-card) !important;
+  border: 1px solid color-mix(in srgb, var(--ios-blue) 22%, var(--ios-sep)) !important;
+  color: var(--ios-label) !important;
+}
+
+.pt-home-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: -18px auto 24px;
+  max-width: 360px;
+}
+
+.pt-home-benefits span {
+  border: 1px solid color-mix(in srgb, var(--ios-blue) 22%, var(--ios-sep));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ios-bg2) 78%, transparent);
+  color: var(--ios-label2);
+  font-size: 12px;
+  font-weight: 720;
+  padding: 7px 10px;
+}
+
+.ios-card,
+.ios-game-card,
+.ios-group {
+  background: var(--pt-readable-card) !important;
+  border-color: color-mix(in srgb, var(--ios-sep) 58%, transparent) !important;
+}
+
+.ios-game-card,
+.ios-row,
+.pt-home-side-link {
+  min-height: 56px;
+}
+
+.ios-game-card {
+  border-radius: 18px !important;
+}
+
+.pt-nav-mobile {
+  box-shadow: 0 -12px 34px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+}
+
+.pt-rail-brand,
+.pt-rail-item,
+.pt-home-side-link,
+.ios-row {
+  border-radius: 16px;
+}
+
+@media (min-width: 768px) {
+  .pt-home-modes .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .pt-page-shell {
+    max-width: 1180px;
+  }
+}
+
+@media (max-width: 430px) {
+  .pt-home-hero-main .ios-large-title {
+    font-size: clamp(40px, 13vw, 52px) !important;
+  }
+
+  .pt-home-benefits {
+    margin-top: -14px;
+  }
+}
