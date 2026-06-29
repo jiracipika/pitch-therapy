@@ -53,9 +53,9 @@ function AnimatedNumber({ value, delay = 0 }: { value: number; delay?: number })
 }
 
 const QUICK_ACTIONS = [
-  { href: '/daily', label: 'Run Daily Drill', sub: '2 focused challenges' },
-  { href: '/progress', label: 'Review Weak Spots', sub: 'See low-accuracy modes' },
-  { href: '/settings', label: 'Tune Audio Profile', sub: 'Adjust cues and feedback' },
+  { href: '/daily', label: '1. Run Daily Drill', sub: 'A guided warm-up for today' },
+  { href: '/play-modes', label: '2. Pick a Focus Mode', sub: 'Choose by ear-training skill' },
+  { href: '/progress', label: '3. Review Weak Spots', sub: 'See low-accuracy modes' },
 ];
 
 function StreakRing({ streak, size = 80 }: { streak: number; size?: number }) {
@@ -154,8 +154,8 @@ export default function Dashboard() {
         <PageHero
           variant="dashboard"
           eyebrow={greeting()}
-          title="Ready to train?"
-          subtitle="Pick up where you left off and keep your ear in shape."
+          title="Your practice cockpit"
+          subtitle="Start the daily drill, review weak spots, or jump into a focused mode without hunting through menus."
         />
 
         {!loaded ? (
