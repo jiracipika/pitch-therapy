@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { GAME_MODE_META, GAME_MODES } from "../gameData";
 import {
   buildPracticePlan,
+  getModeTrainingCue,
   getModesByCategory,
   getPracticeFocusForDate,
   getRecommendedModes,
@@ -41,5 +42,26 @@ describe("practice plan", () => {
     expect(advancedModes.every((modeId) => GAME_MODE_META[modeId].category === "advanced")).toBe(
       true,
     );
+  });
+
+  it("builds training cues from mode category metadata", () => {
+    expect(getModeTrainingCue("note-id")).toMatchObject({
+      skillLabel: "Core listening",
+      durationLabel: "3-5 min",
+    });
+    expect(getModeTrainingCue("speed-round")).toMatchObject({
+      skillLabel: "Timed reflexes",
+      durationLabel: "2-4 min",
+    });
+  });
+
+  it("provides complete training cue copy for every playable mode", () => {
+    for (const modeId of GAME_MODES) {
+      const cue = getModeTrainingCue(modeId);
+
+      expect(cue.durationLabel.length).toBeGreaterThan(0);
+      expect(cue.skillLabel.length).toBeGreaterThan(0);
+      expect(cue.sessionGoal.length).toBeGreaterThan(0);
+    }
   });
 });

@@ -16,6 +16,12 @@ export interface PracticePlan {
   steps: PracticePlanStep[];
 }
 
+export interface ModeTrainingCue {
+  skillLabel: string;
+  durationLabel: string;
+  sessionGoal: string;
+}
+
 const FOCUS_ROTATION: PracticeFocus[] = [
   "balanced",
   "pitch",
@@ -59,6 +65,39 @@ const FOCUS_MODES: Record<PracticeFocus, GameMode[]> = {
 
 const STEP_LABELS = ["Warm up", "Focus", "Finish strong"];
 
+const CATEGORY_TRAINING_CUES: Record<ModeCategoryId, ModeTrainingCue> = {
+  foundational: {
+    skillLabel: "Core listening",
+    durationLabel: "3-5 min",
+    sessionGoal: "Build reliable note and frequency recognition before moving faster.",
+  },
+  wordle: {
+    skillLabel: "Daily puzzle",
+    durationLabel: "4-6 min",
+    sessionGoal: "Use repeatable guesses to sharpen interval memory and elimination strategy.",
+  },
+  pitch: {
+    skillLabel: "Pitch control",
+    durationLabel: "5-8 min",
+    sessionGoal: "Match, hold, and reproduce target tones with steady feedback.",
+  },
+  interactive: {
+    skillLabel: "Hands-on drill",
+    durationLabel: "3-6 min",
+    sessionGoal: "Turn what you hear into a fast physical answer on the staff, keys, or slider.",
+  },
+  advanced: {
+    skillLabel: "Advanced ear",
+    durationLabel: "6-10 min",
+    sessionGoal: "Challenge fine-grained interval, harmony, tuning, and cents judgment.",
+  },
+  speed: {
+    skillLabel: "Timed reflexes",
+    durationLabel: "2-4 min",
+    sessionGoal: "Keep recognition accurate while decisions get faster under pressure.",
+  },
+};
+
 export function getPracticeFocusForDate(date = new Date()): PracticeFocus {
   return FOCUS_ROTATION[date.getDay()] ?? "balanced";
 }
@@ -73,6 +112,10 @@ export function getRecommendedModes(focus: PracticeFocus = "balanced", limit = 3
 
 export function getModesByCategory(categoryId: ModeCategoryId): GameMode[] {
   return GAME_MODES.filter((modeId) => GAME_MODE_META[modeId].category === categoryId);
+}
+
+export function getModeTrainingCue(modeId: GameMode): ModeTrainingCue {
+  return CATEGORY_TRAINING_CUES[GAME_MODE_META[modeId].category];
 }
 
 export function buildPracticePlan(

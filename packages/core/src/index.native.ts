@@ -19,12 +19,7 @@ export type {
   RoundResult,
 } from "./gameData";
 
-export {
-  GAME_MODES,
-  GAME_MODE_META,
-  MODE_CATEGORIES,
-  DIFFICULTY_CONFIG,
-} from "./gameData";
+export { GAME_MODES, GAME_MODE_META, MODE_CATEGORIES, DIFFICULTY_CONFIG } from "./gameData";
 
 // ─── Audio utilities (pure math, no web deps) ───────────────────────────────
 
@@ -49,7 +44,11 @@ export { getSupabaseClient } from "./supabase.native";
 
 // ─── Daily Challenge (pure logic) ───────────────────────────────────────────
 
-export { getDailySeed as getDailyChallengeSeed, calculateStreak, todayDateString } from "./dailyChallenge";
+export {
+  getDailySeed as getDailyChallengeSeed,
+  calculateStreak,
+  todayDateString,
+} from "./dailyChallenge";
 export type { DailyChallengeResult } from "./dailyChallenge";
 
 // ─── Staff (pure math) ──────────────────────────────────────────────────────
@@ -65,11 +64,7 @@ export {
   createInitialGameState,
   GRADE_COLORS,
 } from "./gameFramework";
-export type {
-  BaseGameState,
-  ScoreBreakdown,
-  Grade,
-} from "./gameFramework";
+export type { BaseGameState, ScoreBreakdown, Grade } from "./gameFramework";
 
 // ─── Pitch Detection (native stub) ──────────────────────────────────────────
 
@@ -79,10 +74,7 @@ export {
   calculateCentsDeviation,
   centsToTunerRange,
 } from "./pitchDetection.native";
-export type {
-  PitchDetectionResult,
-  MicPermissionState,
-} from "./pitchDetection.native";
+export type { PitchDetectionResult, MicPermissionState } from "./pitchDetection.native";
 
 // ─── MIDI (native stub) ─────────────────────────────────────────────────────
 
@@ -96,22 +88,12 @@ export type { MidiNoteEvent, MidiDevice } from "./midi.native";
 
 // ─── Game Session (pure logic) ──────────────────────────────────────────────
 
-export {
-  sessionReducer,
-  initialSessionState,
-  generateShareGrid,
-} from "./gameSession";
-export type {
-  WordleAttempt,
-  WordleFeedback,
-} from "./gameSession";
+export { sessionReducer, initialSessionState, generateShareGrid } from "./gameSession";
+export type { WordleAttempt, WordleFeedback } from "./gameSession";
 
 // ─── Progress Insights (pure analytics) ─────────────────────────────────────
 
-export {
-  buildProgressInsights,
-  buildDailyActivityMap,
-} from "./progressInsights";
+export { buildProgressInsights, buildDailyActivityMap } from "./progressInsights";
 export type {
   ProgressResult,
   WeakModeCluster,
@@ -123,8 +105,14 @@ export type {
 
 export {
   buildPracticePlan,
+  getModeTrainingCue,
   getModesByCategory,
   getPracticeFocusForDate,
   getRecommendedModes,
 } from "./practicePlan";
-export type { PracticeFocus, PracticePlan, PracticePlanStep } from "./practicePlan";
+export type {
+  ModeTrainingCue,
+  PracticeFocus,
+  PracticePlan,
+  PracticePlanStep,
+} from "./practicePlan";
