@@ -43,7 +43,11 @@ export function AnimatedModeCard({ mode, compact = false }: AnimatedModeCardProp
           void triggerSelectionHaptic();
           router.push(route);
         }}
+        accessibilityRole="button"
+        accessibilityLabel={`Open ${mode.label}`}
+        accessibilityHint={`${mode.description}. ${cue.durationLabel}. ${cue.skillLabel}.`}
         style={({ pressed }) => ({
+          minHeight: 48,
           transform: [{ scale: pressed ? 0.985 : 1 }],
           opacity: pressed ? 0.88 : 1,
         })}

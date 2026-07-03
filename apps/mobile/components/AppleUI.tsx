@@ -11,9 +11,19 @@ interface GlassCardProps {
   onPress?: () => void;
   padding?: number;
   accent?: string;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
-export function GlassCard({ children, style, onPress, padding = 16, accent }: GlassCardProps) {
+export function GlassCard({
+  children,
+  style,
+  onPress,
+  padding = 16,
+  accent,
+  accessibilityLabel,
+  accessibilityHint,
+}: GlassCardProps) {
   const lift = useRef(new Animated.Value(0)).current;
   const { glassMode } = useAppSettings();
   const reducedGlass = glassMode === 'reduced';
@@ -78,7 +88,11 @@ export function GlassCard({ children, style, onPress, padding = 16, accent }: Gl
     <Animated.View style={{ opacity, transform: [{ translateY }] }}>
       <Pressable
         onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={accessibilityHint}
         style={({ pressed }) => ({
+          minHeight: 48,
           opacity: pressed ? 0.86 : 1,
           transform: [{ scale: pressed ? 0.985 : 1 }],
         })}
@@ -119,6 +133,8 @@ interface AppleButtonProps {
   loading?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 export function AppleButton({
@@ -129,6 +145,8 @@ export function AppleButton({
   loading,
   disabled,
   style,
+  accessibilityLabel,
+  accessibilityHint,
 }: AppleButtonProps) {
   const isPrimary = variant === 'primary';
   const isSecondary = variant === 'secondary';
@@ -137,6 +155,10 @@ export function AppleButton({
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? title}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled: Boolean(disabled || loading), busy: Boolean(loading) }}
       style={({ pressed }) => [
         styles.button,
         {
@@ -338,6 +360,8 @@ interface AppleInputProps {
   keyboardType?: 'default' | 'email-address' | 'numeric';
   autoCorrect?: boolean;
   style?: StyleProp<ViewStyle>;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 export function AppleInput({
@@ -349,6 +373,8 @@ export function AppleInput({
   keyboardType = 'default',
   autoCorrect = false,
   style,
+  accessibilityLabel,
+  accessibilityHint,
 }: AppleInputProps) {
   return (
     <TextInput
@@ -360,6 +386,8 @@ export function AppleInput({
       autoCapitalize={autoCapitalize}
       keyboardType={keyboardType}
       autoCorrect={autoCorrect}
+      accessibilityLabel={accessibilityLabel ?? placeholder}
+      accessibilityHint={accessibilityHint}
       style={[styles.input, style]}
     />
   );
@@ -400,6 +428,7 @@ const styles = StyleSheet.create({
     ...typography.subhead,
   },
   button: {
+    minHeight: 48,
     borderRadius: radii.md,
     paddingVertical: 15,
     paddingHorizontal: 22,

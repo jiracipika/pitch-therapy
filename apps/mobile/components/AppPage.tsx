@@ -360,8 +360,12 @@ export function AppPage({
                         router.replace(tab.route as Href);
                       }
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Open ${tab.label}`}
+                    accessibilityState={{ selected: active }}
                     style={{
                       width: 64,
+                      minHeight: 48,
                       paddingVertical: 10,
                       borderRadius: 8,
                       backgroundColor: active ? tab.color + '24' : 'transparent',

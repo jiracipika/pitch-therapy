@@ -70,8 +70,12 @@ export default function DashboardScreen() {
               void triggerSelectionHaptic();
               router.push("/play-modes");
             }}
+            accessibilityRole="button"
+            accessibilityLabel="Start play"
+            accessibilityHint="Open the full play mode catalog"
             style={({ pressed }) => ({
               flex: 1,
+              minHeight: 48,
               borderRadius: radii.md,
               backgroundColor: colors.text,
               paddingVertical: 14,
@@ -86,8 +90,11 @@ export default function DashboardScreen() {
               void triggerSelectionHaptic();
               router.push("/daily");
             }}
+            accessibilityRole="button"
+            accessibilityLabel="Open daily challenge"
             style={({ pressed }) => ({
               width: isTablet ? 104 : "100%",
+              minHeight: 48,
               borderRadius: radii.md,
               borderWidth: 1,
               borderColor: colors.borderStrong,

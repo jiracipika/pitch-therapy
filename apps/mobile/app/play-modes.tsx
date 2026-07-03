@@ -156,6 +156,8 @@ export default function PlayModesScreen() {
           value={modeSearch}
           onChangeText={setModeSearch}
           placeholder="Search all play modes"
+          accessibilityLabel="Search play modes"
+          accessibilityHint="Filter drills by skill, cue, or game name"
           autoCapitalize="none"
           autoCorrect={false}
           style={{

@@ -95,6 +95,9 @@ export default function SplashScreen() {
             void triggerSelectionHaptic();
             router.replace('/dashboard');
           }}
+          accessibilityRole="button"
+          accessibilityLabel="Get Started"
+          accessibilityHint="Open the Pitch Therapy dashboard"
           style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
         >
           <Text style={styles.buttonText}>Get Started</Text>
@@ -151,6 +154,7 @@ const styles = StyleSheet.create({
   },
   button: {
     minWidth: 210,
+    minHeight: 48,
     backgroundColor: colors.text,
     borderRadius: radii.md,
     paddingHorizontal: 34,
