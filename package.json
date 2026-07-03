@@ -37,5 +37,8 @@
   "packageManager": "npm@10.9.2",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "wonka": "^6.3.6"
   }
 }
