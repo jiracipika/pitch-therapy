@@ -1,4 +1,5 @@
 import { GAME_MODE_META, GAME_MODES, type GameMode, type ModeCategoryId } from "./gameData";
+import { buildProgressInsights, type ProgressResult } from "./progressInsights";
 
 export type PracticeFocus = "balanced" | "pitch" | "frequency" | "speed" | "advanced";
 
@@ -12,6 +13,7 @@ export interface PracticePlan {
   focus: PracticeFocus;
   title: string;
   summary: string;
+  personalized: boolean;
   modeIds: GameMode[];
   steps: PracticePlanStep[];
 }
@@ -32,7 +34,10 @@ const FOCUS_ROTATION: PracticeFocus[] = [
   "balanced",
 ];
 
-const FOCUS_COPY: Record<PracticeFocus, Omit<PracticePlan, "focus" | "modeIds" | "steps">> = {
+const FOCUS_COPY: Record<
+  PracticeFocus,
+  Omit<PracticePlan, "focus" | "modeIds" | "steps" | "personalized">
+> = {
   balanced: {
     title: "Balanced ear tune-up",
     summary: "Recognition, pitch control, and pressure in one short session.",
@@ -64,6 +69,7 @@ const FOCUS_MODES: Record<PracticeFocus, GameMode[]> = {
 };
 
 const STEP_LABELS = ["Warm up", "Focus", "Finish strong"];
+const VALID_MODE_IDS = new Set<string>(GAME_MODES);
 
 const CATEGORY_TRAINING_CUES: Record<ModeCategoryId, ModeTrainingCue> = {
   foundational: {
@@ -110,6 +116,25 @@ export function getRecommendedModes(focus: PracticeFocus = "balanced", limit = 3
   return uniqueModes.slice(0, Math.max(1, limit));
 }
 
+function isGameMode(mode: string): mode is GameMode {
+  return VALID_MODE_IDS.has(mode);
+}
+
+function uniqueModeIds(modeIds: GameMode[]): GameMode[] {
+  return modeIds.filter((modeId, index, all) => all.indexOf(modeId) === index);
+}
+
+function buildPracticePlanSteps(modeIds: GameMode[]): PracticePlanStep[] {
+  return modeIds.map((modeId, index) => {
+    const mode = GAME_MODE_META[modeId];
+    return {
+      label: STEP_LABELS[index] ?? `Step ${index + 1}`,
+      detail: `${mode.label}: ${mode.description.toLowerCase()}.`,
+      modeId,
+    };
+  });
+}
+
 export function getModesByCategory(categoryId: ModeCategoryId): GameMode[] {
   return GAME_MODES.filter((modeId) => GAME_MODE_META[modeId].category === categoryId);
 }
@@ -123,19 +148,47 @@ export function buildPracticePlan(
   focus = getPracticeFocusForDate(date),
 ): PracticePlan {
   const modeIds = getRecommendedModes(focus, 3);
-  const steps = modeIds.map((modeId, index) => {
-    const mode = GAME_MODE_META[modeId];
-    return {
-      label: STEP_LABELS[index] ?? `Step ${index + 1}`,
-      detail: `${mode.label}: ${mode.description.toLowerCase()}.`,
-      modeId,
-    };
-  });
 
   return {
     focus,
     ...FOCUS_COPY[focus],
+    personalized: false,
     modeIds,
-    steps,
+    steps: buildPracticePlanSteps(modeIds),
+  };
+}
+
+export function buildAdaptivePracticePlan(
+  results: ProgressResult[],
+  date = new Date(),
+  fallbackFocus = getPracticeFocusForDate(date),
+): PracticePlan {
+  const normalizedResults = results.filter((result) => isGameMode(result.mode));
+
+  if (normalizedResults.length < 2) {
+    return buildPracticePlan(date, fallbackFocus);
+  }
+
+  const insights = buildProgressInsights(normalizedResults, 3);
+  const priorityModes = insights.weakModes.map((mode) => mode.mode).filter(isGameMode);
+
+  if (!priorityModes.length) {
+    return buildPracticePlan(date, fallbackFocus);
+  }
+
+  const modeIds = uniqueModeIds([...priorityModes, ...getRecommendedModes(fallbackFocus, 3)]).slice(
+    0,
+    3,
+  );
+  const [primaryMode] = modeIds;
+  const primaryLabel = primaryMode ? GAME_MODE_META[primaryMode].label : "your weakest mode";
+
+  return {
+    focus: fallbackFocus,
+    title: `Personalized ${FOCUS_COPY[fallbackFocus].title.toLowerCase()}`,
+    summary: `Prioritizes ${primaryLabel} from your recent accuracy trends, then balances today's rotation.`,
+    personalized: true,
+    modeIds,
+    steps: buildPracticePlanSteps(modeIds),
   };
 }

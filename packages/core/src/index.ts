@@ -90,6 +90,7 @@ export type {
 // ─── Practice Planning (pure recommendations) ────────────────────────────────
 
 export {
+  buildAdaptivePracticePlan,
   buildPracticePlan,
   getModeTrainingCue,
   getModesByCategory,
