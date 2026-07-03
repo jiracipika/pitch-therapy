@@ -118,3 +118,13 @@ export type {
   ProgressMomentum,
   ProgressInsights,
 } from "./progressInsights";
+
+// ─── Practice Planning (pure recommendations) ────────────────────────────────
+
+export {
+  buildPracticePlan,
+  getModesByCategory,
+  getPracticeFocusForDate,
+  getRecommendedModes,
+} from "./practicePlan";
+export type { PracticeFocus, PracticePlan, PracticePlanStep } from "./practicePlan";

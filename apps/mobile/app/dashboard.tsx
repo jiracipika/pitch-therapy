@@ -1,24 +1,26 @@
-import { Image, Pressable, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
-import { GAME_MODE_META } from '@pitch-therapy/core';
-import { AnimatedModeCard } from '@/components/AnimatedModeCard';
-import { GlassCard, MotionStatusCard, Pill, RecommendedPath, SectionHeader, StatItem } from '@/components/AppleUI';
-import { StreakRing } from '@/components/StreakRing';
-import { AppPage } from '@/components/AppPage';
-import { triggerSelectionHaptic } from '@/lib/haptics';
-import { useResponsiveLayout } from '@/lib/responsive';
-import { colors, radii, typography } from '@/lib/theme';
-
-const DASHBOARD_STEPS = [
-  { label: 'Warm up', detail: 'Start with a short recognition drill.' },
-  { label: 'Focus', detail: 'Pick one featured mode and finish a full round.' },
-  { label: 'Keep streak', detail: 'Close with today\'s daily challenge.' },
-];
+import { Image, Pressable, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { GAME_MODE_META, buildPracticePlan } from "@pitch-therapy/core";
+import { AnimatedModeCard } from "@/components/AnimatedModeCard";
+import {
+  GlassCard,
+  MotionStatusCard,
+  Pill,
+  RecommendedPath,
+  SectionHeader,
+  StatItem,
+} from "@/components/AppleUI";
+import { StreakRing } from "@/components/StreakRing";
+import { AppPage } from "@/components/AppPage";
+import { triggerSelectionHaptic } from "@/lib/haptics";
+import { useResponsiveLayout } from "@/lib/responsive";
+import { colors, radii, typography } from "@/lib/theme";
 
 export default function DashboardScreen() {
   const router = useRouter();
   const { isTablet, isDesktop } = useResponsiveLayout();
-  const featuredModes = Object.values(GAME_MODE_META).slice(0, 4);
+  const practicePlan = buildPracticePlan();
+  const featuredModes = practicePlan.modeIds.map((modeId) => GAME_MODE_META[modeId]);
 
   return (
     <AppPage
@@ -34,38 +36,46 @@ export default function DashboardScreen() {
         message="Your personalized dashboard is loaded and tuned for your next session."
       />
       <GlassCard accent={colors.teal} padding={18} style={{ gap: 18 }}>
-        <View style={{ flexDirection: isTablet ? 'row' : 'column', alignItems: isTablet ? 'center' : 'flex-start', gap: 14 }}>
+        <View
+          style={{
+            flexDirection: isTablet ? "row" : "column",
+            alignItems: isTablet ? "center" : "flex-start",
+            gap: 14,
+          }}
+        >
           <Image
-            source={require('../assets/logo-placeholder.png')}
+            source={require("../assets/logo-placeholder.png")}
             style={{
               width: 66,
               height: 66,
               borderRadius: radii.lg,
               borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.18)',
+              borderColor: "rgba(255,255,255,0.18)",
             }}
           />
           <View style={{ flex: 1, gap: 7 }}>
             <Pill label="Ready for today" color={colors.green} />
-            <Text style={{ color: colors.text, ...typography.title2 }}>Train smarter, not louder.</Text>
+            <Text style={{ color: colors.text, ...typography.title2 }}>
+              Train smarter, not louder.
+            </Text>
             <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
               Quick rounds, daily challenges, and precise pitch drills are all one swipe away.
             </Text>
           </View>
         </View>
 
-        <View style={{ flexDirection: isTablet ? 'row' : 'column', gap: 10 }}>
+        <View style={{ flexDirection: isTablet ? "row" : "column", gap: 10 }}>
           <Pressable
             onPress={() => {
               void triggerSelectionHaptic();
-              router.push('/play-modes');
+              router.push("/play-modes");
             }}
             style={({ pressed }) => ({
               flex: 1,
               borderRadius: radii.md,
               backgroundColor: colors.text,
               paddingVertical: 14,
-              alignItems: 'center',
+              alignItems: "center",
               opacity: pressed ? 0.82 : 1,
             })}
           >
@@ -74,15 +84,15 @@ export default function DashboardScreen() {
           <Pressable
             onPress={() => {
               void triggerSelectionHaptic();
-              router.push('/daily');
+              router.push("/daily");
             }}
             style={({ pressed }) => ({
-              width: isTablet ? 104 : '100%',
+              width: isTablet ? 104 : "100%",
               borderRadius: radii.md,
               borderWidth: 1,
               borderColor: colors.borderStrong,
               paddingVertical: 14,
-              alignItems: 'center',
+              alignItems: "center",
               opacity: pressed ? 0.82 : 1,
             })}
           >
@@ -91,22 +101,30 @@ export default function DashboardScreen() {
         </View>
       </GlassCard>
 
-      <RecommendedPath steps={DASHBOARD_STEPS} accent={colors.blue} compact />
+      <RecommendedPath steps={practicePlan.steps} accent={colors.blue} compact />
 
       <GlassCard accent={colors.speedRound}>
-        <View style={{ flexDirection: isTablet ? 'row' : 'column', alignItems: isTablet ? 'center' : 'flex-start', gap: 14 }}>
+        <View
+          style={{
+            flexDirection: isTablet ? "row" : "column",
+            alignItems: isTablet ? "center" : "flex-start",
+            gap: 14,
+          }}
+        >
           <View style={{ flex: 1, gap: 5 }}>
-            <Text style={{ color: colors.textTertiary, ...typography.overline }}>CURRENT STREAK</Text>
-            <Text style={{ color: colors.text, ...typography.title2 }}>3 days</Text>
+            <Text style={{ color: colors.textTertiary, ...typography.overline }}>
+              TODAY'S PRACTICE PLAN
+            </Text>
+            <Text style={{ color: colors.text, ...typography.title2 }}>{practicePlan.title}</Text>
             <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
-              Complete one focused session to keep momentum moving.
+              {practicePlan.summary}
             </Text>
           </View>
-          <StreakRing streak={3} size={88} />
+          <StreakRing streak={practicePlan.modeIds.length} size={88} />
         </View>
       </GlassCard>
 
-      <View style={{ flexDirection: isTablet ? 'row' : 'column', gap: 10 }}>
+      <View style={{ flexDirection: isTablet ? "row" : "column", gap: 10 }}>
         <GlassCard style={{ flex: 1 }} padding={14} accent={colors.blue}>
           <StatItem label="Sessions" value="0" color={colors.blue} />
         </GlassCard>
@@ -118,10 +136,13 @@ export default function DashboardScreen() {
         </GlassCard>
       </View>
 
-      <SectionHeader title="Featured Modes" subtitle="Fast drills that cover pitch, memory, and frequency." />
-      <View style={{ flexDirection: isDesktop ? 'row' : 'column', flexWrap: 'wrap', gap: 10 }}>
+      <SectionHeader
+        title="Featured Modes"
+        subtitle="Fast drills that cover pitch, memory, and frequency."
+      />
+      <View style={{ flexDirection: isDesktop ? "row" : "column", flexWrap: "wrap", gap: 10 }}>
         {featuredModes.map((mode) => (
-          <View key={mode.id} style={{ width: isDesktop ? '49%' : '100%' }}>
+          <View key={mode.id} style={{ width: isDesktop ? "49%" : "100%" }}>
             <AnimatedModeCard mode={mode} compact />
           </View>
         ))}

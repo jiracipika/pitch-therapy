@@ -1,23 +1,20 @@
 import { Text, View } from "react-native";
-import { GAME_MODE_META, GAME_MODES, MODE_CATEGORIES, type GameMode } from "@pitch-therapy/core";
+import {
+  GAME_MODE_META,
+  GAME_MODES,
+  MODE_CATEGORIES,
+  buildPracticePlan,
+  getModesByCategory,
+} from "@pitch-therapy/core";
 import { AnimatedModeCard } from "@/components/AnimatedModeCard";
 import { GlassCard, Pill, RecommendedPath, SectionHeader } from "@/components/AppleUI";
 import { AppPage } from "@/components/AppPage";
 import { useResponsiveLayout } from "@/lib/responsive";
 import { colors, typography } from "@/lib/theme";
 
-const MODE_PICKER_STEPS = [
-  { label: "Start simple", detail: "Use foundational modes when you want accuracy reps." },
-  { label: "Add pressure", detail: "Move into puzzles or speed work when the basics feel easy." },
-  {
-    label: "Go advanced",
-    detail: "Use intervals, waveform, cents, and chords for precision work.",
-  },
-];
-
 const MODES_BY_CATEGORY = MODE_CATEGORIES.map((category) => ({
   ...category,
-  modes: GAME_MODES.filter((modeId) => GAME_MODE_META[modeId].category === category.id),
+  modes: getModesByCategory(category.id),
 })).filter((category) => category.modes.length > 0);
 
 function modeCountLabel(count: number) {
@@ -26,7 +23,8 @@ function modeCountLabel(count: number) {
 
 export default function PlayModesScreen() {
   const { isTablet, isDesktop } = useResponsiveLayout();
-  const featuredModes = ["note-id", "pitch-match", "speed-round"] satisfies GameMode[];
+  const practicePlan = buildPracticePlan();
+  const featuredModes = practicePlan.modeIds;
 
   return (
     <AppPage
@@ -79,7 +77,7 @@ export default function PlayModesScreen() {
         </View>
       </GlassCard>
 
-      <RecommendedPath steps={MODE_PICKER_STEPS} accent={colors.green} compact />
+      <RecommendedPath steps={practicePlan.steps} accent={colors.green} compact />
 
       {MODES_BY_CATEGORY.map((category) => (
         <View key={category.id} style={{ gap: 10 }}>
