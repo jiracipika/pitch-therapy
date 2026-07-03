@@ -106,8 +106,7 @@ function buildWeakModeClusters(results: ProgressResult[], limit: number): WeakMo
   return clusters.sort((a, b) => b.priorityScore - a.priorityScore).slice(0, limit);
 }
 
-function buildMomentum(results: ProgressResult[]): ProgressMomentum {
-  const now = new Date();
+function buildMomentum(results: ProgressResult[], now: Date = new Date()): ProgressMomentum {
   const last7Start = new Date(now);
   last7Start.setDate(now.getDate() - 6);
   const prev7Start = new Date(now);
@@ -156,7 +155,11 @@ function buildFocusTip(weakModes: WeakModeCluster[], momentum: ProgressMomentum)
   return `Focus next on ${primary.label}. It is ${trend}, but still your highest-impact gap. Run ${minutes}-minute reps and aim for +4% accuracy.`;
 }
 
-export function buildProgressInsights(results: ProgressResult[], topWeakModes = 3): ProgressInsights {
+export function buildProgressInsights(
+  results: ProgressResult[],
+  topWeakModes = 3,
+  now: Date = new Date(),
+): ProgressInsights {
   const normalized = results
     .filter((result) => Number.isFinite(result.accuracy))
     .map((result) => ({
@@ -165,7 +168,7 @@ export function buildProgressInsights(results: ProgressResult[], topWeakModes = 
       date: result.date || new Date().toISOString(),
     }));
 
-  const momentum = buildMomentum(normalized);
+  const momentum = buildMomentum(normalized, now);
   const weakModes = buildWeakModeClusters(normalized, topWeakModes);
 
   return {
