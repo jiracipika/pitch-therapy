@@ -4,24 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 
-type GlassMode = 'high' | 'reduced';
-const GLASS_MODE_KEY = 'pt_glass_mode';
-
-function useAmbientEnabled(pathname: string) {
-  if (pathname === '/') return true;
-  if (pathname.startsWith('/auth')) return false;
-  if (pathname.startsWith('/onboarding')) return true;
-  return true;
-}
-
 export default function AppTransitionShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const reducedMotion = useReducedMotion();
   const [isSafari, setIsSafari] = useState(false);
   const [isLowResourceProfile, setIsLowResourceProfile] = useState(false);
-  const [glassMode, setGlassMode] = useState<GlassMode>('high');
-  const showAmbient = useAmbientEnabled(pathname);
-  const motionLite = reducedMotion || isSafari || isLowResourceProfile || glassMode === 'reduced';
+  const motionLite = reducedMotion || isSafari || isLowResourceProfile;
 
   useEffect(() => {
     const ua = navigator.userAgent;
@@ -35,46 +23,7 @@ export default function AppTransitionShell({ children }: { children: React.React
   }, []);
 
   useEffect(() => {
-    const readGlassMode = () => {
-      const next = window.localStorage.getItem(GLASS_MODE_KEY);
-      if (next === 'reduced' || next === 'high') {
-        setGlassMode(next);
-        return;
-      }
-      setGlassMode('high');
-    };
-
-    readGlassMode();
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === GLASS_MODE_KEY) {
-        readGlassMode();
-      }
-    };
-    const handleLocal = () => readGlassMode();
-    window.addEventListener('storage', handleStorage);
-    window.addEventListener('pt:glass-mode-changed', handleLocal);
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-      window.removeEventListener('pt:glass-mode-changed', handleLocal);
-    };
-  }, []);
-
-  useEffect(() => {
-    const reduced = glassMode === 'reduced';
-    document.body.classList.toggle('pt-glass-reduced', reduced);
-    document.body.classList.toggle('pt-glass-high', !reduced);
-    return () => {
-      document.body.classList.remove('pt-glass-reduced');
-      document.body.classList.remove('pt-glass-high');
-    };
-  }, [glassMode]);
-
-  useEffect(() => {
-    if (motionLite) {
-      document.body.classList.add('pt-motion-lite');
-    } else {
-      document.body.classList.remove('pt-motion-lite');
-    }
+    document.body.classList.toggle('pt-motion-lite', motionLite);
     return () => document.body.classList.remove('pt-motion-lite');
   }, [motionLite]);
 
@@ -89,25 +38,23 @@ export default function AppTransitionShell({ children }: { children: React.React
 
   return (
     <div className="pt-route-root">
-      {showAmbient && (
-        <div className="pt-ambient" aria-hidden>
-          <motion.div
-            className="pt-ambient-glow pt-ambient-glow-a"
-            animate={motionLite ? undefined : { x: ['-2%', '2%', '-2%'], y: ['0%', '-3%', '0%'] }}
-            transition={{ duration: ambientDurations.a, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.div
-            className="pt-ambient-glow pt-ambient-glow-b"
-            animate={motionLite ? undefined : { x: ['3%', '-3%', '3%'], y: ['1%', '-2%', '1%'] }}
-            transition={{ duration: ambientDurations.b, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.div
-            className="pt-ambient-grid"
-            animate={motionLite ? undefined : { opacity: [0.2, 0.32, 0.2] }}
-            transition={{ duration: ambientDurations.grid, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        </div>
-      )}
+      <div className="pt-ambient" aria-hidden>
+        <motion.div
+          className="pt-ambient-glow pt-ambient-glow-a"
+          animate={motionLite ? undefined : { x: ['-2%', '2%', '-2%'], y: ['0%', '-3%', '0%'] }}
+          transition={{ duration: ambientDurations.a, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="pt-ambient-glow pt-ambient-glow-b"
+          animate={motionLite ? undefined : { x: ['3%', '-3%', '3%'], y: ['1%', '-2%', '1%'] }}
+          transition={{ duration: ambientDurations.b, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="pt-ambient-grid"
+          animate={motionLite ? undefined : { opacity: [0.2, 0.32, 0.2] }}
+          transition={{ duration: ambientDurations.grid, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </div>
 
       <AnimatePresence mode="wait" initial={false}>
         <motion.div

@@ -14,11 +14,44 @@ const routeTitles: Record<string, string> = {
 };
 
 const quickLinks = [
-  { href: '/dashboard', label: 'Home', icon: '⌂' },
-  { href: '/play-modes', label: 'Modes', icon: '◫' },
-  { href: '/daily', label: 'Daily', icon: '◷' },
-  { href: '/progress', label: 'Stats', icon: '▥' },
+  { href: '/dashboard', label: 'Home', icon: 'home' },
+  { href: '/play-modes', label: 'Modes', icon: 'grid' },
+  { href: '/daily', label: 'Daily', icon: 'calendar' },
+  { href: '/progress', label: 'Stats', icon: 'chart' },
 ] as const;
+
+function TopBarIcon({ name }: { name: string }) {
+  const icons: Record<string, React.ReactElement> = {
+    home: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>
+        <path d="M9 21V12h6v9"/>
+      </svg>
+    ),
+    grid: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </svg>
+    ),
+    calendar: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2.5" />
+        <path d="M8 2v3M16 2v3M3 10h18" />
+      </svg>
+    ),
+    chart: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="6" y1="20" x2="6" y2="14" />
+        <line x1="12" y1="20" x2="12" y2="9" />
+        <line x1="18" y1="20" x2="18" y2="4" />
+      </svg>
+    ),
+  };
+  return icons[name] ?? icons.grid;
+}
 
 export default function DesktopTopBar() {
   const pathname = usePathname();
@@ -60,7 +93,9 @@ export default function DesktopTopBar() {
                 href={item.href}
                 className={`pt-desktop-action ${active ? 'is-active' : ''}`}
               >
-                <span className="pt-desktop-action-icon">{item.icon}</span>
+                <span className="pt-desktop-action-icon">
+                  <TopBarIcon name={item.icon} />
+                </span>
                 <span>{item.label}</span>
               </Link>
             );
