@@ -42,6 +42,7 @@ export type { UserProfile } from "./auth";
 export {
   getDailySeed as getDailyChallengeSeed,
   calculateStreak,
+  calculateLongestStreak,
   todayDateString,
 } from "./dailyChallenge";
 export type { DailyChallengeResult } from "./dailyChallenge";

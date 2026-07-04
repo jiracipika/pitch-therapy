@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { calculateStreak, todayDateString, getDailySeed } from "../dailyChallenge";
+import { calculateStreak, calculateLongestStreak, todayDateString, getDailySeed } from "../dailyChallenge";
 
 afterEach(() => {
   vi.useRealTimers();
@@ -71,6 +71,57 @@ describe("calculateStreak", () => {
     vi.setSystemTime(new Date("2026-08-02T12:00:00"));
     // Jul 31 → Aug 1 → Aug 2
     expect(calculateStreak(["2026-08-02", "2026-08-01", "2026-07-31"])).toBe(3);
+  });
+});
+
+describe("calculateLongestStreak", () => {
+  it("returns 0 for empty array", () => {
+    expect(calculateLongestStreak([])).toBe(0);
+  });
+
+  it("returns 1 for a single date", () => {
+    expect(calculateLongestStreak(["2026-07-10"])).toBe(1);
+  });
+
+  it("returns the length of a single consecutive run", () => {
+    expect(calculateLongestStreak(["2026-07-10", "2026-07-11", "2026-07-12"])).toBe(3);
+  });
+
+  it("returns the longest run among multiple separated runs", () => {
+    // run A: 3 consecutive, run B: 5 consecutive, run C: 2 consecutive
+    const dates = [
+      "2026-06-01", "2026-06-02", "2026-06-03",
+      "2026-06-10", "2026-06-11", "2026-06-12", "2026-06-13", "2026-06-14",
+      "2026-06-20", "2026-06-21",
+    ];
+    expect(calculateLongestStreak(dates)).toBe(5);
+  });
+
+  it("is not anchored to today (unlike calculateStreak)", () => {
+    // A 4-day run entirely in the past should still return 4, even though
+    // calculateStreak would return 0 because it doesn't touch today/yesterday.
+    vi.setSystemTime(new Date("2026-12-01T12:00:00"));
+    expect(calculateLongestStreak(["2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04"])).toBe(4);
+  });
+
+  it("deduplicates dates", () => {
+    expect(calculateLongestStreak(["2026-07-10", "2026-07-10", "2026-07-11"])).toBe(2);
+  });
+
+  it("handles unsorted input", () => {
+    expect(calculateLongestStreak(["2026-07-12", "2026-07-10", "2026-07-11"])).toBe(3);
+  });
+
+  it("returns 1 when no two dates are consecutive", () => {
+    expect(calculateLongestStreak(["2026-07-01", "2026-07-05", "2026-07-10"])).toBe(1);
+  });
+
+  it("handles a run crossing a month boundary", () => {
+    expect(calculateLongestStreak(["2026-07-30", "2026-07-31", "2026-08-01", "2026-08-02"])).toBe(4);
+  });
+
+  it("handles a run crossing a year boundary", () => {
+    expect(calculateLongestStreak(["2026-12-30", "2026-12-31", "2027-01-01", "2027-01-02"])).toBe(4);
   });
 });
 

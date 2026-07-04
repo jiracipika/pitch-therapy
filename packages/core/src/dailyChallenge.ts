@@ -62,6 +62,32 @@ export function calculateStreak(dates: string[]): number {
 }
 
 /**
+ * Calculate the longest run of consecutive calendar days in the history.
+ * Unlike {@link calculateStreak}, this is not anchored to "today/yesterday"
+ * — it scans every run in the full history and returns the maximum length.
+ *
+ * Deduplicates input dates and uses UTC day arithmetic for DST safety.
+ */
+export function calculateLongestStreak(dates: string[]): number {
+  if (dates.length === 0) return 0;
+  const sorted = [...new Set(dates)].sort();
+  if (sorted.length === 1) return 1;
+
+  let longest = 1;
+  let current = 1;
+  for (let i = 1; i < sorted.length; i++) {
+    const diff = dayDiff(sorted[i]!, sorted[i - 1]!);
+    if (diff === 1) {
+      current++;
+      if (current > longest) longest = current;
+    } else {
+      current = 1;
+    }
+  }
+  return longest;
+}
+
+/**
  * Shift a YYYY-MM-DD date string by `n` days.
  * Works in UTC to avoid local timezone surprises.
  */

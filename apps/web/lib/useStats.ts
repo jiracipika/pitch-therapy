@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { calculateStreak, calculateLongestStreak } from "@pitch-therapy/core";
 
 /* ── Types ── */
 
@@ -22,102 +23,129 @@ export interface ModeStats {
 
 export interface UserStats {
   results: GameResult[];
+  /** Current consecutive-day streak, anchored to today/yesterday. */
   streak: number;
+  /** Longest run of consecutive days ever recorded. */
   bestStreak: number;
-  lastPlayDate: string | null; // YYYY-MM-DD
+  /** YYYY-MM-DD of the most recent session, or null. */
+  lastPlayDate: string | null;
   dailyCompleted: string[]; // YYYY-MM-DD list of completed dailies
 }
 
 const STORAGE_KEY = "pitch-therapy-stats";
 const MAX_STORED_RESULTS = 500;
 
-const DEFAULT_STATS: UserStats = {
+interface PersistedStats {
+  results: GameResult[];
+  dailyCompleted: string[];
+}
+
+const DEFAULT_PERSISTED: PersistedStats = {
   results: [],
-  streak: 0,
-  bestStreak: 0,
-  lastPlayDate: null,
   dailyCompleted: [],
 };
 
-function loadStats(): UserStats {
-  if (typeof window === "undefined") return DEFAULT_STATS;
+function loadPersisted(): PersistedStats {
+  if (typeof window === "undefined") return DEFAULT_PERSISTED;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_STATS;
-    return { ...DEFAULT_STATS, ...JSON.parse(raw) };
+    if (!raw) return DEFAULT_PERSISTED;
+    const parsed = JSON.parse(raw) as Partial<PersistedStats> & {
+      // Legacy fields kept for back-compat — migrated/derived on load.
+      streak?: number;
+      bestStreak?: number;
+      lastPlayDate?: string | null;
+    };
+    return {
+      results: Array.isArray(parsed.results) ? parsed.results : [],
+      dailyCompleted: Array.isArray(parsed.dailyCompleted) ? parsed.dailyCompleted : [],
+    };
   } catch {
-    return DEFAULT_STATS;
+    return DEFAULT_PERSISTED;
   }
 }
 
-function saveStats(stats: UserStats) {
+function savePersisted(stats: PersistedStats) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
   } catch {
     // quota exceeded — trim old results
-    const trimmed = { ...stats, results: stats.results.slice(-200) };
+    const trimmed: PersistedStats = { ...stats, results: stats.results.slice(-200) };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
     } catch {}
   }
 }
 
-function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
+/** Extract the YYYY-MM-DD day key from an ISO timestamp. */
+function dayKey(iso: string): string {
+  return iso.slice(0, 10);
 }
 
-function yesterdayStr(): string {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return d.toISOString().slice(0, 10);
+/* ── Derived stats (pure) ── */
+
+/**
+ * Build the full UserStats view from the persisted results + dailyCompleted.
+ * streak / bestStreak / lastPlayDate are *derived* from session history using
+ * the canonical, DST-safe @pitch-therapy/core functions, so they can never
+ * drift out of sync with the results array.
+ */
+function deriveStats(persisted: PersistedStats): UserStats {
+  const { results, dailyCompleted } = persisted;
+
+  if (results.length === 0) {
+    return {
+      results,
+      dailyCompleted,
+      streak: 0,
+      bestStreak: 0,
+      lastPlayDate: null,
+    };
+  }
+
+  const dayKeys = results.map((r) => dayKey(r.date));
+  const lastPlayDate = dayKeys.reduce((latest, key) => (key > latest ? key : latest), dayKeys[0]!);
+
+  return {
+    results,
+    dailyCompleted,
+    streak: calculateStreak(dayKeys),
+    bestStreak: calculateLongestStreak(dayKeys),
+    lastPlayDate,
+  };
 }
 
 /* ── Hook ── */
 
 export function useStats() {
-  const [stats, setStats] = useState<UserStats>(DEFAULT_STATS);
+  const [persisted, setPersisted] = useState<PersistedStats>(DEFAULT_PERSISTED);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setStats(loadStats());
+    setPersisted(loadPersisted());
     setLoaded(true);
   }, []);
 
+  const stats = useMemo(() => deriveStats(persisted), [persisted]);
+
   const recordResult = useCallback((result: GameResult) => {
-    setStats((prev) => {
-      const today = todayStr();
-      const yesterday = yesterdayStr();
-
-      // Calculate streak
-      let newStreak = prev.streak;
-      if (prev.lastPlayDate === today) {
-        // Already played today, streak stays
-      } else if (prev.lastPlayDate === yesterday) {
-        newStreak = prev.streak + 1;
-      } else {
-        newStreak = 1;
-      }
-
-      const updated: UserStats = {
+    setPersisted((prev) => {
+      const updated: PersistedStats = {
         results: [...prev.results, result].slice(-MAX_STORED_RESULTS),
-        streak: newStreak,
-        bestStreak: Math.max(prev.bestStreak, newStreak),
-        lastPlayDate: today,
         dailyCompleted: prev.dailyCompleted,
       };
-
-      saveStats(updated);
+      savePersisted(updated);
       return updated;
     });
   }, []);
 
   const markDailyCompleted = useCallback(() => {
-    setStats((prev) => {
-      const today = todayStr();
+    setPersisted((prev) => {
+      const today = new Date().toISOString().slice(0, 10);
       if (prev.dailyCompleted.includes(today)) return prev;
-      const updated = { ...prev, dailyCompleted: [...prev.dailyCompleted, today] };
-      saveStats(updated);
+      const updated: PersistedStats = { ...prev, dailyCompleted: [...prev.dailyCompleted, today] };
+      savePersisted(updated);
       return updated;
     });
   }, []);
@@ -140,8 +168,8 @@ export function useStats() {
   );
 
   const clearStats = useCallback(() => {
-    setStats(DEFAULT_STATS);
-    saveStats(DEFAULT_STATS);
+    setPersisted(DEFAULT_PERSISTED);
+    savePersisted(DEFAULT_PERSISTED);
   }, []);
 
   return { stats, loaded, recordResult, markDailyCompleted, getModeStats, clearStats };
