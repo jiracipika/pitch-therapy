@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PageHero } from '@/components/PremiumMotion';
 import { useStatsContext } from '@/components/StatsProvider';

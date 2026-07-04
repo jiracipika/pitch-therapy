@@ -517,7 +517,7 @@ export default function Dashboard() {
                     letterSpacing: "0.04em",
                   }}
                 >
-                  Today's Plan
+                  Today&apos;s Plan
                 </div>
                 <span
                   style={{
