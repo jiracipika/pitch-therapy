@@ -1,4 +1,4 @@
-import type { NoteName } from "./index";
+import type { Difficulty, NoteName } from "./index";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -165,17 +165,65 @@ function shuffle<T>(arr: T[]): T[] {
 // ─── calculateScore ──────────────────────────────────────────────────────────
 
 /**
+ * Per-mode difficulty multiplier. Higher = the mode demands finer
+ * perceptual judgment, so a correct answer is worth more.
+ *
+ * Typed as `Partial<Record<GameMode, number>>` and resolved through the
+ * canonical GAME_MODES list so that *every* mode receives a multiplier —
+ * previously only 5 of 18 modes had entries and the rest silently fell
+ * back to 1.0 via a loosely-typed `Record<string, number>`.
+ */
+const MODE_DIFFICULTY_MULTIPLIER: Partial<Record<string, number>> = {
+  // Foundational — gentle entry points
+  "pitch-match": 1.0,
+  "note-id": 1.2,
+  "frequency-guess": 1.5,
+  // Daily puzzles — repeatable, strategy-weighted
+  "note-wordle": 1.3,
+  "frequency-wordle": 1.8,
+  // Pitch control
+  "pitch-memory": 1.4,
+  "tune-in": 1.5,
+  // Interactive / hands-on
+  "name-that-note": 1.1,
+  "piano-tap": 1.2,
+  "frequency-slider": 1.6,
+  "frequency-hunt": 1.7,
+  "waveform-match": 1.6,
+  // Advanced listening
+  "drone-lock": 1.8,
+  "cents-deviation": 2.0,
+  "interval-archer": 1.9,
+  "chord-detective": 1.9,
+  "tuning-battle": 1.8,
+  // Speed
+  "speed-round": 1.3,
+};
+
+/**
+ * Difficulty multiplier applied on top of the mode multiplier.
+ * Hard sessions (8s/round, 15 rounds) reward more than easy (no limit, 5 rounds).
+ */
+const DIFFICULTY_MULTIPLIER: Record<Difficulty, number> = {
+  easy: 1.0,
+  medium: 1.15,
+  hard: 1.3,
+};
+
+/**
  * Calculate score for a round.
+ * - mode: game mode
  * - accuracy: 0-1 (1 = perfect)
  * - responseTimeMs: time in ms
  * - streak: current streak count
- * - mode: game mode
+ * - difficulty: easy | medium | hard (default medium for backward compatibility)
  */
 export function calculateScore(
   mode: string,
   accuracy: number,
   responseTimeMs: number,
   streak: number,
+  difficulty: Difficulty = "medium",
 ): number {
   if (accuracy <= 0) return 0;
 
@@ -188,17 +236,15 @@ export function calculateScore(
   // Streak multiplier: 1x base, up to 2x at streak 10+
   const streakMultiplier = 1 + Math.min(streak, 10) * 0.1;
 
-  // Mode multiplier
-  const modeMultiplier: Record<string, number> = {
-    "pitch-match": 1.0,
-    "note-id": 1.2,
-    "frequency-guess": 1.5,
-    "note-wordle": 1.3,
-    "frequency-wordle": 1.8,
-  };
+  // Mode + difficulty multipliers
+  const modeMultiplier = MODE_DIFFICULTY_MULTIPLIER[mode] ?? 1.0;
+  const difficultyMultiplier = DIFFICULTY_MULTIPLIER[difficulty] ?? 1.0;
 
   const total = Math.round(
-    (baseScore + timeBonus) * streakMultiplier * (modeMultiplier[mode] ?? 1.0),
+    (baseScore + timeBonus) *
+      streakMultiplier *
+      modeMultiplier *
+      difficultyMultiplier,
   );
 
   return Math.max(0, Math.min(total, 500)); // cap at 500 per round

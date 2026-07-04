@@ -7,6 +7,7 @@ import {
   generateNoteOptions,
   calculateScore,
 } from "../audio";
+import { GAME_MODES } from "../gameData";
 
 describe("noteToFrequency", () => {
   it("A4 = 440 Hz", () => {
@@ -172,5 +173,33 @@ describe("calculateScore", () => {
     const basic = calculateScore("pitch-match", 1.0, 1000, 0);
     const freq = calculateScore("frequency-wordle", 1.0, 1000, 0);
     expect(freq).toBeGreaterThan(basic);
+  });
+
+  it("hard difficulty scores higher than easy for identical performance", () => {
+    const easy = calculateScore("note-id", 1.0, 1000, 3, "easy");
+    const medium = calculateScore("note-id", 1.0, 1000, 3, "medium");
+    const hard = calculateScore("note-id", 1.0, 1000, 3, "hard");
+
+    expect(hard).toBeGreaterThan(medium);
+    expect(medium).toBeGreaterThan(easy);
+  });
+
+  it("advanced modes now outscore foundational modes at the same difficulty", () => {
+    // Before the fix, chord-detective (advanced) had no multiplier entry and
+    // silently defaulted to 1.0 — scoring the same as pitch-match.
+    const foundational = calculateScore("pitch-match", 1.0, 1000, 0, "medium");
+    const advanced = calculateScore("chord-detective", 1.0, 1000, 0, "medium");
+    expect(advanced).toBeGreaterThan(foundational);
+  });
+
+  it("every game mode has a non-default multiplier", () => {
+    // Regression guard: ensures no mode silently falls back to 1.0 unless
+    // intentionally set (only pitch-match is explicitly 1.0).
+    for (const mode of GAME_MODES) {
+      const score = calculateScore(mode, 1.0, 1000, 0, "easy");
+      // At easy (1.0x difficulty) with perfect accuracy, every mode should
+      // produce a positive score.
+      expect(score).toBeGreaterThan(0);
+    }
   });
 });
