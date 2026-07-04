@@ -1,9 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-} from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   noteToFrequency,
   frequencyToNote,
@@ -32,7 +27,7 @@ describe("noteToFrequency", () => {
 
   it("handles sharps", () => {
     expect(noteToFrequency("C#4")).toBeCloseTo(277.18, 1);
-    expect(noteToFrequency("F#3")).toBeCloseTo(185.00, 1);
+    expect(noteToFrequency("F#3")).toBeCloseTo(185.0, 1);
   });
 
   it("handles flats", () => {
@@ -45,6 +40,12 @@ describe("noteToFrequency", () => {
     expect(noteToFrequency("ABC")).toBeNaN();
     expect(noteToFrequency("")).toBeNaN();
     expect(noteToFrequency("A")).toBeNaN();
+  });
+
+  it("handles lowercase note names", () => {
+    expect(noteToFrequency("a4")).toBe(440);
+    expect(noteToFrequency("c#4")).toBeCloseTo(277.18, 1);
+    expect(noteToFrequency("bb4")).toBeCloseTo(466.16, 1);
   });
 });
 
@@ -95,6 +96,31 @@ describe("getDailySeed", () => {
     const b = getDailySeed(new Date(2026, 0, 16));
     // Could theoretically collide but extremely unlikely
     expect(a.note !== b.note || a.frequency !== b.frequency).toBe(true);
+  });
+
+  it("produces identical seed for local-midnight and UTC-midnight on same calendar day", () => {
+    // Both Date objects represent Jan 5, 2026 — the function reads local
+    // components so these should produce the same seed.
+    const a = getDailySeed(new Date(2026, 0, 5, 0, 0, 0));
+    const b = getDailySeed(new Date(2026, 0, 5, 23, 59, 59));
+    expect(a).toEqual(b);
+  });
+
+  it("does not collide between month-day permutations that share an unpadded string", () => {
+    // Before the zero-pad fix, Jan-12 ("2026-1-12") and Dec-1 ("2026-12-1")
+    // were distinct, but Jan-1 ("2026-1-1") and Nov-1 ("2026-11-1") could
+    // land close in hash space. With padding every date is unique.
+    const jan1 = getDailySeed(new Date(2026, 0, 1));
+    const nov1 = getDailySeed(new Date(2026, 10, 1));
+    const dec1 = getDailySeed(new Date(2026, 11, 1));
+    const seeds = [jan1, nov1, dec1].map((s) => `${s.note}@${s.frequency}`);
+    expect(new Set(seeds).size).toBeGreaterThanOrEqual(2);
+  });
+
+  it("returns a frequency within audible musical range", () => {
+    const seed = getDailySeed(new Date(2026, 6, 4));
+    expect(seed.frequency).toBeGreaterThan(60);
+    expect(seed.frequency).toBeLessThan(2100);
   });
 });
 

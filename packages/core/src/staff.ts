@@ -24,8 +24,12 @@ export interface StaffPosition {
 }
 
 /**
- * Map a note name (with optional accidental) to its staff position.
- * Supports C through B with sharps, in octave 4 context.
+ * Map a note name (with optional accidental and octave) to its staff position.
+ * Supports C through B with sharps and flats, in octave 4 context.
+ *
+ * Examples: "C4" → { position: 0, accidental: null }
+ *           "F#4" → { position: 3, accidental: "#" }
+ *           "Bb4" → { position: 6, accidental: "b" }
  */
 export function noteToStaffPos(noteName: string): StaffPosition {
   const NATURAL_POSITIONS: Record<string, number> = {
@@ -38,9 +42,10 @@ export function noteToStaffPos(noteName: string): StaffPosition {
     B: 6,
   };
 
-  // Handle sharps: "C#" -> natural "C" + accidental
   const isSharp = noteName.includes("#");
-  const natural = noteName.replace("#", "").replace("b", "");
+  const isFlat = noteName.includes("b");
+  // Strip accidental and any trailing octave digits
+  const natural = noteName.replace(/[#b]/g, "").replace(/\d/g, "");
   const position = NATURAL_POSITIONS[natural];
 
   if (position === undefined) {
@@ -50,7 +55,7 @@ export function noteToStaffPos(noteName: string): StaffPosition {
 
   return {
     position,
-    accidental: isSharp ? "#" : null,
+    accidental: isSharp ? "#" : isFlat ? "b" : null,
   };
 }
 

@@ -2,19 +2,29 @@ import type { NoteName } from "./index";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const NOTE_NAMES: NoteName[] = [
-  "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-];
+const NOTE_NAMES: NoteName[] = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 const SEMITONE_OFFSETS: Record<string, number> = {
-  C: 0, "C#": 1, Db: 1,
-  D: 2, "D#": 3, Eb: 3,
-  E: 4, Fb: 4,
-  F: 5, "E#": 5,
-  "F#": 6, Gb: 6,
-  G: 7, "G#": 8, Ab: 8,
-  A: 9, "A#": 10, Bb: 10,
-  B: 11, Cb: 11,
+  C: 0,
+  "C#": 1,
+  Db: 1,
+  D: 2,
+  "D#": 3,
+  Eb: 3,
+  E: 4,
+  Fb: 4,
+  F: 5,
+  "E#": 5,
+  "F#": 6,
+  Gb: 6,
+  G: 7,
+  "G#": 8,
+  Ab: 8,
+  A: 9,
+  "A#": 10,
+  Bb: 10,
+  B: 11,
+  Cb: 11,
 };
 
 // ─── noteToFrequency ─────────────────────────────────────────────────────────
@@ -39,6 +49,7 @@ export function noteToFrequency(noteName: string): number {
 }
 
 function capitalize(s: string): string {
+  if (!s) return s;
   return s[0].toUpperCase() + s.slice(1).toLowerCase();
 }
 
@@ -66,7 +77,7 @@ export function frequencyToNote(hz: number): FrequencyToNoteResult | null {
   const centsOff = Math.round((semitonesFromA4 - roundedSemitones) * 100);
 
   // Convert semitone offset to note name + octave
-  const noteIndex = ((roundedSemitones + 9) % 12 + 12) % 12;
+  const noteIndex = (((roundedSemitones + 9) % 12) + 12) % 12;
   const octave = Math.floor((roundedSemitones + 9) / 12) + 4;
 
   return {
@@ -84,7 +95,7 @@ export function frequencyToNote(hz: number): FrequencyToNoteResult | null {
  */
 export function getDailySeed(date?: Date): { note: string; frequency: number } {
   const d = date ?? new Date();
-  const dateStr = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const hash = simpleHash(dateStr);
 
   // Pick note from C2..B6 (60 notes, octaves 2-6)
@@ -97,7 +108,7 @@ export function getDailySeed(date?: Date): { note: string; frequency: number } {
   const lowFreq = noteToFrequency("C" + octave)!;
   const highFreq = noteToFrequency("B" + octave)!;
   const freqHash = simpleHash(dateStr + "-freq");
-  const frequency = lowFreq + (freqHash % 10000) / 10000 * (highFreq - lowFreq);
+  const frequency = lowFreq + ((freqHash % 10000) / 10000) * (highFreq - lowFreq);
 
   return { note, frequency: Math.round(frequency * 100) / 100 };
 }
@@ -122,10 +133,7 @@ export function getAllNoteNames(): string[] {
  * Generate random note options for Note ID mode.
  * Beginner: 4 natural notes, Intermediate: 6 with sharps, Advanced: all 12.
  */
-export function generateNoteOptions(
-  count?: number,
-  includeSharps?: boolean,
-): string[] {
+export function generateNoteOptions(count?: number, includeSharps?: boolean): string[] {
   const naturalNotes = ["C", "D", "E", "F", "G", "A", "B"];
 
   // Default behavior based on no args
