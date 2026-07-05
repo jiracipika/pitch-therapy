@@ -1,6 +1,6 @@
 import { Image, Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { GAME_MODE_META, buildPracticePlan } from "@pitch-therapy/core";
+import { GAME_MODE_META, buildAdaptivePracticePlan } from "@pitch-therapy/core";
 import { AnimatedModeCard } from "@/components/AnimatedModeCard";
 import {
   GlassCard,
@@ -14,13 +14,22 @@ import { StreakRing } from "@/components/StreakRing";
 import { AppPage } from "@/components/AppPage";
 import { triggerSelectionHaptic } from "@/lib/haptics";
 import { useResponsiveLayout } from "@/lib/responsive";
+import { useSessionResults } from "@/lib/sessionResults";
 import { colors, radii, typography } from "@/lib/theme";
 
 export default function DashboardScreen() {
   const router = useRouter();
   const { isTablet, isDesktop } = useResponsiveLayout();
-  const practicePlan = buildPracticePlan();
+  const { stats } = useSessionResults();
+  const practicePlan = buildAdaptivePracticePlan(stats.results);
   const featuredModes = practicePlan.modeIds.map((modeId) => GAME_MODE_META[modeId]);
+
+  const accuracyLabel =
+    stats.totalSessions > 0
+      ? `${Math.round(stats.avgAccuracy * 100)}%`
+      : "--";
+  const streakLabel =
+    stats.streak > 0 ? `${stats.streak}d` : stats.bestStreak > 0 ? `${stats.bestStreak}d best` : "—";
 
   return (
     <AppPage
@@ -120,26 +129,29 @@ export default function DashboardScreen() {
         >
           <View style={{ flex: 1, gap: 5 }}>
             <Text style={{ color: colors.textTertiary, ...typography.overline }}>
-              TODAY'S PRACTICE PLAN
+              {practicePlan.personalized ? "PERSONALIZED PLAN" : "TODAY'S PRACTICE PLAN"}
             </Text>
             <Text style={{ color: colors.text, ...typography.title2 }}>{practicePlan.title}</Text>
             <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
               {practicePlan.summary}
             </Text>
           </View>
-          <StreakRing streak={practicePlan.modeIds.length} size={88} />
+          <StreakRing streak={Math.max(stats.streak, 1)} size={88} />
         </View>
       </GlassCard>
 
       <View style={{ flexDirection: isTablet ? "row" : "column", gap: 10 }}>
         <GlassCard style={{ flex: 1 }} padding={14} accent={colors.blue}>
-          <StatItem label="Sessions" value="0" color={colors.blue} />
+          <StatItem label="Sessions" value={String(stats.totalSessions)} color={colors.blue} />
         </GlassCard>
         <GlassCard style={{ flex: 1 }} padding={14} accent={colors.green}>
-          <StatItem label="Accuracy" value="--" color={colors.green} />
+          <StatItem label="Accuracy" value={accuracyLabel} color={colors.green} />
         </GlassCard>
         <GlassCard style={{ flex: 1 }} padding={14} accent={colors.pink}>
-          <StatItem label="Best" value="0" color={colors.pink} />
+          <StatItem label="Best" value={String(stats.bestScore)} color={colors.pink} />
+        </GlassCard>
+        <GlassCard style={{ flex: 1 }} padding={14} accent={colors.orange}>
+          <StatItem label="Streak" value={streakLabel} color={colors.orange} />
         </GlassCard>
       </View>
 
