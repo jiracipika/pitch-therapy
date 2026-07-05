@@ -104,3 +104,21 @@ export type {
   PracticePlan,
   PracticePlanStep,
 } from "./practicePlan";
+
+// ─── Achievements / Milestones (pure analytics) ──────────────────────────────
+
+export {
+  ACHIEVEMENT_TIERS,
+  deriveAchievementMetrics,
+  evaluateAchievements,
+  evaluateTier,
+  getUnlockedAchievements,
+  getNextGoals,
+} from "./achievements";
+export type {
+  AchievementCategory,
+  AchievementTier,
+  AchievementStatus,
+  AchievementMetrics,
+  AchievementResult,
+} from "./achievements";
