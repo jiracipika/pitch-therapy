@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 import { GAME_MODE_META, buildProgressInsights, type ProgressResult } from '@pitch-therapy/core';
 import { GlassCard, MotionStatusCard, SectionHeader, StatItem } from '@/components/AppleUI';
+import { AchievementsSection } from '@/components/AchievementsSection';
 import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
 import { useResponsiveLayout } from '@/lib/responsive';
@@ -96,6 +97,8 @@ export default function ProgressScreen() {
           </GlassCard>
         ))}
       </View>
+
+      <AchievementsSection results={sessionResults} />
 
       <GlassCard accent={colors.blue} padding={16}>
         <View style={{ gap: 6 }}>
