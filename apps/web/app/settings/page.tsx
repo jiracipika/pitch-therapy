@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PageHero } from '@/components/PremiumMotion';
 import { useStatsContext } from '@/components/StatsProvider';
+import { useSettingsContext } from '@/components/SettingsProvider';
+import type { Difficulty } from '@/lib/useSettings';
 
 type Diff = 'easy' | 'medium' | 'hard';
-type DiffMap = Record<string, Diff>;
 
 const MODES = [
   { id: 'pitch-match',      label: 'Pitch Match',      icon: '🎤', color: '#0A84FF' },
@@ -21,7 +22,7 @@ const SOUND_TYPES = [
   { id: 'triangle', label: 'Triangle', desc: 'Warm, mellow' },
   { id: 'square',   label: 'Square',   desc: 'Retro, buzzy' },
   { id: 'sawtooth', label: 'Sawtooth', desc: 'Bright, rich' },
-];
+] as const;
 
 function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
@@ -57,36 +58,20 @@ const rowStyle: React.CSSProperties = {
 
 export default function SettingsPage() {
   const { stats, loaded, clearStats } = useStatsContext();
+  const {
+    settings,
+    setSound,
+    setHaptics,
+    setSoundType,
+    setVolume,
+    setDifficulty,
+    applyPreset,
+  } = useSettingsContext();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [difficulty, setDifficulty] = useState<DiffMap>({
-    'pitch-match': 'medium', 'note-id': 'medium',
-    'frequency-guess': 'medium', 'note-wordle': 'medium', 'frequency-wordle': 'medium',
-  });
-  const [sound,     setSound]     = useState(true);
-  const [haptics,   setHaptics]   = useState(true);
-  const [soundType, setSoundType] = useState('sine');
-  const [volume,    setVolume]    = useState(70);
 
-  const applyProfile = (profile: 'focus' | 'coach' | 'quiet') => {
-    if (profile === 'focus') {
-      setSound(true);
-      setHaptics(true);
-      setSoundType('triangle');
-      setVolume(72);
-      return;
-    }
-    if (profile === 'coach') {
-      setSound(true);
-      setHaptics(true);
-      setSoundType('sine');
-      setVolume(82);
-      return;
-    }
-    setSound(false);
-    setHaptics(false);
-    setSoundType('sine');
-    setVolume(35);
-  };
+  const { sound, haptics, soundType, volume, difficulty } = settings;
+
+  const handleDifficulty = (mode: string, diff: Difficulty) => setDifficulty(mode, diff);
 
   return (
     <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
@@ -113,7 +98,7 @@ export default function SettingsPage() {
                 <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Sound Effects</div>
                 <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>Game audio and tones</div>
               </div>
-              <Toggle on={sound} onToggle={() => setSound(v => !v)} />
+              <Toggle on={sound} onToggle={() => setSound(!sound)} />
             </div>
 
             {/* Volume */}
@@ -139,7 +124,7 @@ export default function SettingsPage() {
                 <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Haptic Feedback</div>
                 <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>Vibration on answers</div>
               </div>
-              <Toggle on={haptics} onToggle={() => setHaptics(v => !v)} />
+              <Toggle on={haptics} onToggle={() => setHaptics(!haptics)} />
             </div>
           </div>
 
@@ -204,11 +189,11 @@ export default function SettingsPage() {
                 {/* Right: segmented buttons */}
                 <div style={{ display: 'flex', gap: 6 }}>
                   {(['easy', 'medium', 'hard'] as Diff[]).map((d) => {
-                    const active = difficulty[m.id] === d;
+                    const active = (difficulty[m.id] ?? 'medium') === d;
                     return (
                       <button
                         key={d}
-                        onClick={() => setDifficulty({ ...difficulty, [m.id]: d })}
+                        onClick={() => handleDifficulty(m.id, d)}
                         style={{
                           height: 28,
                           borderRadius: 14,
@@ -243,7 +228,7 @@ export default function SettingsPage() {
             ].map((profile, idx) => (
               <button
                 key={profile.id}
-                onClick={() => applyProfile(profile.id as 'focus' | 'coach' | 'quiet')}
+                onClick={() => applyPreset(profile.id as 'focus' | 'coach' | 'quiet')}
                 style={{
                   ...rowStyle,
                   borderTop: idx === 0 ? 'none' : '0.5px solid var(--ios-sep)',
