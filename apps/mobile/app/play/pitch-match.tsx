@@ -1,10 +1,11 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const MODE = GAME_MODE_META['pitch-match'];
 const ACCENT = MODE.accentHex;
@@ -22,6 +23,7 @@ const ACCURACY_OPTIONS = [
 
 export default function PitchMatchScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('idle');
   const [round, setRound] = useState(0);
   const totalRounds = 5;
@@ -29,6 +31,22 @@ export default function PitchMatchScreen() {
   const [streak, setStreak] = useState(0);
   const [targetNote, setTargetNote] = useState(0);
   const resultsRef = useRef<{ round: number; correct: boolean; points: number; target: string }[]>([]);
+  const sessionStartRef = useRef<number>(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'done' || recordedRef.current) return;
+    recordedRef.current = true;
+    const correct = resultsRef.current.filter((r) => r.correct).length;
+    recordResult({
+      mode: 'pitch-match',
+      score,
+      accuracy: totalRounds > 0 ? correct / totalRounds : 0,
+      rounds: totalRounds,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, score, totalRounds, recordResult]);
 
   const freq = (i: number) => NOTE_FREQS_4[NOTE_NAMES[i]] ?? 440;
 
@@ -44,6 +62,8 @@ export default function PitchMatchScreen() {
     setScore(0);
     setStreak(0);
     resultsRef.current = [];
+    sessionStartRef.current = Date.now();
+    recordedRef.current = false;
     startRound(1);
   };
 

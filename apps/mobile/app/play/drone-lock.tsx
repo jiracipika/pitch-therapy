@@ -1,8 +1,9 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#10B981';
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -35,6 +36,7 @@ type Phase = 'idle' | 'listening' | 'scored' | 'done';
 
 export default function DroneLockScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('idle');
   const [round, setRound] = useState(0);
   const totalRounds = 8;
@@ -43,6 +45,23 @@ export default function DroneLockScreen() {
   const [targetInterval, setTargetInterval] = useState<(typeof INTERVALS)[number]>(INTERVALS[0]);
   const [lastPoints, setLastPoints] = useState(0);
   const [results, setResults] = useState<{ interval: string; points: number }[]>([]);
+  const sessionStartRef = useRef<number>(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'done' || recordedRef.current || results.length === 0) return;
+    recordedRef.current = true;
+    // Max possible points per round = 200.
+    const avgPoints = results.reduce((s, r) => s + r.points, 0) / results.length;
+    recordResult({
+      mode: 'drone-lock',
+      score,
+      accuracy: Math.max(0, Math.min(1, avgPoints / 200)),
+      rounds: results.length,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, results, score, recordResult]);
 
   const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQS_4[n] ?? 261.63);
 
@@ -65,6 +84,8 @@ export default function DroneLockScreen() {
     setRound(0);
     setScore(0);
     setResults([]);
+    sessionStartRef.current = Date.now();
+    recordedRef.current = false;
     startRound();
   }, [startRound]);
 

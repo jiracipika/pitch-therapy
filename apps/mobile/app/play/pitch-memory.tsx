@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#F43F5E';
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -11,6 +12,7 @@ type Phase = 'idle' | 'playing' | 'input' | 'feedback' | 'done';
 
 export default function PitchMemoryScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('idle');
   const [level, setLevel] = useState(1);
   const [score, setScore] = useState(0);
@@ -21,6 +23,24 @@ export default function PitchMemoryScreen() {
   const [lives, setLives] = useState(3);
 
   const timerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const sessionStartRef = useRef<number>(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game ends.
+  // Rounds = levels completed (level-1 because level increments before game over).
+  useEffect(() => {
+    if (phase !== 'done' || recordedRef.current) return;
+    recordedRef.current = true;
+    const roundsCompleted = Math.max(0, level - 1);
+    recordResult({
+      mode: 'pitch-memory',
+      score,
+      // Accuracy proxy: rounds completed relative to a benchmark of 10 levels.
+      accuracy: Math.max(0, Math.min(1, roundsCompleted / 10)),
+      rounds: roundsCompleted,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, level, score, recordResult]);
 
   useEffect(() => () => timerRef.current.forEach(clearTimeout), []);
 
@@ -44,6 +64,8 @@ export default function PitchMemoryScreen() {
     setScore(0);
     setStreak(0);
     setLives(3);
+    sessionStartRef.current = Date.now();
+    recordedRef.current = false;
     setPhase('playing');
     setTimeout(() => playSequence(seq), 500);
   };

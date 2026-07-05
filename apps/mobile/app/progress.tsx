@@ -6,19 +6,18 @@ import { AchievementsSection } from '@/components/AchievementsSection';
 import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
 import { useResponsiveLayout } from '@/lib/responsive';
+import { useSessionResults, getModeStats } from '@/lib/sessionResults';
 import { colors, radii, typography } from '@/lib/theme';
 
-const STATS = [
-  { label: 'Sessions', value: '0', color: colors.blue },
-  { label: 'Correct', value: '0', color: colors.green },
-  { label: 'Accuracy', value: '--', color: colors.speedRound },
-  { label: 'Best', value: '0', color: colors.pink },
-];
+function formatAccuracy(value: number): string {
+  return value > 0 ? `${Math.round(value * 100)}%` : '--';
+}
 
 export default function ProgressScreen() {
   const { isDesktop } = useResponsiveLayout();
   const [loaded, setLoaded] = useState(false);
-  const sessionResults = useMemo<ProgressResult[]>(() => [], []);
+  const { stats } = useSessionResults();
+  const sessionResults = useMemo<ProgressResult[]>(() => stats.results, [stats.results]);
   const insights = useMemo(() => buildProgressInsights(sessionResults), [sessionResults]);
   const hasStats = sessionResults.length > 0;
 
@@ -26,6 +25,13 @@ export default function ProgressScreen() {
     const timeout = setTimeout(() => setLoaded(true), 120);
     return () => clearTimeout(timeout);
   }, []);
+
+  const statsCards = [
+    { label: 'Sessions', value: String(stats.totalSessions), color: colors.blue },
+    { label: 'Correct', value: String(stats.totalCorrect), color: colors.green },
+    { label: 'Accuracy', value: formatAccuracy(stats.avgAccuracy), color: colors.speedRound },
+    { label: 'Best', value: String(stats.bestScore), color: colors.pink },
+  ];
 
   const status = !loaded
     ? {
@@ -56,46 +62,61 @@ export default function ProgressScreen() {
       <GlassCard accent={colors.purple} padding={20}>
         <View style={{ alignItems: 'center', gap: 12 }}>
           <Text style={{ color: colors.textTertiary, ...typography.overline }}>BEST STREAK</Text>
-          <StreakRing streak={0} size={108} />
-          <Text style={{ color: colors.text, ...typography.title3 }}>0 days</Text>
+          <StreakRing streak={stats.bestStreak} size={108} />
+          <Text style={{ color: colors.text, ...typography.title3 }}>{stats.bestStreak} days</Text>
         </View>
       </GlassCard>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-        {STATS.map((stat) => (
+        {statsCards.map((stat) => (
           <GlassCard key={stat.label} style={{ flex: 1, minWidth: '47%' }} padding={14} accent={stat.color}>
             <StatItem label={stat.label} value={stat.value} color={stat.color} />
           </GlassCard>
         ))}
       </View>
 
-      <SectionHeader title="By Mode" subtitle="Mode history will fill in as sessions are recorded." />
+      <SectionHeader
+        title="By Mode"
+        subtitle={
+          hasStats
+            ? 'Your accuracy and play count across each drill.'
+            : 'Mode history will fill in as sessions are recorded.'
+        }
+      />
       <View style={{ flexDirection: isDesktop ? 'row' : 'column', flexWrap: 'wrap', gap: 10 }}>
-        {Object.values(GAME_MODE_META).map((mode) => (
-          <GlassCard key={mode.id} padding={13} accent={mode.accentHex} style={{ width: isDesktop ? '49%' : '100%' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <View
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: radii.md,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: mode.accentHex + '20',
-                  borderWidth: 1,
-                  borderColor: mode.accentHex + '55',
-                }}
-              >
-                <Text style={{ color: mode.accentHex, fontWeight: '900' }}>♪</Text>
+        {Object.values(GAME_MODE_META).map((mode) => {
+          const modeData = getModeStats(sessionResults, mode.id);
+          const played = modeData.sessions > 0;
+          return (
+            <GlassCard key={mode.id} padding={13} accent={mode.accentHex} style={{ width: isDesktop ? '49%' : '100%' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <View
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: radii.md,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: mode.accentHex + '20',
+                    borderWidth: 1,
+                    borderColor: mode.accentHex + '55',
+                  }}
+                >
+                  <Text style={{ color: mode.accentHex, fontWeight: '900' }}>♪</Text>
+                </View>
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text style={{ color: colors.text, ...typography.subhead }}>{mode.label}</Text>
+                  <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>
+                    {played ? `${modeData.sessions} session${modeData.sessions > 1 ? 's' : ''} played` : '0 sessions played'}
+                  </Text>
+                </View>
+                <Text style={{ color: played ? colors.text : colors.textTertiary, ...typography.subhead }}>
+                  {played ? formatAccuracy(modeData.avgAccuracy) : '--'}
+                </Text>
               </View>
-              <View style={{ flex: 1, gap: 3 }}>
-                <Text style={{ color: colors.text, ...typography.subhead }}>{mode.label}</Text>
-                <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>0 sessions played</Text>
-              </View>
-              <Text style={{ color: colors.textTertiary, ...typography.subhead }}>--</Text>
-            </View>
-          </GlassCard>
-        ))}
+            </GlassCard>
+          );
+        })}
       </View>
 
       <AchievementsSection results={sessionResults} />

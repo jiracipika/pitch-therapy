@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import NoteComparisonStaff from '@/components/NoteComparisonStaff';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#0EA5E9';
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -24,6 +25,7 @@ type Phase = 'idle' | 'playing' | 'timed-out' | 'done';
 
 export default function NameThatNoteScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('idle');
   const [round, setRound] = useState(0);
   const [totalRounds] = useState(10);
@@ -34,6 +36,22 @@ export default function NameThatNoteScreen() {
   const [guessedLabel, setGuessedLabel] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(10);
   const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const sessionStartRef = useRef<number>(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'done' || recordedRef.current) return;
+    recordedRef.current = true;
+    const correct = Math.round(score / 100);
+    recordResult({
+      mode: 'name-that-note',
+      score,
+      accuracy: totalRounds > 0 ? correct / totalRounds : 0,
+      rounds: totalRounds,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, score, totalRounds, recordResult]);
 
   const startRound = () => {
     const note = QUIZ_NOTES[Math.floor(Math.random() * QUIZ_NOTES.length)];
@@ -54,6 +72,8 @@ export default function NameThatNoteScreen() {
 
   const handleStart = () => {
     setRound(0); setScore(0); setStreak(0);
+    sessionStartRef.current = Date.now();
+    recordedRef.current = false;
     startRound();
   };
 

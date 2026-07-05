@@ -2,6 +2,7 @@ import { View, Text, Pressable, StyleSheet, PanResponder, Animated } from 'react
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { playFrequency } from '@/lib/audio';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#F97316';
 const MIN_FREQ = 100;
@@ -14,6 +15,7 @@ type Phase = 'idle' | 'hunting' | 'result' | 'done';
 
 export default function FrequencyHuntScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('idle');
   const [round, setRound] = useState(0);
   const [totalRounds] = useState(8);
@@ -25,6 +27,23 @@ export default function FrequencyHuntScreen() {
   const sliderAnim = useRef(new Animated.Value(0.5)).current;
   const sliderWidth = useRef(0);
   const isTracking = useRef(false);
+  const sessionStartRef = useRef<number>(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'done' || recordedRef.current || results.length === 0) return;
+    recordedRef.current = true;
+    // accuracy = average points as a fraction of the max possible (1000).
+    const avgPoints = results.reduce((s, r) => s + r.points, 0) / results.length;
+    recordResult({
+      mode: 'frequency-hunt',
+      score,
+      accuracy: Math.max(0, Math.min(1, avgPoints / 1000)),
+      rounds: results.length,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, results, score, recordResult]);
 
   useEffect(() => {
     sliderAnim.addListener(({ value }) => {
@@ -73,6 +92,8 @@ export default function FrequencyHuntScreen() {
 
   const handleStart = () => {
     setRound(0); setScore(0); setResults([]);
+    sessionStartRef.current = Date.now();
+    recordedRef.current = false;
     startRound();
   };
 
