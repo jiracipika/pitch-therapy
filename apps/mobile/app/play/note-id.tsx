@@ -6,6 +6,7 @@ import { GameHeader } from "@/components/GameHeader";
 import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { playTone, NOTE_FREQS_4 } from "@/lib/audio";
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from "@/lib/haptics";
+import { useSessionResults } from "@/lib/sessionResults";
 
 const MODE = GAME_MODE_META["note-id"];
 const ACCENT = MODE.accentHex;
@@ -32,6 +33,7 @@ interface RoundResult {
 
 export default function NoteIdScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>("select-difficulty");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [round, setRound] = useState(1);
@@ -49,6 +51,8 @@ export default function NoteIdScreen() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timedOutRef = useRef(false);
   const feedbackLockRef = useRef(false);
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
 
   const totalRounds = DIFFICULTY_CONFIG[difficulty].rounds;
   const timeLimit = DIFFICULTY_CONFIG[difficulty].timeLimit;
@@ -64,6 +68,20 @@ export default function NoteIdScreen() {
 
   // Cleanup on unmount.
   useEffect(() => clearTimer, [clearTimer]);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== "results" || recordedRef.current) return;
+    recordedRef.current = true;
+    const correct = results.filter((r) => r.correct).length;
+    recordResult({
+      mode: "note-id",
+      score,
+      accuracy: totalRounds > 0 ? correct / totalRounds : 0,
+      rounds: totalRounds,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, results, score, totalRounds, recordResult]);
 
   const beginCountdown = useCallback(() => {
     if (!isTimed) return;
@@ -86,6 +104,8 @@ export default function NoteIdScreen() {
     (diff: Difficulty) => {
       setDifficulty(diff);
       feedbackLockRef.current = false;
+      recordedRef.current = false;
+      sessionStartRef.current = Date.now();
       const first = pickRandom(DIFFICULTY_NOTES[diff]);
       setTarget(first);
       setRound(1);

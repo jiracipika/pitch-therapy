@@ -1,9 +1,10 @@
 import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { playFrequency } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const MODE = GAME_MODE_META['frequency-wordle'];
 const ACCENT = MODE.accentHex;
@@ -20,17 +21,37 @@ function getFeedback(guess: number, target: number): { feedback: Feedback; direc
 
 export default function FrequencyWordleScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [targetFreq, setTargetFreq] = useState(0);
   const [guesses, setGuesses] = useState<GuessRow[]>([]);
   const [inputVal, setInputVal] = useState('');
   const [phase, setPhase] = useState<'playing' | 'won' | 'lost'>('playing');
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
 
   const initGame = () => {
     setTargetFreq(Math.round((Math.random() * 800 + 200) * 10) / 10);
     setGuesses([]); setInputVal(''); setPhase('playing');
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
   };
 
   useEffect(() => { initGame(); }, []);
+
+  // Persist session result once when the puzzle is won or lost.
+  useEffect(() => {
+    if (phase === 'playing' || recordedRef.current) return;
+    recordedRef.current = true;
+    const rounds = guesses.length;
+    const score = phase === 'won' ? Math.max(100, (7 - rounds) * 100) : 0;
+    recordResult({
+      mode: 'frequency-wordle',
+      score,
+      accuracy: phase === 'won' ? 1 : 0,
+      rounds,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, guesses.length, recordResult]);
 
   const submitGuess = () => {
     const freq = parseFloat(inputVal);

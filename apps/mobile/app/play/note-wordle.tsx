@@ -1,11 +1,12 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
 import NoteComparisonStaff from '@/components/NoteComparisonStaff';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const MODE = GAME_MODE_META['note-wordle'];
 const ACCENT = MODE.accentHex;
@@ -24,17 +25,38 @@ function getFeedback(guess: string, targetIdx: number): Feedback {
 
 export default function NoteWordleScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [targetIdx, setTargetIdx] = useState(0);
   const [guesses, setGuesses] = useState<GuessRow[]>([]);
   const [currentGuess, setCurrentGuess] = useState<string | null>(null);
   const [phase, setPhase] = useState<'playing' | 'won' | 'lost'>('playing');
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
 
   const initGame = () => {
     setTargetIdx(Math.floor(Math.random() * 12));
     setGuesses([]); setCurrentGuess(null); setPhase('playing');
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
   };
 
   useEffect(() => { initGame(); }, []);
+
+  // Persist session result once when the puzzle is won or lost.
+  useEffect(() => {
+    if (phase === 'playing' || recordedRef.current) return;
+    recordedRef.current = true;
+    const rounds = guesses.length;
+    // Wordle scoring: win in fewer guesses = higher score (max 600 at 1 guess).
+    const score = phase === 'won' ? Math.max(100, (7 - rounds) * 100) : 0;
+    recordResult({
+      mode: 'note-wordle',
+      score,
+      accuracy: phase === 'won' ? 1 : 0,
+      rounds,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, guesses.length, recordResult]);
 
   const submitGuess = () => {
     if (!currentGuess || guesses.length >= 6 || phase !== 'playing') return;

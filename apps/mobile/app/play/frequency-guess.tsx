@@ -1,10 +1,11 @@
 import { View, Text, Pressable, ScrollView, PanResponder, LayoutChangeEvent } from 'react-native';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META, DIFFICULTY_CONFIG, type Difficulty } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const MODE = GAME_MODE_META['frequency-guess'];
 const ACCENT = MODE.accentHex;
@@ -83,6 +84,7 @@ function FreqSlider({ value, onChange, accent }: { value: number; onChange: (v: 
 
 export default function FrequencyGuessScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('select-difficulty');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [round, setRound] = useState(1);
@@ -94,6 +96,9 @@ export default function FrequencyGuessScreen() {
   const [sliderVal, setSliderVal] = useState(440);
   const [feedback, setFeedback] = useState<null | { correct: boolean; errorPct: number; pts: number }>(null);
   const [roundStart, setRoundStart] = useState(0);
+
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
 
   const totalRounds = DIFFICULTY_CONFIG[difficulty].rounds;
 
@@ -114,6 +119,8 @@ export default function FrequencyGuessScreen() {
     setStreak(0);
     setResults([]);
     setFeedback(null);
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
     setPhase('playing');
     const pick = pickRandom(QUIZ_FREQS);
     setTargetNote(pick.note);
@@ -122,6 +129,20 @@ export default function FrequencyGuessScreen() {
     setRoundStart(Date.now());
     playFrequency(pick.hz);
   }, []);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'results' || recordedRef.current) return;
+    recordedRef.current = true;
+    const correct = results.filter((r) => r.correct).length;
+    recordResult({
+      mode: 'frequency-guess',
+      score,
+      accuracy: totalRounds > 0 ? correct / totalRounds : 0,
+      rounds: totalRounds,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, results, score, totalRounds, recordResult]);
 
   const handlePlay = useCallback(() => { playFrequency(targetHz); }, [targetHz]);
   const handlePlayGuess = useCallback(() => { playFrequency(sliderVal); }, [sliderVal]);

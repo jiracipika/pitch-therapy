@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#FB923C';
 const ALL_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -11,6 +12,7 @@ type Phase = 'setup' | 'playing' | 'results';
 
 export default function SpeedRoundScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [duration, setDuration] = useState(30);
   const [currentNote, setCurrentNote] = useState('');
@@ -22,6 +24,8 @@ export default function SpeedRoundScreen() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
 
   const pickRandom = () => ALL_NOTES[Math.floor(Math.random() * ALL_NOTES.length)];
 
@@ -30,6 +34,8 @@ export default function SpeedRoundScreen() {
   const startGame = useCallback(() => {
     setScore(0); setCorrect(0); setTotal(0); setStreak(0); setBestStreak(0);
     setTimeLeft(duration); setFeedback(null); nextNote(); setPhase('playing');
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
@@ -38,6 +44,19 @@ export default function SpeedRoundScreen() {
       });
     }, 1000);
   }, [duration, nextNote]);
+
+  // Persist session result once when the sprint ends.
+  useEffect(() => {
+    if (phase !== 'results' || recordedRef.current) return;
+    recordedRef.current = true;
+    recordResult({
+      mode: 'speed-round',
+      score,
+      accuracy: total > 0 ? correct / total : 0,
+      rounds: total,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, score, correct, total, recordResult]);
 
   const handleTap = useCallback((note: string) => {
     if (phase !== 'playing') return;
