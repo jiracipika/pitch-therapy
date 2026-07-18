@@ -1,9 +1,10 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#D946EF';
 
@@ -40,6 +41,7 @@ interface RoundResult { round: number; root: string; interval: string; answer: s
 
 export default function IntervalArcherScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [intervalMode, setIntervalMode] = useState<IntervalMode>('ascending');
   const [round, setRound] = useState(0);
@@ -52,6 +54,22 @@ export default function IntervalArcherScreen() {
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [results, setResults] = useState<RoundResult[]>([]);
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'results' || recordedRef.current || results.length === 0) return;
+    recordedRef.current = true;
+    const bullseyes = results.filter(r => r.correct).length;
+    recordResult({
+      mode: 'interval-archer',
+      score,
+      accuracy: bullseyes / results.length,
+      rounds: results.length,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, results, score, recordResult]);
 
   const pool = MODE_CONFIG[intervalMode].pool;
   const activeIntervals = INTERVALS.filter(i => pool.includes(i.semitones));
@@ -74,6 +92,8 @@ export default function IntervalArcherScreen() {
   const startGame = (mode: IntervalMode) => {
     setIntervalMode(mode);
     setRound(0); setScore(0); setStreak(0); setBestStreak(0); setResults([]);
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
     nextRound(mode);
   };
 

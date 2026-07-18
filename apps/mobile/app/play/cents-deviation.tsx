@@ -1,9 +1,10 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#84CC16';
 const CENTS_RANGE = 50;
@@ -23,6 +24,7 @@ interface RoundResult { round: number; note: string; actualCents: number; guessC
 
 export default function CentsDeviationScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [round, setRound] = useState(0);
@@ -35,6 +37,22 @@ export default function CentsDeviationScreen() {
   const [needleCents, setNeedleCents] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [results, setResults] = useState<RoundResult[]>([]);
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'results' || recordedRef.current || results.length === 0) return;
+    recordedRef.current = true;
+    const avgPoints = results.reduce((s, r) => s + r.points, 0) / results.length;
+    recordResult({
+      mode: 'cents-deviation',
+      score,
+      accuracy: Math.max(0, Math.min(1, avgPoints / 100)),
+      rounds: results.length,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, results, score, recordResult]);
 
   const config = DIFF_CONFIG[difficulty];
   const totalRounds = config.rounds;
@@ -55,6 +73,8 @@ export default function CentsDeviationScreen() {
   const startGame = (diff: Difficulty) => {
     setDifficulty(diff);
     setRound(0); setScore(0); setStreak(0); setBestStreak(0); setResults([]);
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
     const { freq } = pickRound();
     setRound(1);
     setPhase('playing');

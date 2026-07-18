@@ -1,8 +1,9 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#EC4899';
 const TARGET_NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const;
@@ -19,6 +20,7 @@ interface RoundResult {
 
 export default function TuneInScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
@@ -27,6 +29,22 @@ export default function TuneInScreen() {
   const [target, setTarget] = useState('A');
   const [targetFreq, setTargetFreq] = useState(440);
   const [results, setResults] = useState<RoundResult[]>([]);
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'results' || recordedRef.current || results.length === 0) return;
+    recordedRef.current = true;
+    const hits = results.filter(r => r.correct).length;
+    recordResult({
+      mode: 'tune-in',
+      score,
+      accuracy: hits / results.length,
+      rounds: results.length,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, results, score, recordResult]);
 
   const pickTarget = useCallback(() => {
     const note = TARGET_NOTES[Math.floor(Math.random() * TARGET_NOTES.length)];
@@ -42,6 +60,8 @@ export default function TuneInScreen() {
     setStreak(0);
     setBestStreak(0);
     setResults([]);
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
     const { note, freq } = pickTarget();
     setRound(1);
     setPhase('playing');

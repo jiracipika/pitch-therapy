@@ -2,16 +2,18 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playFrequency } from '@/lib/audio';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#818CF8';
 const ROUNDS = 8;
 
 function centsToFreq(base: number, cents: number) { return base * Math.pow(2, cents / 1200); }
 
-type Phase = 'setup' | 'playing' | 'done';
+type Phase = 'setup' | 'playing' | 'reveal' | 'done';
 
 export default function WaveformMatchScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
@@ -19,6 +21,22 @@ export default function WaveformMatchScreen() {
   const [detuneCents, setDetuneCents] = useState(0);
   const [sliderCents, setSliderCents] = useState(0);
   const [results, setResults] = useState<{ round: number; detune: number; answer: number; pts: number }[]>([]);
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'done' || recordedRef.current || results.length === 0) return;
+    recordedRef.current = true;
+    const avgPts = results.reduce((a, r) => a + r.pts, 0) / results.length;
+    recordResult({
+      mode: 'waveform-match',
+      score,
+      accuracy: Math.max(0, Math.min(1, avgPts / 100)),
+      rounds: results.length,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, results, score, recordResult]);
 
   const FREQS = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25];
 
@@ -30,15 +48,28 @@ export default function WaveformMatchScreen() {
     setTimeout(() => playFrequency(centsToFreq(f, cents), 0.4), 600);
   }, []);
 
-  const startGame = useCallback(() => { setRound(0); setScore(0); setResults([]); nextRound(); }, [nextRound]);
+  const startGame = useCallback(() => {
+    setRound(0); setScore(0); setResults([]);
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
+    nextRound();
+  }, [nextRound]);
 
   const submit = useCallback(() => {
     const diff = Math.abs(sliderCents - detuneCents);
     const pts = Math.max(0, Math.round(100 - diff * 3));
     setScore(s => s + pts);
     setResults(r => [...r, { round, detune: detuneCents, answer: sliderCents, pts }]);
-    setPhase('done');
+    setPhase('reveal');
   }, [sliderCents, detuneCents, round]);
+
+  const advance = useCallback(() => {
+    if (round >= ROUNDS) {
+      setPhase('done');
+    } else {
+      nextRound();
+    }
+  }, [round, nextRound]);
 
   if (phase === 'done') {
     const avg = results.length > 0 ? Math.round(results.reduce((a, r) => a + r.pts, 0) / results.length) : 0;
@@ -150,8 +181,25 @@ export default function WaveformMatchScreen() {
           </View>
         </View>
 
-        <Pressable onPress={submit} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center' }}>
-          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Submit ({round}/{ROUNDS})</Text>
+        {phase === 'reveal' && (
+          <View style={{ backgroundColor: 'rgba(34,197,94,0.1)', borderRadius: 12, padding: 12, marginBottom: 16, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(74,222,128,0.3)' }}>
+            <Text style={{ color: '#97A3B6', fontSize: 13 }}>Target: <Text style={{ color: '#F8FAFC', fontWeight: '700' }}>{detuneCents > 0 ? '+' : ''}{detuneCents}¢</Text></Text>
+            <Text style={{ color: '#97A3B6', fontSize: 13 }}>Your answer: <Text style={{ color: '#F8FAFC', fontWeight: '700' }}>{sliderCents > 0 ? '+' : ''}{sliderCents}¢</Text></Text>
+            <Text style={{ color: Math.abs(sliderCents - detuneCents) <= 5 ? '#4ade80' : '#fbbf24', fontSize: 16, fontWeight: '700', marginTop: 4 }}>
+              {Math.abs(sliderCents - detuneCents)}¢ off
+            </Text>
+          </View>
+        )}
+
+        <Pressable
+          onPress={phase === 'reveal' ? advance : submit}
+          style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center' }}
+        >
+          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>
+            {phase === 'reveal'
+              ? (round >= ROUNDS ? 'See Results' : 'Next Round →')
+              : `Submit (${round}/${ROUNDS})`}
+          </Text>
         </Pressable>
       </View>
     </View>

@@ -1,8 +1,9 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, NOTE_FREQS_4, playFrequency } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#F472B6';
 
@@ -40,6 +41,7 @@ const ROUNDS = 10;
 
 export default function ChordDetectiveScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [advanced, setAdvanced] = useState(false);
   const [round, setRound] = useState(0);
@@ -53,6 +55,22 @@ export default function ChordDetectiveScreen() {
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [results, setResults] = useState<Result[]>([]);
   const targetRef = useRef({ root: '', type: '' });
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'results' || recordedRef.current || results.length === 0) return;
+    recordedRef.current = true;
+    const correctCount = results.filter(r => r.correct).length;
+    recordResult({
+      mode: 'chord-detective',
+      score,
+      accuracy: correctCount / results.length,
+      rounds: results.length,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, results, score, recordResult]);
 
   const pickRandom = <T,>(arr: readonly T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
@@ -67,6 +85,8 @@ export default function ChordDetectiveScreen() {
 
   const startGame = useCallback(() => {
     setRound(0); setScore(0); setStreak(0); setBestStreak(0); setResults([]);
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
     nextChord(); setRound(1); setPhase('playing');
   }, [nextChord]);
 

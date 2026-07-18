@@ -1,10 +1,11 @@
 import { View, Text, Pressable, ScrollView, PanResponder, LayoutChangeEvent } from 'react-native';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { playFrequency } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 import { colors, radii, typography } from '@/lib/theme';
 
 const ACCENT = colors.frequencySlider;
@@ -33,6 +34,7 @@ interface RoundResult { round: number; freq: number; answer: number; centsOff: n
 export default function FrequencySliderScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
@@ -42,6 +44,22 @@ export default function FrequencySliderScreen() {
   const [submitted, setSubmitted] = useState(false);
   const [results, setResults] = useState<RoundResult[]>([]);
   const [trackWidth, setTrackWidth] = useState(1);
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'results' || recordedRef.current || results.length === 0) return;
+    recordedRef.current = true;
+    const avgPoints = results.reduce((s, r) => s + r.points, 0) / results.length;
+    recordResult({
+      mode: 'frequency-slider',
+      score,
+      accuracy: Math.max(0, Math.min(1, avgPoints / 150)),
+      rounds: results.length,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, results, score, recordResult]);
 
   const pickTarget = () => {
     const minLog = Math.log(MIN_FREQ);
@@ -58,6 +76,8 @@ export default function FrequencySliderScreen() {
     setScore(0);
     setStreak(0);
     setResults([]);
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
     const nextFreq = pickTarget();
     setPhase('playing');
     void playFrequency(nextFreq, 1.0);

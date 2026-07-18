@@ -1,9 +1,10 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#6366F1';
 const KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -23,6 +24,7 @@ interface RoundResult { round: number; target: string; answer: string; correct: 
 
 export default function PianoTapScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [kbMode, setKbMode] = useState<KeyboardMode>('diatonic');
   const [round, setRound] = useState(0);
@@ -32,6 +34,22 @@ export default function PianoTapScreen() {
   const [selected, setSelected] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [results, setResults] = useState<RoundResult[]>([]);
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  useEffect(() => {
+    if (phase !== 'results' || recordedRef.current || results.length === 0) return;
+    recordedRef.current = true;
+    const correctCount = results.filter(r => r.correct).length;
+    recordResult({
+      mode: 'piano-tap',
+      score,
+      accuracy: correctCount / results.length,
+      rounds: results.length,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, results, score, recordResult]);
 
   const activeKeys = MODE_CONFIG[kbMode].keys;
 
@@ -47,6 +65,8 @@ export default function PianoTapScreen() {
     setResults([]);
     setFeedback(null);
     setSelected(null);
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
     setPhase('playing');
     const freq = NOTE_FREQS_4[first];
     if (freq) playTone(first, freq);
