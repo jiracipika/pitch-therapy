@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useStatsContext } from "@/components/StatsProvider";
+import { playTone } from "@/lib/audio";
 
 const ACCENT = "#FF453A";
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -21,20 +22,6 @@ const NOTE_FREQS: Record<string, number> = {
   "A#": 466.16,
   B: 493.88,
 };
-
-function playTone(freq: number, dur = 0.5) {
-  const ctx = new AudioContext();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.frequency.value = freq;
-  osc.type = "triangle";
-  gain.gain.setValueAtTime(0.25, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + dur);
-  osc.start();
-  osc.stop(ctx.currentTime + dur);
-}
 
 function pickRandom() {
   return NOTE_NAMES[Math.floor(Math.random() * NOTE_NAMES.length)];

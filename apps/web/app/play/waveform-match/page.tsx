@@ -4,26 +4,13 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStatsContext } from "@/components/StatsProvider";
+import { playTone } from "@/lib/audio";
 
 const ACCENT = "#5E5CE6";
 const ROUNDS = 8;
 
 function centsToFreq(baseFreq: number, cents: number) {
   return baseFreq * Math.pow(2, cents / 1200);
-}
-
-function playTone(frequency: number, duration: number = 0.4) {
-  const ctx = new AudioContext();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.frequency.value = frequency;
-  osc.type = "sine";
-  gain.gain.setValueAtTime(0.2, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
-  osc.start();
-  osc.stop(ctx.currentTime + duration);
 }
 
 function drawWaveform(
