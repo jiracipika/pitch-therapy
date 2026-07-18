@@ -3,10 +3,13 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
+  buildModeBreakdown,
   buildProgressInsights,
   evaluateAchievements,
   getNextGoals,
   type AchievementStatus,
+  type ModeBreakdownEntry,
+  type ModeTrendLabel,
 } from "@pitch-therapy/core";
 import { useStatsContext } from "@/components/StatsProvider";
 import Link from "next/link";
@@ -37,6 +40,14 @@ const WEEKS = 12;
 const DAYS = 7;
 const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 
+// Per-mode trend display, driven by shared-core analytics (buildModeBreakdown).
+// Same source of truth as the mobile Progress screen.
+const TREND_DISPLAY: Record<ModeTrendLabel, { arrow: string; color: string; label: string }> = {
+  improving: { arrow: "↗", color: "var(--ios-green)", label: "Improving" },
+  steady: { arrow: "→", color: "var(--ios-label3)", label: "Steady" },
+  slipping: { arrow: "↘", color: "var(--ios-red)", label: "Slipping" },
+};
+
 /** Format the progress metric for a locked tier as "current / target". */
 function formatMetricProgress(s: AchievementStatus): string {
   const { tier, progress } = s;
@@ -66,6 +77,15 @@ export default function ProgressPage() {
   const insights = useMemo(() => buildProgressInsights(stats.results), [stats.results]);
   const achievements = useMemo(() => evaluateAchievements(stats.results), [stats.results]);
   const nextGoals = useMemo(() => getNextGoals(stats.results), [stats.results]);
+
+  // Per-mode trend (improving / steady / slipping) from shared core analytics.
+  // Mirrors the mobile Progress screen so both surfaces agree.
+  const modeBreakdown = useMemo(() => buildModeBreakdown(stats.results), [stats.results]);
+  const breakdownByMode = useMemo(() => {
+    const map = new Map<string, ModeBreakdownEntry>();
+    for (const entry of modeBreakdown) map.set(entry.mode, entry);
+    return map;
+  }, [modeBreakdown]);
 
   // Build activity map: date -> count
   const activityMap: Record<string, number> = {};
@@ -705,7 +725,35 @@ export default function ProgressPage() {
                         </div>
                       </Link>
                       {ms.gamesPlayed > 0 && (
-                        <div style={{ textAlign: "right" }}>
+                        <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+                          {(() => {
+                            const breakdown = breakdownByMode.get(m.id);
+                            const trend = breakdown ? TREND_DISPLAY[breakdown.trendLabel] : null;
+                            if (!trend) return null;
+                            // Trend requires >=4 sessions in shared core; otherwise "steady".
+                            const isSteady = breakdown?.trendLabel === "steady";
+                            return (
+                              <div
+                                title={`Trend: ${trend.label}${breakdown && !isSteady ? ` (${breakdown.trendDelta >= 0 ? "+" : ""}${Math.round(breakdown.trendDelta * 100)}%)` : ""}`}
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 3,
+                                  fontSize: 11,
+                                  fontWeight: 500,
+                                  color: trend.color,
+                                  background: "var(--ios-bg3)",
+                                  border: "0.5px solid var(--ios-sep)",
+                                  borderRadius: 999,
+                                  padding: "1px 7px",
+                                  marginBottom: 2,
+                                }}
+                              >
+                                <span style={{ fontSize: 12, lineHeight: 1 }}>{trend.arrow}</span>
+                                {trend.label}
+                              </div>
+                            );
+                          })()}
                           <div
                             style={{ fontSize: 15, fontWeight: 600, color: "var(--ios-label2)" }}
                           >

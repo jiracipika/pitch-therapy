@@ -80,12 +80,14 @@ export type { WordleAttempt, WordleFeedback } from "./gameSession";
 
 // ─── Progress Insights (pure analytics) ─────────────────────────────────────
 
-export { buildProgressInsights, buildDailyActivityMap } from "./progressInsights";
+export { buildProgressInsights, buildDailyActivityMap, buildModeBreakdown, MODE_TREND_THRESHOLD } from "./progressInsights";
 export type {
   ProgressResult,
   WeakModeCluster,
   ProgressMomentum,
   ProgressInsights,
+  ModeBreakdownEntry,
+  ModeTrendLabel,
 } from "./progressInsights";
 
 // ─── Practice Planning (pure recommendations) ────────────────────────────────

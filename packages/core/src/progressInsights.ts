@@ -36,6 +36,21 @@ export interface ProgressInsights {
   focusTip: string;
 }
 
+export type ModeTrendLabel = "improving" | "steady" | "slipping";
+
+export interface ModeBreakdownEntry {
+  mode: string;
+  label: string;
+  sessions: number;
+  avgAccuracy: number;
+  bestScore: number;
+  /** Signed mean-accuracy delta (recent half − early half). 0 when < 4 sessions. */
+  trendDelta: number;
+  trendLabel: ModeTrendLabel;
+  /** ISO timestamp of the most recent session for this mode, or null. */
+  lastPlayed: string | null;
+}
+
 function toDayKey(dateISO: string) {
   return dateISO.slice(0, 10);
 }
@@ -185,4 +200,63 @@ export function buildDailyActivityMap(results: ProgressResult[]) {
     activity.set(key, (activity.get(key) ?? 0) + 1);
   }
   return activity;
+}
+
+// ─── Per-mode breakdown (used by the Progress "By Mode" section) ──────────────
+
+/**
+ * Absolute accuracy delta required before a mode is labeled "improving" or
+ * "slipping" rather than "steady". Tuned to match the visible granularity of
+ * the weekly momentum card (~5% felt-sense threshold).
+ */
+export const MODE_TREND_THRESHOLD = 0.03;
+
+function classifyModeTrend(trendDelta: number): ModeTrendLabel {
+  if (trendDelta >= MODE_TREND_THRESHOLD) return "improving";
+  if (trendDelta <= -MODE_TREND_THRESHOLD) return "slipping";
+  return "steady";
+}
+
+/**
+ * Build a per-mode breakdown of accuracy, trend, and recency.
+ *
+ * Pure and deterministic: the same input array always produces the same output
+ * in the same order (sorted by mode id alphabetically). Every mode that has at
+ * least one result is included; modes with no results are omitted so callers
+ * can render an explicit empty state.
+ */
+export function buildModeBreakdown(results: ProgressResult[]): ModeBreakdownEntry[] {
+  const buckets = new Map<string, ProgressResult[]>();
+
+  for (const result of results) {
+    if (!Number.isFinite(result.accuracy)) continue;
+    const mode = result.mode;
+    const list = buckets.get(mode) ?? [];
+    list.push(result);
+    buckets.set(mode, list);
+  }
+
+  const entries: ModeBreakdownEntry[] = [];
+
+  buckets.forEach((modeResults, mode) => {
+    const sorted = [...modeResults].sort((a, b) => a.date.localeCompare(b.date));
+    const accuracySeries = sorted.map((entry) => Math.max(0, Math.min(1, entry.accuracy)));
+    const trendDelta = signedWindowTrend(accuracySeries);
+    const last = sorted[sorted.length - 1];
+    const label =
+      (GAME_MODE_META as Record<string, { label: string } | undefined>)[mode]?.label ?? mode;
+
+    entries.push({
+      mode,
+      label,
+      sessions: modeResults.length,
+      avgAccuracy: mean(accuracySeries),
+      bestScore: modeResults.reduce((max, r) => (r.score > max ? r.score : max), 0),
+      trendDelta,
+      trendLabel: classifyModeTrend(trendDelta),
+      lastPlayed: last ? last.date : null,
+    });
+  });
+
+  return entries.sort((a, b) => a.mode.localeCompare(b.mode));
 }

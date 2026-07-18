@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildProgressInsights, buildDailyActivityMap } from "../progressInsights";
+import {
+  buildDailyActivityMap,
+  buildModeBreakdown,
+  buildProgressInsights,
+  MODE_TREND_THRESHOLD,
+} from "../progressInsights";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -146,5 +151,109 @@ describe("buildDailyActivityMap", () => {
   it("returns empty map for no results", () => {
     const map = buildDailyActivityMap([]);
     expect(map.size).toBe(0);
+  });
+});
+
+describe("buildModeBreakdown", () => {
+  const fixedNow = new Date("2026-07-03T12:00:00Z");
+
+  it("returns an empty array when there are no sessions", () => {
+    expect(buildModeBreakdown([])).toEqual([]);
+  });
+
+  it("aggregates sessions per mode and computes mean accuracy + best score", () => {
+    const results = [
+      { mode: "note-id", score: 500, accuracy: 0.5, rounds: 5, date: "2026-07-01T12:00:00Z", timeMs: 300000 },
+      { mode: "note-id", score: 900, accuracy: 0.9, rounds: 5, date: "2026-07-02T12:00:00Z", timeMs: 300000 },
+    ];
+
+    const breakdown = buildModeBreakdown(results);
+
+    expect(breakdown).toHaveLength(1);
+    expect(breakdown[0]?.mode).toBe("note-id");
+    expect(breakdown[0]?.sessions).toBe(2);
+    expect(breakdown[0]?.avgAccuracy).toBeCloseTo(0.7, 5);
+    expect(breakdown[0]?.bestScore).toBe(900);
+    expect(breakdown[0]?.lastPlayed).toBe("2026-07-02T12:00:00Z");
+  });
+
+  it("labels the trend as steady when fewer than 4 sessions exist", () => {
+    const results = [
+      r("note-id", 0.9, 1),
+      r("note-id", 0.9, 2),
+    ].map((x) => ({ ...x, date: new Date(x.date).toISOString() }));
+
+    const [entry] = buildModeBreakdown(results);
+    expect(entry?.trendDelta).toBe(0);
+    expect(entry?.trendLabel).toBe("steady");
+  });
+
+  it("labels a clear upward trend as improving", () => {
+    const results = [
+      { mode: "note-id", score: 500, accuracy: 0.4, rounds: 5, date: new Date(fixedNow.getTime() - 4 * DAY).toISOString(), timeMs: 300000 },
+      { mode: "note-id", score: 520, accuracy: 0.42, rounds: 5, date: new Date(fixedNow.getTime() - 3 * DAY).toISOString(), timeMs: 300000 },
+      { mode: "note-id", score: 880, accuracy: 0.88, rounds: 5, date: new Date(fixedNow.getTime() - 2 * DAY).toISOString(), timeMs: 300000 },
+      { mode: "note-id", score: 910, accuracy: 0.91, rounds: 5, date: new Date(fixedNow.getTime() - 1 * DAY).toISOString(), timeMs: 300000 },
+    ];
+
+    const [entry] = buildModeBreakdown(results);
+    expect(entry?.trendDelta).toBeGreaterThan(MODE_TREND_THRESHOLD);
+    expect(entry?.trendLabel).toBe("improving");
+  });
+
+  it("labels a clear downward trend as slipping", () => {
+    const results = [
+      { mode: "note-id", score: 900, accuracy: 0.9, rounds: 5, date: new Date(fixedNow.getTime() - 4 * DAY).toISOString(), timeMs: 300000 },
+      { mode: "note-id", score: 880, accuracy: 0.88, rounds: 5, date: new Date(fixedNow.getTime() - 3 * DAY).toISOString(), timeMs: 300000 },
+      { mode: "note-id", score: 420, accuracy: 0.42, rounds: 5, date: new Date(fixedNow.getTime() - 2 * DAY).toISOString(), timeMs: 300000 },
+      { mode: "note-id", score: 400, accuracy: 0.4, rounds: 5, date: new Date(fixedNow.getTime() - 1 * DAY).toISOString(), timeMs: 300000 },
+    ];
+
+    const [entry] = buildModeBreakdown(results);
+    expect(entry?.trendDelta).toBeLessThan(-MODE_TREND_THRESHOLD);
+    expect(entry?.trendLabel).toBe("slipping");
+  });
+
+  it("sorts entries deterministically by mode id and excludes unplayed modes", () => {
+    const results = [
+      { mode: "pitch-match", score: 700, accuracy: 0.7, rounds: 5, date: "2026-07-01T12:00:00Z", timeMs: 300000 },
+      { mode: "note-id", score: 800, accuracy: 0.8, rounds: 5, date: "2026-07-01T13:00:00Z", timeMs: 300000 },
+    ];
+
+    const breakdown = buildModeBreakdown(results);
+    expect(breakdown.map((e) => e.mode)).toEqual(["note-id", "pitch-match"]);
+    expect(breakdown.find((e) => e.mode === "speed-round")).toBeUndefined();
+  });
+
+  it("is deterministic: identical inputs produce identical outputs", () => {
+    const results = [
+      r("pitch-match", 0.2, 1),
+      r("pitch-match", 0.2, 2),
+      r("note-id", 0.9, 1),
+      r("note-id", 0.9, 2),
+    ].map((x) => ({ ...x, date: new Date(x.date).toISOString() }));
+
+    expect(buildModeBreakdown(results)).toEqual(buildModeBreakdown(results));
+  });
+
+  it("uses the mode's display label from game metadata", () => {
+    const results = [
+      { mode: "note-id", score: 500, accuracy: 0.5, rounds: 5, date: "2026-07-01T12:00:00Z", timeMs: 300000 },
+    ];
+
+    const [entry] = buildModeBreakdown(results);
+    // GAME_MODE_META["note-id"].label is human-friendly (not the raw id).
+    expect(entry?.label).not.toBe("note-id");
+    expect(entry?.label.length).toBeGreaterThan(0);
+  });
+
+  it("clamps out-of-range accuracy into [0, 1] before averaging", () => {
+    const results = [
+      { mode: "note-id", score: 500, accuracy: 1.5, rounds: 5, date: "2026-07-01T12:00:00Z", timeMs: 300000 },
+      { mode: "note-id", score: 500, accuracy: -0.3, rounds: 5, date: "2026-07-02T12:00:00Z", timeMs: 300000 },
+    ];
+
+    const [entry] = buildModeBreakdown(results);
+    expect(entry?.avgAccuracy).toBeCloseTo(0.5, 5);
   });
 });

@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
-import { GAME_MODE_META, buildProgressInsights, type ProgressResult } from '@pitch-therapy/core';
+import {
+  GAME_MODE_META,
+  buildModeBreakdown,
+  buildProgressInsights,
+  type ModeTrendLabel,
+  type ProgressResult,
+} from '@pitch-therapy/core';
 import { GlassCard, MotionStatusCard, SectionHeader, StatItem } from '@/components/AppleUI';
 import { AchievementsSection } from '@/components/AchievementsSection';
 import { StreakRing } from '@/components/StreakRing';
@@ -19,12 +25,27 @@ function formatDelta(pct: number): { text: string; color: string } {
   return { text: `${Math.round(pct)}%`, color: colors.textTertiary };
 }
 
+const TREND_DISPLAY: Record<ModeTrendLabel, { arrow: string; color: string; label: string }> = {
+  improving: { arrow: '↗', color: colors.green, label: 'improving' },
+  steady: { arrow: '→', color: colors.textTertiary, label: 'steady' },
+  slipping: { arrow: '↘', color: colors.danger, label: 'slipping' },
+};
+
 export default function ProgressScreen() {
   const { isDesktop } = useResponsiveLayout();
   const [loaded, setLoaded] = useState(false);
   const { stats } = useSessionResults();
   const sessionResults = useMemo<ProgressResult[]>(() => stats.results, [stats.results]);
   const insights = useMemo(() => buildProgressInsights(sessionResults), [sessionResults]);
+  const modeBreakdown = useMemo(
+    () => buildModeBreakdown(sessionResults),
+    [sessionResults],
+  );
+  const breakdownByMode = useMemo(() => {
+    const map = new Map<string, (typeof modeBreakdown)[number]>();
+    for (const entry of modeBreakdown) map.set(entry.mode, entry);
+    return map;
+  }, [modeBreakdown]);
   const hasStats = sessionResults.length > 0;
 
   useEffect(() => {
@@ -85,7 +106,7 @@ export default function ProgressScreen() {
         title="By Mode"
         subtitle={
           hasStats
-            ? 'Your accuracy and play count across each drill.'
+            ? 'Accuracy, play count, and trend across each drill.'
             : 'Mode history will fill in as sessions are recorded.'
         }
       />
@@ -93,6 +114,10 @@ export default function ProgressScreen() {
         {Object.values(GAME_MODE_META).map((mode) => {
           const modeData = getModeStats(sessionResults, mode.id);
           const played = modeData.sessions > 0;
+          // Trend comes from the shared core breakdown (needs >= 4 sessions
+          // to be non-steady). Falls back to "steady" for fresh modes.
+          const breakdown = breakdownByMode.get(mode.id);
+          const trend = breakdown ? TREND_DISPLAY[breakdown.trendLabel] : TREND_DISPLAY.steady;
           return (
             <GlassCard key={mode.id} padding={13} accent={mode.accentHex} style={{ width: isDesktop ? '49%' : '100%' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -113,9 +138,16 @@ export default function ProgressScreen() {
                 <View style={{ flex: 1, gap: 3 }}>
                   <Text style={{ color: colors.text, ...typography.subhead }}>{mode.label}</Text>
                   <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>
-                    {played ? `${modeData.sessions} session${modeData.sessions > 1 ? 's' : ''} played` : '0 sessions played'}
+                    {played
+                      ? `${modeData.sessions} session${modeData.sessions > 1 ? 's' : ''} played`
+                      : '0 sessions played'}
                   </Text>
                 </View>
+                {played && (
+                  <Text style={{ color: trend.color, ...typography.caption1, marginRight: 8 }}>
+                    {trend.arrow} {trend.label}
+                  </Text>
+                )}
                 <Text style={{ color: played ? colors.text : colors.textTertiary, ...typography.subhead }}>
                   {played ? formatAccuracy(modeData.avgAccuracy) : '--'}
                 </Text>
