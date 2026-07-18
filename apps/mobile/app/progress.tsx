@@ -13,6 +13,12 @@ function formatAccuracy(value: number): string {
   return value > 0 ? `${Math.round(value * 100)}%` : '--';
 }
 
+function formatDelta(pct: number): { text: string; color: string } {
+  if (pct > 5) return { text: `▲ ${Math.round(pct)}%`, color: colors.green };
+  if (pct < -5) return { text: `▼ ${Math.round(Math.abs(pct))}%`, color: colors.danger };
+  return { text: `${Math.round(pct)}%`, color: colors.textTertiary };
+}
+
 export default function ProgressScreen() {
   const { isDesktop } = useResponsiveLayout();
   const [loaded, setLoaded] = useState(false);
@@ -120,6 +126,72 @@ export default function ProgressScreen() {
       </View>
 
       <AchievementsSection results={sessionResults} />
+
+      {hasStats && (
+        <>
+          <SectionHeader title="7-Day Momentum" subtitle="Weekly trends in volume and accuracy." />
+          <GlassCard accent={colors.indigo} padding={16}>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text style={{ color: colors.textTertiary, ...typography.overline }}>SESSIONS</Text>
+                <Text style={{ color: colors.text, ...typography.title3 }}>
+                  {insights.momentum.sessionsLast7}
+                </Text>
+                <Text style={{ color: formatDelta(insights.momentum.sessionDeltaPct).color, ...typography.caption1 }}>
+                  {formatDelta(insights.momentum.sessionDeltaPct).text} vs prev week
+                </Text>
+              </View>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text style={{ color: colors.textTertiary, ...typography.overline }}>ACCURACY</Text>
+                <Text style={{ color: colors.text, ...typography.title3 }}>
+                  {formatAccuracy(insights.momentum.avgAccuracyLast7)}
+                </Text>
+                <Text style={{ color: formatDelta(insights.momentum.accuracyDeltaPct).color, ...typography.caption1 }}>
+                  {formatDelta(insights.momentum.accuracyDeltaPct).text} vs prev week
+                </Text>
+              </View>
+            </View>
+          </GlassCard>
+        </>
+      )}
+
+      {hasStats && insights.weakModes.length > 0 && (
+        <>
+          <SectionHeader title="Focus Areas" subtitle="Modes with the highest improvement potential." />
+          <View style={{ gap: 8 }}>
+            {insights.weakModes.map((wm) => (
+              <GlassCard key={wm.mode} padding={13} accent={colors.orange}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  <View
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: radii.md,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: colors.orange + '20',
+                      borderWidth: 1,
+                      borderColor: colors.orange + '55',
+                    }}
+                  >
+                    <Text style={{ color: colors.orange, fontWeight: '900' }}>!</Text>
+                  </View>
+                  <View style={{ flex: 1, gap: 3 }}>
+                    <Text style={{ color: colors.text, ...typography.subhead }}>{wm.label}</Text>
+                    <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>
+                      {wm.sessions} session{wm.sessions > 1 ? 's' : ''} · {formatAccuracy(wm.avgAccuracy)}
+                      {wm.trendDelta >= 0 ? '  ↗ improving' : '  ↘ slipping'}
+                    </Text>
+                  </View>
+                  <Text style={{ color: colors.text, ...typography.subhead }}>
+                    {formatAccuracy(wm.avgAccuracy)}
+                  </Text>
+                </View>
+              </GlassCard>
+            ))}
+          </View>
+        </>
+      )}
 
       <GlassCard accent={colors.blue} padding={16}>
         <View style={{ gap: 6 }}>
