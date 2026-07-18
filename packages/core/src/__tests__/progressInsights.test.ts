@@ -103,6 +103,68 @@ describe("buildProgressInsights", () => {
     expect(insights.focusTip).toContain("No sessions yet");
   });
 
+  describe("focusTip coaching", () => {
+    // Two weak sessions of the same mode, both inside the last-7-day window.
+    // avg accuracy = 0.6 -> personalized target should be 85% (the ceiling,
+    // since 0.6 + 0.05 = 0.65 < 0.85).
+    const weakResults = [
+      r("note-id", 0.6, 1),
+      r("note-id", 0.6, 3),
+    ].map((x) => ({ ...x, date: new Date(x.date).toISOString() }));
+
+    it("suggests a personalized accuracy target instead of a fixed +4%", () => {
+      const insights = buildProgressInsights(weakResults, 3, fixedNow);
+      expect(insights.focusTip).toContain("aim for 85% accuracy");
+      expect(insights.focusTip).not.toContain("+4%");
+    });
+
+    it("labels a mode with too few sessions as steady (not improving)", () => {
+      // Only 2 sessions -> signedWindowTrend returns 0 -> classifyModeTrend
+      // yields "steady". The old >= 0 check falsely reported "improving".
+      const insights = buildProgressInsights(weakResults, 3, fixedNow);
+      expect(insights.focusTip).toContain("It's steady");
+      expect(insights.focusTip).not.toContain("It's improving");
+    });
+
+    it("acks a slipping week when overall accuracy drops sharply", () => {
+      // Build a history where last-7 accuracy is well below prev-7.
+      const slipping = [
+        r("note-id", 0.9, 10), // prev-7, strong
+        r("note-id", 0.9, 12),
+        r("note-id", 0.4, 1), // last-7, weak
+        r("note-id", 0.4, 3),
+      ].map((x) => ({ ...x, date: new Date(x.date).toISOString() }));
+
+      const insights = buildProgressInsights(slipping, 3, fixedNow);
+      expect(insights.momentum.accuracyDeltaPct).toBeLessThan(-10);
+      expect(insights.focusTip).toContain("overall accuracy dipped");
+    });
+
+    it("celebrates an improving week when overall accuracy jumps", () => {
+      const improving = [
+        r("note-id", 0.4, 10), // prev-7, weak
+        r("note-id", 0.4, 12),
+        r("note-id", 0.9, 1), // last-7, strong
+        r("note-id", 0.9, 3),
+      ].map((x) => ({ ...x, date: new Date(x.date).toISOString() }));
+
+      const insights = buildProgressInsights(improving, 3, fixedNow);
+      expect(insights.momentum.accuracyDeltaPct).toBeGreaterThan(10);
+      expect(insights.focusTip).toContain("trending up overall");
+    });
+
+    it("caps the suggested target at 95% for an already-strong weak mode", () => {
+      // avg 0.92 -> 0.92 + 0.05 = 0.97, capped to 0.95 -> "95%".
+      const strongWeak = [
+        r("pitch-match", 0.92, 1),
+        r("pitch-match", 0.92, 3),
+      ].map((x) => ({ ...x, date: new Date(x.date).toISOString() }));
+
+      const insights = buildProgressInsights(strongWeak, 3, fixedNow);
+      expect(insights.focusTip).toContain("aim for 95% accuracy");
+    });
+  });
+
   it("handles a single session (no weak clusters since need 2+)", () => {
     const results = [
       { mode: "note-id", score: 500, accuracy: 0.5, rounds: 5, date: new Date(fixedNow.getTime() - 1 * DAY).toISOString(), timeMs: 300000 },

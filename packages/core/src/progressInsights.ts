@@ -156,6 +156,12 @@ function buildMomentum(results: ProgressResult[], now: Date = new Date()): Progr
   };
 }
 
+/**
+ * Weekly accuracy-delta magnitude (percentage points) that counts as a real
+ * directional shift worth calling out in the focus tip.
+ */
+const MOMENTUM_SHIFT_PCT = 10;
+
 function buildFocusTip(weakModes: WeakModeCluster[], momentum: ProgressMomentum) {
   if (!weakModes.length) {
     if (momentum.sessionsLast7 > 0) {
@@ -165,9 +171,30 @@ function buildFocusTip(weakModes: WeakModeCluster[], momentum: ProgressMomentum)
   }
 
   const [primary] = weakModes;
-  const trend = primary.trendDelta >= 0 ? "improving" : "slipping";
+  // Use the same thresholded classification as the "By Mode" card so a mode
+  // with too few sessions reads as "steady" rather than the misleading
+  // "improving" the old >= 0 check produced.
+  const trend = classifyModeTrend(primary.trendDelta);
+
+  // Personalized target: pull the user toward an 85% ceiling, always ask for at
+  // least a 5pp jump, and never suggest more than 95%. Whole percentage points
+  // keep the tip readable ("aim for 78%" not "78.3%").
+  const targetRatio = Math.min(0.95, Math.max(primary.avgAccuracy + 0.05, 0.85));
+  const targetPct = Math.round(targetRatio * 100);
+
   const minutes = Math.max(6, Math.round((momentum.avgSessionMinutesLast7 || 8) * 0.8));
-  return `Focus next on ${primary.label}. It is ${trend}, but still your highest-impact gap. Run ${minutes}-minute reps and aim for +4% accuracy.`;
+
+  // Fold weekly momentum direction into the coaching tone so the tip reflects
+  // the user's overall trajectory, not just the single weak mode.
+  const momentumShift = momentum.accuracyDeltaPct;
+  let momentumClause = "";
+  if (momentumShift <= -MOMENTUM_SHIFT_PCT) {
+    momentumClause = " Your overall accuracy dipped this week, so protect your gains before pushing harder.";
+  } else if (momentumShift >= MOMENTUM_SHIFT_PCT) {
+    momentumClause = " You're trending up overall — keep the streak going.";
+  }
+
+  return `Focus next on ${primary.label}. It's ${trend}, but still your highest-impact gap. Run ${minutes}-minute reps and aim for ${targetPct}% accuracy.${momentumClause}`;
 }
 
 export function buildProgressInsights(
