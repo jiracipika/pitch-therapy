@@ -10,7 +10,25 @@ import type { ProgressResult } from "./progressInsights";
 import { calculateLongestStreak } from "./dailyChallenge";
 import { GAME_MODES } from "./gameData";
 
-export type AchievementCategory = "volume" | "consistency" | "accuracy" | "versatility" | "speed";
+/**
+ * Minimum number of sessions a user must have in a single mode for it to count
+ * toward mastery, at an average accuracy of at least {@link MASTERY_MIN_ACCURACY}.
+ */
+export const MASTERY_MIN_SESSIONS = 4;
+
+/**
+ * Minimum average accuracy (0–1) across all sessions of a mode for it to count
+ * as mastered.
+ */
+export const MASTERY_MIN_ACCURACY = 0.8;
+
+export type AchievementCategory =
+  | "volume"
+  | "consistency"
+  | "accuracy"
+  | "versatility"
+  | "mastery"
+  | "speed";
 
 export interface AchievementTier {
   /** Stable identifier, e.g. "volume-10". */
@@ -40,6 +58,12 @@ export interface AchievementMetrics {
   bestAccuracy: number;
   modesPlayed: number;
   totalModes: number;
+  /**
+   * Count of modes the user has drilled to a sustained high standard
+   * (≥ {@link MASTERY_MIN_SESSIONS} sessions at ≥ {@link MASTERY_MIN_ACCURACY}
+   * average accuracy). 0 until any mode clears both bars.
+   */
+  modesMastered: number;
   fastestAvgResponseMs: number | null;
 }
 
@@ -175,6 +199,36 @@ const ALL_TIERS: AchievementTier[] = [
     icon: "🎓",
   },
 
+  // ── Mastery: modes drilled to a sustained high standard ──
+  // A mode counts toward mastery once it has ≥ MASTERY_MIN_SESSIONS sessions
+  // at ≥ MASTERY_MIN_ACCURACY average accuracy. This rewards depth — drilling a
+  // mode to a real, repeatable standard — rather than the breadth that
+  // versatility measures (which only requires trying a mode once).
+  {
+    id: "mastery-1",
+    category: "mastery",
+    label: "Locked In",
+    description: "Master 1 mode (4+ sessions at 80%+ average).",
+    threshold: 1,
+    icon: "🔐",
+  },
+  {
+    id: "mastery-3",
+    category: "mastery",
+    label: "Specialist",
+    description: "Master 3 modes (4+ sessions at 80%+ average).",
+    threshold: 3,
+    icon: "🏅",
+  },
+  {
+    id: "mastery-6",
+    category: "mastery",
+    label: "Tonal Authority",
+    description: "Master 6 modes (4+ sessions at 80%+ average).",
+    threshold: 6,
+    icon: "🏆",
+  },
+
   // ── Speed: fastest average round response ──
   {
     id: "speed-8000",
@@ -213,6 +267,7 @@ export function deriveAchievementMetrics(results: ProgressResult[]): Achievement
       bestAccuracy: 0,
       modesPlayed: 0,
       totalModes: GAME_MODES.length,
+      modesMastered: 0,
       fastestAvgResponseMs: null,
     };
   }
@@ -232,6 +287,23 @@ export function deriveAchievementMetrics(results: ProgressResult[]): Achievement
 
   const modesPlayed = new Set(normalized.map((r) => r.mode)).size;
 
+  // Group sessions by mode to compute mastery. A mode counts as mastered once
+  // it has ≥ MASTERY_MIN_SESSIONS sessions at ≥ MASTERY_MIN_ACCURACY average.
+  // Unlike versatility (which counts a mode after a single try), mastery
+  // rewards drilling a mode to a repeatable, sustained standard.
+  const modeAccuracies = new Map<string, number[]>();
+  for (const r of normalized) {
+    const list = modeAccuracies.get(r.mode) ?? [];
+    list.push(r.accuracy);
+    modeAccuracies.set(r.mode, list);
+  }
+  let modesMastered = 0;
+  modeAccuracies.forEach((accs) => {
+    if (accs.length < MASTERY_MIN_SESSIONS) return;
+    const avg = accs.reduce((sum, a) => sum + a, 0) / accs.length;
+    if (avg >= MASTERY_MIN_ACCURACY) modesMastered += 1;
+  });
+
   // Per-session average response time = timeMs / rounds. Track the fastest.
   let fastestAvgResponseMs: number | null = null;
   for (const r of normalized) {
@@ -248,6 +320,7 @@ export function deriveAchievementMetrics(results: ProgressResult[]): Achievement
     bestAccuracy,
     modesPlayed,
     totalModes: GAME_MODES.length,
+    modesMastered,
     fastestAvgResponseMs,
   };
 }
@@ -265,6 +338,8 @@ function metricForCategory(category: AchievementCategory, metrics: AchievementMe
       return metrics.bestAccuracy;
     case "versatility":
       return metrics.modesPlayed;
+    case "mastery":
+      return metrics.modesMastered;
     case "speed":
       // Speed is inverted: lower is better, threshold is an upper bound.
       // A missing fastest time means speed tiers can never unlock.

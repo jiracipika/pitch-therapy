@@ -27,6 +27,7 @@ describe("ACHIEVEMENT_TIERS", () => {
     expect(categories.has("consistency")).toBe(true);
     expect(categories.has("accuracy")).toBe(true);
     expect(categories.has("versatility")).toBe(true);
+    expect(categories.has("mastery")).toBe(true);
     expect(categories.has("speed")).toBe(true);
   });
 
@@ -52,6 +53,7 @@ describe("deriveAchievementMetrics", () => {
     expect(metrics.longestStreak).toBe(0);
     expect(metrics.bestAccuracy).toBe(0);
     expect(metrics.modesPlayed).toBe(0);
+    expect(metrics.modesMastered).toBe(0);
     expect(metrics.fastestAvgResponseMs).toBeNull();
   });
 
@@ -106,6 +108,53 @@ describe("deriveAchievementMetrics", () => {
   });
 });
 
+describe("deriveAchievementMetrics — mastery", () => {
+  // 4 sessions at 80%+ average in one mode → 1 mastered mode.
+  it("counts a mode as mastered at 4+ sessions and 80%+ average", () => {
+    const metrics = deriveAchievementMetrics([
+      session("note-id", 0.8, 10, "2026-07-01T12:00:00Z"),
+      session("note-id", 0.8, 10, "2026-07-02T12:00:00Z"),
+      session("note-id", 0.8, 10, "2026-07-03T12:00:00Z"),
+      session("note-id", 0.85, 10, "2026-07-04T12:00:00Z"),
+    ]);
+    expect(metrics.modesMastered).toBe(1);
+  });
+
+  it("does not count a mode with only 3 sessions even at high accuracy", () => {
+    const metrics = deriveAchievementMetrics([
+      session("note-id", 0.95, 10, "2026-07-01T12:00:00Z"),
+      session("note-id", 0.95, 10, "2026-07-02T12:00:00Z"),
+      session("note-id", 0.95, 10, "2026-07-03T12:00:00Z"),
+    ]);
+    expect(metrics.modesMastered).toBe(0);
+  });
+
+  it("does not count a mode with 4 sessions but under 80% average", () => {
+    const metrics = deriveAchievementMetrics([
+      session("note-id", 0.7, 10, "2026-07-01T12:00:00Z"),
+      session("note-id", 0.75, 10, "2026-07-02T12:00:00Z"),
+      session("note-id", 0.72, 10, "2026-07-03T12:00:00Z"),
+      session("note-id", 0.78, 10, "2026-07-04T12:00:00Z"),
+    ]);
+    expect(metrics.modesMastered).toBe(0);
+  });
+
+  it("counts multiple mastered modes independently", () => {
+    const metrics = deriveAchievementMetrics([
+      session("note-id", 0.9, 10, "2026-07-01T12:00:00Z"),
+      session("note-id", 0.9, 10, "2026-07-02T12:00:00Z"),
+      session("note-id", 0.9, 10, "2026-07-03T12:00:00Z"),
+      session("note-id", 0.9, 10, "2026-07-04T12:00:00Z"),
+      session("pitch-match", 0.85, 10, "2026-07-01T12:00:00Z"),
+      session("pitch-match", 0.85, 10, "2026-07-02T12:00:00Z"),
+      session("pitch-match", 0.85, 10, "2026-07-03T12:00:00Z"),
+      session("pitch-match", 0.85, 10, "2026-07-04T12:00:00Z"),
+    ]);
+    expect(metrics.modesMastered).toBe(2);
+    expect(metrics.modesPlayed).toBe(2);
+  });
+});
+
 describe("evaluateTier", () => {
   const metrics = {
     totalSessions: 25,
@@ -113,6 +162,7 @@ describe("evaluateTier", () => {
     bestAccuracy: 0.88,
     modesPlayed: 5,
     totalModes: 18,
+    modesMastered: 2,
     fastestAvgResponseMs: 4000,
   };
 
@@ -251,6 +301,43 @@ describe("evaluateAchievements", () => {
     expect(unlockedIds).toContain("versatility-3");
     expect(unlockedIds).toContain("versatility-6");
     expect(unlockedIds).not.toContain("versatility-12");
+  });
+
+  it("unlocks mastery tiers as modes are drilled to a sustained standard", () => {
+    // 4 sessions each of note-id, pitch-match, and frequency-guess, all at
+    // ≥ 80% → 3 modes mastered (unlocks mastery-1 and mastery-3, not mastery-6).
+    const drilled = [
+      session("note-id", 0.85, 10, "2026-07-01T12:00:00Z"),
+      session("note-id", 0.85, 10, "2026-07-02T12:00:00Z"),
+      session("note-id", 0.85, 10, "2026-07-03T12:00:00Z"),
+      session("note-id", 0.85, 10, "2026-07-04T12:00:00Z"),
+      session("pitch-match", 0.82, 10, "2026-07-05T12:00:00Z"),
+      session("pitch-match", 0.82, 10, "2026-07-06T12:00:00Z"),
+      session("pitch-match", 0.82, 10, "2026-07-07T12:00:00Z"),
+      session("pitch-match", 0.82, 10, "2026-07-08T12:00:00Z"),
+      session("frequency-guess", 0.81, 10, "2026-07-09T12:00:00Z"),
+      session("frequency-guess", 0.81, 10, "2026-07-10T12:00:00Z"),
+      session("frequency-guess", 0.81, 10, "2026-07-11T12:00:00Z"),
+      session("frequency-guess", 0.81, 10, "2026-07-12T12:00:00Z"),
+    ];
+    const result = evaluateAchievements(drilled);
+    const unlockedIds = result.statuses.filter((s) => s.unlocked).map((s) => s.tier.id);
+    expect(unlockedIds).toContain("mastery-1");
+    expect(unlockedIds).toContain("mastery-3");
+    expect(unlockedIds).not.toContain("mastery-6");
+  });
+
+  it("does not unlock mastery-1 from breadth alone (one session per mode)", () => {
+    // Trying many modes once at 80% unlocks versatility but NOT mastery,
+    // because no single mode has 4+ sessions.
+    const tried = ["note-id", "pitch-match", "frequency-guess", "speed-round", "piano-tap"].map(
+      (m, i) => session(m, 0.9, 10, `2026-07-${String(i + 1).padStart(2, "0")}T12:00:00Z`),
+    );
+    const result = evaluateAchievements(tried);
+    const masteryUnlocked = result.statuses
+      .filter((s) => s.unlocked && s.tier.category === "mastery")
+      .map((s) => s.tier.id);
+    expect(masteryUnlocked).toEqual([]);
   });
 
   it("unlocks speed tiers when average response is fast enough", () => {

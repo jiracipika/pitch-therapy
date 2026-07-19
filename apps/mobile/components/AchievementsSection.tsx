@@ -31,6 +31,10 @@ function formatMetricProgress(s: AchievementStatus): string {
       return `${Math.round(progress * 100)}% / ${Math.round(tier.threshold * 100)}%`;
     case 'versatility':
       return `${Math.round(progress)} / ${tier.threshold} modes`;
+    case 'mastery':
+      // Mastery counts modes drilled to a sustained standard (4+ sessions at
+      // 80%+ average). Show mastered / target.
+      return `${Math.round(progress)} / ${tier.threshold} mastered`;
     case 'speed': {
       // Speed is inverted: lower is better. Show current / target seconds.
       const targetSec = (tier.threshold / 1000).toFixed(0);

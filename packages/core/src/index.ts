@@ -114,8 +114,10 @@ export {
   deriveAchievementMetrics,
   evaluateAchievements,
   evaluateTier,
-  getUnlockedAchievements,
   getNextGoals,
+  getUnlockedAchievements,
+  MASTERY_MIN_ACCURACY,
+  MASTERY_MIN_SESSIONS,
 } from "./achievements";
 export type {
   AchievementCategory,

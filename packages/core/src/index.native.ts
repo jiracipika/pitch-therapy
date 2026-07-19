@@ -130,6 +130,8 @@ export {
   evaluateTier,
   getUnlockedAchievements,
   getNextGoals,
+  MASTERY_MIN_ACCURACY,
+  MASTERY_MIN_SESSIONS,
 } from "./achievements";
 export type {
   AchievementCategory,
