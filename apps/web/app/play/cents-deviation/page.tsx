@@ -8,7 +8,6 @@ import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 
 const ACCENT = "#30D158";
-const CENTS_RANGE = 50;
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -17,6 +16,14 @@ const DIFF_CONFIG: Record<Difficulty, { label: string; centsRange: number; round
   medium: { label: "Medium", centsRange: 30, rounds: 8 },
   hard: { label: "Hard", centsRange: 15, rounds: 10 },
 };
+
+/**
+ * Tick marks drawn inside the cents meter, expressed in cents relative to the
+ * per-difficulty range. Values are filtered to those that fit inside the
+ * current range, so the meter always shows evenly-distributed tick lines
+ * scaled to the active difficulty (±50/±30/±15).
+ */
+const METER_TICK_VALUES = [50, 40, 30, 25, 20, 15, 10, 5];
 
 export default function CentsDeviationPage() {
   const { recordResult } = useStatsContext();
@@ -122,10 +129,10 @@ export default function CentsDeviationPage() {
       if (!meterRef.current || submitted) return;
       const rect = meterRef.current.getBoundingClientRect();
       const pct = (clientX - rect.left) / rect.width;
-      const cents = Math.round((pct - 0.5) * 2 * CENTS_RANGE);
-      setNeedlePos(Math.max(-CENTS_RANGE, Math.min(CENTS_RANGE, cents)));
+      const cents = Math.round((pct - 0.5) * 2 * config.centsRange);
+      setNeedlePos(Math.max(-config.centsRange, Math.min(config.centsRange, cents)));
     },
-    [submitted],
+    [submitted, config.centsRange],
   );
 
   useEffect(() => {
@@ -324,8 +331,8 @@ export default function CentsDeviationPage() {
     );
   }
 
-  const needlePct = 50 + (needlePos / CENTS_RANGE) * 45;
-  const actualPct = 50 + (actualCents / CENTS_RANGE) * 45;
+  const needlePct = 50 + (needlePos / config.centsRange) * 45;
+  const actualPct = 50 + (actualCents / config.centsRange) * 45;
 
   return (
     <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
@@ -487,9 +494,9 @@ export default function CentsDeviationPage() {
               marginBottom: 8,
             }}
           >
-            <span>♭ Flat -{CENTS_RANGE}¢</span>
+            <span>♭ Flat −{config.centsRange}¢</span>
             <span>Perfect 0¢</span>
-            <span>♯ Sharp +{CENTS_RANGE}¢</span>
+            <span>♯ Sharp +{config.centsRange}¢</span>
           </div>
           <div
             ref={meterRef}
@@ -522,20 +529,22 @@ export default function CentsDeviationPage() {
                 background: "var(--ios-sep)",
               }}
             />
-            {/* Zone markers */}
-            {[-40, -30, -20, -10, 10, 20, 30, 40].map((c) => (
-              <div
-                key={c}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  bottom: 0,
-                  width: 1,
-                  background: "var(--ios-sep)",
-                  opacity: 0.5,
-                  left: `${50 + (c / CENTS_RANGE) * 45}%`,
-                }}
-              />
+            {/* Zone markers — scaled to the active difficulty range */}
+            {[...METER_TICK_VALUES, ...METER_TICK_VALUES.map((v) => -v)]
+              .filter((c) => Math.abs(c) < config.centsRange)
+              .map((c) => (
+                <div
+                  key={c}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    bottom: 0,
+                    width: 1,
+                    background: "var(--ios-sep)",
+                    opacity: 0.5,
+                    left: `${50 + (c / config.centsRange) * 45}%`,
+                  }}
+                />
             ))}
             {/* Needle */}
             <motion.div

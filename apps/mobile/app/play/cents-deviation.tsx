@@ -7,7 +7,6 @@ import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#84CC16';
-const CENTS_RANGE = 50;
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -114,7 +113,7 @@ export default function CentsDeviationScreen() {
 
   const adjustNeedle = (amount: number) => {
     if (submitted) return;
-    setNeedleCents(prev => Math.max(-CENTS_RANGE, Math.min(CENTS_RANGE, prev + amount)));
+    setNeedleCents(prev => Math.max(-config.centsRange, Math.min(config.centsRange, prev + amount)));
   };
 
   if (phase === 'setup') {
@@ -155,8 +154,8 @@ export default function CentsDeviationScreen() {
     );
   }
 
-  const needlePct = 50 + (needleCents / CENTS_RANGE) * 45;
-  const actualPct = 50 + (actualCents / CENTS_RANGE) * 45;
+  const needlePct = 50 + (needleCents / config.centsRange) * 45;
+  const actualPct = 50 + (actualCents / config.centsRange) * 45;
 
   return (
     <View style={{ flex: 1, backgroundColor: '#08090D' }}>
@@ -177,9 +176,9 @@ export default function CentsDeviationScreen() {
         {/* Cents meter */}
         <View style={{ marginBottom: 8 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-            <Text style={{ color: '#7E8A9A', fontSize: 10 }}>-{CENTS_RANGE}¢</Text>
+            <Text style={{ color: '#7E8A9A', fontSize: 10 }}>−{config.centsRange}¢</Text>
             <Text style={{ color: '#7E8A9A', fontSize: 10 }}>0</Text>
-            <Text style={{ color: '#7E8A9A', fontSize: 10 }}>+{CENTS_RANGE}¢</Text>
+            <Text style={{ color: '#7E8A9A', fontSize: 10 }}>+{config.centsRange}¢</Text>
           </View>
           <View style={{ height: 64, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' }}>
             <View style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, backgroundColor: '#3f3f46' }} />
