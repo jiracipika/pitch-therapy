@@ -31,6 +31,16 @@ const TREND_DISPLAY: Record<ModeTrendLabel, { arrow: string; color: string; labe
   slipping: { arrow: '↘', color: colors.danger, label: 'slipping' },
 };
 
+// Compact inline trend strings for the Focus Areas list. Uses the canonical
+// trendLabel from shared core (3% threshold) so a weak mode with too few
+// sessions reads "steady" instead of the misleading "improving" that a naive
+// trendDelta >= 0 check produced.
+const WEAK_TREND_DISPLAY: Record<ModeTrendLabel, string> = {
+  improving: '↗ improving',
+  steady: '→ steady',
+  slipping: '↘ slipping',
+};
+
 export default function ProgressScreen() {
   const { isDesktop } = useResponsiveLayout();
   const [loaded, setLoaded] = useState(false);
@@ -212,7 +222,7 @@ export default function ProgressScreen() {
                     <Text style={{ color: colors.text, ...typography.subhead }}>{wm.label}</Text>
                     <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>
                       {wm.sessions} session{wm.sessions > 1 ? 's' : ''} · {formatAccuracy(wm.avgAccuracy)}
-                      {wm.trendDelta >= 0 ? '  ↗ improving' : '  ↘ slipping'}
+                      {`  ${WEAK_TREND_DISPLAY[wm.trendLabel]}`}
                     </Text>
                   </View>
                   <Text style={{ color: colors.text, ...typography.subhead }}>

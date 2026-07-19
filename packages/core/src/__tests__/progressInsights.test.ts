@@ -103,6 +103,60 @@ describe("buildProgressInsights", () => {
     expect(insights.focusTip).toContain("No sessions yet");
   });
 
+  describe("weakMode trendLabel (regression: matches focusTip classification)", () => {
+    // Regression guard for the mobile progress screen bug where a weak mode
+    // with only 2-3 sessions (trendDelta === 0) was rendered as "improving"
+    // via a naive `>= 0` check, contradicting the focusTip which (correctly)
+    // classified it as "steady" via the shared 3% threshold.
+    it("labels a mode with too few sessions as steady (not improving)", () => {
+      const few = [
+        r("note-id", 0.5, 1),
+        r("note-id", 0.5, 3),
+      ].map((x) => ({ ...x, date: new Date(x.date).toISOString() }));
+
+      const insights = buildProgressInsights(few, 3, fixedNow);
+      expect(insights.weakModes[0]?.trendDelta).toBe(0);
+      expect(insights.weakModes[0]?.trendLabel).toBe("steady");
+    });
+
+    it("labels a clearly improving weak mode as improving", () => {
+      const improving = [
+        r("note-id", 0.3, 4),
+        r("note-id", 0.3, 3),
+        r("note-id", 0.4, 2),
+        r("note-id", 0.5, 1),
+      ].map((x) => ({ ...x, date: new Date(x.date).toISOString() }));
+
+      const insights = buildProgressInsights(improving, 3, fixedNow);
+      expect(insights.weakModes[0]?.trendLabel).toBe("improving");
+    });
+
+    it("labels a clearly slipping weak mode as slipping", () => {
+      const slipping = [
+        r("note-id", 0.5, 4),
+        r("note-id", 0.5, 3),
+        r("note-id", 0.4, 2),
+        r("note-id", 0.3, 1),
+      ].map((x) => ({ ...x, date: new Date(x.date).toISOString() }));
+
+      const insights = buildProgressInsights(slipping, 3, fixedNow);
+      expect(insights.weakModes[0]?.trendLabel).toBe("slipping");
+    });
+
+    it("stays consistent with the focusTip's own trend wording", () => {
+      const few = [
+        r("note-id", 0.6, 1),
+        r("note-id", 0.6, 3),
+      ].map((x) => ({ ...x, date: new Date(x.date).toISOString() }));
+
+      const insights = buildProgressInsights(few, 3, fixedNow);
+      // The focusTip uses classifyModeTrend internally; the new trendLabel
+      // must agree with the wording the tip already uses.
+      expect(insights.weakModes[0]?.trendLabel).toBe("steady");
+      expect(insights.focusTip).toContain("It's steady");
+    });
+  });
+
   describe("focusTip coaching", () => {
     // Two weak sessions of the same mode, both inside the last-7-day window.
     // avg accuracy = 0.6 -> personalized target should be 85% (the ceiling,

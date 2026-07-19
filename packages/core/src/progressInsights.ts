@@ -14,7 +14,16 @@ export interface WeakModeCluster {
   label: string;
   sessions: number;
   avgAccuracy: number;
+  /** Signed mean-accuracy delta (recent half − early half). 0 when < 4 sessions. */
   trendDelta: number;
+  /**
+   * Canonical trend label derived from {@link trendDelta} via the shared
+   * 3% threshold ({@link MODE_TREND_THRESHOLD}). Use this in UI instead of
+   * re-deriving "improving/slipping" from `trendDelta` directly, so a mode
+   * with too few sessions (trendDelta === 0) is reported as "steady" rather
+   * than the misleading "improving" a naive `>= 0` check produces.
+   */
+  trendLabel: ModeTrendLabel;
   volatility: number;
   priorityScore: number;
 }
@@ -49,6 +58,21 @@ export interface ModeBreakdownEntry {
   trendLabel: ModeTrendLabel;
   /** ISO timestamp of the most recent session for this mode, or null. */
   lastPlayed: string | null;
+}
+
+// ─── Trend classification (shared by weak-mode and per-mode breakdown) ───────
+
+/**
+ * Absolute accuracy delta required before a mode is labeled "improving" or
+ * "slipping" rather than "steady". Tuned to match the visible granularity of
+ * the weekly momentum card (~5% felt-sense threshold).
+ */
+export const MODE_TREND_THRESHOLD = 0.03;
+
+function classifyModeTrend(trendDelta: number): ModeTrendLabel {
+  if (trendDelta >= MODE_TREND_THRESHOLD) return "improving";
+  if (trendDelta <= -MODE_TREND_THRESHOLD) return "slipping";
+  return "steady";
 }
 
 function toDayKey(dateISO: string) {
@@ -113,6 +137,7 @@ function buildWeakModeClusters(results: ProgressResult[], limit: number): WeakMo
       sessions: modeResults.length,
       avgAccuracy,
       trendDelta,
+      trendLabel: classifyModeTrend(trendDelta),
       volatility,
       priorityScore,
     });
@@ -230,19 +255,6 @@ export function buildDailyActivityMap(results: ProgressResult[]) {
 }
 
 // ─── Per-mode breakdown (used by the Progress "By Mode" section) ──────────────
-
-/**
- * Absolute accuracy delta required before a mode is labeled "improving" or
- * "slipping" rather than "steady". Tuned to match the visible granularity of
- * the weekly momentum card (~5% felt-sense threshold).
- */
-export const MODE_TREND_THRESHOLD = 0.03;
-
-function classifyModeTrend(trendDelta: number): ModeTrendLabel {
-  if (trendDelta >= MODE_TREND_THRESHOLD) return "improving";
-  if (trendDelta <= -MODE_TREND_THRESHOLD) return "slipping";
-  return "steady";
-}
 
 /**
  * Build a per-mode breakdown of accuracy, trend, and recency.
