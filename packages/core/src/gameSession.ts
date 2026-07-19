@@ -49,8 +49,8 @@ function isAnswerCorrect(
   target: { note?: string; frequency?: number },
 ): { correct: boolean; centsOff?: number } {
   if (mode === "note-id" || mode === "note-wordle") {
-    const ans = String(answer).toUpperCase().replace(" ", "");
-    const tgt = target.note?.toUpperCase().replace(" ", "");
+    const ans = String(answer).toUpperCase().replace(/\s/g, "");
+    const tgt = target.note?.toUpperCase().replace(/\s/g, "");
     return { correct: ans === tgt };
   }
 
@@ -74,8 +74,8 @@ function getWordleFeedback(
   target: { note?: string; frequency?: number },
 ): WordleFeedback[] {
   if (mode === "note-wordle") {
-    const guess = String(answer).toUpperCase().replace(" ", "");
-    const correct = target.note?.toUpperCase().replace(" ", "") ?? "";
+    const guess = String(answer).toUpperCase().replace(/\s/g, "");
+    const correct = target.note?.toUpperCase().replace(/\s/g, "") ?? "";
 
     return guess.split("").map((char, i) => {
       if (char === correct[i]) return "correct";
