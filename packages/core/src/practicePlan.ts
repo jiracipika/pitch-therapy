@@ -7,6 +7,13 @@ export interface PracticePlanStep {
   label: string;
   detail: string;
   modeId: GameMode;
+  /**
+   * Category-derived training cue for this step (skill label, estimated
+   * duration range as a display string like "3-5 min", and a one-line
+   * session goal). Populated by {@link buildPracticePlanSteps} so callers
+   * don't need to look the mode up themselves.
+   */
+  cue: ModeTrainingCue;
 }
 
 export interface PracticePlan {
@@ -131,6 +138,7 @@ function buildPracticePlanSteps(modeIds: GameMode[]): PracticePlanStep[] {
       label: STEP_LABELS[index] ?? `Step ${index + 1}`,
       detail: `${mode.label}: ${mode.description.toLowerCase()}.`,
       modeId,
+      cue: getModeTrainingCue(modeId),
     };
   });
 }
@@ -191,4 +199,76 @@ export function buildAdaptivePracticePlan(
     modeIds,
     steps: buildPracticePlanSteps(modeIds),
   };
+}
+
+/**
+ * Parsed min/max minutes from a {@link ModeTrainingCue.durationLabel}.
+ * Labels look like "3-5 min", "6-10 min", or occasionally a single number
+ * like "5 min". Returns null when the label can't be parsed.
+ */
+export interface PlanDurationRange {
+  minMinutes: number;
+  maxMinutes: number;
+}
+
+/**
+ * Total-session estimate for a practice plan: sums the per-step min and max
+ * minutes (drawn from each step's category training cue) into a tight range.
+ *
+ * Used by the dashboard "Today's Plan" card so a user can see at a glance
+ * whether today's plan is a 9-minute tune-up or a 22-minute deep session
+ * before committing. Pure and deterministic — safe to call on every render.
+ */
+export interface PlanDurationEstimate {
+  minMinutes: number;
+  maxMinutes: number;
+  /** Pre-formatted display label, e.g. "9-14 min" or "8 min". */
+  label: string;
+}
+
+const DURATION_LABEL_RE = /(\d+)\s*-\s*(\d+)/;
+const DURATION_SINGLE_RE = /(\d+)/;
+
+/**
+ * Parse a category duration label like "3-5 min" or "6-10 min" into a numeric
+ * range. Falls back to a single value (min === max) for labels like "5 min".
+ * Returns null if no number can be found.
+ */
+export function parseDurationLabel(label: string): PlanDurationRange | null {
+  const range = DURATION_LABEL_RE.exec(label);
+  if (range) {
+    const lo = Number(range[1]);
+    const hi = Number(range[2]);
+    if (Number.isFinite(lo) && Number.isFinite(hi) && hi >= lo) {
+      return { minMinutes: lo, maxMinutes: hi };
+    }
+  }
+  const single = DURATION_SINGLE_RE.exec(label);
+  if (single) {
+    const n = Number(single[1]);
+    if (Number.isFinite(n) && n > 0) {
+      return { minMinutes: n, maxMinutes: n };
+    }
+  }
+  return null;
+}
+
+/**
+ * Sum the per-step duration ranges of a practice plan into a total-session
+ * estimate. Steps whose duration label can't be parsed are treated as 0 and
+ * do not contribute to the total. The label is formatted as "X-Y min" when
+ * the range has any spread, or "N min" when min === max.
+ */
+export function estimatePlanDuration(plan: PracticePlan): PlanDurationEstimate {
+  let minMinutes = 0;
+  let maxMinutes = 0;
+  for (const step of plan.steps) {
+    const range = parseDurationLabel(step.cue.durationLabel);
+    if (!range) continue;
+    minMinutes += range.minMinutes;
+    maxMinutes += range.maxMinutes;
+  }
+  const label =
+    minMinutes === maxMinutes ? `${minMinutes} min` : `${minMinutes}-${maxMinutes} min`;
+  return { minMinutes, maxMinutes, label };
 }

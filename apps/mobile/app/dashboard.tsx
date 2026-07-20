@@ -1,6 +1,10 @@
 import { Image, Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { GAME_MODE_META, buildAdaptivePracticePlan } from "@pitch-therapy/core";
+import {
+  GAME_MODE_META,
+  buildAdaptivePracticePlan,
+  estimatePlanDuration,
+} from "@pitch-therapy/core";
 import { AnimatedModeCard } from "@/components/AnimatedModeCard";
 import {
   GlassCard,
@@ -22,6 +26,7 @@ export default function DashboardScreen() {
   const { isTablet, isDesktop } = useResponsiveLayout();
   const { stats } = useSessionResults();
   const practicePlan = buildAdaptivePracticePlan(stats.results);
+  const planDuration = estimatePlanDuration(practicePlan);
   const featuredModes = practicePlan.modeIds.map((modeId) => GAME_MODE_META[modeId]);
 
   const accuracyLabel =
@@ -128,9 +133,35 @@ export default function DashboardScreen() {
           }}
         >
           <View style={{ flex: 1, gap: 5 }}>
-            <Text style={{ color: colors.textTertiary, ...typography.overline }}>
-              {practicePlan.personalized ? "PERSONALIZED PLAN" : "TODAY'S PRACTICE PLAN"}
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Text style={{ color: colors.textTertiary, ...typography.overline }}>
+                {practicePlan.personalized ? "PERSONALIZED PLAN" : "TODAY'S PRACTICE PLAN"}
+              </Text>
+              {planDuration.maxMinutes > 0 && (
+                <View
+                  accessibilityLabel={`Estimated ${planDuration.label} total`}
+                  style={{
+                    borderRadius: 999,
+                    borderWidth: 1,
+                    borderColor: (colors.orange ?? "#FF9F0A") + "44",
+                    backgroundColor: (colors.orange ?? "#FF9F0A") + "1A",
+                    paddingVertical: 2,
+                    paddingHorizontal: 7,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: colors.orange ?? "#FF9F0A",
+                      fontSize: 10,
+                      fontWeight: "700",
+                      letterSpacing: 0.2,
+                    }}
+                  >
+                    ⏱ {planDuration.label}
+                  </Text>
+                </View>
+              )}
+            </View>
             <Text style={{ color: colors.text, ...typography.title2 }}>{practicePlan.title}</Text>
             <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
               {practicePlan.summary}

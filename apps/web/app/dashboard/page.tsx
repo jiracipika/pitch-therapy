@@ -5,7 +5,12 @@ import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { AnimatedStatCard, PageHero, Reveal, StatusCard } from "@/components/PremiumMotion";
 import { useStatsContext } from "@/components/StatsProvider";
-import { GAME_MODE_META, GAME_MODES, buildAdaptivePracticePlan } from "@pitch-therapy/core";
+import {
+  GAME_MODE_META,
+  GAME_MODES,
+  buildAdaptivePracticePlan,
+  estimatePlanDuration,
+} from "@pitch-therapy/core";
 
 const MODES = GAME_MODES.map((id) => {
   const mode = GAME_MODE_META[id];
@@ -185,6 +190,7 @@ export default function Dashboard() {
   const todayGames = stats.results.filter((r) => r.date.startsWith(todayStr)).length;
   const practicePlan = buildAdaptivePracticePlan(stats.results);
   const practiceModes = practicePlan.modeIds.map((modeId) => GAME_MODE_META[modeId]);
+  const planDuration = estimatePlanDuration(practicePlan);
 
   return (
     <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
@@ -532,6 +538,35 @@ export default function Dashboard() {
                 >
                   {practicePlan.personalized ? "Adaptive" : "Daily"}
                 </span>
+                {planDuration.maxMinutes > 0 && (
+                  <span
+                    title={`Estimated ${planDuration.label} for today's 3-step plan`}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                      borderRadius: 999,
+                      border: "1px solid rgba(255,159,10,0.28)",
+                      color: "var(--ios-orange, #FF9F0A)",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: "3px 8px",
+                      background: "rgba(255,159,10,0.08)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.2" />
+                      <path
+                        d="M6 3.5V6l1.6 1.6"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    {planDuration.label}
+                  </span>
+                )}
               </div>
               <div
                 style={{
@@ -586,17 +621,35 @@ export default function Dashboard() {
                     >
                       {index + 1}
                     </span>
-                    <span style={{ minWidth: 0 }}>
+                    <span style={{ minWidth: 0, flex: 1 }}>
                       <span
                         style={{
-                          display: "block",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
                           fontSize: 13,
                           fontWeight: 650,
                           color: "var(--ios-label)",
                           letterSpacing: "-0.08px",
                         }}
                       >
-                        {mode.label}
+                        <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {mode.label}
+                        </span>
+                        <span
+                          style={{
+                            flexShrink: 0,
+                            fontSize: 10,
+                            fontWeight: 600,
+                            color: "var(--ios-label3)",
+                            background: "rgba(255,255,255,0.05)",
+                            borderRadius: 999,
+                            padding: "1px 6px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {practicePlan.steps[index]?.cue.durationLabel}
+                        </span>
                       </span>
                       <span
                         style={{

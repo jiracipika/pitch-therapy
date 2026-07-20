@@ -95,13 +95,17 @@ export type {
 export {
   buildAdaptivePracticePlan,
   buildPracticePlan,
+  estimatePlanDuration,
   getModeTrainingCue,
   getModesByCategory,
   getPracticeFocusForDate,
   getRecommendedModes,
+  parseDurationLabel,
 } from "./practicePlan";
 export type {
   ModeTrainingCue,
+  PlanDurationEstimate,
+  PlanDurationRange,
   PracticeFocus,
   PracticePlan,
   PracticePlanStep,
