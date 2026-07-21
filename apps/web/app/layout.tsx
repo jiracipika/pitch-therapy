@@ -22,19 +22,21 @@ export const viewport = {
   ],
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen min-h-dvh" style={{ background: 'var(--ios-bg)', color: 'var(--ios-label)' }}>
+      <body
+        className="min-h-dvh min-h-screen"
+        style={{ background: "var(--ios-bg)", color: "var(--ios-label)" }}
+      >
+        <a className="pt-skip-link" href="#main-content">
+          Skip to main content
+        </a>
         <AuthProvider>
           <SettingsProvider>
             <StatsProvider>
               <Nav />
-              <main className="pt-main-shell">
+              <main id="main-content" className="pt-main-shell" tabIndex={-1}>
                 <DesktopTopBar />
                 <AppTransitionShell>{children}</AppTransitionShell>
               </main>
