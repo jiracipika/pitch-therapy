@@ -227,13 +227,19 @@ export function buildProgressInsights(
   topWeakModes = 3,
   now: Date = new Date(),
 ): ProgressInsights {
-  const normalized = results
-    .filter((result) => Number.isFinite(result.accuracy))
-    .map((result) => ({
+  const nowMs = now.getTime();
+  const normalized = results.flatMap((result) => {
+    const timestamp = Date.parse(result.date);
+    if (!Number.isFinite(result.accuracy) || !Number.isFinite(timestamp) || timestamp > nowMs) {
+      return [];
+    }
+
+    return [{
       ...result,
       accuracy: Math.max(0, Math.min(1, result.accuracy)),
-      date: result.date || new Date().toISOString(),
-    }));
+      date: new Date(timestamp).toISOString(),
+    }];
+  });
 
   const momentum = buildMomentum(normalized, now);
   const weakModes = buildWeakModeClusters(normalized, topWeakModes);

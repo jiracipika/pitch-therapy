@@ -65,7 +65,7 @@ describe("buildProgressInsights", () => {
       r("note-id", 0.9, 7).date,
       r("note-id", 0.9, 13).date,
       r("note-id", 0.9, 20).date,
-    ].map((d, i) => ({
+    ].map((d) => ({
       mode: "note-id",
       score: 500,
       accuracy: 0.9,
@@ -78,6 +78,31 @@ describe("buildProgressInsights", () => {
     // days 0 and 6 are in last-7; days 7 and 13 are in prev-7; day 20 is excluded
     expect(insights.momentum.sessionsLast7).toBe(2);
     expect(insights.momentum.sessionsPrev7).toBe(2);
+  });
+
+  it("excludes future-dated sessions from weekly momentum", () => {
+    const results = [
+      r("note-id", 0.8, 1),
+      r("note-id", 0.95, -1),
+    ].map((x) => ({ ...x, date: new Date(x.date).toISOString() }));
+
+    const insights = buildProgressInsights(results, 3, fixedNow);
+
+    expect(insights.momentum.sessionsLast7).toBe(1);
+    expect(insights.momentum.avgAccuracyLast7).toBeCloseTo(0.8, 5);
+  });
+
+  it("ignores blank and malformed dates instead of treating them as current sessions", () => {
+    const results = [
+      { ...r("note-id", 0.8, 1), date: new Date(r("note-id", 0.8, 1).date).toISOString() },
+      { ...r("note-id", 0.2, 1), date: "" },
+      { ...r("note-id", 0.1, 1), date: "not-a-date" },
+    ];
+
+    const insights = buildProgressInsights(results, 3, fixedNow);
+
+    expect(insights.momentum.sessionsLast7).toBe(1);
+    expect(insights.weakModes).toHaveLength(0);
   });
 
   it("computes accuracy momentum delta between windows", () => {
