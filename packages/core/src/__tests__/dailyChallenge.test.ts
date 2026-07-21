@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { calculateStreak, calculateLongestStreak, todayDateString, getDailySeed } from "../dailyChallenge";
+import {
+  calculateStreak,
+  calculateLongestStreak,
+  todayDateString,
+  getDailySeed,
+  getDailyChallengeCompletion,
+} from "../dailyChallenge";
 
 afterEach(() => {
   vi.useRealTimers();
@@ -14,6 +20,35 @@ describe("todayDateString", () => {
   it("zero-pads month and day", () => {
     vi.setSystemTime(new Date("2026-01-05T08:00:00"));
     expect(todayDateString()).toBe("2026-01-05");
+  });
+});
+
+describe("getDailyChallengeCompletion", () => {
+  const today = new Date(2026, 6, 21, 12, 0, 0);
+
+  it("tracks each daily mode once from today's completed sessions", () => {
+    const result = getDailyChallengeCompletion([
+      { mode: "note-wordle", date: new Date(2026, 6, 21, 8).toISOString() },
+      { mode: "note-wordle", date: new Date(2026, 6, 21, 9).toISOString() },
+      { mode: "frequency-wordle", date: new Date(2026, 6, 21, 10).toISOString() },
+    ], today);
+
+    expect(result).toEqual({
+      completedModes: ["note-wordle", "frequency-wordle"],
+      completedCount: 2,
+      isComplete: true,
+    });
+  });
+
+  it("ignores other modes, previous days, and invalid timestamps", () => {
+    const result = getDailyChallengeCompletion([
+      { mode: "note-wordle", date: new Date(2026, 6, 20, 23, 59).toISOString() },
+      { mode: "pitch-match", date: new Date(2026, 6, 21, 9).toISOString() },
+      { mode: "frequency-wordle", date: "not-a-date" },
+    ], today);
+
+    expect(result.completedCount).toBe(0);
+    expect(result.isComplete).toBe(false);
   });
 });
 

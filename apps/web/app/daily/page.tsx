@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
+import { useStatsContext } from '@/components/StatsProvider';
+import { DAILY_CHALLENGE_MODES, getDailyChallengeCompletion } from '@pitch-therapy/core';
 
 function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState('');
@@ -50,15 +52,13 @@ const CHALLENGES = [
 ];
 
 export default function DailyPage() {
-  const [played] = useState<Record<string, boolean>>({});
-  const [hydrated, setHydrated] = useState(false);
-  const completedCount = CHALLENGES.filter((c) => played[c.id]).length;
+  const { stats, loaded } = useStatsContext();
+  const completion = getDailyChallengeCompletion(stats.results);
+  const played: Record<string, boolean> = Object.fromEntries(
+    DAILY_CHALLENGE_MODES.map((mode) => [mode, completion.completedModes.includes(mode)]),
+  );
+  const completedCount = completion.completedCount;
   const completionPct = Math.round((completedCount / CHALLENGES.length) * 100);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setHydrated(true), 120);
-    return () => clearTimeout(timeout);
-  }, []);
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric',
@@ -76,12 +76,12 @@ export default function DailyPage() {
         />
         <Reveal delay={0.04}>
           <StatusCard
-            tone={!hydrated ? 'loading' : completedCount === CHALLENGES.length ? 'success' : 'loading'}
-            title={!hydrated ? 'Preparing your daily run' : completedCount === CHALLENGES.length ? 'Daily complete' : 'Daily challenge active'}
+            tone={!loaded ? 'loading' : completion.isComplete ? 'success' : 'empty'}
+            title={!loaded ? 'Preparing your daily run' : completion.isComplete ? 'Daily complete' : 'Daily challenge active'}
             body={
-              !hydrated
+              !loaded
                 ? 'Syncing today’s drills and countdown.'
-                : completedCount === CHALLENGES.length
+                : completion.isComplete
                   ? 'Great work. Your streak-safe sessions for today are done.'
                   : 'Complete both drills before reset to keep consistency strong.'
             }
@@ -254,7 +254,9 @@ export default function DailyPage() {
               transition={{ delay: 0.22, duration: 0.4 }}
             >
               {[...Array(5)].map((_, i) => {
-                const date = new Date(Date.now() - (i + 1) * 86400000);
+                const date = new Date();
+                date.setDate(date.getDate() - (i + 1));
+                const dayCompletion = getDailyChallengeCompletion(stats.results, date);
                 const label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                 return (
                   <div
@@ -269,23 +271,27 @@ export default function DailyPage() {
                       {label}
                     </span>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      {CHALLENGES.map((c) => (
-                        <div
-                          key={c.id}
-                          style={{
-                            width: 22,
-                            height: 22,
-                            borderRadius: 11,
-                            background: 'var(--ios-bg3)',
-                            border: '1.5px solid var(--ios-sep)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <div style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--ios-bg4)' }} />
-                        </div>
-                      ))}
+                      {CHALLENGES.map((c) => {
+                        const done = dayCompletion.completedModes.some((mode) => mode === c.id);
+                        return (
+                          <div
+                            key={c.id}
+                            aria-label={`${c.label}: ${done ? 'completed' : 'not completed'}`}
+                            style={{
+                              width: 22,
+                              height: 22,
+                              borderRadius: 11,
+                              background: done ? 'color-mix(in srgb, var(--ios-green) 20%, transparent)' : 'var(--ios-bg3)',
+                              border: `1.5px solid ${done ? 'var(--ios-green)' : 'var(--ios-sep)'}`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <div style={{ width: 6, height: 6, borderRadius: 3, background: done ? 'var(--ios-green)' : 'var(--ios-bg4)' }} />
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );

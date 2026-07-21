@@ -49,8 +49,10 @@ export {
   calculateStreak,
   calculateLongestStreak,
   todayDateString,
+  DAILY_CHALLENGE_MODES,
+  getDailyChallengeCompletion,
 } from "./dailyChallenge";
-export type { DailyChallengeResult } from "./dailyChallenge";
+export type { DailyChallengeResult, DailyChallengeMode } from "./dailyChallenge";
 
 // ─── Staff (pure math) ──────────────────────────────────────────────────────
 

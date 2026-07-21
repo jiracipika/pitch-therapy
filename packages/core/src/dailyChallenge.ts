@@ -28,9 +28,40 @@ export interface DailyChallengeResult {
   guesses: number;
 }
 
-export function todayDateString(): string {
-  const d = new Date();
+export const DAILY_CHALLENGE_MODES = ["note-wordle", "frequency-wordle"] as const;
+
+export type DailyChallengeMode = (typeof DAILY_CHALLENGE_MODES)[number];
+
+export function todayDateString(date: Date = new Date()): string {
+  const d = date;
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/**
+ * Derive today's daily-challenge progress from persisted session history.
+ * Session timestamps are converted to local calendar dates so completion and
+ * the midnight reset stay aligned for users outside UTC.
+ */
+export function getDailyChallengeCompletion(
+  results: ReadonlyArray<{ mode: string; date: string }>,
+  date: Date = new Date(),
+): { completedModes: DailyChallengeMode[]; completedCount: number; isComplete: boolean } {
+  const targetDay = todayDateString(date);
+  const completed = new Set<DailyChallengeMode>();
+
+  for (const result of results) {
+    if (!DAILY_CHALLENGE_MODES.includes(result.mode as DailyChallengeMode)) continue;
+    const completedAt = new Date(result.date);
+    if (!Number.isFinite(completedAt.getTime()) || todayDateString(completedAt) !== targetDay) continue;
+    completed.add(result.mode as DailyChallengeMode);
+  }
+
+  const completedModes = DAILY_CHALLENGE_MODES.filter((mode) => completed.has(mode));
+  return {
+    completedModes,
+    completedCount: completedModes.length,
+    isComplete: completedModes.length === DAILY_CHALLENGE_MODES.length,
+  };
 }
 
 /**
