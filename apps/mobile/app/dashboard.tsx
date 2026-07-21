@@ -122,7 +122,16 @@ export default function DashboardScreen() {
         </View>
       </GlassCard>
 
-      <RecommendedPath steps={practicePlan.steps} accent={colors.blue} compact />
+      <RecommendedPath
+        steps={practicePlan.steps}
+        accent={colors.blue}
+        compact
+        onStepPress={(step) => {
+          if (!step.modeId) return;
+          void triggerSelectionHaptic();
+          router.push(`/play/${step.modeId}`);
+        }}
+      />
 
       <GlassCard accent={colors.speedRound}>
         <View

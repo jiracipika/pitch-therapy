@@ -214,34 +214,58 @@ export function StatItem({ label, value, color = colors.text }: StatItemProps) {
 interface RecommendedStep {
   label: string;
   detail: string;
+  modeId?: string;
+  cue?: { durationLabel: string };
 }
 
 interface RecommendedPathProps {
   steps: RecommendedStep[];
   accent?: string;
   compact?: boolean;
+  onStepPress?: (step: RecommendedStep) => void;
 }
 
-export function RecommendedPath({ steps, accent = colors.blue, compact }: RecommendedPathProps) {
+export function RecommendedPath({ steps, accent = colors.blue, compact, onStepPress }: RecommendedPathProps) {
   return (
     <GlassCard accent={accent} padding={compact ? 12 : 14}>
       <View style={{ gap: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
           <Text style={{ color: colors.text, ...typography.headline }}>Recommended path</Text>
-          <Pill label="Apple-like flow" color={accent} />
+          <Pill label={onStepPress ? 'Tap to train' : 'Guided flow'} color={accent} />
         </View>
         <View style={{ gap: 8 }}>
-          {steps.map((step, index) => (
-            <View key={step.label} style={styles.pathRow}>
-              <View style={[styles.pathIndex, { borderColor: accent + '55', backgroundColor: accent + '24' }]}>
-                <Text style={[styles.pathIndexText, { color: accent }]}>{index + 1}</Text>
-              </View>
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text style={styles.pathLabel}>{step.label}</Text>
-                <Text style={styles.pathDetail}>{step.detail}</Text>
-              </View>
-            </View>
-          ))}
+          {steps.map((step, index) => {
+            const row = (
+              <>
+                <View style={[styles.pathIndex, { borderColor: accent + '55', backgroundColor: accent + '24' }]}>
+                  <Text style={[styles.pathIndexText, { color: accent }]}>{index + 1}</Text>
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={[styles.pathLabel, { flex: 1 }]}>{step.label}</Text>
+                    {step.cue ? <Text style={{ color: accent, ...typography.caption2, fontWeight: '700' }}>{step.cue.durationLabel}</Text> : null}
+                  </View>
+                  <Text style={styles.pathDetail}>{step.detail}</Text>
+                </View>
+                {onStepPress ? <Text style={{ color: accent, fontSize: 24 }}>›</Text> : null}
+              </>
+            );
+
+            return onStepPress ? (
+              <Pressable
+                key={`${step.label}-${index}`}
+                onPress={() => onStepPress(step)}
+                accessibilityRole="button"
+                accessibilityLabel={`${step.label}: ${step.detail}`}
+                accessibilityHint="Starts this recommended practice step"
+                style={({ pressed }) => [styles.pathRow, { opacity: pressed ? 0.8 : 1, backgroundColor: pressed ? accent + '18' : 'rgba(255,255,255,0.045)' }]}
+              >
+                {row}
+              </Pressable>
+            ) : (
+              <View key={`${step.label}-${index}`} style={styles.pathRow}>{row}</View>
+            );
+          })}
         </View>
       </View>
     </GlassCard>

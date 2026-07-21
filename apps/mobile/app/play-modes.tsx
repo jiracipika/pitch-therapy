@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Text, View } from "react-native";
+import { useRouter } from "expo-router";
 import {
   GAME_MODE_META,
   GAME_MODES,
@@ -12,6 +13,7 @@ import {
 import { AnimatedModeCard } from "@/components/AnimatedModeCard";
 import { AppleInput, GlassCard, Pill, RecommendedPath, SectionHeader } from "@/components/AppleUI";
 import { AppPage } from "@/components/AppPage";
+import { triggerSelectionHaptic } from "@/lib/haptics";
 import { useResponsiveLayout } from "@/lib/responsive";
 import { colors, typography } from "@/lib/theme";
 
@@ -44,6 +46,7 @@ function modeCountLabel(count: number) {
 }
 
 export default function PlayModesScreen() {
+  const router = useRouter();
   const { isTablet, isDesktop } = useResponsiveLayout();
   const [modeSearch, setModeSearch] = useState("");
   const practicePlan = buildPracticePlan();
@@ -125,7 +128,16 @@ export default function PlayModesScreen() {
         </View>
       </GlassCard>
 
-      <RecommendedPath steps={practicePlan.steps} accent={colors.green} compact />
+      <RecommendedPath
+        steps={practicePlan.steps}
+        accent={colors.green}
+        compact
+        onStepPress={(step) => {
+          if (!step.modeId) return;
+          void triggerSelectionHaptic();
+          router.push(`/play/${step.modeId}`);
+        }}
+      />
 
       <GlassCard accent={colors.blue} padding={14} style={{ gap: 10 }}>
         <View
