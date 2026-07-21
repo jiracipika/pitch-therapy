@@ -1,8 +1,8 @@
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'expo-router';
-import { playTone, playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
+import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
+import { GameResultsScreen } from '@/components/GameResultsScreen';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
 
@@ -22,7 +22,6 @@ type Phase = 'setup' | 'playing' | 'reveal' | 'results';
 interface RoundResult { round: number; note: string; actualCents: number; guessCents: number; points: number }
 
 export default function CentsDeviationScreen() {
-  const router = useRouter();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
@@ -139,18 +138,12 @@ export default function CentsDeviationScreen() {
 
   if (phase === 'results') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
-        <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
-          <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Cents Deviation Complete!</Text>
-          <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 20, alignItems: 'center' }}>
-            <Text style={{ color: ACCENT, fontSize: 48, fontWeight: '700' }}>{score}</Text>
-            <Text style={{ color: '#97A3B6', marginTop: 4 }}>points</Text>
-          </View>
-          <Pressable onPress={() => startGame(difficulty)} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24 }}>
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Play Again</Text>
-          </Pressable>
-        </ScrollView>
-      </View>
+      <GameResultsScreen
+        title="Cents Deviation Complete!"
+        score={score}
+        accent={ACCENT}
+        onPlayAgain={() => startGame(difficulty)}
+      />
     );
   }
 

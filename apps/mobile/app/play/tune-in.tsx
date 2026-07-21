@@ -1,8 +1,9 @@
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
+import { GameResultsScreen } from '@/components/GameResultsScreen';
 import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#EC4899';
@@ -152,15 +153,13 @@ export default function TuneInScreen() {
   if (phase === 'results') {
     const correct = results.filter(r => r.correct).length;
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
-        <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
-          <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Tune In Complete!</Text>
-
-          <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 20, alignItems: 'center' }}>
-            <Text style={{ color: ACCENT, fontSize: 48, fontWeight: '700' }}>{score}</Text>
-            <Text style={{ color: '#97A3B6', marginTop: 4 }}>points</Text>
-          </View>
-
+      <GameResultsScreen
+        title="Tune In Complete!"
+        score={score}
+        accent={ACCENT}
+        onPlayAgain={startGame}
+        onExit={() => router.back()}
+      >
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
             {[
               { label: 'Hit', value: `${correct}/${TOTAL_ROUNDS}` },
@@ -174,7 +173,7 @@ export default function TuneInScreen() {
           </View>
 
           {results.map((r, i) => (
-            <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
+            <View key={r.round} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
               <Text style={{ color: '#97A3B6', fontSize: 13 }}>Round {i + 1}</Text>
               <Text style={{ color: '#F8FAFC', fontSize: 13, fontWeight: '600' }}>Target: {r.target}</Text>
               <Text style={{ color: r.correct ? '#4ade80' : '#f87171', fontSize: 13 }}>
@@ -182,18 +181,7 @@ export default function TuneInScreen() {
               </Text>
             </View>
           ))}
-
-          <Pressable
-            onPress={startGame}
-            style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24 }}
-          >
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Play Again</Text>
-          </Pressable>
-          <Pressable onPress={() => router.back()} style={{ padding: 16 }}>
-            <Text style={{ color: '#97A3B6', textAlign: 'center' }}>← Dashboard</Text>
-          </Pressable>
-        </ScrollView>
-      </View>
+      </GameResultsScreen>
     );
   }
 
