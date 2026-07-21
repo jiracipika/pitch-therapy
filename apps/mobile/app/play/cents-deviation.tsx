@@ -1,8 +1,13 @@
 import { View, Text, Pressable } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useRouter } from 'expo-router';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
-import { GameResultsScreen } from '@/components/GameResultsScreen';
+import {
+  GameResultRow,
+  GameResultStats,
+  GameResultsScreen,
+} from '@/components/GameResultsScreen';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
 
@@ -22,6 +27,7 @@ type Phase = 'setup' | 'playing' | 'reveal' | 'results';
 interface RoundResult { round: number; note: string; actualCents: number; guessCents: number; points: number }
 
 export default function CentsDeviationScreen() {
+  const router = useRouter();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
@@ -137,13 +143,41 @@ export default function CentsDeviationScreen() {
   }
 
   if (phase === 'results') {
+    const accurateRounds = results.filter(
+      (result) => Math.abs(result.guessCents - result.actualCents) <= 5,
+    ).length;
+    const averagePoints = results.length
+      ? Math.round(results.reduce((sum, result) => sum + result.points, 0) / results.length)
+      : 0;
     return (
       <GameResultsScreen
         title="Cents Deviation Complete!"
+        subtitle={`${DIFF_CONFIG[difficulty].label} · ±${config.centsRange}¢ range`}
         score={score}
         accent={ACCENT}
         onPlayAgain={() => startGame(difficulty)}
-      />
+        onExit={() => router.back()}
+      >
+        <GameResultStats
+          items={[
+            { label: 'Within 5¢', value: `${accurateRounds}/${results.length}` },
+            { label: 'Average', value: `${averagePoints}%` },
+            { label: 'Best Streak', value: `${bestStreak}` },
+          ]}
+        />
+        {results.map((result) => {
+          const error = Math.abs(result.guessCents - result.actualCents);
+          return (
+            <GameResultRow
+              key={result.round}
+              label={`Round ${result.round}`}
+              detail={`${result.note}: ${result.guessCents > 0 ? '+' : ''}${result.guessCents}¢`}
+              outcome={`${error}¢ off`}
+              success={error <= 5}
+            />
+          );
+        })}
+      </GameResultsScreen>
     );
   }
 

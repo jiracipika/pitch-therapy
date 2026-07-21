@@ -3,7 +3,11 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
-import { GameResultsScreen } from '@/components/GameResultsScreen';
+import {
+  GameResultRow,
+  GameResultStats,
+  GameResultsScreen,
+} from '@/components/GameResultsScreen';
 import { useSessionResults } from '@/lib/sessionResults';
 
 const ACCENT = '#EC4899';
@@ -155,31 +159,27 @@ export default function TuneInScreen() {
     return (
       <GameResultsScreen
         title="Tune In Complete!"
+        subtitle="Voice & instrument pitch matching"
         score={score}
         accent={ACCENT}
         onPlayAgain={startGame}
         onExit={() => router.back()}
       >
-          <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
-            {[
+          <GameResultStats
+            items={[
               { label: 'Hit', value: `${correct}/${TOTAL_ROUNDS}` },
-              { label: 'Best Streak', value: `🔥 ${bestStreak}` },
-            ].map(s => (
-              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center' }}>
-                <Text style={{ color: '#F8FAFC', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
-                <Text style={{ color: '#97A3B6', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
-              </View>
-            ))}
-          </View>
+              { label: 'Best Streak', value: `${bestStreak}` },
+            ]}
+          />
 
           {results.map((r, i) => (
-            <View key={r.round} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-              <Text style={{ color: '#97A3B6', fontSize: 13 }}>Round {i + 1}</Text>
-              <Text style={{ color: '#F8FAFC', fontSize: 13, fontWeight: '600' }}>Target: {r.target}</Text>
-              <Text style={{ color: r.correct ? '#4ade80' : '#f87171', fontSize: 13 }}>
-                {r.correct ? `✓ +${r.points}` : '✗ skip'}
-              </Text>
-            </View>
+            <GameResultRow
+              key={r.round}
+              label={`Round ${i + 1}`}
+              detail={`Target: ${r.target}`}
+              outcome={r.correct ? `+${r.points}` : 'Skipped'}
+              success={r.correct}
+            />
           ))}
       </GameResultsScreen>
     );

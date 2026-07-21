@@ -1,8 +1,9 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { GAME_MODE_META, DIFFICULTY_CONFIG, type Difficulty } from "@pitch-therapy/core";
 import { GameHeader } from "@/components/GameHeader";
+import { GameResultRow, GameResultStats, GameResultsScreen } from "@/components/GameResultsScreen";
 import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { playTone, NOTE_FREQS_4 } from "@/lib/audio";
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from "@/lib/haptics";
@@ -307,97 +308,32 @@ export default function NoteIdScreen() {
   if (phase === "results") {
     const correct = results.filter((r) => r.correct).length;
     return (
-      <View style={{ flex: 1, backgroundColor: "#08090D" }}>
-        <ScrollView
-          contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}
-        >
-          <Text style={{ color: "#F8FAFC", fontSize: 28, fontWeight: "700", marginBottom: 4 }}>
-            Round Complete!
-          </Text>
-          <Text style={{ color: "#97A3B6", marginBottom: 32 }}>
-            {MODE.label} · {difficulty}
-          </Text>
-
-          <View
-            style={{
-              backgroundColor: "rgba(21,24,32,0.86)",
-              borderRadius: 16,
-              padding: 20,
-              borderWidth: 1,
-              borderColor: "rgba(255,255,255,0.10)",
-              marginBottom: 20,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: ACCENT, fontSize: 48, fontWeight: "700" }}>{score}</Text>
-            <Text style={{ color: "#97A3B6", marginTop: 4 }}>points</Text>
-          </View>
-
-          <View style={{ flexDirection: "row", gap: 10, marginBottom: 24 }}>
-            {[
-              { label: "Correct", value: `${correct}/${totalRounds}` },
-              { label: "Accuracy", value: `${Math.round((correct / totalRounds) * 100)}%` },
-            ].map((s) => (
-              <View
-                key={s.label}
-                style={{
-                  flex: 1,
-                  backgroundColor: "rgba(21,24,32,0.86)",
-                  borderRadius: 12,
-                  padding: 14,
-                  borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.10)",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: "#F8FAFC", fontSize: 20, fontWeight: "700" }}>{s.value}</Text>
-                <Text style={{ color: "#97A3B6", fontSize: 12, marginTop: 2 }}>{s.label}</Text>
-              </View>
-            ))}
-          </View>
-
-          {results.map((r, i) => (
-            <View
-              key={i}
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                paddingVertical: 8,
-                borderBottomWidth: 1,
-                borderBottomColor: "rgba(255,255,255,0.05)",
-              }}
-            >
-              <Text style={{ color: "#97A3B6", fontSize: 13 }}>Round {i + 1}</Text>
-              <Text style={{ color: "#F8FAFC", fontSize: 13, fontWeight: "600" }}>
-                Target: {r.target}
-              </Text>
-              <Text style={{ color: r.correct ? "#4ade80" : "#f87171", fontSize: 13 }}>
-                {r.correct ? "✓" : r.answer === "timeout" ? "⏱ timeout" : `✗ ${r.answer}`}
-              </Text>
-            </View>
-          ))}
-
-          <Pressable
-            onPress={() => startGame(difficulty)}
-            accessibilityRole="button"
-            accessibilityLabel="Play again"
-            style={{
-              backgroundColor: ACCENT,
-              borderRadius: 14,
-              padding: 16,
-              minHeight: 48,
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: 24,
-            }}
-          >
-            <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>Play Again</Text>
-          </Pressable>
-          <Pressable onPress={() => router.back()} style={{ padding: 16 }}>
-            <Text style={{ color: "#97A3B6", textAlign: "center" }}>← Dashboard</Text>
-          </Pressable>
-        </ScrollView>
-      </View>
+      <GameResultsScreen
+        title="Round Complete!"
+        subtitle={`${MODE.label} · ${difficulty}`}
+        score={score}
+        accent={ACCENT}
+        onPlayAgain={() => startGame(difficulty)}
+        onExit={() => router.back()}
+      >
+        <GameResultStats
+          items={[
+            { label: "Correct", value: `${correct}/${totalRounds}` },
+            { label: "Accuracy", value: `${Math.round((correct / totalRounds) * 100)}%` },
+          ]}
+        />
+        {results.map((result, index) => (
+          <GameResultRow
+            key={`${index}-${result.target}`}
+            label={`Round ${index + 1}`}
+            detail={`Target: ${result.target}`}
+            outcome={
+              result.correct ? "Correct" : result.answer === "timeout" ? "Timed out" : result.answer
+            }
+            success={result.correct}
+          />
+        ))}
+      </GameResultsScreen>
     );
   }
 
