@@ -438,6 +438,34 @@ export function getUnlockedAchievements(results: ProgressResult[]): AchievementS
 }
 
 /**
+ * Return the highest unlocked tier in each category — the user's current
+ * "badge" per category. Complementary to {@link getNextGoals}: getNextGoals
+ * shows the next locked tier per category, this shows the strongest unlocked
+ * tier per category. Categories with nothing unlocked yet are omitted, so the
+ * result length grows from 0 up to the number of categories (currently 6).
+ *
+ * Sorted by category (alphabetical) with a deterministic tiebreak, so the
+ * render order is stable across renders and identical on web + mobile.
+ */
+export function getLatestBadges(results: ProgressResult[]): AchievementStatus[] {
+  const { statuses } = evaluateAchievements(results);
+  const bestByCategory = new Map<AchievementCategory, AchievementStatus>();
+  for (const s of statuses) {
+    if (!s.unlocked) continue;
+    const cur = bestByCategory.get(s.tier.category);
+    if (!cur || s.tier.threshold > cur.tier.threshold) {
+      bestByCategory.set(s.tier.category, s);
+    }
+  }
+  return [...bestByCategory.values()].sort((a, b) => {
+    if (a.tier.category !== b.tier.category) {
+      return a.tier.category.localeCompare(b.tier.category);
+    }
+    return b.tier.threshold - a.tier.threshold;
+  });
+}
+
+/**
  * Return the next locked tier for each category (the immediate goal to chase).
  * Categories with nothing left to unlock are omitted.
  */

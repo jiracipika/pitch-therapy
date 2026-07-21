@@ -6,6 +6,9 @@ import {
   buildModeBreakdown,
   buildProgressInsights,
   evaluateAchievements,
+  GAME_MODE_META,
+  GAME_MODES,
+  getLatestBadges,
   getNextGoals,
   type AchievementStatus,
   type ModeBreakdownEntry,
@@ -15,26 +18,10 @@ import { useStatsContext } from "@/components/StatsProvider";
 import Link from "next/link";
 import { AnimatedStatCard, PageHero, Reveal, StatusCard } from "@/components/PremiumMotion";
 
-const MODES = [
-  { id: "pitch-match", label: "Pitch Match", icon: "🎤", color: "#0A84FF" },
-  { id: "note-id", label: "Note ID", icon: "🎵", color: "#BF5AF2" },
-  { id: "frequency-guess", label: "Freq Guess", icon: "📡", color: "#FF9F0A" },
-  { id: "note-wordle", label: "Note Wordle", icon: "🟩", color: "#30D158" },
-  { id: "frequency-wordle", label: "Freq Wordle", icon: "🔊", color: "#5AC8FA" },
-  { id: "pitch-memory", label: "Pitch Memory", icon: "🧠", color: "#FF375F" },
-  { id: "name-that-note", label: "Name That Note", icon: "🎼", color: "#32ADE6" },
-  { id: "frequency-hunt", label: "Freq Hunt", icon: "🔍", color: "#FF9F0A" },
-  { id: "drone-lock", label: "Drone Lock", icon: "🔒", color: "#63E6E2" },
-  { id: "speed-round", label: "Speed Round", icon: "⚡", color: "#FF9F0A" },
-  { id: "chord-detective", label: "Chord Detective", icon: "🕵️", color: "#FF375F" },
-  { id: "waveform-match", label: "Waveform Match", icon: "〰️", color: "#5E5CE6" },
-  { id: "tuning-battle", label: "Tuning Battle", icon: "⚔️", color: "#FF453A" },
-  { id: "tune-in", label: "Tune In", icon: "📻", color: "#FF375F" },
-  { id: "piano-tap", label: "Piano Tap", icon: "🎹", color: "#5E5CE6" },
-  { id: "frequency-slider", label: "Freq Slider", icon: "🎚️", color: "#5AC8FA" },
-  { id: "cents-deviation", label: "Cents Deviation", icon: "📐", color: "#30D158" },
-  { id: "interval-archer", label: "Interval Archer", icon: "🏹", color: "#BF5AF2" },
-];
+const MODES = GAME_MODES.map((id) => {
+  const mode = GAME_MODE_META[id];
+  return { id: mode.id, label: mode.label, icon: mode.icon, color: mode.accentHex };
+});
 
 const WEEKS = 12;
 const DAYS = 7;
@@ -81,6 +68,7 @@ export default function ProgressPage() {
   const insights = useMemo(() => buildProgressInsights(stats.results), [stats.results]);
   const achievements = useMemo(() => evaluateAchievements(stats.results), [stats.results]);
   const nextGoals = useMemo(() => getNextGoals(stats.results), [stats.results]);
+  const latestBadges = useMemo(() => getLatestBadges(stats.results), [stats.results]);
 
   // Per-mode trend (improving / steady / slipping) from shared core analytics.
   // Mirrors the mobile Progress screen so both surfaces agree.
@@ -157,7 +145,7 @@ export default function ProgressPage() {
           title="Progress"
           subtitle="Track consistency, precision, and growth across every mode."
         />
-        <Reveal delay={0.04}>
+        <Reveal delay={0.04} className="mb-3">
           <StatusCard
             tone={statusTone}
             title={statusTitle}
@@ -217,101 +205,105 @@ export default function ProgressPage() {
               />
             </div>
 
-            {/* ── ACTIVITY CALENDAR ── */}
-            <div
-              style={{
-                fontSize: 13,
-                color: "var(--ios-label3)",
-                textTransform: "uppercase",
-                letterSpacing: "-0.08px",
-                padding: "20px 4px 8px",
-              }}
-            >
-              Activity (Last 12 Weeks)
-            </div>
+            {loaded && totalGames > 0 && (
+              <>
+                {/* ── ACTIVITY CALENDAR ── */}
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: "var(--ios-label3)",
+                    textTransform: "uppercase",
+                    letterSpacing: "-0.08px",
+                    padding: "20px 4px 8px",
+                  }}
+                >
+                  Activity (Last 12 Weeks)
+                </div>
 
-            <motion.div
-              className="ios-card pt-desktop-card"
-              style={{ padding: "16px", overflowX: "auto" }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.14, duration: 0.4 }}
-            >
-              {/* Day labels */}
-              <div style={{ display: "flex", gap: 3, marginBottom: 4 }}>
-                {DAY_LABELS.map((d, i) => (
+                <motion.div
+                  className="ios-card pt-desktop-card"
+                  style={{ padding: "16px", overflowX: "auto" }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.14, duration: 0.4 }}
+                >
+                  {/* Day labels */}
+                  <div style={{ display: "flex", gap: 3, marginBottom: 4 }}>
+                    {DAY_LABELS.map((d, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          width: 14,
+                          textAlign: "center",
+                          fontSize: 9,
+                          fontWeight: 600,
+                          color: "var(--ios-label3)",
+                          letterSpacing: 0.3,
+                        }}
+                      >
+                        {d}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Grid — columns = weeks */}
+                  <div style={{ display: "flex", gap: 3 }}>
+                    {Array.from({ length: WEEKS }).map((_, w) => (
+                      <div key={w} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                        {Array.from({ length: DAYS }).map((_, d) => {
+                          const cell = gridDays[w * DAYS + d];
+                          const intensity = cell?.future
+                            ? 0
+                            : cell?.count
+                              ? Math.max(0.15, cell.count / maxActivity)
+                              : 0;
+                          return (
+                            <div
+                              key={d}
+                              title={cell ? `${cell.date}: ${cell.count} games` : ""}
+                              style={{
+                                width: 14,
+                                height: 14,
+                                borderRadius: 3,
+                                background:
+                                  intensity === 0
+                                    ? "rgba(255,255,255,0.04)"
+                                    : `rgba(10, 132, 255, ${intensity})`,
+                                transition: "background 0.3s ease",
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+
                   <div
-                    key={i}
                     style={{
-                      width: 14,
-                      textAlign: "center",
-                      fontSize: 9,
-                      fontWeight: 600,
-                      color: "var(--ios-label3)",
-                      letterSpacing: 0.3,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-end",
+                      gap: 4,
+                      marginTop: 10,
                     }}
                   >
-                    {d}
+                    <span style={{ fontSize: 10, color: "var(--ios-label3)" }}>Less</span>
+                    {[0, 0.15, 0.35, 0.6, 0.85].map((i) => (
+                      <div
+                        key={i}
+                        style={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: 2,
+                          background: `rgba(10,132,255,${i || 0.04})`,
+                        }}
+                      />
+                    ))}
+                    <span style={{ fontSize: 10, color: "var(--ios-label3)" }}>More</span>
                   </div>
-                ))}
-              </div>
-
-              {/* Grid — columns = weeks */}
-              <div style={{ display: "flex", gap: 3 }}>
-                {Array.from({ length: WEEKS }).map((_, w) => (
-                  <div key={w} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                    {Array.from({ length: DAYS }).map((_, d) => {
-                      const cell = gridDays[w * DAYS + d];
-                      const intensity = cell?.future
-                        ? 0
-                        : cell?.count
-                          ? Math.max(0.15, cell.count / maxActivity)
-                          : 0;
-                      return (
-                        <div
-                          key={d}
-                          title={cell ? `${cell.date}: ${cell.count} games` : ""}
-                          style={{
-                            width: 14,
-                            height: 14,
-                            borderRadius: 3,
-                            background:
-                              intensity === 0
-                                ? "rgba(255,255,255,0.04)"
-                                : `rgba(10, 132, 255, ${intensity})`,
-                            transition: "background 0.3s ease",
-                          }}
-                        />
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-end",
-                  gap: 4,
-                  marginTop: 10,
-                }}
-              >
-                <span style={{ fontSize: 10, color: "var(--ios-label3)" }}>Less</span>
-                {[0, 0.15, 0.35, 0.6, 0.85].map((i) => (
-                  <div
-                    key={i}
-                    style={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: 2,
-                      background: `rgba(10,132,255,${i || 0.04})`,
-                    }}
-                  />
-                ))}
-                <span style={{ fontSize: 10, color: "var(--ios-label3)" }}>More</span>
-              </div>
-            </motion.div>
+                </motion.div>
+              </>
+            )}
 
             {/* ── FAVORITE MODE ── */}
             {loaded && totalGames > 0 && topMode && topMode.gamesPlayed > 0 && (
@@ -424,6 +416,42 @@ export default function ProgressPage() {
                       }}
                     />
                   </div>
+
+                  {/* Current badges — strongest unlocked tier per category */}
+                  {latestBadges.length > 0 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 6,
+                        marginBottom: 16,
+                      }}
+                    >
+                      {latestBadges.map((b: AchievementStatus) => (
+                        <div
+                          key={b.tier.id}
+                          title={`${b.tier.label} — your current best in ${b.tier.category}`}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
+                            padding: "4px 10px",
+                            borderRadius: 999,
+                            background:
+                              "linear-gradient(135deg, rgba(48,209,88,0.18), rgba(10,132,255,0.10))",
+                            border: "0.5px solid rgba(48,209,88,0.35)",
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: "var(--ios-label)",
+                            letterSpacing: "-0.08px",
+                          }}
+                        >
+                          <span style={{ fontSize: 12 }}>{b.tier.icon}</span>
+                          <span>{b.tier.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Tier grid */}
                   <div
@@ -641,150 +669,172 @@ export default function ProgressPage() {
               </motion.div>
             ) : null}
 
-            {/* ── PER MODE ── */}
-            <div
-              style={{
-                fontSize: 13,
-                color: "var(--ios-label3)",
-                textTransform: "uppercase",
-                letterSpacing: "-0.08px",
-                padding: "24px 4px 8px",
-              }}
-            >
-              Per Mode
-            </div>
+            {loaded && totalGames > 0 && (
+              <>
+                {/* ── PER MODE ── */}
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: "var(--ios-label3)",
+                    textTransform: "uppercase",
+                    letterSpacing: "-0.08px",
+                    padding: "24px 4px 8px",
+                  }}
+                >
+                  Per Mode
+                </div>
 
-            <motion.div
-              className="ios-group pt-desktop-card"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-            >
-              {MODES.map((m, idx) => {
-                const ms = getModeStats(m.id);
-                const progressPct =
-                  ms.gamesPlayed > 0 ? Math.min(100, Math.round(ms.avgAccuracy * 100)) : 0;
+                <motion.div
+                  className="ios-group pt-desktop-card"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.4 }}
+                >
+                  {MODES.map((m, idx) => {
+                    const ms = getModeStats(m.id);
+                    const progressPct =
+                      ms.gamesPlayed > 0 ? Math.min(100, Math.round(ms.avgAccuracy * 100)) : 0;
 
-                return (
-                  <div
-                    key={m.id}
-                    className="ios-row"
-                    style={{
-                      padding: "14px 16px",
-                      borderTop: idx === 0 ? "none" : "0.5px solid var(--ios-sep)",
-                      flexDirection: "column",
-                      alignItems: "stretch",
-                      gap: 0,
-                    }}
-                  >
-                    {/* Top row */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        marginBottom: ms.gamesPlayed > 0 ? 10 : 0,
-                      }}
-                    >
-                      <Link
-                        href={`/play/${m.id}`}
+                    return (
+                      <div
+                        key={m.id}
+                        className="ios-row"
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          flex: 1,
-                          textDecoration: "none",
+                          padding: "14px 16px",
+                          borderTop: idx === 0 ? "none" : "0.5px solid var(--ios-sep)",
+                          flexDirection: "column",
+                          alignItems: "stretch",
+                          gap: 0,
                         }}
                       >
+                        {/* Top row */}
                         <div
                           style={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: 9,
-                            background: `${m.color}18`,
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: 18,
-                            marginRight: 12,
-                            flexShrink: 0,
+                            marginBottom: ms.gamesPlayed > 0 ? 10 : 0,
                           }}
                         >
-                          {m.icon}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div
+                          <Link
+                            href={`/play/${m.id}`}
                             style={{
-                              fontSize: 16,
-                              fontWeight: 500,
-                              color: "var(--ios-label)",
-                              letterSpacing: "-0.32px",
+                              display: "flex",
+                              alignItems: "center",
+                              flex: 1,
+                              textDecoration: "none",
                             }}
                           >
-                            {m.label}
-                          </div>
-                          <div style={{ fontSize: 12, color: "var(--ios-label3)", marginTop: 1 }}>
-                            {ms.gamesPlayed > 0
-                              ? `${ms.gamesPlayed} game${ms.gamesPlayed !== 1 ? "s" : ""} · ${Math.round(ms.avgAccuracy * 100)}% accuracy`
-                              : "Not played yet"}
-                          </div>
-                        </div>
-                      </Link>
-                      {ms.gamesPlayed > 0 && (
-                        <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
-                          {(() => {
-                            const breakdown = breakdownByMode.get(m.id);
-                            const trend = breakdown ? TREND_DISPLAY[breakdown.trendLabel] : null;
-                            if (!trend) return null;
-                            // Trend requires >=4 sessions in shared core; otherwise "steady".
-                            const isSteady = breakdown?.trendLabel === "steady";
-                            return (
+                            <div
+                              style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: 9,
+                                background: `${m.color}18`,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: 18,
+                                marginRight: 12,
+                                flexShrink: 0,
+                              }}
+                            >
+                              {m.icon}
+                            </div>
+                            <div style={{ flex: 1 }}>
                               <div
-                                title={`Trend: ${trend.label}${breakdown && !isSteady ? ` (${breakdown.trendDelta >= 0 ? "+" : ""}${Math.round(breakdown.trendDelta * 100)}%)` : ""}`}
                                 style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: 3,
-                                  fontSize: 11,
+                                  fontSize: 16,
                                   fontWeight: 500,
-                                  color: trend.color,
-                                  background: "var(--ios-bg3)",
-                                  border: "0.5px solid var(--ios-sep)",
-                                  borderRadius: 999,
-                                  padding: "1px 7px",
-                                  marginBottom: 2,
+                                  color: "var(--ios-label)",
+                                  letterSpacing: "-0.32px",
                                 }}
                               >
-                                <span style={{ fontSize: 12, lineHeight: 1 }}>{trend.arrow}</span>
-                                {trend.label}
+                                {m.label}
                               </div>
-                            );
-                          })()}
-                          <div
-                            style={{ fontSize: 15, fontWeight: 600, color: "var(--ios-label2)" }}
-                          >
-                            {ms.bestScore}
-                          </div>
-                          <div style={{ fontSize: 11, color: "var(--ios-label3)" }}>Best</div>
+                              <div
+                                style={{ fontSize: 12, color: "var(--ios-label3)", marginTop: 1 }}
+                              >
+                                {ms.gamesPlayed > 0
+                                  ? `${ms.gamesPlayed} game${ms.gamesPlayed !== 1 ? "s" : ""} · ${Math.round(ms.avgAccuracy * 100)}% accuracy`
+                                  : "Not played yet"}
+                              </div>
+                            </div>
+                          </Link>
+                          {ms.gamesPlayed > 0 && (
+                            <div
+                              style={{
+                                textAlign: "right",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "flex-end",
+                                gap: 2,
+                              }}
+                            >
+                              {(() => {
+                                const breakdown = breakdownByMode.get(m.id);
+                                const trend = breakdown
+                                  ? TREND_DISPLAY[breakdown.trendLabel]
+                                  : null;
+                                if (!trend) return null;
+                                // Trend requires >=4 sessions in shared core; otherwise "steady".
+                                const isSteady = breakdown?.trendLabel === "steady";
+                                return (
+                                  <div
+                                    title={`Trend: ${trend.label}${breakdown && !isSteady ? ` (${breakdown.trendDelta >= 0 ? "+" : ""}${Math.round(breakdown.trendDelta * 100)}%)` : ""}`}
+                                    style={{
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: 3,
+                                      fontSize: 11,
+                                      fontWeight: 500,
+                                      color: trend.color,
+                                      background: "var(--ios-bg3)",
+                                      border: "0.5px solid var(--ios-sep)",
+                                      borderRadius: 999,
+                                      padding: "1px 7px",
+                                      marginBottom: 2,
+                                    }}
+                                  >
+                                    <span style={{ fontSize: 12, lineHeight: 1 }}>
+                                      {trend.arrow}
+                                    </span>
+                                    {trend.label}
+                                  </div>
+                                );
+                              })()}
+                              <div
+                                style={{
+                                  fontSize: 15,
+                                  fontWeight: 600,
+                                  color: "var(--ios-label2)",
+                                }}
+                              >
+                                {ms.bestScore}
+                              </div>
+                              <div style={{ fontSize: 11, color: "var(--ios-label3)" }}>Best</div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
 
-                    {/* Progress bar */}
-                    {ms.gamesPlayed > 0 && (
-                      <div className="ios-progress-track">
-                        <div
-                          className="ios-progress-fill"
-                          style={{
-                            width: `${progressPct}%`,
-                            background: m.color,
-                            transition: "width 0.6s ease-out",
-                          }}
-                        />
+                        {/* Progress bar */}
+                        {ms.gamesPlayed > 0 && (
+                          <div className="ios-progress-track">
+                            <div
+                              className="ios-progress-fill"
+                              style={{
+                                width: `${progressPct}%`,
+                                background: m.color,
+                                transition: "width 0.6s ease-out",
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </motion.div>
+                    );
+                  })}
+                </motion.div>
+              </>
+            )}
 
             {/* ── RECENT RESULTS ── */}
             {loaded && stats.results.length > 0 && (

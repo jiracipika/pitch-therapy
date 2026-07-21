@@ -133,6 +133,7 @@ export {
   evaluateAchievements,
   evaluateTier,
   getUnlockedAchievements,
+  getLatestBadges,
   getNextGoals,
   MASTERY_MIN_ACCURACY,
   MASTERY_MIN_SESSIONS,

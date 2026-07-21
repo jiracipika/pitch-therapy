@@ -118,6 +118,7 @@ export {
   deriveAchievementMetrics,
   evaluateAchievements,
   evaluateTier,
+  getLatestBadges,
   getNextGoals,
   getUnlockedAchievements,
   MASTERY_MIN_ACCURACY,

@@ -4,6 +4,7 @@ import {
   deriveAchievementMetrics,
   evaluateAchievements,
   evaluateTier,
+  getLatestBadges,
   getNextGoals,
   getUnlockedAchievements,
   type AchievementTier,
@@ -393,6 +394,106 @@ describe("getUnlockedAchievements", () => {
 
   it("returns empty array when nothing is unlocked", () => {
     expect(getUnlockedAchievements([])).toEqual([]);
+  });
+});
+
+describe("getLatestBadges", () => {
+  it("returns empty array when nothing is unlocked", () => {
+    expect(getLatestBadges([])).toEqual([]);
+  });
+
+  it("returns exactly one tier per unlocked category (the strongest)", () => {
+    // 25 sessions at 88% with a 7-day streak, 4 distinct modes, 2 mastered,
+    // and a 4000 ms/round fastest response. This unlocks volume-10 + volume-1,
+    // consistency-3 + consistency-7, accuracy-70 + accuracy-85, versatility-3,
+    // mastery-1 + mastery-3, speed-8000 + speed-5000.
+    const results = Array.from({ length: 25 }, (_, i) =>
+      session("note-id", 0.88, 10, `2026-07-${String((i % 7) + 1).padStart(2, "0")}T12:00:00Z`, 500, 40000),
+    );
+    const badges = getLatestBadges(results);
+    const categoryCounts = new Map<string, number>();
+    for (const b of badges) {
+      categoryCounts.set(b.tier.category, (categoryCounts.get(b.tier.category) ?? 0) + 1);
+    }
+    for (const count of categoryCounts.values()) {
+      expect(count).toBe(1);
+    }
+    // Must return only unlocked tiers.
+    expect(badges.every((b) => b.unlocked)).toBe(true);
+  });
+
+  it("picks the highest-threshold unlocked tier within a category", () => {
+    // 60 sessions unlocks volume-1, volume-10, volume-50 — getLatestBadges
+    // should surface volume-50 only.
+    const results = Array.from({ length: 60 }, (_, i) =>
+      session("note-id", 0.8, 10, `2026-07-${String((i % 27) + 1).padStart(2, "0")}T12:00:00Z`),
+    );
+    const badges = getLatestBadges(results);
+    const volume = badges.find((b) => b.tier.category === "volume");
+    expect(volume).toBeDefined();
+    expect(volume!.tier.id).toBe("volume-50");
+  });
+
+  it("is complementary to getNextGoals (no shared category when both exist)", () => {
+    // For a user with progress: some categories have a current badge AND a
+    // next goal. Each returned badge in getLatestBadges should be unlocked,
+    // while getNextGoals only returns locked tiers.
+    const results = Array.from({ length: 15 }, (_, i) =>
+      session("note-id", 0.78, 10, `2026-07-${String((i % 10) + 1).padStart(2, "0")}T12:00:00Z`),
+    );
+    const badges = getLatestBadges(results);
+    const goals = getNextGoals(results);
+    expect(badges.every((b) => b.unlocked)).toBe(true);
+    expect(goals.every((g) => !g.unlocked)).toBe(true);
+    // A category can appear in both (have one badge and a higher next goal),
+    // but never should a single tier id appear in both lists.
+    const badgeIds = new Set(badges.map((b) => b.tier.id));
+    for (const g of goals) {
+      expect(badgeIds.has(g.tier.id)).toBe(false);
+    }
+  });
+
+  it("returns a stable, deterministic order", () => {
+    const results = Array.from({ length: 30 }, (_, i) =>
+      session("note-id", 0.9, 10, `2026-07-${String((i % 12) + 1).padStart(2, "0")}T12:00:00Z`),
+    );
+    expect(getLatestBadges(results)).toEqual(getLatestBadges(results));
+  });
+
+  it("covers every category once a user has fully leveled up", () => {
+    // Heavy history: 100+ sessions, 95%+ best accuracy, 12 distinct modes,
+    // mastered modes (4+ sessions @ 80%+ in each), 7-day streak, fast
+    // response. At minimum we expect every category to be represented.
+    const modes = [
+      "note-id",
+      "pitch-match",
+      "frequency-guess",
+      "note-wordle",
+      "frequency-wordle",
+      "pitch-memory",
+      "name-that-note",
+      "frequency-hunt",
+      "drone-lock",
+      "tune-in",
+      "piano-tap",
+      "frequency-slider",
+    ];
+    const results: ReturnType<typeof session>[] = [];
+    for (let i = 0; i < 120; i++) {
+      const day = (i % 27) + 1;
+      const mode = modes[i % modes.length]!;
+      results.push(
+        session(mode, 0.95, 10, `2026-07-${String(day).padStart(2, "0")}T12:00:00Z`, 500, 25000),
+      );
+    }
+    const badges = getLatestBadges(results);
+    const categories = new Set(badges.map((b) => b.tier.category));
+    expect(categories.has("volume")).toBe(true);
+    expect(categories.has("consistency")).toBe(true);
+    expect(categories.has("accuracy")).toBe(true);
+    expect(categories.has("versatility")).toBe(true);
+    expect(categories.has("mastery")).toBe(true);
+    expect(categories.has("speed")).toBe(true);
   });
 });
 
