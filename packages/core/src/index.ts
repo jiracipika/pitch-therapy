@@ -91,6 +91,26 @@ export {
 } from "./noteWordle";
 export type { NoteWordleFeedback, NoteWordleNote, NoteWordlePhase } from "./noteWordle";
 
+// ─── Frequency Wordle (pure cross-platform rules & presentation) ────────────
+
+export {
+  FREQUENCY_WORDLE_MAX_GUESSES,
+  FREQUENCY_WORDLE_MIN_GUESS,
+  FREQUENCY_WORDLE_MAX_GUESS,
+  buildFrequencyWordleResult,
+  buildFrequencyWordleShareText,
+  formatFrequency,
+  getFrequencyWordleFeedback,
+  parseFrequencyGuess,
+} from "./frequencyWordle";
+export type {
+  FrequencyGuessParseResult,
+  FrequencyWordleDirection,
+  FrequencyWordleFeedback,
+  FrequencyWordleFeedbackResult,
+  FrequencyWordlePhase,
+} from "./frequencyWordle";
+
 // ─── Progress Insights (pure analytics) ─────────────────────────────────────
 
 export {
