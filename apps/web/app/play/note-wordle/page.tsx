@@ -6,23 +6,30 @@ import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import WaveVisualizer from "@/components/WaveVisualizer";
 import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { useStatsContext } from "@/components/StatsProvider";
+import {
+  buildNoteWordleResult,
+  buildNoteWordleShareText,
+  getNoteWordleFeedback,
+  noteForSpeech,
+  type NoteWordleFeedback,
+} from "@pitch-therapy/core";
 
-type Feedback = "correct" | "close" | "miss";
 interface GuessRow {
   note: string;
-  feedback: Feedback;
+  feedback: NoteWordleFeedback;
 }
 
 export default function NoteWordlePage() {
   const { recordResult } = useStatsContext();
   const recordedRef = useRef(false);
+  const sessionStartRef = useRef(Date.now());
 
   const router = useRouter();
   const [targetIdx, setTargetIdx] = useState(0);
   const [guesses, setGuesses] = useState<GuessRow[]>([]);
   const [currentGuess, setCurrentGuess] = useState<string | null>(null);
   const [phase, setPhase] = useState<"playing" | "won" | "lost">("playing");
-  const [copied, setCopied] = useState(false);
+  const [shareStatus, setShareStatus] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
 
   const ACCENT = "#30D158";
@@ -32,41 +39,29 @@ export default function NoteWordlePage() {
     setGuesses([]);
     setCurrentGuess(null);
     setPhase("playing");
+    setShareStatus("");
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
   };
 
   useEffect(() => {
     initGame();
   }, []);
 
-  const getFeedback = (guess: string): Feedback => {
-    const guessIdx = NOTE_NAMES.indexOf(guess as (typeof NOTE_NAMES)[number]);
-    const diff = Math.abs(guessIdx - targetIdx);
-    if (diff === 0) return "correct";
-    if (diff <= 2 || diff >= 10) return "close";
-    return "miss";
-  };
-
   useEffect(() => {
-    if (!(phase === "won" || phase === "lost")) {
-      recordedRef.current = false;
-      return;
-    }
-    if (!recordedRef.current) {
-      recordedRef.current = true;
-      recordResult({
-        mode: "note-wordle",
-        score: phase === "won" ? Math.max(100, 700 - guesses.length * 100) : 0,
-        accuracy: phase === "won" ? Math.max(0.1, 1 - (guesses.length - 1) * 0.15) : 0,
-        rounds: Math.max(guesses.length, 1),
-        date: new Date().toISOString(),
-        timeMs: Math.max(guesses.length, 1) * 5000,
-      });
-    }
-  }, [phase, recordResult]);
+    if (phase === "playing" || recordedRef.current) return;
+    recordedRef.current = true;
+    recordResult({
+      mode: "note-wordle",
+      ...buildNoteWordleResult(phase, guesses.length),
+      date: new Date().toISOString(),
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [guesses.length, phase, recordResult]);
 
   const submitGuess = () => {
     if (!currentGuess || guesses.length >= 6 || phase !== "playing") return;
-    const feedback = getFeedback(currentGuess);
+    const feedback = getNoteWordleFeedback(currentGuess, NOTE_NAMES[targetIdx]);
     setIsPlaying(true);
     playTone(NOTE_FREQUENCIES[`${currentGuess}4`] || 261.63, 0.3);
     setTimeout(() => setIsPlaying(false), 300);
@@ -77,15 +72,18 @@ export default function NoteWordlePage() {
     else if (newGuesses.length >= 6) setPhase("lost");
   };
 
-  const handleShare = () => {
-    const grid = guesses
-      .map((g) => (g.feedback === "correct" ? "🟩" : g.feedback === "close" ? "🟨" : "🟥"))
-      .join("\n");
-    navigator.clipboard.writeText(
-      `🎵 Note Wordle ${phase === "won" ? guesses.length : "X"}/6\n${grid}`,
-    );
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleShare = async () => {
+    const text = buildNoteWordleShareText(guesses.map((guess) => guess.feedback));
+    const canUseShareSheet = typeof navigator.share === "function";
+    try {
+      if (canUseShareSheet) await navigator.share({ text });
+      else await navigator.clipboard.writeText(text);
+      setShareStatus(canUseShareSheet ? "Shared" : "Copied");
+    } catch (error) {
+      if ((error as DOMException).name === "AbortError") return;
+      setShareStatus("Could not share. Try again.");
+    }
+    window.setTimeout(() => setShareStatus(""), 2500);
   };
 
   const targetNote = NOTE_NAMES[targetIdx];
@@ -103,10 +101,11 @@ export default function NoteWordlePage() {
           }}
         >
           <button
+            aria-label="Back to dashboard"
             onClick={() => router.push("/dashboard")}
             style={{
-              width: 36,
-              height: 36,
+              width: 44,
+              height: 44,
               borderRadius: 18,
               background: "var(--ios-bg2)",
               border: "none",
@@ -126,17 +125,19 @@ export default function NoteWordlePage() {
               />
             </svg>
           </button>
-          <div
+          <h1
             style={{
               fontSize: 17,
               fontWeight: 600,
               color: "var(--ios-label)",
               letterSpacing: "-0.43px",
+              margin: 0,
             }}
           >
             🟩 Note Wordle
-          </div>
+          </h1>
           <button
+            aria-label="New puzzle"
             onClick={initGame}
             style={{
               fontSize: 13,
@@ -145,6 +146,8 @@ export default function NoteWordlePage() {
               background: "none",
               border: "none",
               cursor: "pointer",
+              minWidth: 44,
+              minHeight: 44,
             }}
           >
             🔄 New
@@ -157,6 +160,8 @@ export default function NoteWordlePage() {
 
         {/* Guess rows */}
         <div
+          role="list"
+          aria-label="Note Wordle guesses"
           style={{
             display: "flex",
             flexDirection: "column",
@@ -167,6 +172,7 @@ export default function NoteWordlePage() {
         >
           {Array.from({ length: 6 }).map((_, i) => {
             const guess = guesses[i];
+            const isCurrent = phase === "playing" && i === guesses.length;
             let bg = "var(--ios-bg2)";
             let border = "1.5px solid var(--ios-sep)";
             let color = "var(--ios-label3)";
@@ -184,7 +190,7 @@ export default function NoteWordlePage() {
                 border = "2px solid var(--ios-red)";
                 color = "var(--ios-red)";
               }
-            } else if (i === guesses.length) {
+            } else if (isCurrent) {
               bg = "var(--ios-bg2)";
               border = "2px solid var(--ios-sep)";
               color = "var(--ios-label)";
@@ -192,6 +198,12 @@ export default function NoteWordlePage() {
             return (
               <div
                 key={i}
+                role="listitem"
+                aria-label={
+                  guess
+                    ? `Guess ${i + 1}: ${noteForSpeech(guess.note)}. ${guess.feedback === "correct" ? "Correct" : guess.feedback === "close" ? "Within two semitones" : "Far away"}.`
+                    : `Guess ${i + 1}: ${isCurrent ? "current guess" : "empty"}`
+                }
                 style={{
                   width: "100%",
                   height: 52,
@@ -207,7 +219,7 @@ export default function NoteWordlePage() {
                   transition: "all 0.2s ease",
                 }}
               >
-                {guess ? guess.note : i === guesses.length ? (currentGuess ?? "") : ""}
+                {guess ? guess.note : isCurrent ? (currentGuess ?? "") : ""}
               </div>
             );
           })}
@@ -216,6 +228,8 @@ export default function NoteWordlePage() {
         {phase === "playing" && (
           <div>
             <div
+              role="group"
+              aria-label="Choose a note"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(6, 1fr)",
@@ -226,6 +240,8 @@ export default function NoteWordlePage() {
               {NOTE_NAMES.map((n) => (
                 <button
                   key={n}
+                  aria-pressed={currentGuess === n}
+                  aria-label={`Select note ${noteForSpeech(n)}`}
                   onClick={() => setCurrentGuess(n)}
                   style={{
                     borderRadius: 10,
@@ -237,6 +253,7 @@ export default function NoteWordlePage() {
                     border: "none",
                     cursor: "pointer",
                     transition: "background 0.12s",
+                    minHeight: 44,
                   }}
                 >
                   {n}
@@ -258,6 +275,8 @@ export default function NoteWordlePage() {
           <div style={{ textAlign: "center", paddingTop: 16 }}>
             <div style={{ fontSize: 40, marginBottom: 8 }}>{phase === "won" ? "🎉" : "😔"}</div>
             <div
+              role="status"
+              aria-live="polite"
               style={{
                 fontSize: 22,
                 fontWeight: 700,
@@ -291,7 +310,11 @@ export default function NoteWordlePage() {
                   color: "var(--ios-label2)",
                 }}
               >
-                {copied ? "✅ Copied!" : "📋 Share"}
+                {shareStatus === "Shared"
+                  ? "✅ Shared"
+                  : shareStatus === "Copied"
+                    ? "✅ Copied"
+                    : "📋 Share result"}
               </button>
               <button
                 onClick={initGame}
@@ -304,14 +327,21 @@ export default function NoteWordlePage() {
             <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>
               Dashboard
             </button>
+            <p
+              aria-live="polite"
+              style={{ minHeight: 20, margin: "8px 0 0", color: "var(--ios-label2)", fontSize: 13 }}
+            >
+              {shareStatus === "Could not share. Try again." ? shareStatus : ""}
+            </p>
           </div>
         )}
 
         <div className="ios-card" style={{ padding: 16, textAlign: "center", marginTop: 16 }}>
-          <div style={{ fontSize: 12, color: "var(--ios-label3)" }}>
+          <div style={{ fontSize: 12, color: "var(--ios-label2)" }}>
             🟩 Correct • 🟨 Within 2 semitones • 🟥 More than 2 semitones
           </div>
           <button
+            aria-label="Play target tone"
             onClick={() => playTone(NOTE_FREQUENCIES[`${targetNote}4`] || 261.63, 0.6)}
             style={{
               marginTop: 8,
@@ -320,6 +350,7 @@ export default function NoteWordlePage() {
               background: "none",
               border: "none",
               cursor: "pointer",
+              minHeight: 44,
             }}
           >
             🔊 Play target tone

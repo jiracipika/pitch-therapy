@@ -94,9 +94,25 @@ export type { MidiNoteEvent, MidiDevice } from "./midi.native";
 export { sessionReducer, initialSessionState, generateShareGrid } from "./gameSession";
 export type { WordleAttempt, WordleFeedback } from "./gameSession";
 
+// ─── Note Wordle (pure cross-platform rules & presentation) ─────────────────
+
+export {
+  NOTE_WORDLE_NOTES,
+  buildNoteWordleResult,
+  buildNoteWordleShareText,
+  getNoteWordleFeedback,
+  noteForSpeech,
+} from "./noteWordle";
+export type { NoteWordleFeedback, NoteWordleNote, NoteWordlePhase } from "./noteWordle";
+
 // ─── Progress Insights (pure analytics) ─────────────────────────────────────
 
-export { buildProgressInsights, buildDailyActivityMap, buildModeBreakdown, MODE_TREND_THRESHOLD } from "./progressInsights";
+export {
+  buildProgressInsights,
+  buildDailyActivityMap,
+  buildModeBreakdown,
+  MODE_TREND_THRESHOLD,
+} from "./progressInsights";
 export type {
   ProgressResult,
   WeakModeCluster,
