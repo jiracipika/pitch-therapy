@@ -255,7 +255,7 @@ export default function Dashboard() {
                 style={{
                   minHeight: 96,
                   background:
-                    "linear-gradient(135deg, rgba(10,132,255,0.08) 0%, rgba(94,92,230,0.04) 100%)",
+                    "color-mix(in srgb, var(--ios-blue) 8%, var(--pt-surface-1))",
                 }}
               >
                 <div>
@@ -282,14 +282,14 @@ export default function Dashboard() {
                     gap: 4,
                     height: 32,
                     borderRadius: 8,
-                    background: "linear-gradient(135deg, #0A84FF 0%, #5E5CE6 100%)",
-                    color: "#fff",
+                    background: "var(--ios-blue)",
+                    color: "var(--pt-on-accent)",
                     fontSize: 13,
                     fontWeight: 600,
                     letterSpacing: "-0.08px",
                     textDecoration: "none",
                     marginTop: 8,
-                    boxShadow: "0 2px 12px rgba(10,132,255,0.3)",
+                    boxShadow: "3px 4px 0 var(--pt-shadow)",
                   }}
                 >
                   Play Today
@@ -476,14 +476,14 @@ export default function Dashboard() {
                         alignItems: "center",
                         justifyContent: "center",
                         height: 36,
-                        borderRadius: 10,
+                        borderRadius: 4,
                         padding: "0 14px",
-                        background: "linear-gradient(135deg, #0A84FF 0%, #5E5CE6 100%)",
-                        color: "#fff",
+                        background: "var(--ios-blue)",
+                        color: "var(--pt-on-accent)",
                         fontSize: 13,
                         fontWeight: 600,
                         textDecoration: "none",
-                        boxShadow: "0 2px 12px rgba(10,132,255,0.3)",
+                        boxShadow: "3px 4px 0 var(--pt-shadow)",
                       }}
                     >
                       Start First Session
@@ -495,12 +495,12 @@ export default function Dashboard() {
           </div>
           <div className="pt-dashboard-side">
             <motion.div
-              className="ios-card pt-desktop-card"
+              className="ios-card pt-desktop-card pt-dashboard-plan-card"
               style={{
                 padding: 14,
                 marginBottom: 12,
-                background: "linear-gradient(160deg, rgba(48,209,88,0.1), rgba(10,132,255,0.06))",
-                border: "0.5px solid rgba(48,209,88,0.18)",
+                background: "color-mix(in srgb, var(--ios-blue) 7%, var(--pt-surface-1))",
+                border: "1px solid color-mix(in srgb, var(--ios-blue) 22%, var(--pt-stroke))",
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -670,12 +670,12 @@ export default function Dashboard() {
               </div>
             </motion.div>
             <motion.div
-              className="ios-card pt-desktop-card"
+              className="ios-card pt-desktop-card pt-dashboard-guided-card"
               style={{
                 padding: 14,
                 marginBottom: 12,
-                background: "linear-gradient(160deg, rgba(10,132,255,0.12), rgba(94,92,230,0.08))",
-                border: "0.5px solid rgba(10,132,255,0.2)",
+                background: "color-mix(in srgb, var(--ios-orange) 6%, var(--pt-surface-1))",
+                border: "1px solid color-mix(in srgb, var(--ios-orange) 18%, var(--pt-stroke))",
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -725,7 +725,7 @@ export default function Dashboard() {
             </motion.div>
 
             {/* ── ALL MODES ── */}
-            <div className="pt-desktop-card">
+            <div className="pt-desktop-card pt-dashboard-all-modes">
               <div
                 style={{
                   fontSize: 13,
@@ -739,7 +739,7 @@ export default function Dashboard() {
               >
                 All Modes
               </div>
-              <div className="ios-group">
+              <div className="ios-group pt-dashboard-mode-list">
                 <motion.div variants={stagger} initial="hidden" animate="visible">
                   {MODES.map((m, idx) => {
                     const modeStats = loaded ? stats.results.filter((r) => r.mode === m.id) : [];
@@ -762,8 +762,8 @@ export default function Dashboard() {
                             style={{
                               width: 36,
                               height: 36,
-                              borderRadius: 9,
-                              background: `linear-gradient(135deg, ${m.color}22, ${m.color}0A)`,
+                              borderRadius: 4,
+                              background: `${m.color}18`,
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",

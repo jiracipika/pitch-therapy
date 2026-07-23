@@ -204,7 +204,7 @@ export default function PitchMemoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#08090D' },
+  container: { flex: 1, backgroundColor: '#10130E' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, marginBottom: 20 },
   title: { fontSize: 28, fontWeight: '700', color: '#F8FAFC', letterSpacing: 0 },

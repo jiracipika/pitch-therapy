@@ -8,25 +8,25 @@ type StatusTone = "loading" | "success" | "error" | "empty";
 
 const heroGradients: Record<HeroVariant, string> = {
   dashboard:
-    "linear-gradient(135deg, rgba(10,132,255,0.16), rgba(94,92,230,0.10) 60%, rgba(255,255,255,0.02))",
+    "linear-gradient(135deg, rgba(183,243,74,0.15), rgba(255,120,87,0.08) 62%, rgba(244,246,236,0.02))",
   daily:
-    "linear-gradient(135deg, rgba(48,209,88,0.16), rgba(90,200,250,0.10) 60%, rgba(255,255,255,0.02))",
+    "linear-gradient(135deg, rgba(115,232,121,0.15), rgba(183,243,74,0.07) 62%, rgba(244,246,236,0.02))",
   progress:
-    "linear-gradient(135deg, rgba(10,132,255,0.14), rgba(191,90,242,0.11) 60%, rgba(255,255,255,0.02))",
+    "linear-gradient(135deg, rgba(214,131,242,0.15), rgba(183,243,74,0.06) 62%, rgba(244,246,236,0.02))",
   settings:
-    "linear-gradient(135deg, rgba(255,159,10,0.15), rgba(10,132,255,0.08) 60%, rgba(255,255,255,0.02))",
+    "linear-gradient(135deg, rgba(255,129,95,0.15), rgba(183,243,74,0.06) 62%, rgba(244,246,236,0.02))",
   profile:
-    "linear-gradient(135deg, rgba(191,90,242,0.17), rgba(10,132,255,0.10) 60%, rgba(255,255,255,0.02))",
-  default: "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
+    "linear-gradient(135deg, rgba(155,140,255,0.16), rgba(255,120,87,0.07) 62%, rgba(244,246,236,0.02))",
+  default: "linear-gradient(135deg, rgba(183,243,74,0.10), rgba(244,246,236,0.02))",
 };
 
 const heroGlow: Record<HeroVariant, string> = {
-  dashboard: "rgba(10,132,255,0.24)",
-  daily: "rgba(48,209,88,0.22)",
-  progress: "rgba(191,90,242,0.20)",
-  settings: "rgba(255,159,10,0.22)",
-  profile: "rgba(191,90,242,0.22)",
-  default: "rgba(255,255,255,0.16)",
+  dashboard: "rgba(183,243,74,0.22)",
+  daily: "rgba(115,232,121,0.20)",
+  progress: "rgba(214,131,242,0.18)",
+  settings: "rgba(255,129,95,0.20)",
+  profile: "rgba(155,140,255,0.20)",
+  default: "rgba(183,243,74,0.14)",
 };
 
 const heroMotion: Record<

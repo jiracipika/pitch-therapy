@@ -176,7 +176,7 @@ export default function FrequencyGuessScreen() {
   // ── Difficulty Selection ───────────────────────────────────────────────────
   if (phase === 'select-difficulty') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
           <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700' }}>{MODE.label}</Text>
@@ -217,7 +217,7 @@ export default function FrequencyGuessScreen() {
     const correct = results.filter((r) => r.correct).length;
     const avgErr = results.reduce((s, r) => s + r.errorPct, 0) / results.length;
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
           <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Complete!</Text>
           <Text style={{ color: '#97A3B6', marginBottom: 32 }}>{MODE.label} · {difficulty}</Text>
@@ -262,7 +262,7 @@ export default function FrequencyGuessScreen() {
 
   // ── Playing ────────────────────────────────────────────────────────────────
   return (
-    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+    <View style={{ flex: 1, backgroundColor: '#10130E' }}>
       <GameHeader score={score} round={round} totalRounds={totalRounds} streak={streak} accent={ACCENT} />
 
       <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: 32, justifyContent: 'center' }}>

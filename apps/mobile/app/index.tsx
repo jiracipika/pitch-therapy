@@ -1,173 +1,131 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { triggerSelectionHaptic } from '@/lib/haptics';
-import { colors, radii, shadows, typography } from '@/lib/theme';
+import { useReducedMotionPreference } from '@/lib/motion';
+import { colors, typography } from '@/lib/theme';
 
-export default function SplashScreen() {
+const BARS = [26, 48, 72, 42, 88, 58, 96, 38, 68, 46, 82, 32, 62, 50, 76, 36];
+
+export default function HomeScreen() {
   const router = useRouter();
-  const reveal = useRef(new Animated.Value(0)).current;
-  const sweep = useRef(new Animated.Value(0)).current;
+  const reducedMotion = useReducedMotionPreference();
+  const fade = useRef(new Animated.Value(0)).current;
+  const rise = useRef(new Animated.Value(16)).current;
+  const meter = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.timing(reveal, {
-      toValue: 1,
-      duration: 680,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
+    if (reducedMotion) {
+      fade.setValue(1);
+      rise.setValue(0);
+      meter.setValue(1);
+    } else {
+      Animated.parallel([
+        Animated.timing(fade, { toValue: 1, duration: 420, useNativeDriver: true }),
+        Animated.spring(rise, { toValue: 0, damping: 18, stiffness: 160, useNativeDriver: true }),
+        Animated.timing(meter, { toValue: 1, duration: 680, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      ]).start();
+    }
 
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(sweep, {
-          toValue: 1,
-          duration: 6200,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.timing(sweep, {
-          toValue: 0,
-          duration: 6200,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [reveal, sweep]);
-
-  const sweepTranslate = sweep.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-130, 130],
-  });
-  const revealY = reveal.interpolate({
-    inputRange: [0, 1],
-    outputRange: [16, 0],
-  });
-  const revealScale = reveal.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.96, 1],
-  });
+    const timeout = setTimeout(() => router.replace('/dashboard'), reducedMotion ? 500 : 1450);
+    return () => clearTimeout(timeout);
+  }, [fade, meter, reducedMotion, rise, router]);
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <LinearGradient
-        colors={['#0F1320', '#08090D', '#121828']}
-        locations={[0, 0.55, 1]}
-        style={StyleSheet.absoluteFill}
+        colors={[colors.background, '#151B11', colors.ink]}
+        locations={[0, 0.5, 1]}
+        style={{ position: 'absolute', inset: 0 }}
       />
-      <Animated.View
+      <View
         pointerEvents="none"
-        style={[
-          styles.sweep,
-          {
-            transform: [{ translateX: sweepTranslate }, { rotate: '-6deg' }],
-          },
-        ]}
-      >
-        <LinearGradient
-          colors={['rgba(10,132,255,0)', 'rgba(10,132,255,0.24)', 'rgba(10,132,255,0)']}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}
-          style={{ flex: 1 }}
-        />
-      </Animated.View>
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0.18,
+          borderWidth: 1,
+          borderColor: colors.border,
+        }}
+      />
 
       <Animated.View
         style={{
-          alignItems: 'center',
-          gap: 22,
-          opacity: reveal,
-          transform: [{ translateY: revealY }, { scale: revealScale }],
+          flex: 1,
+          paddingHorizontal: 28,
+          paddingTop: 72,
+          paddingBottom: 54,
+          justifyContent: 'space-between',
+          opacity: fade,
+          transform: [{ translateY: rise }],
         }}
       >
-        <View style={styles.logoShell}>
-          <Image source={require('../assets/logo-placeholder.png')} style={styles.logo} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View
+            style={{
+              width: 58,
+              height: 58,
+              backgroundColor: colors.signal,
+              borderWidth: 1,
+              borderColor: colors.cream,
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: `5px 5px 0 ${colors.coral}`,
+            }}
+          >
+            <Text style={{ color: colors.ink, fontSize: 17, fontWeight: '900', letterSpacing: -1 }}>PT</Text>
+          </View>
+          <View style={{ alignItems: 'flex-end', gap: 3 }}>
+            <Text style={{ color: colors.signal, ...typography.caption2, letterSpacing: 1.2 }}>SYSTEM ONLINE</Text>
+            <Text style={{ color: colors.textTertiary, ...typography.caption2 }}>AUDIO / INPUT 01</Text>
+          </View>
         </View>
-        <View style={styles.copy}>
-          <Text style={styles.title}>Pitch Therapy</Text>
-          <Text style={styles.subtitle}>Train your ear with focused daily reps.</Text>
+
+        <View>
+          <Text style={{ color: colors.signal, ...typography.caption1, letterSpacing: 1.4, marginBottom: 16 }}>
+            LIVE EAR TRAINING SYSTEM
+          </Text>
+          <Text style={{ color: colors.text, fontSize: 62, fontWeight: '900', lineHeight: 57, letterSpacing: -4.2 }}>
+            Hear it.{`\n`}Lock it in.
+          </Text>
+          <Text style={{ color: colors.textSecondary, ...typography.body, marginTop: 20, maxWidth: 330 }}>
+            Precision practice for pitch, frequency, intervals, and musical memory.
+          </Text>
+
+          <View style={{ height: 112, marginTop: 42, flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            {BARS.map((height, index) => (
+              <Animated.View
+                key={`${height}-${index}`}
+                style={{
+                  flex: 1,
+                  height: `${height}%`,
+                  backgroundColor: colors.signal,
+                  transform: [{ scaleY: meter }],
+                  transformOrigin: 'center',
+                }}
+              />
+            ))}
+          </View>
         </View>
-        <Pressable
-          onPress={() => {
-            void triggerSelectionHaptic();
-            router.replace('/dashboard');
-          }}
-          accessibilityRole="button"
-          accessibilityLabel="Get Started"
-          accessibilityHint="Open the Pitch Therapy dashboard"
-          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-        >
-          <Text style={styles.buttonText}>Get Started</Text>
-        </Pressable>
+
+        <View style={{ borderTopWidth: 1, borderTopColor: colors.borderStrong, paddingTop: 18 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+            <Text style={{ color: colors.textTertiary, ...typography.caption2, letterSpacing: 1 }}>CALIBRATING</Text>
+            <Text style={{ color: colors.signal, ...typography.caption2 }}>440.0 HZ</Text>
+          </View>
+          <View style={{ height: 4, backgroundColor: colors.surfaceElevated, overflow: 'hidden' }}>
+            <Animated.View
+              style={{
+                height: '100%',
+                width: '100%',
+                backgroundColor: colors.coral,
+                transform: [{ scaleX: meter }],
+                transformOrigin: 'left',
+              }}
+            />
+          </View>
+        </View>
       </Animated.View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.background,
-    paddingHorizontal: 32,
-  },
-  sweep: {
-    position: 'absolute',
-    top: '30%',
-    width: '150%',
-    height: 180,
-    opacity: 0.6,
-  },
-  logoShell: {
-    width: 154,
-    height: 154,
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.glass,
-    ...shadows.elevated,
-  },
-  logo: {
-    width: 138,
-    height: 138,
-    borderRadius: radii.lg,
-  },
-  copy: {
-    alignItems: 'center',
-    gap: 6,
-  },
-  title: {
-    color: colors.text,
-    ...typography.largeTitle,
-    textAlign: 'center',
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    ...typography.callout,
-    textAlign: 'center',
-  },
-  button: {
-    minWidth: 210,
-    minHeight: 48,
-    backgroundColor: colors.text,
-    borderRadius: radii.md,
-    paddingHorizontal: 34,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 18,
-  },
-  buttonPressed: {
-    opacity: 0.82,
-    transform: [{ scale: 0.985 }],
-  },
-  buttonText: {
-    color: colors.background,
-    ...typography.headline,
-  },
-});

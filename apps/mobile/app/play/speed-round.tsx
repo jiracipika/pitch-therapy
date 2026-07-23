@@ -83,7 +83,7 @@ export default function SpeedRoundScreen() {
   if (phase === 'results') {
     const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40, alignItems: 'center' }}>
           <Text style={{ fontSize: 48 }}>⚡</Text>
           <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginTop: 16 }}>Time's Up!</Text>
@@ -108,7 +108,7 @@ export default function SpeedRoundScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D', paddingHorizontal: 20, justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E', paddingHorizontal: 20, justifyContent: 'center' }}>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>⚡</Text>
         <Text style={{ color: ACCENT, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: 16 }}>Speed Round</Text>
         <Text style={{ color: '#97A3B6', fontSize: 14, textAlign: 'center', marginTop: 8 }}>Identify notes as fast as you can</Text>
@@ -129,7 +129,7 @@ export default function SpeedRoundScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+    <View style={{ flex: 1, backgroundColor: '#10130E' }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
         <Pressable onPress={() => { if (timerRef.current) clearInterval(timerRef.current); router.back(); }}><Text style={{ color: '#97A3B6' }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>⚡ Speed Round</Text>

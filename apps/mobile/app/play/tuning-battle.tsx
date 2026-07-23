@@ -110,7 +110,7 @@ export default function TuningBattleScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D', paddingHorizontal: 20, justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E', paddingHorizontal: 20, justifyContent: 'center' }}>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>⚔️</Text>
         <Text style={{ color: ACCENT, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: 16 }}>Tuning Battle</Text>
         <Text style={{ color: '#97A3B6', fontSize: 14, textAlign: 'center', marginTop: 8 }}>Two players, one target note. First to lock in wins!</Text>
@@ -132,7 +132,7 @@ export default function TuningBattleScreen() {
 
   if (phase === 'countdown') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D', justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E', justifyContent: 'center', alignItems: 'center' }}>
         <Text style={{ color: '#97A3B6', marginBottom: 8 }}>Target: <Text style={{ color: '#F8FAFC', fontWeight: '700', fontSize: 20 }}>{targetNote}</Text></Text>
         <Text style={{ fontSize: 72, fontWeight: '800', color: '#F8FAFC' }}>{countdown > 0 ? countdown : 'GO!'}</Text>
       </View>
@@ -141,7 +141,7 @@ export default function TuningBattleScreen() {
 
   if (phase === 'roundResult') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
         <Text style={{ fontSize: 56 }}>{roundWinner ? '🏆' : '🤝'}</Text>
         <Text style={{ color: '#F8FAFC', fontSize: 24, fontWeight: '700', marginTop: 16 }}>{roundWinner ? `${roundWinner} wins!` : 'Tie!'}</Text>
         <Text style={{ color: '#97A3B6', marginTop: 8 }}>Target was <Text style={{ color: '#F8FAFC', fontWeight: '600' }}>{targetNote}</Text></Text>
@@ -163,7 +163,7 @@ export default function TuningBattleScreen() {
   if (phase === 'done') {
     const w = players[0].score > players[1].score ? 'Player 1' : players[1].score > players[0].score ? 'Player 2' : null;
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
         <Text style={{ fontSize: 56 }}>👑</Text>
         <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginTop: 16 }}>{w ? `${w} Wins!` : "It's a Tie!"}</Text>
         <View style={{ flexDirection: 'row', gap: 16, marginTop: 24 }}>
@@ -184,7 +184,7 @@ export default function TuningBattleScreen() {
 
   // Playing
   return (
-    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+    <View style={{ flex: 1, backgroundColor: '#10130E' }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
         <Pressable onPress={() => router.back()}><Text style={{ color: '#97A3B6' }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>⚔️ Tuning Battle</Text>

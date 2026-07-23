@@ -159,7 +159,7 @@ export function AnimatedTabBar() {
         }}
       >
         <LinearGradient
-          colors={['rgba(10,132,255,0)', 'rgba(10,132,255,0.28)', 'rgba(10,132,255,0)']}
+          colors={['rgba(183,243,74,0)', 'rgba(183,243,74,0.26)', 'rgba(183,243,74,0)']}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={{ flex: 1 }}

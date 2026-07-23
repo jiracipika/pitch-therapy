@@ -24,39 +24,39 @@ function getHeroSpec(variant: NonNullable<AppPageProps['heroVariant']>) {
   switch (variant) {
     case 'dashboard':
       return {
-        gradient: ['rgba(10,132,255,0.26)', 'rgba(94,92,230,0.16)', 'rgba(255,255,255,0.02)'] as const,
-        ribbonA: ['rgba(10,132,255,0)', 'rgba(10,132,255,0.20)', 'rgba(10,132,255,0)'] as const,
-        ribbonB: ['rgba(191,90,242,0)', 'rgba(191,90,242,0.14)', 'rgba(90,200,250,0)'] as const,
+        gradient: ['rgba(183,243,74,0.18)', 'rgba(255,120,87,0.10)', 'rgba(25,30,22,0.96)'] as const,
+        ribbonA: ['rgba(183,243,74,0)', 'rgba(183,243,74,0.16)', 'rgba(183,243,74,0)'] as const,
+        ribbonB: ['rgba(255,120,87,0)', 'rgba(255,120,87,0.12)', 'rgba(255,120,87,0)'] as const,
       };
     case 'daily':
       return {
-        gradient: ['rgba(48,209,88,0.24)', 'rgba(90,200,250,0.16)', 'rgba(255,255,255,0.02)'] as const,
-        ribbonA: ['rgba(48,209,88,0)', 'rgba(48,209,88,0.20)', 'rgba(48,209,88,0)'] as const,
-        ribbonB: ['rgba(255,159,10,0)', 'rgba(255,159,10,0.16)', 'rgba(90,200,250,0)'] as const,
+        gradient: ['rgba(115,232,121,0.18)', 'rgba(183,243,74,0.08)', 'rgba(25,30,22,0.96)'] as const,
+        ribbonA: ['rgba(115,232,121,0)', 'rgba(115,232,121,0.15)', 'rgba(115,232,121,0)'] as const,
+        ribbonB: ['rgba(255,129,95,0)', 'rgba(255,129,95,0.12)', 'rgba(255,129,95,0)'] as const,
       };
     case 'play':
       return {
-        gradient: ['rgba(74,222,128,0.22)', 'rgba(10,132,255,0.14)', 'rgba(255,255,255,0.02)'] as const,
-        ribbonA: ['rgba(74,222,128,0)', 'rgba(74,222,128,0.18)', 'rgba(74,222,128,0)'] as const,
-        ribbonB: ['rgba(10,132,255,0)', 'rgba(10,132,255,0.15)', 'rgba(90,200,250,0)'] as const,
+        gradient: ['rgba(183,243,74,0.17)', 'rgba(95,215,217,0.08)', 'rgba(25,30,22,0.96)'] as const,
+        ribbonA: ['rgba(183,243,74,0)', 'rgba(183,243,74,0.14)', 'rgba(183,243,74,0)'] as const,
+        ribbonB: ['rgba(95,215,217,0)', 'rgba(95,215,217,0.12)', 'rgba(95,215,217,0)'] as const,
       };
     case 'progress':
       return {
-        gradient: ['rgba(191,90,242,0.23)', 'rgba(10,132,255,0.16)', 'rgba(255,255,255,0.02)'] as const,
-        ribbonA: ['rgba(191,90,242,0)', 'rgba(191,90,242,0.18)', 'rgba(191,90,242,0)'] as const,
-        ribbonB: ['rgba(10,132,255,0)', 'rgba(10,132,255,0.15)', 'rgba(94,92,230,0)'] as const,
+        gradient: ['rgba(214,131,242,0.18)', 'rgba(183,243,74,0.07)', 'rgba(25,30,22,0.96)'] as const,
+        ribbonA: ['rgba(214,131,242,0)', 'rgba(214,131,242,0.14)', 'rgba(214,131,242,0)'] as const,
+        ribbonB: ['rgba(183,243,74,0)', 'rgba(183,243,74,0.10)', 'rgba(183,243,74,0)'] as const,
       };
     case 'settings':
       return {
-        gradient: ['rgba(255,159,10,0.24)', 'rgba(10,132,255,0.13)', 'rgba(255,255,255,0.02)'] as const,
-        ribbonA: ['rgba(255,159,10,0)', 'rgba(255,159,10,0.19)', 'rgba(255,159,10,0)'] as const,
-        ribbonB: ['rgba(10,132,255,0)', 'rgba(10,132,255,0.13)', 'rgba(90,200,250,0)'] as const,
+        gradient: ['rgba(255,129,95,0.18)', 'rgba(183,243,74,0.06)', 'rgba(25,30,22,0.96)'] as const,
+        ribbonA: ['rgba(255,129,95,0)', 'rgba(255,129,95,0.14)', 'rgba(255,129,95,0)'] as const,
+        ribbonB: ['rgba(183,243,74,0)', 'rgba(183,243,74,0.09)', 'rgba(183,243,74,0)'] as const,
       };
     default:
       return {
-        gradient: ['rgba(255,255,255,0.08)', 'rgba(255,255,255,0.03)', 'rgba(255,255,255,0.01)'] as const,
-        ribbonA: ['rgba(10,132,255,0)', 'rgba(10,132,255,0.18)', 'rgba(10,132,255,0)'] as const,
-        ribbonB: ['rgba(191,90,242,0)', 'rgba(191,90,242,0.15)', 'rgba(90,200,250,0)'] as const,
+        gradient: ['rgba(183,243,74,0.12)', 'rgba(244,246,236,0.04)', 'rgba(25,30,22,0.96)'] as const,
+        ribbonA: ['rgba(183,243,74,0)', 'rgba(183,243,74,0.12)', 'rgba(183,243,74,0)'] as const,
+        ribbonB: ['rgba(255,120,87,0)', 'rgba(255,120,87,0.10)', 'rgba(255,120,87,0)'] as const,
       };
   }
 }
@@ -292,7 +292,7 @@ export function AppPage({
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <LinearGradient
-        colors={['#0B0D14', '#06070C', '#10131D']}
+        colors={[colors.background, '#131810', colors.ink]}
         locations={[0, 0.52, 1]}
         style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
       />
@@ -343,7 +343,7 @@ export function AppPage({
               paddingBottom: insets.bottom + 12,
               paddingHorizontal: 8,
               gap: 12,
-              backgroundColor: 'rgba(10,12,16,0.78)',
+              backgroundColor: 'rgba(15,18,13,0.94)',
             }}
           >
             <View style={{ alignItems: 'center', marginBottom: 8 }}>
@@ -367,7 +367,7 @@ export function AppPage({
                       width: 64,
                       minHeight: 48,
                       paddingVertical: 10,
-                      borderRadius: 8,
+                      borderRadius: 4,
                       backgroundColor: active ? tab.color + '24' : 'transparent',
                       borderWidth: 1,
                       borderColor: active ? tab.color + '66' : 'transparent',
@@ -409,14 +409,14 @@ export function AppPage({
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={{
-                  borderRadius: 8,
-                  paddingHorizontal: 14,
-                  paddingVertical: 13,
+                  borderRadius: 6,
+                  paddingHorizontal: 17,
+                  paddingVertical: 16,
                   borderWidth: 1,
                   borderColor: reducedGlass ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.13)',
                   gap: 7,
                   overflow: 'hidden',
-                  boxShadow: reducedGlass ? '0 10px 22px rgba(0,0,0,0.24)' : '0 18px 36px rgba(0,0,0,0.34)',
+                  boxShadow: reducedGlass ? '3px 4px 0 rgba(0,0,0,0.26)' : '6px 7px 0 rgba(0,0,0,0.34)',
                 }}
               >
                 <Animated.View

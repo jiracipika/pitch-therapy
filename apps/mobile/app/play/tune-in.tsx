@@ -112,7 +112,7 @@ export default function TuneInScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
@@ -187,7 +187,7 @@ export default function TuneInScreen() {
 
   // ── Playing ──────────────────────────────────────────────────────────────────
   return (
-    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+    <View style={{ flex: 1, backgroundColor: '#10130E' }}>
       <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} />
 
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 40, justifyContent: 'space-between', paddingBottom: 40 }}>

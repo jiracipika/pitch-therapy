@@ -144,7 +144,7 @@ export default function IntervalArcherScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
           <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700', marginTop: 12 }}>Interval Archer</Text>
@@ -166,7 +166,7 @@ export default function IntervalArcherScreen() {
   if (phase === 'results') {
     const correct = results.filter(r => r.correct).length;
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
           <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Interval Archer Complete!</Text>
           <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 20, alignItems: 'center' }}>
@@ -200,7 +200,7 @@ export default function IntervalArcherScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+    <View style={{ flex: 1, backgroundColor: '#10130E' }}>
       <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
         <Pressable onPress={() => playIntervalSound(rootFreq, targetInterval.semitones)} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>

@@ -123,7 +123,7 @@ export default function CentsDeviationScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
           <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700', marginTop: 12 }}>Cents Deviation</Text>
@@ -185,7 +185,7 @@ export default function CentsDeviationScreen() {
   const actualPct = 50 + (actualCents / config.centsRange) * 45;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#08090D' }}>
+    <View style={{ flex: 1, backgroundColor: '#10130E' }}>
       <GameHeader score={score} round={round} totalRounds={totalRounds} streak={streak} accent={ACCENT} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
         <Text style={{ textAlign: 'center', color: '#a1a1aa', fontSize: 14, marginBottom: 4 }}>Reference: <Text style={{ color: '#F8FAFC', fontWeight: '700' }}>{baseNote}</Text></Text>

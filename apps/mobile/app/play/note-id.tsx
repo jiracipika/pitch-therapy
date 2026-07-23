@@ -239,7 +239,7 @@ export default function NoteIdScreen() {
   // ── Select Difficulty ──────────────────────────────────────────────────────
   if (phase === "select-difficulty") {
     return (
-      <View style={{ flex: 1, backgroundColor: "#08090D" }}>
+      <View style={{ flex: 1, backgroundColor: "#10130E" }}>
         <View
           style={{
             paddingTop: 56,
@@ -341,7 +341,7 @@ export default function NoteIdScreen() {
   const timerPct = isTimed ? Math.max(0, Math.min(1, timeLeft / timeLimit)) : 0;
   const timerUrgent = isTimed && timeLeft <= 3;
   return (
-    <View style={{ flex: 1, backgroundColor: "#08090D" }}>
+    <View style={{ flex: 1, backgroundColor: "#10130E" }}>
       <GameHeader
         score={score}
         round={round}

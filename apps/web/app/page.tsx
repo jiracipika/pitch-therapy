@@ -3,439 +3,204 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
-
+import { useCallback, useRef, useState } from "react";
 import { GAME_MODE_META, GAME_MODES, MODE_CATEGORIES } from "@pitch-therapy/core";
 
-const MODES = GAME_MODES.map((id) => {
-  const mode = GAME_MODE_META[id];
-  return {
-    id: mode.id,
-    label: mode.label,
-    color: mode.accentHex,
-    icon: mode.icon,
-    desc: mode.description,
-    href: `/play/${mode.id}`,
-  };
-});
-
-const CATEGORIES = MODE_CATEGORIES.map((category) => ({
-  label: category.label,
-  ids: GAME_MODES.filter((id) => GAME_MODE_META[id].category === category.id),
-  color: category.accentHex,
+const MODES = GAME_MODES.map((id) => ({
+  ...GAME_MODE_META[id],
+  href: `/play/${id}`,
 }));
 
-const QUICK_FLOWS = [
-  { href: "/play-modes", title: "Explore Modes", subtitle: "Browse all 18 training experiences", icon: "grid" },
-  { href: "/daily", title: "Play Daily", subtitle: "One curated challenge for today", icon: "calendar" },
-  { href: "/progress", title: "Track Progress", subtitle: "Review streaks and trend lines", icon: "chart" },
-] as const;
+const CATEGORIES = MODE_CATEGORIES.map((category) => ({
+  ...category,
+  modes: MODES.filter((mode) => mode.category === category.id),
+}));
 
-const PRACTICE_PLAN = [
-  { step: "Listen", copy: "Start with note ID or pitch match" },
-  { step: "Lock in", copy: "Use daily challenge to build streaks" },
-  { step: "Review", copy: "Check progress and repeat weak modes" },
-];
+const SIGNAL_BARS = [28, 54, 39, 78, 92, 46, 68, 34, 82, 58, 96, 42, 72, 30, 62, 88, 48, 70, 36, 56, 84, 44, 66, 32];
 
-/* ── Inline SVG icons (SF Symbol style) ── */
-function FlowIcon({ name }: { name: string }) {
-  const icons: Record<string, React.ReactElement> = {
-    grid: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="7" height="7" rx="1.5" />
-        <rect x="14" y="3" width="7" height="7" rx="1.5" />
-        <rect x="3" y="14" width="7" height="7" rx="1.5" />
-        <rect x="14" y="14" width="7" height="7" rx="1.5" />
-      </svg>
-    ),
-    calendar: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2.5" />
-        <path d="M8 2v3M16 2v3M3 10h18" />
-      </svg>
-    ),
-    chart: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="6" y1="20" x2="6" y2="14" />
-        <line x1="12" y1="20" x2="12" y2="9" />
-        <line x1="18" y1="20" x2="18" y2="4" />
-      </svg>
-    ),
-  };
-  return icons[name] ?? icons.grid;
+function Waveform({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className={`pt-signal-wave ${compact ? "is-compact" : ""}`} aria-hidden="true">
+      {SIGNAL_BARS.map((height, index) => (
+        <motion.span
+          key={`${height}-${index}`}
+          style={{ height: `${height}%` }}
+          animate={compact ? undefined : { scaleY: [0.55, 1, 0.7, 0.92, 0.55] }}
+          transition={{ duration: 2.4 + (index % 5) * 0.18, repeat: Infinity, delay: index * 0.045, ease: "easeInOut" }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function SignalMark() {
+  return (
+    <div className="pt-signal-mark" aria-label="Pitch Therapy signal mark" role="img">
+      <span>PT</span>
+      <Waveform compact />
+    </div>
+  );
 }
 
 export default function Home() {
   const router = useRouter();
   const reduceMotion = useReducedMotion();
-  const [isSafari, setIsSafari] = useState(false);
   const [leavingTo, setLeavingTo] = useState<string | null>(null);
-  const transitionTimeout = useRef<number | null>(null);
-  const motionLite = reduceMotion || isSafari;
+  const timeoutRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    const ua = navigator.userAgent;
-    const safari = /Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|FxiOS/i.test(ua);
-    setIsSafari(safari);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (transitionTimeout.current) {
-        window.clearTimeout(transitionTimeout.current);
-      }
-    };
-  }, []);
-
-  const transitionTo = useCallback(
-    (href: string) => {
-      if (leavingTo) return;
-      setLeavingTo(href);
-      transitionTimeout.current = window.setTimeout(() => {
-        router.push(href);
-      }, 380);
-    },
-    [leavingTo, router],
-  );
+  const transitionTo = useCallback((href: string) => {
+    if (leavingTo) return;
+    setLeavingTo(href);
+    timeoutRef.current = window.setTimeout(() => router.push(href), reduceMotion ? 90 : 280);
+  }, [leavingTo, reduceMotion, router]);
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--ios-bg)" }}>
+    <div className="pt-signal-home">
       <AnimatePresence>
-        {leavingTo && (
+        {leavingTo ? (
           <motion.div
-            key="page-leave-overlay"
+            className="pt-signal-transition"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: motionLite ? 0.16 : 0.34, ease: [0.22, 1, 0.36, 1] }}
-            className="pointer-events-none fixed inset-0 z-[120]"
-            style={{
-              background:
-                "radial-gradient(140% 100% at 50% 50%, color-mix(in srgb, var(--ios-blue) 8%, var(--ios-bg)) 0%, var(--ios-bg) 100%)",
-            }}
+            transition={{ duration: reduceMotion ? 0.08 : 0.24 }}
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.78, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: motionLite ? 0.16 : 0.34, ease: [0.34, 1.56, 0.64, 1] }}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-              style={{
-                width: 74,
-                height: 74,
-                borderRadius: 18,
-                background: "linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 16px 48px rgba(10, 132, 255, 0.28)",
-              }}
-            >
-              <span style={{ fontSize: 34 }} role="img" aria-label="Pitch Therapy">🎵</span>
-            </motion.div>
+            <SignalMark />
+            <span>CALIBRATING SESSION</span>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
 
-      {/* Floating note symbols */}
-      <div className="pointer-events-none fixed inset-0 select-none overflow-hidden" aria-hidden>
-        <span className="animate-note-1 absolute left-[8%] top-[18%] font-serif text-6xl" style={{ color: "var(--ios-label4)" }}>♪</span>
-        <span className="animate-note-2 absolute left-[75%] top-[12%] font-serif text-5xl" style={{ color: "var(--ios-label4)" }}>♫</span>
-        <span className="animate-note-3 absolute left-[20%] top-[55%] font-serif text-7xl" style={{ color: "var(--ios-label4)" }}>♬</span>
-        <span className="animate-note-2 absolute left-[65%] top-[45%] font-serif text-5xl" style={{ color: "var(--ios-label4)" }}>♩</span>
-        <span className="animate-note-1 absolute left-[45%] top-[72%] font-serif text-4xl" style={{ color: "var(--ios-label4)" }}>♪</span>
+      <header className="pt-signal-header">
+        <Link href="/" className="pt-signal-brand" aria-label="Pitch Therapy home">
+          <SignalMark />
+          <span className="pt-signal-brand-copy">
+            <b>Pitch Therapy</b>
+            <small>Ear training / signal lab</small>
+          </span>
+        </Link>
+        <nav aria-label="Landing navigation">
+          <Link href="/play-modes">Modes</Link>
+          <Link href="/progress">Progress</Link>
+          <button type="button" onClick={() => transitionTo("/dashboard")}>Enter studio</button>
+        </nav>
+      </header>
 
-        <motion.div
-          className="absolute inset-x-[-10%] top-[14%] h-44"
-          animate={motionLite ? undefined : { x: ["-3%", "3%", "-3%"] }}
-          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-          style={{
-            background: "linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--ios-blue) 10%, transparent) 18%, color-mix(in srgb, var(--ios-indigo) 12%, transparent) 52%, color-mix(in srgb, var(--ios-teal) 10%, transparent) 86%, transparent 100%)",
-            filter: `blur(${motionLite ? 16 : 24}px)`,
-          }}
-        />
-        <motion.div
-          className="absolute inset-x-[-12%] top-[52%] h-40"
-          animate={motionLite ? undefined : { x: ["4%", "-4%", "4%"] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          style={{
-            background: "linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--ios-purple) 9%, transparent) 20%, color-mix(in srgb, var(--ios-blue) 10%, transparent) 50%, color-mix(in srgb, var(--ios-green) 7%, transparent) 82%, transparent 100%)",
-            filter: `blur(${motionLite ? 14 : 22}px)`,
-          }}
-        />
-      </div>
-
-      {/* ── HERO ── */}
-      <section className="pt-home-hero relative flex min-h-[100dvh] flex-col items-center justify-center px-6 pb-16 pt-14">
-        <div className="pt-home-hero-inner">
-          <div className="pt-home-hero-main text-center">
-            <motion.div
-              initial={motionLite ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
-              className="mb-6"
-            >
-              <div
-                className="ios-app-icon mx-auto"
-                style={{
-                  width: 96,
-                  height: 96,
-                  borderRadius: "21.6px",
-                  boxShadow: "0 24px 64px rgba(10, 132, 255, 0.35), 0 8px 24px rgba(10, 132, 255, 0.2)",
-                }}
-              >
-                <span style={{ fontSize: 44 }} role="img" aria-label="Pitch Therapy">🎵</span>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.5 }}
-              className="mb-3"
-            >
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  background: "color-mix(in srgb, var(--ios-blue) 12%, transparent)",
-                  border: "1px solid color-mix(in srgb, var(--ios-blue) 22%, transparent)",
-                  borderRadius: 20,
-                  padding: "5px 14px",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  letterSpacing: "-0.08px",
-                  color: "var(--ios-blue)",
-                }}
-              >
-                <span style={{ width: 6, height: 6, borderRadius: 3, background: "var(--ios-blue)", display: "inline-block" }} />
-                Simple daily ear training
-              </span>
-            </motion.div>
-
-            <motion.h1
-              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-              className="ios-large-title mb-3"
-              style={{ fontSize: "clamp(36px, 7vw, 52px)", letterSpacing: "-0.5px", lineHeight: 1.05 }}
-            >
-              Pitch Therapy
-            </motion.h1>
-
-            <motion.p
-              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="ios-callout mb-8 max-w-xs"
-              style={{ color: "var(--ios-label2)", lineHeight: 1.5, margin: "0 auto 32px" }}
-            >
-              A clearer, faster way to train pitch, intervals, frequency, and musical memory — one guided drill at a time.
-            </motion.p>
-
-            <motion.div
-              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.42, duration: 0.45 }}
-              className="pt-home-benefits"
-            >
-              <span>2-minute sessions</span>
-              <span>Clear progress</span>
-              <span>No setup needed</span>
-            </motion.div>
-
-            <motion.div
-              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.48, duration: 0.45 }}
-              className="flex w-full max-w-xs flex-col gap-3"
-              style={{ margin: "0 auto" }}
-            >
-              <motion.button
-                whileHover={{ scale: 1.015, y: -1 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => transitionTo("/dashboard")}
-                className="ios-btn-primary"
-                style={{ fontSize: 17 }}
-              >
-                Start with Guided Training
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.012 }}
-                whileTap={{ scale: 0.985 }}
-                onClick={() => transitionTo("/daily")}
-                className="ios-btn-secondary"
-                style={{ fontSize: 17 }}
-              >
-                Do Today&apos;s Challenge
-              </motion.button>
-            </motion.div>
-
-            {/* Mobile practice plan */}
-            <motion.div
-              initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.58, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="pt-home-mobile-plan"
-            >
-              {PRACTICE_PLAN.map((item, index) => (
-                <div key={item.step} className="pt-home-plan-row">
-                  <span className="pt-home-plan-index">{index + 1}</span>
-                  <span>
-                    <b>{item.step}</b>
-                    <small>{item.copy}</small>
-                  </span>
-                </div>
-              ))}
-            </motion.div>
-          </div>
-
-          {/* Desktop sidebar */}
-          <motion.aside
-            initial={motionLite ? { opacity: 1, y: 0 } : { opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.45, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="pt-home-hero-side ios-card"
+      <main id="landing-content">
+        <section className="pt-signal-hero">
+          <motion.div
+            className="pt-signal-hero-copy"
+            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="pt-home-side-header">
-              <span className="pt-home-side-title">Today&apos;s Training Flow</span>
+            <div className="pt-signal-kicker"><span /> LIVE EAR TRAINING SYSTEM</div>
+            <h1>Hear it.<br /><em>Lock it in.</em></h1>
+            <p>
+              Train pitch, intervals, frequency, and musical memory through short,
+              focused drills that adapt to how you listen.
+            </p>
+            <div className="pt-signal-actions">
+              <button type="button" onClick={() => transitionTo("/dashboard")} className="pt-signal-primary">
+                Start a guided session <span aria-hidden="true">↗</span>
+              </button>
+              <button type="button" onClick={() => transitionTo("/daily")} className="pt-signal-secondary">
+                Today&apos;s challenge
+              </button>
             </div>
-            <div className="pt-home-side-list">
-              {QUICK_FLOWS.map((item) => (
-                <Link key={item.href} href={item.href} className="pt-home-side-link" style={{ color: "var(--ios-label2)" }}>
-                  <span className="pt-home-side-icon" style={{ color: "var(--ios-blue)" }}>
-                    <FlowIcon name={item.icon} />
-                  </span>
-                  <span className="pt-home-side-copy">
-                    <span className="pt-home-side-link-title">{item.title}</span>
-                    <span className="pt-home-side-link-subtitle">{item.subtitle}</span>
-                  </span>
-                </Link>
-              ))}
+            <div className="pt-signal-proof" aria-label="Product highlights">
+              <span><b>18</b> focused modes</span>
+              <span><b>2–5</b> minute sessions</span>
+              <span><b>0</b> setup required</span>
             </div>
-            <div className="pt-home-category-strip">
-              {CATEGORIES.map((cat) => (
-                <div key={cat.label} className="pt-home-category-row">
-                  <span className="pt-home-category-dot" style={{ background: cat.color }} />
-                  <span className="pt-home-category-name">{cat.label}</span>
-                  <span className="pt-home-category-count">{cat.ids.length}</span>
-                </div>
-              ))}
+          </motion.div>
+
+          <motion.aside
+            className="pt-signal-console"
+            initial={reduceMotion ? false : { opacity: 0, scale: 0.96, rotate: 1.2 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ delay: 0.12, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            aria-label="Live training signal preview"
+          >
+            <div className="pt-signal-console-head">
+              <span>INPUT MONITOR / A4</span>
+              <span className="pt-signal-live"><i /> LIVE</span>
             </div>
-            <div className="pt-home-practice-plan">
-              <span className="pt-home-side-title">Recommended path</span>
-              {PRACTICE_PLAN.map((item, index) => (
-                <div key={item.step} className="pt-home-plan-row" style={{ borderBottom: "none", paddingBottom: 0, paddingTop: index === 0 ? 0 : 10 }}>
-                  <span className="pt-home-plan-index">{index + 1}</span>
-                  <span>
-                    <b>{item.step}</b>
-                    <small>{item.copy}</small>
-                  </span>
-                </div>
-              ))}
+            <div className="pt-signal-frequency">
+              <span>440.0</span><small>HZ</small>
+            </div>
+            <Waveform />
+            <div className="pt-signal-meter">
+              <span>−50</span><span>−25</span><strong>0</strong><span>+25</span><span>+50</span>
+              <i style={{ left: "49.5%" }} />
+            </div>
+            <div className="pt-signal-console-foot">
+              <span><i className="is-green" /> PITCH LOCKED</span>
+              <span>DEVIATION <b>+02¢</b></span>
             </div>
           </motion.aside>
-        </div>
+        </section>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.35 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
-          className="pt-home-scroll-indicator absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1"
-        >
-          <span style={{ fontSize: 11, color: "var(--ios-label3)", letterSpacing: 1, textTransform: "uppercase", fontWeight: 500 }}>
-            Scroll
-          </span>
-          <motion.svg
-            width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="var(--ios-label3)" strokeWidth="2" strokeLinecap="round"
-            animate={motionLite ? undefined : { y: [0, 5, 0] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <path d="M12 5v14M5 12l7 7 7-7" />
-          </motion.svg>
-        </motion.div>
-      </section>
-
-      {/* ── MODE GRID ── */}
-      <section className="pt-home-modes mx-auto max-w-6xl px-4 pb-20">
-        {CATEGORIES.map((cat, ci) => {
-          const catModes = MODES.filter((m) => cat.ids.includes(m.id));
-          return (
-            <motion.div
-              key={cat.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: ci * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="pt-home-category-block mb-8"
-            >
-              <div className="mb-3 flex items-center gap-2 px-1">
-                <div style={{ width: 3, height: 16, borderRadius: 2, background: cat.color }} />
-                <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: "var(--ios-label2)" }}>
-                  {cat.label}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5">
-                {catModes.map((m, i) => (
-                  <motion.div
-                    key={m.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    whileHover={{ y: -3 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.06, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                  >
-                    <Link
-                      href={m.href}
-                      className="ios-game-card ios-card-lift block h-full"
-                      style={{ textDecoration: "none" }}
-                    >
-                      <div
-                        style={{
-                          width: 44, height: 44, borderRadius: 10,
-                          background: `${m.color}18`,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          marginBottom: 10, fontSize: 22,
-                        }}
-                      >
-                        {m.icon}
-                      </div>
-                      <div style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.2px", color: "var(--ios-label)", marginBottom: 3 }}>
-                        {m.label}
-                      </div>
-                      <div style={{ fontSize: 12, color: "var(--ios-label3)", letterSpacing: "-0.08px", lineHeight: 1.4, textWrap: "pretty" }}>
-                        {m.desc}
-                      </div>
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          );
-        })}
-
-        {/* CTA block */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="pt-home-cta ios-card mt-4 p-6 text-center"
-          style={{
-            background: "linear-gradient(135deg, color-mix(in srgb, var(--ios-orange) 12%, transparent) 0%, color-mix(in srgb, var(--ios-pink) 10%, transparent) 100%)",
-          }}
-        >
-          <div style={{ fontSize: 36, marginBottom: 10 }}>🔥</div>
-          <div className="ios-title3 mb-2">Do Today&apos;s Challenge</div>
-          <div style={{ fontSize: 15, color: "var(--ios-label2)", marginBottom: 18, letterSpacing: "-0.2px" }}>
-            A new challenge every day. Keep your streak alive.
+        <section className="pt-signal-path" aria-labelledby="path-title">
+          <div>
+            <span className="pt-signal-section-number">01</span>
+            <h2 id="path-title">Your next ten minutes</h2>
           </div>
-          <Link href="/daily" className="ios-btn-tonal" style={{ display: "inline-flex", width: "auto" }}>
-            Play Today&apos;s Challenge
-          </Link>
-        </motion.div>
-      </section>
+          <ol>
+            <li><b>01</b><span><strong>Calibrate</strong><small>Note ID · 2 min</small></span></li>
+            <li><b>02</b><span><strong>Build control</strong><small>Pitch Match · 4 min</small></span></li>
+            <li><b>03</b><span><strong>Pressure test</strong><small>Speed Round · 3 min</small></span></li>
+          </ol>
+          <Link href="/dashboard">Run this session <span aria-hidden="true">→</span></Link>
+        </section>
+
+        <section className="pt-signal-catalog" aria-labelledby="catalog-title">
+          <div className="pt-signal-section-heading">
+            <div><span className="pt-signal-section-number">02</span><h2 id="catalog-title">Choose your frequency</h2></div>
+            <p>Every mode isolates one listening skill. Pick a weakness and get precise.</p>
+          </div>
+
+          <div className="pt-signal-category-grid">
+            {CATEGORIES.map((category, categoryIndex) => (
+              <motion.article
+                key={category.id}
+                className="pt-signal-category"
+                initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ delay: categoryIndex * 0.04, duration: 0.4 }}
+              >
+                <header style={{ "--category": category.accentHex } as React.CSSProperties}>
+                  <span>{String(categoryIndex + 1).padStart(2, "0")}</span>
+                  <h3>{category.label}</h3>
+                  <small>{category.modes.length} MODES</small>
+                </header>
+                <div>
+                  {category.modes.map((mode) => (
+                    <Link key={mode.id} href={mode.href} className="pt-signal-mode">
+                      <span className="pt-signal-mode-icon" style={{ "--mode": mode.accentHex } as React.CSSProperties}>{mode.icon}</span>
+                      <span><b>{mode.label}</b><small>{mode.description}</small></span>
+                      <i aria-hidden="true">↗</i>
+                    </Link>
+                  ))}
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+
+        <section className="pt-signal-final">
+          <span className="pt-signal-section-number">03</span>
+          <h2>Less guessing.<br />More hearing.</h2>
+          <p>Your daily challenge is tuned and ready.</p>
+          <Link href="/daily">Play today&apos;s challenge <span aria-hidden="true">→</span></Link>
+        </section>
+      </main>
+
+      <footer className="pt-signal-footer">
+        <span>PITCH THERAPY © 2026</span>
+        <span>LISTEN / RESPOND / IMPROVE</span>
+      </footer>
     </div>
   );
 }
