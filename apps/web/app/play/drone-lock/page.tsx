@@ -5,23 +5,14 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
+import { intervalsInPool } from "@pitch-therapy/core";
 
 const ACCENT = "#30D158";
-const INTERVALS = [
-  { name: "Unison", semitones: 0 },
-  { name: "Minor 2nd", semitones: 1 },
-  { name: "Major 2nd", semitones: 2 },
-  { name: "Minor 3rd", semitones: 3 },
-  { name: "Major 3rd", semitones: 4 },
-  { name: "Perfect 4th", semitones: 5 },
-  { name: "Tritone", semitones: 6 },
-  { name: "Perfect 5th", semitones: 7 },
-  { name: "Minor 6th", semitones: 8 },
-  { name: "Major 6th", semitones: 9 },
-  { name: "Minor 7th", semitones: 10 },
-  { name: "Octave", semitones: 12 },
-];
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
+
+// Drone Lock excludes M7 (semitone 11) — extremely difficult to sing
+// accurately against a drone, making it a poor ear-training target here.
+const INTERVALS = intervalsInPool([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]);
 
 type Phase = "idle" | "listening" | "locking" | "scored" | "done";
 

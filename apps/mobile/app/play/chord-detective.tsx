@@ -4,29 +4,22 @@ import { useRouter } from 'expo-router';
 import { playTone, NOTE_FREQS_4, playFrequency } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
+import {
+  CHROMATIC_SCALE,
+  CHORD_TYPES,
+  CHORD_INTERVALS,
+  chordTypeById,
+} from '@pitch-therapy/core';
 
 const ACCENT = '#F472B6';
 
-const CHORD_TYPES = [
-  { id: 'major', label: 'Major' },
-  { id: 'minor', label: 'Minor' },
-  { id: 'dim', label: 'Dim' },
-  { id: 'aug', label: 'Aug' },
-  { id: 'dom7', label: 'Dom 7' },
-  { id: 'min7', label: 'Min 7' },
-];
-
-const CHORD_INTERVALS: Record<string, number[]> = {
-  major: [0, 4, 7], minor: [0, 3, 7], dim: [0, 3, 6],
-  aug: [0, 4, 8], dom7: [0, 4, 7, 10], min7: [0, 3, 7, 10],
-};
-
-const ALL_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
+const ALL_NOTES = CHROMATIC_SCALE;
 
 function playChord(root: string, chordType: string) {
-  const rootIdx = ALL_NOTES.indexOf(root as typeof ALL_NOTES[number]);
+  const rootIdx = ALL_NOTES.indexOf(root as (typeof ALL_NOTES)[number]);
   if (rootIdx < 0) return;
-  const intervals = CHORD_INTERVALS[chordType] || CHORD_INTERVALS.major;
+  const lookup = CHORD_INTERVALS as Record<string, number[]>;
+  const intervals = lookup[chordType] ?? CHORD_INTERVALS.major;
   intervals.forEach((semi, i) => {
     const note = ALL_NOTES[(rootIdx + semi) % 12];
     const freq = NOTE_FREQS_4[note];
@@ -209,7 +202,7 @@ export default function ChordDetectiveScreen() {
             borderWidth: 1, borderColor: feedback === 'correct' ? '#4ade80' : '#f87171',
           }}>
             <Text style={{ color: feedback === 'correct' ? '#4ade80' : '#f87171', fontWeight: '700', fontSize: 16 }}>
-              {feedback === 'correct' ? '✓ Correct!' : `✗ It was ${root} ${CHORD_TYPES.find(c => c.id === chordType)?.label}`}
+              {feedback === 'correct' ? '✓ Correct!' : `✗ It was ${root} ${chordTypeById(chordType)?.label}`}
             </Text>
           </View>
         )}

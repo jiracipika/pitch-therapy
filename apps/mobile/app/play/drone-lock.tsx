@@ -4,24 +4,18 @@ import { useRouter } from 'expo-router';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
+import { CHROMATIC_SCALE, intervalsInPool } from '@pitch-therapy/core';
 
 const ACCENT = '#10B981';
-const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
+const NOTE_NAMES = CHROMATIC_SCALE;
 
-const INTERVALS = [
-  { name: 'Unison',      semitones: 0  },
-  { name: 'Minor 2nd',   semitones: 1  },
-  { name: 'Major 2nd',   semitones: 2  },
-  { name: 'Minor 3rd',   semitones: 3  },
-  { name: 'Major 3rd',   semitones: 4  },
-  { name: 'Perfect 4th', semitones: 5  },
-  { name: 'Tritone',     semitones: 6  },
-  { name: 'Perfect 5th', semitones: 7  },
-  { name: 'Minor 6th',   semitones: 8  },
-  { name: 'Major 6th',   semitones: 9  },
-  { name: 'Minor 7th',   semitones: 10 },
-  { name: 'Octave',      semitones: 12 },
-] as const;
+// Drone Lock uses full interval names for its descriptive UI.
+// Intentionally excludes M7 (semitone 11) — extremely difficult to sing
+// against a drone, making it a poor ear-training target for this mode.
+const INTERVALS = intervalsInPool([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]).map((i) => ({
+  name: i.name,
+  semitones: i.semitones,
+}));
 
 // Accuracy options map to the same point tiers as the web version:
 // <10¢ → 200, <25¢ → 150, <50¢ → 100, else → 50

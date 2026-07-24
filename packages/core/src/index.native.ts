@@ -59,6 +59,22 @@ export type { DailyChallengeResult, DailyChallengeMode } from "./dailyChallenge"
 export { noteToStaffPos, staffPosToY, STAFF_LINES } from "./staff";
 export type { StaffPosition } from "./staff";
 
+// ─── Music Theory (pure cross-platform constants & helpers) ──────────────────
+
+export {
+  CHROMATIC_SCALE,
+  OCTAVE_SEMITONES,
+  INTERVALS,
+  intervalBySemitones,
+  intervalsInPool,
+  CHORD_TYPES,
+  CHORD_INTERVALS,
+  chordTypeById,
+  chordNotes,
+  chordLabel,
+} from "./musicTheory";
+export type { ChromaticNote, IntervalDef, ChordTypeId, ChordTypeDef } from "./musicTheory";
+
 // ─── Game Framework (pure logic) ────────────────────────────────────────────
 
 export {

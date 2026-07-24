@@ -6,24 +6,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { playTone, getAudioContext, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
+import { INTERVALS as CORE_INTERVALS, type IntervalDef } from "@pitch-therapy/core";
 
 const ACCENT = "#D946EF";
 
-const INTERVALS = [
-  { name: "Unison", semitones: 0 },
-  { name: "m2", semitones: 1 },
-  { name: "M2", semitones: 2 },
-  { name: "m3", semitones: 3 },
-  { name: "M3", semitones: 4 },
-  { name: "P4", semitones: 5 },
-  { name: "Tritone", semitones: 6 },
-  { name: "P5", semitones: 7 },
-  { name: "m6", semitones: 8 },
-  { name: "M6", semitones: 9 },
-  { name: "m7", semitones: 10 },
-  { name: "M7", semitones: 11 },
-  { name: "Octave", semitones: 12 },
-];
+// Display adapter: uses short abbreviation labels for this mode's compact UI.
+const INTERVALS = CORE_INTERVALS.map((i) => ({
+  name: i.abbr,
+  semitones: i.semitones,
+}));
 
 type IntervalMode = "ascending" | "descending" | "harmonic";
 

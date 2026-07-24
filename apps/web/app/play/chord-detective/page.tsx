@@ -6,26 +6,9 @@ import { motion } from "framer-motion";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
+import { CHORD_TYPES, CHORD_INTERVALS, chordTypeById } from "@pitch-therapy/core";
 
 const ACCENT = "#FF2D55";
-
-const CHORD_TYPES = [
-  { id: "major", label: "Major", symbol: "" },
-  { id: "minor", label: "Minor", symbol: "m" },
-  { id: "dim", label: "Dim", symbol: "dim" },
-  { id: "aug", label: "Aug", symbol: "aug" },
-  { id: "dom7", label: "Dom 7", symbol: "7" },
-  { id: "min7", label: "Min 7", symbol: "m7" },
-];
-
-const CHORD_INTERVALS: Record<string, number[]> = {
-  major: [0, 4, 7],
-  minor: [0, 3, 7],
-  dim: [0, 3, 6],
-  aug: [0, 4, 8],
-  dom7: [0, 4, 7, 10],
-  min7: [0, 3, 7, 10],
-};
 
 const ALL_NOTES = NOTE_NAMES;
 const ROUNDS = 10;
@@ -37,7 +20,8 @@ function midiToFreq(midi: number) {
 function playChord(root: string, chordType: string) {
   const rootIdx = ALL_NOTES.indexOf(root as (typeof ALL_NOTES)[number]);
   if (rootIdx < 0) return;
-  const intervals = CHORD_INTERVALS[chordType] || CHORD_INTERVALS.major;
+  const lookup = CHORD_INTERVALS as Record<string, number[]>;
+  const intervals = lookup[chordType] ?? CHORD_INTERVALS.major;
   intervals.forEach((semi, i) => {
     const noteIdx = (rootIdx + semi) % 12;
     const note = ALL_NOTES[noteIdx];
@@ -565,7 +549,7 @@ export default function ChordDetectivePage() {
           >
             {feedback === "correct"
               ? "✓ Correct!"
-              : `✗ It was ${root} ${CHORD_TYPES.find((c) => c.id === chordType)?.label}`}
+              : `✗ It was ${root} ${chordTypeById(chordType)?.label}`}
           </motion.div>
         )}
 
