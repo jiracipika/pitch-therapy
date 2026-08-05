@@ -40,6 +40,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@rolldown/pluginutils": "^1.0.1",
     "caniuse-lite": "^1.0.30001800",
     "framer-motion": "^12.42.2",
     "styled-jsx": "^5.1.7",

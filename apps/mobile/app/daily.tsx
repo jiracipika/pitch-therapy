@@ -26,12 +26,23 @@ export default function DailyScreen() {
   const completion = getDailyChallengeCompletion(stats.results);
 
   useEffect(() => {
-    setTimeRemaining(getTimeUntilMidnight());
-    const timer = setInterval(() => {
-      setTimeRemaining(getTimeUntilMidnight());
-    }, 1000);
+    // Battery-efficient countdown: tick every second only in the final
+    // minute, otherwise every 30 seconds — avoids waking the CPU 60x/min
+    // for hours on end while showing a countdown the user rarely watches.
+    let intervalId: ReturnType<typeof setInterval>;
+    const tick = () => {
+      const next = getTimeUntilMidnight();
+      setTimeRemaining(next);
+      const secondsLeft = next.endsWith('s')
+        ? parseInt(next.split(' ').pop() ?? '0', 10)
+        : 999;
+      // If under 60 seconds, keep 1s updates; otherwise slow down to 30s.
+      clearInterval(intervalId);
+      intervalId = setInterval(tick, secondsLeft < 60 ? 1000 : 30_000);
+    };
+    tick();
 
-    return () => clearInterval(timer);
+    return () => clearInterval(intervalId);
   }, []);
 
   return (

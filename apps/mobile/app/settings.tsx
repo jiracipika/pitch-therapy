@@ -8,6 +8,7 @@ import { useResponsiveLayout } from '@/lib/responsive';
 import { useAppSettings } from '@/lib/settings';
 import { clearStartupEvents, getStartupEvents, type StartupEvent } from '@/lib/startup-diagnostics';
 import { colors, typography } from '@/lib/theme';
+import { useSessionResults } from '@/lib/sessionResults';
 
 const referenceItems = [
   { label: 'Reference Pitch', value: 'A4 = 440 Hz' },
@@ -19,6 +20,8 @@ export default function SettingsScreen() {
   const systemReduceMotion = useSystemReduceMotion();
   const { soundEnabled, hapticEnabled, glassMode, setSoundEnabled, setHapticEnabled, setGlassMode } = useAppSettings();
   const [startupEvents, setStartupEvents] = useState<StartupEvent[]>([]);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const { stats, clearResults } = useSessionResults();
 
   useEffect(() => {
     let active = true;
@@ -251,6 +254,101 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
       </GlassCard>
+
+      <SectionHeader title="Data Management" subtitle="Reset local training history on this device." />
+      <GlassCard padding={0}>
+        <View style={{ padding: 16, gap: 10 }}>
+          <View style={{ gap: 3 }}>
+            <Text style={{ color: colors.text, ...typography.subhead }}>Reset Progress</Text>
+            <Text style={{ color: colors.textTertiary, ...typography.caption1, lineHeight: 17 }}>
+              Clears all session results, streaks, and achievements stored on this device. This cannot be undone.
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => {
+              setShowResetConfirm(true);
+              void triggerSelectionHaptic();
+            }}
+            style={({ pressed }) => ({
+              minHeight: 40,
+              borderRadius: 8,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 1,
+              borderColor: colors.danger + '55',
+              backgroundColor: colors.danger + '14',
+              opacity: pressed ? 0.78 : 1,
+            })}
+            accessibilityRole="button"
+            accessibilityLabel="Reset all progress"
+            accessibilityHint="Opens a confirmation dialog"
+          >
+            <Text style={{ color: colors.danger, ...typography.caption1, fontWeight: '700' }}>
+              Reset All Progress
+            </Text>
+          </Pressable>
+        </View>
+      </GlassCard>
+
+      {showResetConfirm && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 32,
+          }}
+        >
+          <View style={{ backgroundColor: colors.surfaceElevated, borderRadius: 14, padding: 24, gap: 14, width: '100%' }}>
+            <Text style={{ color: colors.text, ...typography.headline }}>Reset all progress?</Text>
+            <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
+              This permanently deletes {stats.totalSessions} session{stats.totalSessions === 1 ? '' : 's'}, your {stats.bestStreak}-day best streak, and all achievements from this device.
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <Pressable
+                onPress={() => {
+                  setShowResetConfirm(false);
+                  void triggerSelectionHaptic();
+                }}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  minHeight: 42,
+                  borderRadius: 8,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderWidth: 1,
+                  borderColor: colors.borderStrong,
+                  opacity: pressed ? 0.78 : 1,
+                })}
+              >
+                <Text style={{ color: colors.textSecondary, ...typography.subhead }}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  clearResults();
+                  setShowResetConfirm(false);
+                  void triggerSelectionHaptic();
+                }}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  minHeight: 42,
+                  borderRadius: 8,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: colors.danger,
+                  opacity: pressed ? 0.82 : 1,
+                })}
+              >
+                <Text style={{ color: colors.background, ...typography.subhead, fontWeight: '700' }}>
+                  Delete
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      )}
     </AppPage>
   );
 }

@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Component, type ReactNode, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { prewarmAudioSession } from '@/lib/audio';
 import { preloadAppSettings } from '@/lib/settings';
 import {
@@ -27,6 +27,10 @@ class RootErrorBoundary extends Component<
     recordStartupError('root_error_boundary', error, errorInfo.componentStack);
   }
 
+  handleReset = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
   render(): ReactNode {
     if (this.state.hasError) {
       return (
@@ -35,7 +39,25 @@ class RootErrorBoundary extends Component<
           <Text style={styles.errorMessage}>
             {this.state.error?.message || 'An unexpected error occurred'}
           </Text>
-          <Text style={styles.errorHint}>Restart the app to try again</Text>
+          <Pressable
+            onPress={this.handleReset}
+            style={({ pressed }) => ({
+              marginTop: 24,
+              paddingVertical: 12,
+              paddingHorizontal: 28,
+              borderRadius: 10,
+              backgroundColor: colors.signal,
+              opacity: pressed ? 0.82 : 1,
+            })}
+            accessibilityRole="button"
+            accessibilityLabel="Try again"
+            accessibilityHint="Clears the error and reloads the app"
+          >
+            <Text style={{ color: colors.ink, fontSize: 16, fontWeight: '700' }}>
+              Try Again
+            </Text>
+          </Pressable>
+          <Text style={styles.errorHint}>Or restart the app manually</Text>
         </View>
       );
     }
