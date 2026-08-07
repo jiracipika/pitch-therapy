@@ -93,6 +93,7 @@ export default function RootLayout() {
         <StatusBar style="light" translucent={false} backgroundColor={colors.background} />
       <Stack
         screenOptions={{
+          headerShown: false,
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
           headerShadowVisible: false,
@@ -104,18 +105,14 @@ export default function RootLayout() {
           statusBarTranslucent: false,
         }}
       >
-        <Stack.Screen name="index" options={{ headerShown: false, animation: 'fade' }} />
-        <Stack.Screen name="dashboard" options={{ headerShown: false, animation: 'fade' }} />
-        <Stack.Screen name="play-modes" options={{ headerShown: false }} />
-        <Stack.Screen name="daily" options={{ headerShown: false, animation: 'fade' }} />
-        <Stack.Screen name="progress" options={{ headerShown: false, animation: 'fade' }} />
-        <Stack.Screen name="settings" options={{ headerShown: false, animation: 'fade' }} />
-        <Stack.Screen name="play/[mode]" options={{ headerShown: false }} />
-        <Stack.Screen name="play/pitch-match" options={{ headerShown: false }} />
-        <Stack.Screen name="play/note-id" options={{ headerShown: false }} />
-        <Stack.Screen name="play/frequency-guess" options={{ headerShown: false }} />
-        <Stack.Screen name="play/note-wordle" options={{ headerShown: false }} />
-        <Stack.Screen name="play/frequency-wordle" options={{ headerShown: false }} />
+        <Stack.Screen name="index" options={{ animation: 'fade' }} />
+        <Stack.Screen name="dashboard" options={{ animation: 'fade' }} />
+        <Stack.Screen name="play-modes" />
+        <Stack.Screen name="daily" options={{ animation: 'fade' }} />
+        <Stack.Screen name="progress" options={{ animation: 'fade' }} />
+        <Stack.Screen name="settings" options={{ animation: 'fade' }} />
+        {/* Individual play/ screens are auto-registered by Expo Router's
+            file-based routing. No explicit Stack.Screen entries needed. */}
       </Stack>
       </ToastProvider>
     </RootErrorBoundary>

@@ -9,14 +9,18 @@ import { useResponsiveLayout } from '@/lib/responsive';
 import { useSessionResults } from '@/lib/sessionResults';
 import { colors, typography } from '@/lib/theme';
 
-function getTimeUntilMidnight(): string {
+function getSecondsUntilMidnight(): number {
   const now = new Date();
   const midnight = new Date(now);
   midnight.setHours(24, 0, 0, 0);
-  const diff = midnight.getTime() - now.getTime();
-  const h = Math.floor(diff / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
+  return Math.floor((midnight.getTime() - now.getTime()) / 1000);
+}
+
+function formatTimeUntilMidnight(): string {
+  const diff = getSecondsUntilMidnight();
+  const h = Math.floor(diff / 3600);
+  const m = Math.floor((diff % 3600) / 60);
+  const s = diff % 60;
   return `${h}h ${m}m ${s}s`;
 }
 
@@ -32,14 +36,11 @@ export default function DailyScreen() {
     // for hours on end while showing a countdown the user rarely watches.
     let intervalId: ReturnType<typeof setInterval>;
     const tick = () => {
-      const next = getTimeUntilMidnight();
-      setTimeRemaining(next);
-      const secondsLeft = next.endsWith('s')
-        ? parseInt(next.split(' ').pop() ?? '0', 10)
-        : 999;
+      setTimeRemaining(formatTimeUntilMidnight());
+      const totalSeconds = getSecondsUntilMidnight();
       // If under 60 seconds, keep 1s updates; otherwise slow down to 30s.
       clearInterval(intervalId);
-      intervalId = setInterval(tick, secondsLeft < 60 ? 1000 : 30_000);
+      intervalId = setInterval(tick, totalSeconds < 60 ? 1000 : 30_000);
     };
     tick();
 

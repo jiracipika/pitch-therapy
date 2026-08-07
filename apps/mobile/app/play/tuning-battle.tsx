@@ -1,9 +1,12 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import { GAME_MODE_META } from '@pitch-therapy/core';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
+import { useSessionResults } from '@/lib/sessionResults';
 
-const ACCENT = '#F43F5E';
+const MODE = GAME_MODE_META['tuning-battle'];
+const ACCENT = MODE.accentHex;
 const ALL_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
 
 type Phase = 'setup' | 'countdown' | 'playing' | 'roundResult' | 'done';
@@ -13,6 +16,7 @@ function pickRandom() { return ALL_NOTES[Math.floor(Math.random() * ALL_NOTES.le
 
 export default function TuningBattleScreen() {
   const router = useRouter();
+  const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [totalRounds, setTotalRounds] = useState(5);
   const [currentRound, setCurrentRound] = useState(0);
@@ -25,8 +29,26 @@ export default function TuningBattleScreen() {
   ]);
 
   const targetRef = useRef('');
+  const sessionStartRef = useRef(0);
+  const recordedRef = useRef(false);
+
+  // Persist session result once when the game completes.
+  // Score = P1 score; accuracy = P1 wins / total rounds.
+  useEffect(() => {
+    if (phase !== 'done' || recordedRef.current) return;
+    recordedRef.current = true;
+    recordResult({
+      mode: 'tuning-battle',
+      score: players[0].score,
+      accuracy: totalRounds > 0 ? players[0].score / totalRounds : 0,
+      rounds: totalRounds,
+      timeMs: Date.now() - sessionStartRef.current,
+    });
+  }, [phase, players, totalRounds, recordResult]);
 
   const startGame = useCallback(() => {
+    recordedRef.current = false;
+    sessionStartRef.current = Date.now();
     setPlayers([{ score: 0, selectedNote: '', lockedIn: false }, { score: 0, selectedNote: '', lockedIn: false }]);
     setCurrentRound(1);
     const note = pickRandom();
