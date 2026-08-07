@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { DAILY_CHALLENGE_MODES, GAME_MODE_META, getDailyChallengeCompletion } from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
+import { AnimatedProgressBar } from '@/lib/motion';
 import { GlassCard, MotionStatusCard, Pill, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
 import { useResponsiveLayout } from '@/lib/responsive';
@@ -60,10 +61,19 @@ export default function DailyScreen() {
       <GlassCard accent={colors.speedRound} padding={20}>
         <View style={{ alignItems: 'center', gap: 10 }}>
           <Pill label="Next reset" color={colors.speedRound} />
-          <Text style={{ color: colors.text, ...typography.largeTitle, fontVariant: ['tabular-nums'] }}>
+          <Text
+            style={{
+              color: colors.text,
+              ...typography.largeTitle,
+              fontVariant: ['tabular-nums'],
+              fontSize: 48,
+            }}
+          >
             {timeRemaining}
           </Text>
-          <Text style={{ color: colors.textSecondary, ...typography.caption1 }}>Daily target stays hidden until you enter the puzzles.</Text>
+          <Text style={{ color: colors.textSecondary, ...typography.caption1 }}>
+            Daily target stays hidden until you enter the puzzles.
+          </Text>
         </View>
       </GlassCard>
 
@@ -75,16 +85,13 @@ export default function DailyScreen() {
               {completion.completedCount}/{DAILY_CHALLENGE_MODES.length}
             </Text>
           </View>
-          <View style={{ height: 7, borderRadius: 999, overflow: 'hidden', backgroundColor: colors.surfaceElevated }}>
-            <View
-              style={{
-                width: `${(completion.completedCount / DAILY_CHALLENGE_MODES.length) * 100}%`,
-                height: '100%',
-                borderRadius: 999,
-                backgroundColor: completion.isComplete ? colors.green : colors.blue,
-              }}
-            />
-          </View>
+          <AnimatedProgressBar
+            progress={completion.completedCount / DAILY_CHALLENGE_MODES.length}
+            color={completion.isComplete ? colors.green : colors.blue}
+            trackColor={colors.surfaceElevated}
+            height={7}
+            duration={1000}
+          />
         </View>
       </GlassCard>
 

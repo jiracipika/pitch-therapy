@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useReducedMotionPreference } from '@/lib/motion';
+import { AnimatedCounter, useReducedMotionPreference } from '@/lib/motion';
 import { useAppSettings } from '@/lib/settings';
 import { colors, radii, shadows, typography } from '@/lib/theme';
 
@@ -206,6 +206,46 @@ export function StatItem({ label, value, color = colors.text }: StatItemProps) {
   return (
     <View style={styles.statItem}>
       <Text style={[styles.statValue, { color }]}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+// ─── AnimatedStatItem ───────────────────────────────────────────────────────
+// Stat item with a count-up animation for numeric values. Falls back to
+// plain text for non-numeric values and when reduced-motion is active.
+
+interface AnimatedStatItemProps {
+  label: string;
+  /** Numeric value to count up, or a string for non-animated display. */
+  value: number | string;
+  color?: string;
+  /** Suffix for the count-up (e.g. '%', 'd'). */
+  suffix?: string;
+  /** Prefix for the count-up (e.g. '▲ '). */
+  prefix?: string;
+}
+
+export function AnimatedStatItem({
+  label,
+  value,
+  color = colors.text,
+  suffix = '',
+  prefix = '',
+}: AnimatedStatItemProps) {
+  const isNumeric = typeof value === 'number' && Number.isFinite(value);
+  return (
+    <View style={styles.statItem}>
+      {isNumeric ? (
+        <AnimatedCounter
+          value={value as number}
+          suffix={suffix}
+          prefix={prefix}
+          style={[styles.statValue, { color }]}
+        />
+      ) : (
+        <Text style={[styles.statValue, { color }]}>{value}</Text>
+      )}
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );

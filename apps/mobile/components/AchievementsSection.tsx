@@ -17,6 +17,7 @@ import {
   type ProgressResult,
 } from "@pitch-therapy/core";
 import { GlassCard, SectionHeader } from "@/components/AppleUI";
+import { AnimatedProgressBar } from "@/lib/motion";
 import { useResponsiveLayout } from "@/lib/responsive";
 import { colors, radii, typography } from "@/lib/theme";
 
@@ -75,23 +76,13 @@ export function AchievementsSection({ results }: AchievementsSectionProps) {
       <GlassCard accent={colors.green} padding={18}>
         {/* Overall progress bar */}
         <View style={{ marginBottom: 14 }}>
-          <View
-            style={{
-              height: 8,
-              borderRadius: radii.full,
-              backgroundColor: colors.border,
-              overflow: "hidden",
-            }}
-          >
-            <View
-              style={{
-                height: "100%",
-                width: `${pct}%`,
-                borderRadius: radii.full,
-                backgroundColor: colors.green,
-              }}
-            />
-          </View>
+          <AnimatedProgressBar
+            progress={pct / 100}
+            color={colors.green}
+            trackColor={colors.border}
+            height={8}
+            duration={1200}
+          />
           <View
             style={{
               flexDirection: "row",
@@ -236,24 +227,14 @@ export function AchievementsSection({ results }: AchievementsSectionProps) {
                   </Text>
                 ) : (
                   <>
-                    <View
-                      style={{
-                        height: 4,
-                        borderRadius: radii.full,
-                        backgroundColor: colors.border,
-                        overflow: "hidden",
-                        marginBottom: 3,
-                      }}
-                    >
-                      <View
-                        style={{
-                          height: "100%",
-                          width: `${Math.round(s.progressFraction * 100)}%`,
-                          borderRadius: radii.full,
-                          backgroundColor: isNext ? colors.blue : colors.textTertiary,
-                        }}
-                      />
-                    </View>
+                    <AnimatedProgressBar
+                      progress={s.progressFraction}
+                      color={isNext ? colors.blue : colors.textTertiary}
+                      trackColor={colors.border}
+                      height={4}
+                      duration={900}
+                      style={{ marginBottom: 3 }}
+                    />
                     <Text style={{ color: colors.textTertiary, ...typography.caption2 }}>
                       {formatMetricProgress(s)}
                     </Text>

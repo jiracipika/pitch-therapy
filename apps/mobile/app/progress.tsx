@@ -7,10 +7,13 @@ import {
   type ModeTrendLabel,
   type ProgressResult,
 } from '@pitch-therapy/core';
-import { GlassCard, MotionStatusCard, SectionHeader, StatItem } from '@/components/AppleUI';
+import { AnimatedCounter, AnimatedProgressBar } from '@/lib/motion';
+import { AnimatedStatItem, GlassCard, MotionStatusCard, SectionHeader } from '@/components/AppleUI';
+import { SkeletonCard, SkeletonStatGrid, SkeletonList } from '@/components/Skeleton';
 import { AchievementsSection } from '@/components/AchievementsSection';
 import { StreakRing } from '@/components/StreakRing';
 import { AppPage } from '@/components/AppPage';
+import { triggerImpactMedium } from '@/lib/haptics';
 import { useResponsiveLayout } from '@/lib/responsive';
 import { useSessionResults, getModeStats } from '@/lib/sessionResults';
 import { colors, radii, typography } from '@/lib/theme';
@@ -44,7 +47,8 @@ const WEAK_TREND_DISPLAY: Record<ModeTrendLabel, string> = {
 export default function ProgressScreen() {
   const { isDesktop } = useResponsiveLayout();
   const [loaded, setLoaded] = useState(false);
-  const { stats } = useSessionResults();
+  const [refreshing, setRefreshing] = useState(false);
+  const { stats, reload } = useSessionResults();
   const sessionResults = useMemo<ProgressResult[]>(() => stats.results, [stats.results]);
   const insights = useMemo(() => buildProgressInsights(sessionResults), [sessionResults]);
   const modeBreakdown = useMemo(
@@ -63,11 +67,23 @@ export default function ProgressScreen() {
     return () => clearTimeout(timeout);
   }, []);
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    void triggerImpactMedium();
+    try {
+      if (reload) await reload();
+    } catch {
+      // silent
+    }
+    // minimum visual dwell so the spinner doesn't flash
+    setTimeout(() => setRefreshing(false), 500);
+  };
+
   const statsCards = [
-    { label: 'Sessions', value: String(stats.totalSessions), color: colors.blue },
-    { label: 'Correct', value: String(stats.totalCorrect), color: colors.green },
-    { label: 'Accuracy', value: formatAccuracy(stats.avgAccuracy), color: colors.speedRound },
-    { label: 'Best', value: String(stats.bestScore), color: colors.pink },
+    { label: 'Sessions', value: stats.totalSessions, color: colors.blue },
+    { label: 'Correct', value: stats.totalCorrect, color: colors.green },
+    { label: 'Accuracy', value: stats.totalSessions > 0 ? Math.round(stats.avgAccuracy * 100) : 0, color: colors.speedRound },
+    { label: 'Best', value: stats.bestScore, color: colors.pink },
   ];
 
   const status = !loaded
@@ -88,18 +104,31 @@ export default function ProgressScreen() {
           message: 'Complete one round to unlock detailed graphs and mode-level trends.',
         };
 
+  const loadingState: 'skeleton' | 'content' = !loaded ? 'skeleton' : 'content';
+
   return (
     <AppPage
       title="Progress"
       subtitle="A clean snapshot of consistency and performance."
       heroVariant="progress"
       heroHint="Watch trend quality as your repetitions stack"
+      onRefresh={handleRefresh}
+      refreshing={refreshing}
     >
+      {loadingState === 'skeleton' ? (
+        <>
+          <SkeletonCard lines={3} />
+          <SkeletonStatGrid />
+          <SectionHeader title="By Mode" subtitle="Loading mode data..." />
+          <SkeletonList count={4} />
+        </>
+      ) : (
+        <>
       <MotionStatusCard tone={status.tone} title={status.title} message={status.message} />
       <GlassCard accent={colors.purple} padding={20}>
         <View style={{ alignItems: 'center', gap: 12 }}>
           <Text style={{ color: colors.textTertiary, ...typography.overline }}>BEST STREAK</Text>
-          <StreakRing streak={stats.bestStreak} size={108} />
+          <StreakRing streak={stats.bestStreak} size={108} pulse={stats.bestStreak > 0} />
           <Text style={{ color: colors.text, ...typography.title3 }}>{stats.bestStreak} days</Text>
         </View>
       </GlassCard>
@@ -107,7 +136,12 @@ export default function ProgressScreen() {
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {statsCards.map((stat) => (
           <GlassCard key={stat.label} style={{ flex: 1, minWidth: '47%' }} padding={14} accent={stat.color}>
-            <StatItem label={stat.label} value={stat.value} color={stat.color} />
+            <AnimatedStatItem
+              label={stat.label}
+              value={stat.value}
+              color={stat.color}
+              suffix={stat.label === 'Accuracy' ? '%' : ''}
+            />
           </GlassCard>
         ))}
       </View>
@@ -176,18 +210,21 @@ export default function ProgressScreen() {
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <View style={{ flex: 1, gap: 3 }}>
                 <Text style={{ color: colors.textTertiary, ...typography.overline }}>SESSIONS</Text>
-                <Text style={{ color: colors.text, ...typography.title3 }}>
-                  {insights.momentum.sessionsLast7}
-                </Text>
+                <AnimatedCounter
+                  value={insights.momentum.sessionsLast7}
+                  style={{ color: colors.text, ...typography.title3 }}
+                />
                 <Text style={{ color: formatDelta(insights.momentum.sessionDeltaPct).color, ...typography.caption1 }}>
                   {formatDelta(insights.momentum.sessionDeltaPct).text} vs prev week
                 </Text>
               </View>
               <View style={{ flex: 1, gap: 3 }}>
                 <Text style={{ color: colors.textTertiary, ...typography.overline }}>ACCURACY</Text>
-                <Text style={{ color: colors.text, ...typography.title3 }}>
-                  {formatAccuracy(insights.momentum.avgAccuracyLast7)}
-                </Text>
+                <AnimatedCounter
+                  value={Math.round(insights.momentum.avgAccuracyLast7 * 100)}
+                  suffix="%"
+                  style={{ color: colors.text, ...typography.title3 }}
+                />
                 <Text style={{ color: formatDelta(insights.momentum.accuracyDeltaPct).color, ...typography.caption1 }}>
                   {formatDelta(insights.momentum.accuracyDeltaPct).text} vs prev week
                 </Text>
@@ -241,6 +278,8 @@ export default function ProgressScreen() {
           <Text style={{ color: colors.text, ...typography.subhead }}>{insights.focusTip}</Text>
         </View>
       </GlassCard>
+        </>
+      )}
     </AppPage>
   );
 }

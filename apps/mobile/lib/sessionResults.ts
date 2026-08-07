@@ -168,7 +168,14 @@ export function useSessionResults() {
     notify();
   }, []);
 
-  return { stats, recordResult, clearResults };
+  const reload = useCallback(async () => {
+    // Force re-hydrate from AsyncStorage (for pull-to-refresh)
+    isHydrated = false;
+    hydratePromise = null;
+    await hydrate();
+  }, []);
+
+  return { stats, recordResult, clearResults, reload };
 }
 
 /**

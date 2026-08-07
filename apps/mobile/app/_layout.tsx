@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Component, type ReactNode, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { ToastProvider } from '@/components/Toast';
 import { prewarmAudioSession } from '@/lib/audio';
 import { preloadAppSettings } from '@/lib/settings';
 import {
@@ -88,7 +89,8 @@ export default function RootLayout() {
 
   return (
     <RootErrorBoundary>
-      <StatusBar style="light" translucent={false} backgroundColor={colors.background} />
+      <ToastProvider>
+        <StatusBar style="light" translucent={false} backgroundColor={colors.background} />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: colors.background },
@@ -96,17 +98,18 @@ export default function RootLayout() {
           headerShadowVisible: false,
           contentStyle: { backgroundColor: colors.background },
           animation: 'slide_from_right',
+          animationDuration: 280,
           statusBarStyle: 'light',
           statusBarAnimation: 'fade',
           statusBarTranslucent: false,
         }}
       >
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+        <Stack.Screen name="index" options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="dashboard" options={{ headerShown: false, animation: 'fade' }} />
         <Stack.Screen name="play-modes" options={{ headerShown: false }} />
-        <Stack.Screen name="daily" options={{ headerShown: false }} />
-        <Stack.Screen name="progress" options={{ headerShown: false }} />
-        <Stack.Screen name="settings" options={{ headerShown: false }} />
+        <Stack.Screen name="daily" options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="progress" options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="settings" options={{ headerShown: false, animation: 'fade' }} />
         <Stack.Screen name="play/[mode]" options={{ headerShown: false }} />
         <Stack.Screen name="play/pitch-match" options={{ headerShown: false }} />
         <Stack.Screen name="play/note-id" options={{ headerShown: false }} />
@@ -114,6 +117,7 @@ export default function RootLayout() {
         <Stack.Screen name="play/note-wordle" options={{ headerShown: false }} />
         <Stack.Screen name="play/frequency-wordle" options={{ headerShown: false }} />
       </Stack>
+      </ToastProvider>
     </RootErrorBoundary>
   );
 }

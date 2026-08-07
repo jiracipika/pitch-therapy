@@ -7,12 +7,12 @@ import {
 } from "@pitch-therapy/core";
 import { AnimatedModeCard } from "@/components/AnimatedModeCard";
 import {
+  AnimatedStatItem,
   GlassCard,
   MotionStatusCard,
   Pill,
   RecommendedPath,
   SectionHeader,
-  StatItem,
 } from "@/components/AppleUI";
 import { StreakRing } from "@/components/StreakRing";
 import { AppPage } from "@/components/AppPage";
@@ -28,13 +28,6 @@ export default function DashboardScreen() {
   const practicePlan = buildAdaptivePracticePlan(stats.results);
   const planDuration = estimatePlanDuration(practicePlan);
   const featuredModes = practicePlan.modeIds.map((modeId) => GAME_MODE_META[modeId]);
-
-  const accuracyLabel =
-    stats.totalSessions > 0
-      ? `${Math.round(stats.avgAccuracy * 100)}%`
-      : "--";
-  const streakLabel =
-    stats.streak > 0 ? `${stats.streak}d` : stats.bestStreak > 0 ? `${stats.bestStreak}d best` : "—";
 
   return (
     <AppPage
@@ -176,22 +169,33 @@ export default function DashboardScreen() {
               {practicePlan.summary}
             </Text>
           </View>
-          <StreakRing streak={Math.max(stats.streak, 1)} size={88} />
+          <StreakRing streak={Math.max(stats.streak, 1)} size={88} pulse={stats.streak > 0} />
         </View>
       </GlassCard>
 
       <View style={{ flexDirection: isTablet ? "row" : "column", gap: 10 }}>
         <GlassCard style={{ flex: 1 }} padding={14} accent={colors.blue}>
-          <StatItem label="Sessions" value={String(stats.totalSessions)} color={colors.blue} />
+          <AnimatedStatItem label="Sessions" value={stats.totalSessions} color={colors.blue} />
         </GlassCard>
         <GlassCard style={{ flex: 1 }} padding={14} accent={colors.green}>
-          <StatItem label="Accuracy" value={accuracyLabel} color={colors.green} />
+          <AnimatedStatItem
+            label="Accuracy"
+            value={stats.totalSessions > 0 ? Math.round(stats.avgAccuracy * 100) : 0}
+            suffix="%"
+            color={colors.green}
+          />
         </GlassCard>
         <GlassCard style={{ flex: 1 }} padding={14} accent={colors.pink}>
-          <StatItem label="Best" value={String(stats.bestScore)} color={colors.pink} />
+          <AnimatedStatItem label="Best" value={stats.bestScore} color={colors.pink} />
         </GlassCard>
         <GlassCard style={{ flex: 1 }} padding={14} accent={colors.orange}>
-          <StatItem label="Streak" value={streakLabel} color={colors.orange} />
+          {stats.streak > 0 ? (
+            <AnimatedStatItem label="Streak" value={stats.streak} suffix="d" color={colors.orange} />
+          ) : stats.bestStreak > 0 ? (
+            <AnimatedStatItem label="Best" value={stats.bestStreak} suffix="d" color={colors.orange} />
+          ) : (
+            <AnimatedStatItem label="Streak" value="—" color={colors.orange} />
+          )}
         </GlassCard>
       </View>
 

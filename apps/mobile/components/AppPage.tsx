@@ -1,5 +1,5 @@
 import { Children, type ReactNode, useEffect, useMemo, useRef } from 'react';
-import { Animated, Easing, PanResponder, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, Easing, PanResponder, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,6 +18,8 @@ interface AppPageProps {
   heroVariant?: 'dashboard' | 'daily' | 'progress' | 'settings' | 'play';
   heroHint?: string;
   children: ReactNode;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 function getHeroSpec(variant: NonNullable<AppPageProps['heroVariant']>) {
@@ -72,6 +74,8 @@ export function AppPage({
   heroVariant = 'dashboard',
   heroHint,
   children,
+  onRefresh,
+  refreshing = false,
 }: AppPageProps) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -398,6 +402,17 @@ export function AppPage({
               paddingHorizontal: pagePadding,
               paddingBottom: insets.bottom + (prefersRailNav ? 28 : 120),
             }}
+            refreshControl={
+              onRefresh ? (
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  tintColor={colors.signal}
+                  colors={[colors.signal]}
+                  progressBackgroundColor={colors.surfaceElevated}
+                />
+              ) : undefined
+            }
           >
             <View style={{ width: '100%', maxWidth: contentMaxWidth, alignSelf: 'center', gap: 18 }}>
               <LinearGradient

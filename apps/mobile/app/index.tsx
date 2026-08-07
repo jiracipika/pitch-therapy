@@ -11,25 +11,133 @@ export default function HomeScreen() {
   const router = useRouter();
   const reducedMotion = useReducedMotionPreference();
   const fade = useRef(new Animated.Value(0)).current;
-  const rise = useRef(new Animated.Value(16)).current;
+  const rise = useRef(new Animated.Value(20)).current;
   const meter = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.3)).current;
+  const logoRotate = useRef(new Animated.Value(0)).current;
+  const titleSlide = useRef(new Animated.Value(30)).current;
+  const titleOpacity = useRef(new Animated.Value(0)).current;
+  const calibrateWidth = useRef(new Animated.Value(0)).current;
+  const glowOpacity = useRef(new Animated.Value(0)).current;
+  const glowScale = useRef(new Animated.Value(0.8)).current;
+  const barScales = useRef(BARS.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
     if (reducedMotion) {
       fade.setValue(1);
       rise.setValue(0);
       meter.setValue(1);
+      logoScale.setValue(1);
+      logoRotate.setValue(1);
+      titleSlide.setValue(0);
+      titleOpacity.setValue(1);
+      calibrateWidth.setValue(1);
+      glowOpacity.setValue(0.15);
+      glowScale.setValue(1);
+      barScales.forEach((v) => v.setValue(1));
     } else {
+      // Phase 1: Logo entrance + glow burst (0–450ms)
+      Animated.parallel([
+        Animated.spring(logoScale, {
+          toValue: 1,
+          damping: 12,
+          stiffness: 200,
+          mass: 0.8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(logoRotate, {
+          toValue: 1,
+          duration: 600,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(glowOpacity, {
+          toValue: 0.22,
+          duration: 500,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.spring(glowScale, {
+          toValue: 1.15,
+          damping: 18,
+          stiffness: 120,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Phase 2: Staggered meter bars (120ms offset from phase 1)
+      Animated.stagger(
+        35,
+        barScales.map((v) =>
+          Animated.spring(v, {
+            toValue: 1,
+            damping: 16,
+            stiffness: 200,
+            mass: 0.7,
+            useNativeDriver: true,
+          }),
+        ),
+      ).start();
+
+      // Phase 3: Hero text reveal (350ms in)
+      Animated.parallel([
+        Animated.timing(titleOpacity, {
+          toValue: 1,
+          duration: 500,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.spring(titleSlide, {
+          toValue: 0,
+          damping: 18,
+          stiffness: 160,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Phase 4: Calibration bar sweep (500ms)
+      Animated.timing(calibrateWidth, {
+        toValue: 1,
+        duration: 900,
+        easing: Easing.inOut(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+
+      // Overall container fade + rise
       Animated.parallel([
         Animated.timing(fade, { toValue: 1, duration: 420, useNativeDriver: true }),
         Animated.spring(rise, { toValue: 0, damping: 18, stiffness: 160, useNativeDriver: true }),
-        Animated.timing(meter, { toValue: 1, duration: 680, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(meter, {
+          toValue: 1,
+          duration: 680,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
       ]).start();
     }
 
-    const timeout = setTimeout(() => router.replace('/dashboard'), reducedMotion ? 500 : 1450);
+    const timeout = setTimeout(() => router.replace('/dashboard'), reducedMotion ? 500 : 1850);
     return () => clearTimeout(timeout);
-  }, [fade, meter, reducedMotion, rise, router]);
+  }, [
+    barScales,
+    calibrateWidth,
+    fade,
+    glowOpacity,
+    glowScale,
+    logoRotate,
+    logoScale,
+    meter,
+    reducedMotion,
+    rise,
+    router,
+    titleOpacity,
+    titleSlide,
+  ]);
+
+  const logoRotateDeg = logoRotate.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['-12deg', '0deg'],
+  });
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -60,8 +168,9 @@ export default function HomeScreen() {
           transform: [{ translateY: rise }],
         }}
       >
+        {/* Top row: animated logo + status */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View
+          <Animated.View
             style={{
               width: 58,
               height: 58,
@@ -71,17 +180,40 @@ export default function HomeScreen() {
               alignItems: 'center',
               justifyContent: 'center',
               boxShadow: `5px 5px 0 ${colors.coral}`,
+              transform: [{ scale: logoScale }, { rotate: logoRotateDeg }],
             }}
           >
-            <Text style={{ color: colors.ink, fontSize: 17, fontWeight: '900', letterSpacing: -1 }}>PT</Text>
-          </View>
+            <Text style={{ color: colors.ink, fontSize: 17, fontWeight: '900', letterSpacing: -1 }}>
+              PT
+            </Text>
+          </Animated.View>
+          {/* Ambient glow that bursts on entrance */}
+          <Animated.View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              left: -8,
+              top: -8,
+              width: 74,
+              height: 74,
+              borderRadius: 999,
+              backgroundColor: colors.signal,
+              opacity: glowOpacity,
+              transform: [{ scale: glowScale }],
+            }}
+          />
           <View style={{ alignItems: 'flex-end', gap: 3 }}>
-            <Text style={{ color: colors.signal, ...typography.caption2, letterSpacing: 1.2 }}>SYSTEM ONLINE</Text>
-            <Text style={{ color: colors.textTertiary, ...typography.caption2 }}>AUDIO / INPUT 01</Text>
+            <Text style={{ color: colors.signal, ...typography.caption2, letterSpacing: 1.2 }}>
+              SYSTEM ONLINE
+            </Text>
+            <Text style={{ color: colors.textTertiary, ...typography.caption2 }}>
+              AUDIO / INPUT 01
+            </Text>
           </View>
         </View>
 
-        <View>
+        {/* Hero text with spring slide-in */}
+        <Animated.View style={{ opacity: titleOpacity, transform: [{ translateY: titleSlide }] }}>
           <Text style={{ color: colors.signal, ...typography.caption1, letterSpacing: 1.4, marginBottom: 16 }}>
             LIVE EAR TRAINING SYSTEM
           </Text>
@@ -92,26 +224,41 @@ export default function HomeScreen() {
             Precision practice for pitch, frequency, intervals, and musical memory.
           </Text>
 
+          {/* Staggered animated meter bars */}
           <View style={{ height: 112, marginTop: 42, flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            {BARS.map((height, index) => (
-              <Animated.View
-                key={`${height}-${index}`}
-                style={{
-                  flex: 1,
-                  height: `${height}%`,
-                  backgroundColor: colors.signal,
-                  transform: [{ scaleY: meter }],
-                  transformOrigin: 'center',
-                }}
-              />
-            ))}
+            {BARS.map((height, index) => {
+              const barScale = barScales[index];
+              return (
+                <Animated.View
+                  key={`${height}-${index}`}
+                  style={{
+                    flex: 1,
+                    height: `${height}%`,
+                    backgroundColor: index % 3 === 0 ? colors.coral : colors.signal,
+                    transform: [{ scaleY: barScale }],
+                    transformOrigin: 'center',
+                  }}
+                />
+              );
+            })}
           </View>
-        </View>
+        </Animated.View>
 
+        {/* Calibration bar with animated sweep fill */}
         <View style={{ borderTopWidth: 1, borderTopColor: colors.borderStrong, paddingTop: 18 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-            <Text style={{ color: colors.textTertiary, ...typography.caption2, letterSpacing: 1 }}>CALIBRATING</Text>
-            <Text style={{ color: colors.signal, ...typography.caption2 }}>440.0 HZ</Text>
+            <Text style={{ color: colors.textTertiary, ...typography.caption2, letterSpacing: 1 }}>
+              CALIBRATING
+            </Text>
+            <Animated.Text
+              style={{
+                color: colors.signal,
+                ...typography.caption2,
+                opacity: calibrateWidth,
+              }}
+            >
+              440.0 HZ
+            </Animated.Text>
           </View>
           <View style={{ height: 4, backgroundColor: colors.surfaceElevated, overflow: 'hidden' }}>
             <Animated.View
@@ -119,7 +266,7 @@ export default function HomeScreen() {
                 height: '100%',
                 width: '100%',
                 backgroundColor: colors.coral,
-                transform: [{ scaleX: meter }],
+                transform: [{ scaleX: calibrateWidth }],
                 transformOrigin: 'left',
               }}
             />
