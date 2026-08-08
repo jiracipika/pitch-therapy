@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { getModeTrainingCue, type GameModeMeta } from "@pitch-therapy/core";
 import { triggerSelectionHaptic } from "@/lib/haptics";
+import { useReducedMotionPreference } from "@/lib/motion";
 import { colors, radii, shadows, typography } from "@/lib/theme";
 
 interface AnimatedModeCardProps {
@@ -15,9 +16,14 @@ export function AnimatedModeCard({ mode, compact = false }: AnimatedModeCardProp
   const router = useRouter();
   const route = `/play/${mode.id}` as const;
   const cue = getModeTrainingCue(mode.id);
+  const reducedMotion = useReducedMotionPreference();
   const reveal = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    if (reducedMotion) {
+      reveal.setValue(1);
+      return;
+    }
     Animated.spring(reveal, {
       toValue: 1,
       useNativeDriver: true,
@@ -25,7 +31,7 @@ export function AnimatedModeCard({ mode, compact = false }: AnimatedModeCardProp
       damping: 22,
       mass: 0.9,
     }).start();
-  }, [reveal]);
+  }, [reveal, reducedMotion]);
 
   const translateY = reveal.interpolate({
     inputRange: [0, 1],
