@@ -4,9 +4,11 @@ import { useRouter } from 'expo-router';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
-import { CHROMATIC_SCALE, intervalsInPool } from '@pitch-therapy/core';
+import { CHROMATIC_SCALE, GAME_MODE_META, intervalsInPool } from '@pitch-therapy/core';
+import { playColors as pc } from '@/lib/theme';
 
-const ACCENT = '#10B981';
+const MODE = GAME_MODE_META['drone-lock'];
+const ACCENT = MODE.accentHex;
 const NOTE_NAMES = CHROMATIC_SCALE;
 
 // Drone Lock uses full interval names for its descriptive UI.
@@ -20,10 +22,10 @@ const INTERVALS = intervalsInPool([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]).map((i
 // Accuracy options map to the same point tiers as the web version:
 // <10¢ → 200, <25¢ → 150, <50¢ → 100, else → 50
 const ACCURACY_OPTIONS = [
-  { label: 'Perfect',  description: '< 10¢ off',  points: 200, color: '#4ade80' },
-  { label: 'Good',     description: '< 25¢ off',  points: 150, color: '#fbbf24' },
+  { label: 'Perfect',  description: '< 10¢ off',  points: 200, color: pc.success },
+  { label: 'Good',     description: '< 25¢ off',  points: 150, color: pc.warning },
   { label: 'Close',    description: '< 50¢ off',  points: 100, color: '#f97316' },
-  { label: 'Off track',description: '> 50¢ off',  points: 50,  color: '#f87171' },
+  { label: 'Off track',description: '> 50¢ off',  points: 50,  color: pc.danger },
 ] as const;
 
 type Phase = 'idle' | 'listening' | 'scored' | 'done';
@@ -123,10 +125,10 @@ export default function DroneLockScreen() {
               <Text style={styles.statLabel}>Rounds</Text>
             </View>
           </View>
-          <Pressable onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}>
+          <Pressable accessibilityRole="button" onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}>
             <Text style={styles.btnPrimaryText}>Play Again</Text>
           </Pressable>
-          <Pressable onPress={() => router.back()} style={styles.linkBtn}>
+          <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.linkBtn}>
             <Text style={styles.linkBtnText}>← Dashboard</Text>
           </Pressable>
         </View>
@@ -152,10 +154,10 @@ export default function DroneLockScreen() {
             <Text style={styles.howToLine}>4. Self-assess your tuning accuracy</Text>
           </View>
 
-          <Pressable onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}>
+          <Pressable accessibilityRole="button" onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}>
             <Text style={styles.btnPrimaryText}>Start Session</Text>
           </Pressable>
-          <Pressable onPress={() => router.back()} style={styles.linkBtn}>
+          <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.linkBtn}>
             <Text style={styles.linkBtnText}>← Back</Text>
           </Pressable>
         </View>
@@ -167,8 +169,8 @@ export default function DroneLockScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={{ color: '#97A3B6' }}>←</Text>
+        <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.backBtn}>
+          <Text style={{ color: pc.textSecondary }}>←</Text>
         </Pressable>
         <Text style={{ fontSize: 16, fontWeight: '600', color: ACCENT }}>Drone Lock</Text>
         <View style={styles.scoreBadge}>
@@ -178,10 +180,10 @@ export default function DroneLockScreen() {
 
       {/* Progress */}
       <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
-        <View style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+        <View style={{ height: 4, backgroundColor: pc.cardAmbient, borderRadius: 2 }}>
           <View style={{ height: '100%', backgroundColor: ACCENT, borderRadius: 2, width: `${(round / totalRounds) * 100}%` }} />
         </View>
-        <Text style={{ textAlign: 'center', fontSize: 11, color: '#7E8A9A', marginTop: 6 }}>
+        <Text style={{ textAlign: 'center', fontSize: 11, color: pc.textTertiary, marginTop: 6 }}>
           Round {round}/{totalRounds}
         </Text>
       </View>
@@ -190,13 +192,13 @@ export default function DroneLockScreen() {
         {/* Drone indicator */}
         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, marginBottom: 20 }}>
           <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ACCENT }} />
-          <Text style={{ fontSize: 13, color: '#97A3B6' }}>
-            Drone: <Text style={{ color: '#F8FAFC', fontWeight: '600' }}>{NOTE_NAMES[droneNote]}4</Text>
+          <Text style={{ fontSize: 13, color: pc.textSecondary }}>
+            Drone: <Text style={{ color: pc.text, fontWeight: '600' }}>{NOTE_NAMES[droneNote]}4</Text>
           </Text>
         </View>
 
         {/* Target interval */}
-        <Text style={{ textAlign: 'center', fontSize: 11, color: '#7E8A9A', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 6 }}>
+        <Text style={{ textAlign: 'center', fontSize: 11, color: pc.textTertiary, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 6 }}>
           Sing this interval
         </Text>
         <Text style={{ textAlign: 'center', fontSize: 32, fontWeight: '800', color: ACCENT, marginBottom: 20 }}>
@@ -212,23 +214,23 @@ export default function DroneLockScreen() {
           }}
           style={styles.playBtn}
         >
-          <Text style={{ fontSize: 13, color: '#97A3B6' }}>▶ Hear Drone + Target</Text>
+          <Text style={{ fontSize: 13, color: pc.textSecondary }}>▶ Hear Drone + Target</Text>
         </Pressable>
 
         {phase === 'scored' ? (
           /* Scored feedback */
           <View style={{ alignItems: 'center', marginTop: 32 }}>
-            <Text style={{ color: '#F8FAFC', fontSize: 18, fontWeight: '700' }}>
+            <Text style={{ color: pc.text, fontSize: 18, fontWeight: '700' }}>
               +{lastPoints} pts
             </Text>
-            <Text style={{ color: '#7E8A9A', fontSize: 13, marginTop: 4 }}>
+            <Text style={{ color: pc.textTertiary, fontSize: 13, marginTop: 4 }}>
               {lastPoints >= 200 ? '🎯 Perfect!' : lastPoints >= 150 ? '👍 Good!' : lastPoints >= 100 ? '👌 Close' : '🔄 Keep practicing'}
             </Text>
           </View>
         ) : (
           /* Self-assessment options */
           <View style={{ marginTop: 28, gap: 10 }}>
-            <Text style={{ color: '#7E8A9A', fontSize: 13, textAlign: 'center', marginBottom: 4 }}>
+            <Text style={{ color: pc.textTertiary, fontSize: 13, textAlign: 'center', marginBottom: 4 }}>
               How accurate were you?
             </Text>
             {ACCURACY_OPTIONS.map(option => (
@@ -247,9 +249,9 @@ export default function DroneLockScreen() {
                   opacity: pressed ? 0.7 : 1,
                 })}
               >
-                <Text style={{ color: '#F8FAFC', fontWeight: '600', fontSize: 15 }}>{option.label}</Text>
+                <Text style={{ color: pc.text, fontWeight: '600', fontSize: 15 }}>{option.label}</Text>
                 <Text style={{ color: option.color, fontSize: 13 }}>{option.description}</Text>
-                <Text style={{ color: '#97A3B6', fontSize: 13, minWidth: 50, textAlign: 'right' }}>
+                <Text style={{ color: pc.textSecondary, fontSize: 13, minWidth: 50, textAlign: 'right' }}>
                   +{option.points} pts
                 </Text>
               </Pressable>
@@ -262,25 +264,25 @@ export default function DroneLockScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#10130E' },
+  container: { flex: 1, backgroundColor: pc.screen },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, marginBottom: 20 },
-  title: { fontSize: 28, fontWeight: '700', color: '#F8FAFC', letterSpacing: 0 },
-  subtitle: { fontSize: 14, color: '#97A3B6', marginTop: 8, marginBottom: 24, textAlign: 'center' },
-  howToBox: { backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', marginBottom: 32, alignSelf: 'stretch' },
+  title: { fontSize: 28, fontWeight: '700', color: pc.text, letterSpacing: 0 },
+  subtitle: { fontSize: 14, color: pc.textSecondary, marginTop: 8, marginBottom: 24, textAlign: 'center' },
+  howToBox: { backgroundColor: pc.cardAmbient, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: pc.cardAmbient, marginBottom: 32, alignSelf: 'stretch' },
   howToTitle: { fontSize: 10, fontWeight: '700', letterSpacing: 1.5, marginBottom: 10 },
-  howToLine: { color: '#97A3B6', fontSize: 13, marginBottom: 6 },
+  howToLine: { color: pc.textSecondary, fontSize: 13, marginBottom: 6 },
   statsRow: { flexDirection: 'row', gap: 10, marginTop: 24, marginBottom: 32 },
-  statCard: { backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', flex: 1 },
-  statValue: { fontSize: 22, fontWeight: '700', color: '#F8FAFC' },
-  statLabel: { fontSize: 11, color: '#97A3B6', marginTop: 4, textAlign: 'center' },
+  statCard: { backgroundColor: pc.cardSurface, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', flex: 1 },
+  statValue: { fontSize: 22, fontWeight: '700', color: pc.text },
+  statLabel: { fontSize: 11, color: pc.textSecondary, marginTop: 4, textAlign: 'center' },
   btnPrimary: { borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 8, width: '100%' },
-  btnPrimaryText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  btnPrimaryText: { color: pc.text, fontWeight: '700', fontSize: 16 },
   linkBtn: { padding: 16, marginTop: 4 },
-  linkBtnText: { color: '#97A3B6', textAlign: 'center', fontSize: 13 },
-  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', justifyContent: 'center' },
-  scoreBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.09)' },
-  scoreText: { fontSize: 12, fontWeight: '600', color: '#fff' },
-  playBtn: { alignSelf: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' },
+  linkBtnText: { color: pc.textSecondary, textAlign: 'center', fontSize: 13 },
+  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' },
+  scoreBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder },
+  scoreText: { fontSize: 12, fontWeight: '600', color: pc.text },
+  playBtn: { alignSelf: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder },
 });

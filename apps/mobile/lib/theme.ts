@@ -176,3 +176,39 @@ export const typography = {
 } as const;
 
 export type GameModeColor = keyof typeof colors;
+
+/**
+ * Semantic aliases used across the play screens.
+ *
+ * Previously these screens used hardcoded Tailwind blue-grey hex values
+ * (#97A3B6, #F8FAFC, #7E8A9A, rgba(21,24,32,…)) that were visually
+ * inconsistent with the app's warm green/cream design system. These
+ * aliases map every former hardcode to a design-token equivalent so
+ * screens stay in sync with theme changes automatically.
+ */
+export const playColors = {
+  /** Primary text on dark backgrounds (was #F8FAFC). */
+  text: darkColors.text,
+  /** Secondary text (was #97A3B6). */
+  textSecondary: darkColors.textSecondary,
+  /** Tertiary/label text (was #7E8A9A, #a1a1aa). */
+  textTertiary: darkColors.textTertiary,
+  /** Muted label text (was #71717a, #52525b). */
+  textMuted: darkColors.muted,
+  /** Surface that cards/stat boxes sit on (was rgba(21,24,32,0.86)). */
+  cardSurface: darkColors.surfaceElevated,
+  /** Semi-transparent card for pressed/ambient states (was rgba(255,255,255,0.05)). */
+  cardAmbient: 'rgba(244,246,236,0.05)',
+  /** Card border (was rgba(255,255,255,0.10)). */
+  cardBorder: darkColors.border,
+  /** Success green (was #4ade80). */
+  success: darkColors.success,
+  /** Warning amber (was #fbbf24). */
+  warning: darkColors.warning,
+  /** Danger red (was #f87171). */
+  danger: darkColors.danger,
+  /** Screen background (was #10130E). */
+  screen: darkColors.background,
+  /** Track / divider dark line (was #3f3f46). */
+  trackLine: darkColors.borderStrong,
+};

@@ -10,8 +10,10 @@ import {
 } from '@/components/GameResultsScreen';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
-
-const ACCENT = '#84CC16';
+import { playColors as pc } from '@/lib/theme';
+import { GAME_MODE_META } from '@pitch-therapy/core';
+const MODE = GAME_MODE_META['cents-deviation'];
+const ACCENT = MODE.accentHex;
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -123,18 +125,18 @@ export default function CentsDeviationScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
+      <View style={{ flex: 1, backgroundColor: pc.screen }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
-          <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700', marginTop: 12 }}>Cents Deviation</Text>
-          <Text style={{ color: '#97A3B6', fontSize: 14, marginTop: 4 }}>Detect microtonal shifts</Text>
+          <Text style={{ color: pc.text, fontSize: 22, fontWeight: '700', marginTop: 12 }}>Cents Deviation</Text>
+          <Text style={{ color: pc.textSecondary, fontSize: 14, marginTop: 4 }}>Detect microtonal shifts</Text>
         </View>
         <View style={{ flex: 1, paddingHorizontal: 20, justifyContent: 'center' }}>
-          <Text style={{ color: '#F8FAFC', fontSize: 18, fontWeight: '600', marginBottom: 16 }}>Difficulty</Text>
+          <Text style={{ color: pc.text, fontSize: 18, fontWeight: '600', marginBottom: 16 }}>Difficulty</Text>
           {(Object.keys(DIFF_CONFIG) as Difficulty[]).map(d => (
-            <Pressable key={d} onPress={() => startGame(d)} style={({ pressed }) => ({ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 12, opacity: pressed ? 0.75 : 1 })}>
-              <Text style={{ color: '#F8FAFC', fontWeight: '600', fontSize: 16, textTransform: 'capitalize' }}>{d}</Text>
-              <Text style={{ color: '#97A3B6', fontSize: 13, marginTop: 3 }}>±{DIFF_CONFIG[d].centsRange}¢ · {DIFF_CONFIG[d].rounds} rounds</Text>
+            <Pressable key={d} accessibilityRole="button" onPress={() => startGame(d)} style={({ pressed }) => ({ backgroundColor: pc.cardSurface, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: pc.cardBorder, marginBottom: 12, opacity: pressed ? 0.75 : 1 })}>
+              <Text style={{ color: pc.text, fontWeight: '600', fontSize: 16, textTransform: 'capitalize' }}>{d}</Text>
+              <Text style={{ color: pc.textSecondary, fontSize: 13, marginTop: 3 }}>±{DIFF_CONFIG[d].centsRange}¢ · {DIFF_CONFIG[d].rounds} rounds</Text>
             </Pressable>
           ))}
         </View>
@@ -185,17 +187,17 @@ export default function CentsDeviationScreen() {
   const actualPct = 50 + (actualCents / config.centsRange) * 45;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#10130E' }}>
+    <View style={{ flex: 1, backgroundColor: pc.screen }}>
       <GameHeader score={score} round={round} totalRounds={totalRounds} streak={streak} accent={ACCENT} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
-        <Text style={{ textAlign: 'center', color: '#a1a1aa', fontSize: 14, marginBottom: 4 }}>Reference: <Text style={{ color: '#F8FAFC', fontWeight: '700' }}>{baseNote}</Text></Text>
-        <Text style={{ textAlign: 'center', color: '#7E8A9A', fontSize: 12, marginBottom: 16 }}>Listen then set the needle</Text>
+        <Text style={{ textAlign: 'center', color: pc.textTertiary, fontSize: 14, marginBottom: 4 }}>Reference: <Text style={{ color: pc.text, fontWeight: '700' }}>{baseNote}</Text></Text>
+        <Text style={{ textAlign: 'center', color: pc.textTertiary, fontSize: 12, marginBottom: 16 }}>Listen then set the needle</Text>
 
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 24 }}>
-          <Pressable onPress={() => playFrequency(baseFreq, 0.8)} style={{ width: 56, height: 56, borderRadius: 14, backgroundColor: 'rgba(21,24,32,0.86)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable accessibilityRole="button" onPress={() => playFrequency(baseFreq, 0.8)} style={{ width: 56, height: 56, borderRadius: 14, backgroundColor: pc.cardSurface, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ fontSize: 20 }}>🔊</Text>
           </Pressable>
-          <Pressable onPress={playDeviation} style={{ flex: 1, height: 56, borderRadius: 14, backgroundColor: `${ACCENT}20`, borderWidth: 1, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable accessibilityRole="button" onPress={playDeviation} style={{ flex: 1, height: 56, borderRadius: 14, backgroundColor: `${ACCENT}20`, borderWidth: 1, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ color: ACCENT, fontWeight: '600', fontSize: 13 }}>🔊+🔊 Play Both</Text>
           </Pressable>
         </View>
@@ -203,15 +205,15 @@ export default function CentsDeviationScreen() {
         {/* Cents meter */}
         <View style={{ marginBottom: 8 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-            <Text style={{ color: '#7E8A9A', fontSize: 10 }}>−{config.centsRange}¢</Text>
-            <Text style={{ color: '#7E8A9A', fontSize: 10 }}>0</Text>
-            <Text style={{ color: '#7E8A9A', fontSize: 10 }}>+{config.centsRange}¢</Text>
+            <Text style={{ color: pc.textTertiary, fontSize: 10 }}>−{config.centsRange}¢</Text>
+            <Text style={{ color: pc.textTertiary, fontSize: 10 }}>0</Text>
+            <Text style={{ color: pc.textTertiary, fontSize: 10 }}>+{config.centsRange}¢</Text>
           </View>
-          <View style={{ height: 64, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' }}>
-            <View style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, backgroundColor: '#3f3f46' }} />
+          <View style={{ height: 64, backgroundColor: pc.cardSurface, borderRadius: 16, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: pc.cardBorder }}>
+            <View style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, backgroundColor: pc.trackLine }} />
             <View style={{ position: 'absolute', top: 8, bottom: 8, left: `${needlePct}%`, width: 4, borderRadius: 2, backgroundColor: ACCENT, marginLeft: -2 }} />
             {submitted && (
-              <View style={{ position: 'absolute', top: 12, bottom: 12, left: `${actualPct}%`, width: 4, borderRadius: 2, backgroundColor: '#f87171', marginLeft: -2 }} />
+              <View style={{ position: 'absolute', top: 12, bottom: 12, left: `${actualPct}%`, width: 4, borderRadius: 2, backgroundColor: pc.danger, marginLeft: -2 }} />
             )}
           </View>
         </View>
@@ -223,11 +225,11 @@ export default function CentsDeviationScreen() {
         <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
           {[10, 5, 1].map(amt => (
             <View key={amt} style={{ flexDirection: 'row', gap: 4 }}>
-              <Pressable onPress={() => adjustNeedle(-amt)} style={{ width: 44, height: 36, borderRadius: 8, backgroundColor: 'rgba(21,24,32,0.86)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ color: '#a1a1aa', fontSize: 13, fontWeight: '600' }}>-{amt}</Text>
+              <Pressable accessibilityRole="button" onPress={() => adjustNeedle(-amt)} style={{ width: 44, height: 36, borderRadius: 8, backgroundColor: pc.cardSurface, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ color: pc.textTertiary, fontSize: 13, fontWeight: '600' }}>-{amt}</Text>
               </Pressable>
-              <Pressable onPress={() => adjustNeedle(amt)} style={{ width: 44, height: 36, borderRadius: 8, backgroundColor: 'rgba(21,24,32,0.86)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ color: '#a1a1aa', fontSize: 13, fontWeight: '600' }}>+{amt}</Text>
+              <Pressable accessibilityRole="button" onPress={() => adjustNeedle(amt)} style={{ width: 44, height: 36, borderRadius: 8, backgroundColor: pc.cardSurface, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ color: pc.textTertiary, fontSize: 13, fontWeight: '600' }}>+{amt}</Text>
               </Pressable>
             </View>
           ))}
@@ -235,13 +237,13 @@ export default function CentsDeviationScreen() {
 
         {submitted && (
           <View style={{ backgroundColor: 'rgba(132,204,22,0.08)', borderRadius: 12, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: 'rgba(132,204,22,0.2)', alignItems: 'center' }}>
-            <Text style={{ color: '#97A3B6', fontSize: 13 }}>Actual: <Text style={{ color: '#F8FAFC', fontWeight: '700' }}>{actualCents > 0 ? '+' : ''}{actualCents}¢</Text></Text>
-            <Text style={{ color: '#97A3B6', fontSize: 13 }}>Guess: <Text style={{ color: '#F8FAFC', fontWeight: '700' }}>{needleCents > 0 ? '+' : ''}{needleCents}¢</Text></Text>
+            <Text style={{ color: pc.textSecondary, fontSize: 13 }}>Actual: <Text style={{ color: pc.text, fontWeight: '700' }}>{actualCents > 0 ? '+' : ''}{actualCents}¢</Text></Text>
+            <Text style={{ color: pc.textSecondary, fontSize: 13 }}>Guess: <Text style={{ color: pc.text, fontWeight: '700' }}>{needleCents > 0 ? '+' : ''}{needleCents}¢</Text></Text>
           </View>
         )}
 
-        <Pressable onPress={submitted ? (round >= totalRounds ? () => setPhase('results') : nextRound) : handleSubmit} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center' }}>
-          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>
+        <Pressable accessibilityRole="button" onPress={submitted ? (round >= totalRounds ? () => setPhase('results') : nextRound) : handleSubmit} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center' }}>
+          <Text style={{ color: pc.text, fontWeight: '700', fontSize: 16 }}>
             {!submitted ? 'Lock In' : round >= totalRounds ? 'See Results' : 'Next Round →'}
           </Text>
         </Pressable>

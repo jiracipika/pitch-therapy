@@ -6,12 +6,15 @@ import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
 import {
   CHROMATIC_SCALE,
-  CHORD_TYPES,
   CHORD_INTERVALS,
+  CHORD_TYPES,
+  GAME_MODE_META,
   chordTypeById,
 } from '@pitch-therapy/core';
+import { playColors as pc } from '@/lib/theme';
 
-const ACCENT = '#F472B6';
+const MODE = GAME_MODE_META['chord-detective'];
+const ACCENT = MODE.accentHex;
 
 const ALL_NOTES = CHROMATIC_SCALE;
 
@@ -110,20 +113,20 @@ export default function ChordDetectiveScreen() {
   if (phase === 'results') {
     const c = results.filter(r => r.correct).length;
     return (
-      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
+      <View style={{ flex: 1, backgroundColor: pc.screen }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40, alignItems: 'center' }}>
           <Text style={{ fontSize: 48 }}>🕵️</Text>
-          <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginTop: 16 }}>Case Closed!</Text>
+          <Text style={{ color: pc.text, fontSize: 28, fontWeight: '700', marginTop: 16 }}>Case Closed!</Text>
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
             {[{ l: 'Score', v: String(score) }, { l: 'Correct', v: `${c}/${ROUNDS}` }, { l: 'Best Streak', v: `🔥 ${bestStreak}` }].map(s => (
-              <View key={s.l} style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', flex: 1 }}>
-                <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700' }}>{s.v}</Text>
-                <Text style={{ color: '#97A3B6', fontSize: 12, marginTop: 4 }}>{s.l}</Text>
+              <View key={s.l} style={{ backgroundColor: pc.cardSurface, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', flex: 1 }}>
+                <Text style={{ color: pc.text, fontSize: 22, fontWeight: '700' }}>{s.v}</Text>
+                <Text style={{ color: pc.textSecondary, fontSize: 12, marginTop: 4 }}>{s.l}</Text>
               </View>
             ))}
           </View>
-          <Pressable onPress={startGame} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24, width: '100%' }}>
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Play Again</Text>
+          <Pressable accessibilityRole="button" onPress={startGame} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24, width: '100%' }}>
+            <Text style={{ color: pc.text, fontWeight: '700', fontSize: 16 }}>Play Again</Text>
           </Pressable>
         </ScrollView>
       </View>
@@ -132,63 +135,63 @@ export default function ChordDetectiveScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#10130E', paddingHorizontal: 20, justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: pc.screen, paddingHorizontal: 20, justifyContent: 'center' }}>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>🕵️</Text>
         <Text style={{ color: ACCENT, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: 16 }}>Chord Detective</Text>
-        <Text style={{ color: '#97A3B6', fontSize: 14, textAlign: 'center', marginTop: 8 }}>Identify chord quality by ear</Text>
-        <Pressable onPress={() => setAdvanced(!advanced)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 24 }}>
-          <Text style={{ color: '#a1a1aa', fontSize: 14 }}>Advanced: Identify root too</Text>
-          <View style={{ width: 48, height: 28, borderRadius: 14, backgroundColor: advanced ? ACCENT : 'rgba(255,255,255,0.1)', justifyContent: 'center', paddingHorizontal: 3 }}>
+        <Text style={{ color: pc.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 8 }}>Identify chord quality by ear</Text>
+        <Pressable accessibilityRole="button" onPress={() => setAdvanced(!advanced)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 24 }}>
+          <Text style={{ color: pc.textTertiary, fontSize: 14 }}>Advanced: Identify root too</Text>
+          <View style={{ width: 48, height: 28, borderRadius: 14, backgroundColor: advanced ? ACCENT : 'pc.cardBorder', justifyContent: 'center', paddingHorizontal: 3 }}>
             <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#fff', marginLeft: advanced ? 23 : 0 }} />
           </View>
         </Pressable>
-        <Pressable onPress={startGame} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 32 }}>
-          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Start Investigation</Text>
+        <Pressable accessibilityRole="button" onPress={startGame} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 32 }}>
+          <Text style={{ color: pc.text, fontWeight: '700', fontSize: 16 }}>Start Investigation</Text>
         </Pressable>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#10130E' }}>
+    <View style={{ flex: 1, backgroundColor: pc.screen }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
-        <Pressable onPress={() => router.back()}><Text style={{ color: '#97A3B6' }}>← Back</Text></Pressable>
+        <Pressable accessibilityRole="button" onPress={() => router.back()}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>🕵️ Chord Detective</Text>
-        <Text style={{ color: '#97A3B6' }}>{score}</Text>
+        <Text style={{ color: pc.textSecondary }}>{score}</Text>
       </View>
 
       <View style={{ alignItems: 'center', marginTop: 32 }}>
-        <Pressable onPress={() => playChord(root, chordType)} style={{
+        <Pressable accessibilityRole="button" onPress={() => playChord(root, chordType)} style={{
           width: 96, height: 96, borderRadius: 48, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center',
         }}>
           <Text style={{ fontSize: 36 }}>🔊</Text>
         </Pressable>
-        <Text style={{ color: '#97A3B6', marginTop: 12, fontSize: 14 }}>Tap to replay chord</Text>
+        <Text style={{ color: pc.textSecondary, marginTop: 12, fontSize: 14 }}>Tap to replay chord</Text>
       </View>
 
       <ScrollView style={{ flex: 1, paddingHorizontal: 20, marginTop: 24 }}>
-        <Text style={{ color: '#97A3B6', fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>CHORD QUALITY</Text>
+        <Text style={{ color: pc.textSecondary, fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>CHORD QUALITY</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
           {CHORD_TYPES.map(ct => (
-            <Pressable key={ct.id} onPress={() => phase === 'playing' && setSelectedType(ct.id)} style={{
-              backgroundColor: selectedType === ct.id ? `${ACCENT}30` : 'rgba(255,255,255,0.04)', borderRadius: 16, paddingVertical: 14, paddingHorizontal: 20,
-              borderWidth: selectedType === ct.id ? 2 : 1, borderColor: selectedType === ct.id ? ACCENT : 'rgba(255,255,255,0.07)',
+            <Pressable key={ct.id} accessibilityRole="button" onPress={() => phase === 'playing' && setSelectedType(ct.id)} style={{
+              backgroundColor: selectedType === ct.id ? `${ACCENT}30` : pc.cardAmbient, borderRadius: 16, paddingVertical: 14, paddingHorizontal: 20,
+              borderWidth: selectedType === ct.id ? 2 : 1, borderColor: selectedType === ct.id ? ACCENT : pc.cardBorder,
             }}>
-              <Text style={{ color: selectedType === ct.id ? '#fff' : '#a1a1aa', fontWeight: '600', fontSize: 15 }}>{ct.label}</Text>
+              <Text style={{ color: selectedType === ct.id ? '#fff' : pc.textTertiary, fontWeight: '600', fontSize: 15 }}>{ct.label}</Text>
             </Pressable>
           ))}
         </View>
 
         {advanced && (
           <View style={{ marginTop: 16 }}>
-            <Text style={{ color: '#97A3B6', fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>ROOT NOTE</Text>
+            <Text style={{ color: pc.textSecondary, fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>ROOT NOTE</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
               {ALL_NOTES.map(note => (
-                <Pressable key={note} onPress={() => setSelectedRoot(note)} style={{
-                  backgroundColor: selectedRoot === note ? `${ACCENT}30` : 'rgba(255,255,255,0.04)', borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14,
-                  borderWidth: selectedRoot === note ? 2 : 1, borderColor: selectedRoot === note ? ACCENT : 'rgba(255,255,255,0.07)',
+                <Pressable key={note} accessibilityRole="button" onPress={() => setSelectedRoot(note)} style={{
+                  backgroundColor: selectedRoot === note ? `${ACCENT}30` : pc.cardAmbient, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14,
+                  borderWidth: selectedRoot === note ? 2 : 1, borderColor: selectedRoot === note ? ACCENT : pc.cardBorder,
                 }}>
-                  <Text style={{ color: selectedRoot === note ? '#fff' : '#a1a1aa', fontWeight: '700', fontSize: 14 }}>{note}</Text>
+                  <Text style={{ color: selectedRoot === note ? '#fff' : pc.textTertiary, fontWeight: '700', fontSize: 14 }}>{note}</Text>
                 </Pressable>
               ))}
             </View>
@@ -198,21 +201,21 @@ export default function ChordDetectiveScreen() {
         {feedback && (
           <View style={{
             marginTop: 16, borderRadius: 12, padding: 14, alignItems: 'center',
-            backgroundColor: feedback === 'correct' ? 'rgba(74,222,128,0.12)' : 'rgba(248,113,113,0.12)',
-            borderWidth: 1, borderColor: feedback === 'correct' ? '#4ade80' : '#f87171',
+            backgroundColor: feedback === 'correct' ? pc.cardSurface : pc.cardSurface,
+            borderWidth: 1, borderColor: feedback === 'correct' ? pc.success : pc.danger,
           }}>
-            <Text style={{ color: feedback === 'correct' ? '#4ade80' : '#f87171', fontWeight: '700', fontSize: 16 }}>
+            <Text style={{ color: feedback === 'correct' ? pc.success : pc.danger, fontWeight: '700', fontSize: 16 }}>
               {feedback === 'correct' ? '✓ Correct!' : `✗ It was ${root} ${chordTypeById(chordType)?.label}`}
             </Text>
           </View>
         )}
 
-        <Pressable onPress={submit} disabled={!selectedType || (advanced && !selectedRoot)} style={{
-          backgroundColor: (selectedType && (!advanced || selectedRoot)) ? ACCENT : 'rgba(255,255,255,0.05)', borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 16, marginBottom: 20,
+        <Pressable accessibilityRole="button" onPress={submit} disabled={!selectedType || (advanced && !selectedRoot)} style={{
+          backgroundColor: (selectedType && (!advanced || selectedRoot)) ? ACCENT : pc.cardAmbient, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 16, marginBottom: 20,
         }}>
-          <Text style={{ color: (selectedType && (!advanced || selectedRoot)) ? '#fff' : '#52525b', fontWeight: '700', fontSize: 16 }}>Submit</Text>
+          <Text style={{ color: (selectedType && (!advanced || selectedRoot)) ? '#fff' : pc.textMuted, fontWeight: '700', fontSize: 16 }}>Submit</Text>
         </Pressable>
-        <Text style={{ textAlign: 'center', color: '#97A3B6', marginBottom: 20 }}>🔥 {streak} • Round {round}/{ROUNDS}</Text>
+        <Text style={{ textAlign: 'center', color: pc.textSecondary, marginBottom: 20 }}>🔥 {streak} • Round {round}/{ROUNDS}</Text>
       </ScrollView>
     </View>
   );

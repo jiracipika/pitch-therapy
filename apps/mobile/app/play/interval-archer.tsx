@@ -7,10 +7,13 @@ import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
 import {
   CHROMATIC_SCALE,
+  GAME_MODE_META,
   INTERVALS as CORE_INTERVALS,
 } from '@pitch-therapy/core';
+import { playColors as pc } from '@/lib/theme';
 
-const ACCENT = '#D946EF';
+const MODE = GAME_MODE_META['interval-archer'];
+const ACCENT = MODE.accentHex;
 
 // Display adapter: uses short abbreviation labels for this mode's compact UI.
 const INTERVALS = CORE_INTERVALS.map((i) => ({
@@ -138,18 +141,18 @@ export default function IntervalArcherScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
+      <View style={{ flex: 1, backgroundColor: pc.screen }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
-          <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700', marginTop: 12 }}>Interval Archer</Text>
-          <Text style={{ color: '#97A3B6', fontSize: 14, marginTop: 4 }}>Identify intervals — closer is more points</Text>
+          <Text style={{ color: pc.text, fontSize: 22, fontWeight: '700', marginTop: 12 }}>Interval Archer</Text>
+          <Text style={{ color: pc.textSecondary, fontSize: 14, marginTop: 4 }}>Identify intervals — closer is more points</Text>
         </View>
         <View style={{ flex: 1, paddingHorizontal: 20, justifyContent: 'center' }}>
-          <Text style={{ color: '#F8FAFC', fontSize: 18, fontWeight: '600', marginBottom: 16 }}>Mode</Text>
+          <Text style={{ color: pc.text, fontSize: 18, fontWeight: '600', marginBottom: 16 }}>Mode</Text>
           {(Object.keys(MODE_CONFIG) as IntervalMode[]).map(m => (
-            <Pressable key={m} onPress={() => startGame(m)} style={({ pressed }) => ({ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 12, opacity: pressed ? 0.75 : 1 })}>
-              <Text style={{ color: '#F8FAFC', fontWeight: '600', fontSize: 16 }}>{MODE_CONFIG[m].label}</Text>
-              <Text style={{ color: '#97A3B6', fontSize: 13, marginTop: 3 }}>{MODE_CONFIG[m].pool.length} intervals · {TOTAL_ROUNDS} rounds</Text>
+            <Pressable key={m} accessibilityRole="button" onPress={() => startGame(m)} style={({ pressed }) => ({ backgroundColor: pc.cardSurface, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: pc.cardBorder, marginBottom: 12, opacity: pressed ? 0.75 : 1 })}>
+              <Text style={{ color: pc.text, fontWeight: '600', fontSize: 16 }}>{MODE_CONFIG[m].label}</Text>
+              <Text style={{ color: pc.textSecondary, fontSize: 13, marginTop: 3 }}>{MODE_CONFIG[m].pool.length} intervals · {TOTAL_ROUNDS} rounds</Text>
             </Pressable>
           ))}
         </View>
@@ -160,33 +163,33 @@ export default function IntervalArcherScreen() {
   if (phase === 'results') {
     const correct = results.filter(r => r.correct).length;
     return (
-      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
+      <View style={{ flex: 1, backgroundColor: pc.screen }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
-          <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Interval Archer Complete!</Text>
-          <View style={{ backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', marginBottom: 20, alignItems: 'center' }}>
+          <Text style={{ color: pc.text, fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Interval Archer Complete!</Text>
+          <View style={{ backgroundColor: pc.cardSurface, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: pc.cardBorder, marginBottom: 20, alignItems: 'center' }}>
             <Text style={{ color: ACCENT, fontSize: 48, fontWeight: '700' }}>{score}</Text>
-            <Text style={{ color: '#97A3B6', marginTop: 4 }}>points</Text>
+            <Text style={{ color: pc.textSecondary, marginTop: 4 }}>points</Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
             {[
               { label: 'Bullseyes', value: `${correct}/${TOTAL_ROUNDS}` },
               { label: 'Best Streak', value: `🔥 ${bestStreak}` },
             ].map(s => (
-              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center' }}>
-                <Text style={{ color: '#F8FAFC', fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
-                <Text style={{ color: '#97A3B6', fontSize: 12, marginTop: 2 }}>{s.label}</Text>
+              <View key={s.label} style={{ flex: 1, backgroundColor: pc.cardSurface, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center' }}>
+                <Text style={{ color: pc.text, fontSize: 20, fontWeight: '700' }}>{s.value}</Text>
+                <Text style={{ color: pc.textSecondary, fontSize: 12, marginTop: 2 }}>{s.label}</Text>
               </View>
             ))}
           </View>
           {results.map((r, i) => (
-            <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-              <Text style={{ color: '#97A3B6', fontSize: 13 }}>Round {i + 1}</Text>
-              <Text style={{ color: '#F8FAFC', fontSize: 13, fontWeight: '600' }}>{r.interval}</Text>
-              <Text style={{ color: r.correct ? '#4ade80' : '#f87171', fontSize: 13 }}>{r.correct ? '✓' : r.answer}</Text>
+            <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: pc.cardAmbient }}>
+              <Text style={{ color: pc.textSecondary, fontSize: 13 }}>Round {i + 1}</Text>
+              <Text style={{ color: pc.text, fontSize: 13, fontWeight: '600' }}>{r.interval}</Text>
+              <Text style={{ color: r.correct ? pc.success : pc.danger, fontSize: 13 }}>{r.correct ? '✓' : r.answer}</Text>
             </View>
           ))}
-          <Pressable onPress={() => startGame(intervalMode)} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24 }}>
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Play Again</Text>
+          <Pressable accessibilityRole="button" onPress={() => startGame(intervalMode)} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24 }}>
+            <Text style={{ color: pc.text, fontWeight: '700', fontSize: 16 }}>Play Again</Text>
           </Pressable>
         </ScrollView>
       </View>
@@ -194,14 +197,14 @@ export default function IntervalArcherScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#10130E' }}>
+    <View style={{ flex: 1, backgroundColor: pc.screen }}>
       <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
-        <Pressable onPress={() => playIntervalSound(rootFreq, targetInterval.semitones)} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+        <Pressable accessibilityRole="button" onPress={() => playIntervalSound(rootFreq, targetInterval.semitones)} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
           <Text style={{ fontSize: 28 }}>🔊</Text>
         </Pressable>
-        <Text style={{ textAlign: 'center', color: '#97A3B6', fontSize: 13, marginBottom: 4 }}>Replay interval</Text>
-        <Text style={{ textAlign: 'center', color: '#7E8A9A', fontSize: 12, marginBottom: 20 }}>Root: {rootNote} · {MODE_CONFIG[intervalMode].label}</Text>
+        <Text style={{ textAlign: 'center', color: pc.textSecondary, fontSize: 13, marginBottom: 4 }}>Replay interval</Text>
+        <Text style={{ textAlign: 'center', color: pc.textTertiary, fontSize: 12, marginBottom: 20 }}>Root: {rootNote} · {MODE_CONFIG[intervalMode].label}</Text>
 
         {/* Target visual */}
         <View style={{ alignItems: 'center', marginBottom: 20 }}>
@@ -211,8 +214,8 @@ export default function IntervalArcherScreen() {
         </View>
 
         {feedback && (
-          <View style={{ backgroundColor: feedback === 'correct' ? 'rgba(74,222,128,0.12)' : 'rgba(248,113,113,0.12)', borderRadius: 12, padding: 12, marginBottom: 16, alignItems: 'center', borderWidth: 1, borderColor: feedback === 'correct' ? '#4ade80' : '#f87171' }}>
-            <Text style={{ color: feedback === 'correct' ? '#4ade80' : '#f87171', fontWeight: '700', fontSize: 16 }}>
+          <View style={{ backgroundColor: feedback === 'correct' ? pc.cardSurface : pc.cardSurface, borderRadius: 12, padding: 12, marginBottom: 16, alignItems: 'center', borderWidth: 1, borderColor: feedback === 'correct' ? pc.success : pc.danger }}>
+            <Text style={{ color: feedback === 'correct' ? pc.success : pc.danger, fontWeight: '700', fontSize: 16 }}>
               {feedback === 'correct' ? '🎯 Bullseye!' : `It was ${targetInterval.name}`}
             </Text>
           </View>
@@ -222,21 +225,21 @@ export default function IntervalArcherScreen() {
           {activeIntervals.map(interval => {
             const isTarget = feedback && interval.semitones === targetInterval.semitones;
             const isSelected = selected === interval.name && feedback === 'wrong';
-            let bgColor = 'rgba(255,255,255,0.04)';
-            let borderColor = 'rgba(255,255,255,0.07)';
-            let textColor = '#f4f4f5';
+            let bgColor: string = pc.cardAmbient;
+            let borderColor: string = pc.cardBorder;
+            let textColor: string = pc.text;
 
-            if (isTarget) { bgColor = 'rgba(74,222,128,0.15)'; borderColor = '#4ade80'; textColor = '#4ade80'; }
-            else if (isSelected) { bgColor = 'rgba(248,113,113,0.15)'; borderColor = '#f87171'; textColor = '#f87171'; }
+            if (isTarget) { bgColor = pc.cardSurface; borderColor = pc.success; textColor = pc.success; }
+            else if (isSelected) { bgColor = pc.cardSurface; borderColor = pc.danger; textColor = pc.danger; }
 
             return (
-              <Pressable key={interval.name} onPress={() => handleAnswer(interval.semitones, interval.name)} style={({ pressed }) => ({
+              <Pressable key={interval.name} accessibilityRole="button" onPress={() => handleAnswer(interval.semitones, interval.name)} style={({ pressed }) => ({
                 width: 80, height: 56, borderRadius: 12, backgroundColor: bgColor,
                 borderWidth: 1, borderColor, alignItems: 'center', justifyContent: 'center',
                 opacity: pressed ? 0.75 : 1,
               })}>
                 <Text style={{ color: textColor, fontWeight: '700', fontSize: 14 }}>{interval.name}</Text>
-                <Text style={{ color: '#7E8A9A', fontSize: 10 }}>
+                <Text style={{ color: pc.textTertiary, fontSize: 10 }}>
                   {interval.semitones === 0 ? '' : interval.semitones === 12 ? '8va' : `${interval.semitones}st`}
                 </Text>
               </Pressable>
@@ -244,7 +247,7 @@ export default function IntervalArcherScreen() {
           })}
         </View>
 
-        <Text style={{ textAlign: 'center', color: '#7E8A9A', fontSize: 12, marginTop: 24 }}>{MODE_CONFIG[intervalMode].label} mode</Text>
+        <Text style={{ textAlign: 'center', color: pc.textTertiary, fontSize: 12, marginTop: 24 }}>{MODE_CONFIG[intervalMode].label} mode</Text>
       </View>
     </View>
   );

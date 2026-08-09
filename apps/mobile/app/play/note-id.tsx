@@ -8,7 +8,7 @@ import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { playTone, NOTE_FREQS_4 } from "@/lib/audio";
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from "@/lib/haptics";
 import { useSessionResults } from "@/lib/sessionResults";
-
+import { playColors as pc } from '@/lib/theme';
 const MODE = GAME_MODE_META["note-id"];
 const ACCENT = MODE.accentHex;
 
@@ -457,18 +457,18 @@ export default function NoteIdScreen() {
           {notePool.map((note) => {
             const isSelected = selected === note;
             const isTarget = feedback !== null && note === target;
-            let bgColor = "rgba(255,255,255,0.04)";
-            let borderColor = "rgba(255,255,255,0.07)";
-            let textColor = "#f4f4f5";
+            let bgColor: string = pc.cardAmbient;
+            let borderColor: string = pc.cardBorder;
+            let textColor: string = pc.text;
 
             if (isTarget && feedback !== null) {
-              bgColor = "rgba(74,222,128,0.15)";
-              borderColor = "#4ade80";
-              textColor = "#4ade80";
+              bgColor = pc.cardSurface;
+              borderColor = pc.success;
+              textColor = pc.success;
             } else if (isSelected && feedback === "wrong") {
-              bgColor = "rgba(248,113,113,0.15)";
-              borderColor = "#f87171";
-              textColor = "#f87171";
+              bgColor = pc.cardSurface;
+              borderColor = pc.danger;
+              textColor = pc.danger;
             }
 
             return (

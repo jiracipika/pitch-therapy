@@ -5,8 +5,10 @@ import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import NoteComparisonStaff from '@/components/NoteComparisonStaff';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
-
-const ACCENT = '#0EA5E9';
+import { playColors as pc } from '@/lib/theme';
+import { GAME_MODE_META } from '@pitch-therapy/core';
+const MODE = GAME_MODE_META['name-that-note'];
+const ACCENT = MODE.accentHex;
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
 
 const QUIZ_NOTES = [
@@ -118,8 +120,8 @@ export default function NameThatNoteScreen() {
             <View style={styles.statCard}><Text style={[styles.statValue, { color: ACCENT }]}>{score}</Text><Text style={styles.statLabel}>Score</Text></View>
             <View style={styles.statCard}><Text style={styles.statValue}>{correct}/{totalRounds}</Text><Text style={styles.statLabel}>Correct</Text></View>
           </View>
-          <Pressable onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}><Text style={styles.btnPrimaryText}>Play Again</Text></Pressable>
-          <Pressable onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Dashboard</Text></Pressable>
+          <Pressable accessibilityRole="button" onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}><Text style={styles.btnPrimaryText}>Play Again</Text></Pressable>
+          <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Dashboard</Text></Pressable>
         </View>
       </View>
     );
@@ -134,8 +136,8 @@ export default function NameThatNoteScreen() {
           </View>
           <Text style={[styles.title, { fontSize: 24 }]}>Name That Note</Text>
           <Text style={styles.subtitle}>Identify notes on the staff</Text>
-          <Pressable onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}><Text style={styles.btnPrimaryText}>Start</Text></Pressable>
-          <Pressable onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Back</Text></Pressable>
+          <Pressable accessibilityRole="button" onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}><Text style={styles.btnPrimaryText}>Start</Text></Pressable>
+          <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Back</Text></Pressable>
         </View>
       </View>
     );
@@ -147,37 +149,37 @@ export default function NameThatNoteScreen() {
     <View style={styles.container}>
       <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: '#97A3B6' }}>←</Text></Pressable>
+          <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: pc.textSecondary }}>←</Text></Pressable>
           <Text style={{ fontSize: 16, fontWeight: '600', color: ACCENT }}>Name That Note</Text>
           <View style={styles.scoreBadge}><Text style={styles.scoreText}>{score}</Text></View>
         </View>
 
         {/* Timer */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-          <Text style={{ fontSize: 12, color: '#97A3B6' }}>Time: {timeLeft}s</Text>
-          <Text style={{ fontSize: 12, color: '#97A3B6' }}>Round {round}/{totalRounds}</Text>
+          <Text style={{ fontSize: 12, color: pc.textSecondary }}>Time: {timeLeft}s</Text>
+          <Text style={{ fontSize: 12, color: pc.textSecondary }}>Round {round}/{totalRounds}</Text>
         </View>
-        <View style={{ height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.07)', marginBottom: 24 }}>
-          <View style={{ height: '100%', borderRadius: 2, backgroundColor: timeLeft <= 3 ? '#f87171' : ACCENT, width: `${(timeLeft / 10) * 100}%` }} />
+        <View style={{ height: 4, borderRadius: 2, backgroundColor: pc.cardBorder, marginBottom: 24 }}>
+          <View style={{ height: '100%', borderRadius: 2, backgroundColor: timeLeft <= 3 ? pc.danger : ACCENT, width: `${(timeLeft / 10) * 100}%` }} />
         </View>
 
         {/* Staff */}
         <View style={{ height: 120, position: 'relative', marginBottom: 24 }}>
           {/* Staff lines */}
           {[0, 20, 40, 60, 80].map((bottom, i) => (
-            <View key={i} style={{ position: 'absolute', left: 0, right: 0, bottom, height: 1, backgroundColor: 'rgba(255,255,255,0.2)' }} />
+            <View key={i} style={{ position: 'absolute', left: 0, right: 0, bottom, height: 1, backgroundColor: 'pc.cardBorder' }} />
           ))}
           {/* Treble clef */}
-          <Text style={{ position: 'absolute', left: 4, bottom: 16, fontSize: 48, color: 'rgba(255,255,255,0.25)' }}>𝄞</Text>
+          <Text style={{ position: 'absolute', left: 4, bottom: 16, fontSize: 48, color: 'pc.textTertiary' }}>𝄞</Text>
           {/* Note head */}
           <View style={{
             position: 'absolute', width: 20, height: 16, borderRadius: 8,
-            backgroundColor: feedback === 'correct' ? '#4ADE80' : feedback === 'wrong' ? '#f87171' : ACCENT,
+            backgroundColor: feedback === 'correct' ? '#4ADE80' : feedback === 'wrong' ? pc.danger : ACCENT,
             left: '50%', bottom: y * 10 + 10, transform: [{ translateX: -10 }],
           }} />
         </View>
 
-        {phase === 'timed-out' && <Text style={{ textAlign: 'center', color: '#f87171', fontSize: 13, marginBottom: 16 }}>Time&apos;s up! It was {targetNote.name}</Text>}
+        {phase === 'timed-out' && <Text style={{ textAlign: 'center', color: pc.danger, fontSize: 13, marginBottom: 16 }}>Time&apos;s up! It was {targetNote.name}</Text>}
 
         {/* Staff comparison after answer */}
         {feedback !== 'none' && guessedLabel && (
@@ -190,7 +192,7 @@ export default function NameThatNoteScreen() {
           </View>
         )}
 
-        <Text style={{ textAlign: 'center', fontSize: 12, color: '#7E8A9A', marginBottom: 16 }}>Tap the correct note</Text>
+        <Text style={{ textAlign: 'center', fontSize: 12, color: pc.textTertiary, marginBottom: 16 }}>Tap the correct note</Text>
 
         {/* Answer buttons */}
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 6, flexWrap: 'wrap' }}>
@@ -201,14 +203,14 @@ export default function NameThatNoteScreen() {
               disabled={phase !== 'playing'}
               style={{
                 width: 44, height: 56, borderRadius: 8,
-                backgroundColor: 'rgba(255,255,255,0.08)',
-                borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+                backgroundColor: pc.cardBorder,
+                borderWidth: 1, borderColor: 'pc.cardBorder',
                 alignItems: 'center', justifyContent: 'center',
                 opacity: phase === 'playing' ? 1 : 0.4,
               }}
             >
-              <Text style={{ fontSize: 14, fontWeight: '600', color: '#F8FAFC' }}>{note.label}</Text>
-              <Text style={{ fontSize: 9, color: '#7E8A9A' }}>{note.name}</Text>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: pc.text }}>{note.label}</Text>
+              <Text style={{ fontSize: 9, color: pc.textTertiary }}>{note.name}</Text>
             </Pressable>
           ))}
         </View>
@@ -218,20 +220,20 @@ export default function NameThatNoteScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#10130E' },
+  container: { flex: 1, backgroundColor: pc.screen },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, marginBottom: 20 },
-  title: { fontSize: 28, fontWeight: '700', color: '#F8FAFC', letterSpacing: 0 },
-  subtitle: { fontSize: 14, color: '#97A3B6', marginTop: 8, marginBottom: 40 },
+  title: { fontSize: 28, fontWeight: '700', color: pc.text, letterSpacing: 0 },
+  subtitle: { fontSize: 14, color: pc.textSecondary, marginTop: 8, marginBottom: 40 },
   statsRow: { flexDirection: 'row', gap: 10, marginTop: 24, marginBottom: 32 },
-  statCard: { backgroundColor: 'rgba(21,24,32,0.86)', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', flex: 1 },
-  statValue: { fontSize: 24, fontWeight: '700', color: '#F8FAFC' },
-  statLabel: { fontSize: 11, color: '#97A3B6', marginTop: 4 },
+  statCard: { backgroundColor: pc.cardSurface, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', flex: 1 },
+  statValue: { fontSize: 24, fontWeight: '700', color: pc.text },
+  statLabel: { fontSize: 11, color: pc.textSecondary, marginTop: 4 },
   btnPrimary: { borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 16, width: '100%' },
-  btnPrimaryText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  btnPrimaryText: { color: pc.text, fontWeight: '700', fontSize: 16 },
   linkBtn: { padding: 16, marginTop: 8 },
-  linkBtnText: { color: '#97A3B6', textAlign: 'center', fontSize: 13 },
-  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', alignItems: 'center', justifyContent: 'center' },
-  scoreBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.09)' },
-  scoreText: { fontSize: 12, fontWeight: '600', color: '#fff' },
+  linkBtnText: { color: pc.textSecondary, textAlign: 'center', fontSize: 13 },
+  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' },
+  scoreBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder },
+  scoreText: { fontSize: 12, fontWeight: '600', color: pc.text },
 });

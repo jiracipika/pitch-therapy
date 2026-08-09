@@ -9,7 +9,7 @@ import {
   GameResultsScreen,
 } from '@/components/GameResultsScreen';
 import { useSessionResults } from '@/lib/sessionResults';
-
+import { playColors as pc } from '@/lib/theme';
 const ACCENT = '#EC4899';
 const TARGET_NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const;
 const TOTAL_ROUNDS = 5;
@@ -112,13 +112,13 @@ export default function TuneInScreen() {
 
   if (phase === 'setup') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#10130E' }}>
+      <View style={{ flex: 1, backgroundColor: pc.screen }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
-            <Text style={{ color: '#F8FAFC', fontSize: 22, fontWeight: '700' }}>Tune In</Text>
+            <Text style={{ color: pc.text, fontSize: 22, fontWeight: '700' }}>Tune In</Text>
           </View>
-          <Text style={{ color: '#97A3B6', fontSize: 14, marginTop: 4 }}>
+          <Text style={{ color: pc.textSecondary, fontSize: 14, marginTop: 4 }}>
             Hit the target note with your voice or instrument
           </Text>
         </View>
@@ -127,10 +127,10 @@ export default function TuneInScreen() {
           {/* How to play */}
           <View style={{ backgroundColor: `${ACCENT}0A`, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: `${ACCENT}26`, marginBottom: 32 }}>
             <Text style={{ color: ACCENT, fontSize: 10, fontWeight: '700', letterSpacing: 1.5, marginBottom: 10 }}>HOW TO PLAY</Text>
-            <Text style={{ color: '#97A3B6', fontSize: 13, marginBottom: 6 }}>1. A target note appears — tap 🔊 to hear it</Text>
-            <Text style={{ color: '#97A3B6', fontSize: 13, marginBottom: 6 }}>2. Sing or play that note on your instrument</Text>
-            <Text style={{ color: '#97A3B6', fontSize: 13, marginBottom: 6 }}>3. Mark ✓ if you nailed it or ✗ to skip</Text>
-            <Text style={{ color: '#97A3B6', fontSize: 13 }}>4. Build a streak for bonus points!</Text>
+            <Text style={{ color: pc.textSecondary, fontSize: 13, marginBottom: 6 }}>1. A target note appears — tap 🔊 to hear it</Text>
+            <Text style={{ color: pc.textSecondary, fontSize: 13, marginBottom: 6 }}>2. Sing or play that note on your instrument</Text>
+            <Text style={{ color: pc.textSecondary, fontSize: 13, marginBottom: 6 }}>3. Mark ✓ if you nailed it or ✗ to skip</Text>
+            <Text style={{ color: pc.textSecondary, fontSize: 13 }}>4. Build a streak for bonus points!</Text>
           </View>
 
           <Pressable
@@ -147,8 +147,8 @@ export default function TuneInScreen() {
           </Pressable>
         </View>
 
-        <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
-          <Text style={{ color: '#97A3B6', textAlign: 'center' }}>← Back</Text>
+        <Pressable accessibilityRole="button" onPress={() => router.back()} style={{ padding: 20 }}>
+          <Text style={{ color: pc.textSecondary, textAlign: 'center' }}>← Back</Text>
         </Pressable>
       </View>
     );
@@ -187,19 +187,19 @@ export default function TuneInScreen() {
 
   // ── Playing ──────────────────────────────────────────────────────────────────
   return (
-    <View style={{ flex: 1, backgroundColor: '#10130E' }}>
+    <View style={{ flex: 1, backgroundColor: pc.screen }}>
       <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} />
 
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 40, justifyContent: 'space-between', paddingBottom: 40 }}>
         {/* Target note */}
         <View style={{ alignItems: 'center' }}>
-          <Text style={{ color: '#7E8A9A', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 }}>
+          <Text style={{ color: pc.textTertiary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 }}>
             Target Note
           </Text>
           <Text style={{ color: ACCENT, fontSize: 72, fontWeight: '800', letterSpacing: 0 }}>
             {target}
           </Text>
-          <Text style={{ color: '#7E8A9A', fontSize: 14, marginTop: 6 }}>
+          <Text style={{ color: pc.textTertiary, fontSize: 14, marginTop: 6 }}>
             {targetFreq.toFixed(1)} Hz
           </Text>
 
@@ -211,9 +211,9 @@ export default function TuneInScreen() {
               paddingVertical: 12,
               paddingHorizontal: 24,
               borderRadius: 24,
-              backgroundColor: 'rgba(255,255,255,0.05)',
+              backgroundColor: pc.cardAmbient,
               borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.10)',
+              borderColor: pc.cardBorder,
               flexDirection: 'row',
               alignItems: 'center',
               gap: 8,
@@ -221,10 +221,10 @@ export default function TuneInScreen() {
             })}
           >
             <Text style={{ fontSize: 18 }}>🔊</Text>
-            <Text style={{ color: '#a1a1aa', fontSize: 14, fontWeight: '600' }}>Hear target</Text>
+            <Text style={{ color: pc.textTertiary, fontSize: 14, fontWeight: '600' }}>Hear target</Text>
           </Pressable>
 
-          <Text style={{ color: '#3f3f46', fontSize: 13, marginTop: 20 }}>
+          <Text style={{ color: pc.trackLine, fontSize: 13, marginTop: 20 }}>
             Sing or play the note, then mark your result
           </Text>
         </View>
@@ -245,7 +245,7 @@ export default function TuneInScreen() {
             })}
           >
             <Text style={{ fontSize: 28, marginBottom: 6 }}>✓</Text>
-            <Text style={{ color: '#4ade80', fontWeight: '700', fontSize: 15 }}>Got it</Text>
+            <Text style={{ color: pc.success, fontWeight: '700', fontSize: 15 }}>Got it</Text>
           </Pressable>
 
           <Pressable
@@ -262,7 +262,7 @@ export default function TuneInScreen() {
             })}
           >
             <Text style={{ fontSize: 28, marginBottom: 6 }}>✗</Text>
-            <Text style={{ color: '#f87171', fontWeight: '700', fontSize: 15 }}>Skip</Text>
+            <Text style={{ color: pc.danger, fontWeight: '700', fontSize: 15 }}>Skip</Text>
           </Pressable>
         </View>
       </View>
