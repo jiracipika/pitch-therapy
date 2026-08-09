@@ -179,7 +179,11 @@ export default function HomeScreen() {
               borderColor: colors.cream,
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: `5px 5px 0 ${colors.coral}`,
+              shadowColor: colors.coral,
+              shadowOffset: { width: 0, height: 5 },
+              shadowOpacity: 0.32,
+              shadowRadius: 8,
+              elevation: 5,
               transform: [{ scale: logoScale }, { rotate: logoRotateDeg }],
             }}
           >

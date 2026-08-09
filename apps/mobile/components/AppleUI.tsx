@@ -471,7 +471,11 @@ const styles = StyleSheet.create({
   },
   glassReduced: {
     borderColor: 'rgba(255,255,255,0.09)',
-    boxShadow: '0 8px 18px rgba(0,0,0,0.22)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 16,
+    elevation: 6,
   },
   sectionHeader: {
     flexDirection: 'row',

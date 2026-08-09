@@ -203,7 +203,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: radii.lg,
     borderWidth: 1,
-    boxShadow: '4px 5px 0 rgba(0,0,0,0.32)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 12,
+    elevation: 5,
   },
   toastMessage: {
     flex: 1,

@@ -122,18 +122,42 @@ export const spacing = {
 } as const;
 
 export const radii = {
-  sm: 4,
-  md: 6,
-  lg: 8,
-  xl: 12,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 22,
   full: 999,
 } as const;
 
 export const shadows = {
-  card: { boxShadow: "4px 5px 0 rgba(0,0,0,0.32)" },
-  elevated: { boxShadow: "7px 8px 0 rgba(0,0,0,0.38)" },
-  tab: { boxShadow: "0 -4px 0 rgba(0,0,0,0.28)" },
-  blue: { boxShadow: "4px 5px 0 rgba(0,0,0,0.38)" },
+  card: {
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  elevated: {
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 7 },
+    shadowOpacity: 0.34,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+  tab: {
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 0,
+  },
+  blue: {
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.32,
+    shadowRadius: 14,
+    elevation: 6,
+  },
 } as const;
 
 export const typography = {

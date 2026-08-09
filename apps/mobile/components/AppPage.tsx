@@ -424,14 +424,18 @@ export function AppPage({
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={{
-                  borderRadius: 6,
+                  borderRadius: 16,
                   paddingHorizontal: 17,
                   paddingVertical: 16,
                   borderWidth: 1,
                   borderColor: reducedGlass ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.13)',
                   gap: 7,
                   overflow: 'hidden',
-                  boxShadow: reducedGlass ? '3px 4px 0 rgba(0,0,0,0.26)' : '6px 7px 0 rgba(0,0,0,0.34)',
+                  shadowColor: '#000000',
+                  shadowOffset: { width: 0, height: 5 },
+                  shadowOpacity: reducedGlass ? 0.22 : 0.32,
+                  shadowRadius: 14,
+                  elevation: reducedGlass ? 4 : 7,
                 }}
               >
                 <Animated.View
