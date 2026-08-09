@@ -1937,3 +1937,47 @@ picture, img, video, svg {
 @media (prefers-reduced-motion: reduce) {
   .pt-signal-home * { scroll-behavior: auto !important; }
 }
+
+/* ============================================================
+   HORIZONTAL CAROUSEL — Game Mode Browser
+   ============================================================ */
+
+.pt-carousel-track::-webkit-scrollbar { display: none; }
+
+.pt-carousel-card {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.pt-carousel-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.pt-carousel-card:active {
+  transform: scale(0.97);
+}
+
+.pt-carousel-btn:active {
+  transform: scale(0.88);
+  opacity: 0.7;
+}
+
+@media (hover: none) {
+  .pt-carousel-btn { opacity: 0.6; }
+}
+
+/* ============================================================
+   PRIMARY CTA BUTTONS — Dashboard
+   ============================================================ */
+
+.pt-primary-cta, .pt-secondary-cta {
+  transition: transform 140ms ease-out, box-shadow 140ms ease-out;
+}
+
+.pt-primary-cta:active, .pt-secondary-cta:active {
+  transform: scale(0.97);
+}
+
+.pt-primary-cta:hover {
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--ios-blue) 40%, transparent);
+}

@@ -300,6 +300,61 @@ export default function Dashboard() {
               </div>
             </motion.div>
 
+            {/* ── PRIMARY CTA ROW — prominent action buttons ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.06, duration: 0.4 }}
+              style={{ display: "flex", gap: 8, marginBottom: 12 }}
+            >
+              <Link
+                href="/daily"
+                className="pt-primary-cta"
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  height: 48,
+                  borderRadius: 14,
+                  background: "linear-gradient(135deg, var(--ios-blue) 0%, color-mix(in srgb, var(--ios-blue) 70%, var(--ios-indigo)) 100%)",
+                  color: "var(--pt-on-accent)",
+                  fontSize: 15,
+                  fontWeight: 700,
+                  letterSpacing: "-0.2px",
+                  textDecoration: "none",
+                  boxShadow: "0 4px 14px color-mix(in srgb, var(--ios-blue) 30%, transparent)",
+                }}
+              >
+                <span style={{ fontSize: 18 }}>▶</span>
+                Play Daily Challenge
+              </Link>
+              <Link
+                href="/play-modes"
+                className="pt-secondary-cta"
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  height: 48,
+                  borderRadius: 14,
+                  background: "var(--pt-surface-1)",
+                  border: "1px solid var(--pt-stroke)",
+                  color: "var(--ios-label)",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  letterSpacing: "-0.2px",
+                  textDecoration: "none",
+                }}
+              >
+                <span style={{ fontSize: 18 }}>🎯</span>
+                Browse All Modes
+              </Link>
+            </motion.div>
+
             {/* ── TIP OF THE DAY ── */}
             <motion.div
               initial={{ opacity: 0, y: 8 }}
