@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
 import {
   calculateLongestStreak,
   calculateStreak,
+  normalizeProgressResults,
   type ProgressResult,
 } from '@pitch-therapy/core';
 
@@ -96,9 +97,9 @@ async function hydrate() {
     try {
       const raw = await AsyncStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as SessionResult[];
+        const parsed = JSON.parse(raw) as unknown;
         if (Array.isArray(parsed)) {
-          cachedResults = parsed.slice(-MAX_STORED_RESULTS);
+          cachedResults = normalizeProgressResults(parsed).slice(-MAX_STORED_RESULTS);
           recomputeStats();
           notify();
         }
@@ -151,10 +152,11 @@ export function useSessionResults() {
   }, []);
 
   const recordResult = useCallback((result: Omit<SessionResult, 'date'> & { date?: string }) => {
-    const entry: SessionResult = {
-      ...result,
-      date: result.date ?? new Date().toISOString(),
-    };
+    const [entry] = normalizeProgressResults([
+      { ...result, date: result.date ?? new Date().toISOString() },
+    ]);
+    if (!entry) return;
+
     cachedResults = [...cachedResults, entry].slice(-MAX_STORED_RESULTS);
     recomputeStats();
     persist(cachedResults);

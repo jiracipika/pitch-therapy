@@ -4,6 +4,7 @@ import {
   buildModeBreakdown,
   buildProgressInsights,
   MODE_TREND_THRESHOLD,
+  normalizeProgressResults,
 } from "../progressInsights";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -273,6 +274,36 @@ describe("buildProgressInsights", () => {
 
     const insights = buildProgressInsights(results, 2, fixedNow);
     expect(insights.weakModes[0]?.mode).toBe("pitch-match");
+  });
+});
+
+describe("normalizeProgressResults", () => {
+  it("drops malformed persisted entries and canonicalizes valid data", () => {
+    const normalized = normalizeProgressResults([
+      {
+        mode: " note-id ",
+        score: 120,
+        accuracy: 1.4,
+        rounds: 8.9,
+        date: "2026-07-03T12:00:00-04:00",
+        timeMs: 120_000,
+      },
+      { mode: "", score: 1, accuracy: 0.5, rounds: 1, date: "2026-07-03", timeMs: 1 },
+      { mode: "note-id", score: -1, accuracy: 0.5, rounds: 1, date: "2026-07-03", timeMs: 1 },
+      { mode: "note-id", score: 1, accuracy: 0.5, rounds: 0, date: "2026-07-03", timeMs: 1 },
+      { mode: "note-id", score: 1, accuracy: 0.5, rounds: 1, date: "invalid", timeMs: 1 },
+    ]);
+
+    expect(normalized).toEqual([
+      {
+        mode: "note-id",
+        score: 120,
+        accuracy: 1,
+        rounds: 8,
+        date: "2026-07-03T16:00:00.000Z",
+        timeMs: 120_000,
+      },
+    ]);
   });
 });
 

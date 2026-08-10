@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { calculateStreak, calculateLongestStreak } from "@pitch-therapy/core";
+import { calculateStreak, calculateLongestStreak, normalizeProgressResults } from "@pitch-therapy/core";
 
 /* ── Types ── */
 
@@ -57,7 +57,7 @@ function loadPersisted(): PersistedStats {
       lastPlayDate?: string | null;
     };
     return {
-      results: Array.isArray(parsed.results) ? parsed.results : [],
+      results: Array.isArray(parsed.results) ? normalizeProgressResults(parsed.results) : [],
       dailyCompleted: Array.isArray(parsed.dailyCompleted) ? parsed.dailyCompleted : [],
     };
   } catch {
@@ -131,8 +131,11 @@ export function useStats() {
 
   const recordResult = useCallback((result: GameResult) => {
     setPersisted((prev) => {
+      const [validatedResult] = normalizeProgressResults([result]);
+      if (!validatedResult) return prev;
+
       const updated: PersistedStats = {
-        results: [...prev.results, result].slice(-MAX_STORED_RESULTS),
+        results: [...prev.results, validatedResult].slice(-MAX_STORED_RESULTS),
         dailyCompleted: prev.dailyCompleted,
       };
       savePersisted(updated);

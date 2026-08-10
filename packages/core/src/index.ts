@@ -133,6 +133,7 @@ export {
   buildProgressInsights,
   buildDailyActivityMap,
   buildModeBreakdown,
+  normalizeProgressResults,
   MODE_TREND_THRESHOLD,
 } from "./progressInsights";
 export type {

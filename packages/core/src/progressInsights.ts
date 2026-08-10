@@ -9,6 +9,58 @@ export interface ProgressResult {
   timeMs: number;
 }
 
+/**
+ * Return a safe, canonical set of persisted training results.
+ *
+ * Browser localStorage and native AsyncStorage are both user-controlled and can
+ * outlive schema changes. Keeping validation here ensures every client derives
+ * streaks, achievements, and recommendations from the same trustworthy shape.
+ * Invalid entries are dropped, while recoverable accuracy values are clamped to
+ * the range used by all progress calculations.
+ */
+export function normalizeProgressResults(results: readonly unknown[]): ProgressResult[] {
+  return results.flatMap((value) => {
+    if (!value || typeof value !== "object") return [];
+
+    const result = value as Partial<ProgressResult>;
+    const mode = result.mode;
+    const score = result.score;
+    const accuracy = result.accuracy;
+    const rounds = result.rounds;
+    const timeMs = result.timeMs;
+    const timestamp = typeof result.date === "string" ? Date.parse(result.date) : Number.NaN;
+    if (
+      typeof mode !== "string" ||
+      mode.trim().length === 0 ||
+      typeof score !== "number" ||
+      typeof accuracy !== "number" ||
+      typeof rounds !== "number" ||
+      typeof timeMs !== "number" ||
+      !Number.isFinite(score) ||
+      !Number.isFinite(accuracy) ||
+      !Number.isFinite(rounds) ||
+      !Number.isFinite(timeMs) ||
+      score < 0 ||
+      rounds < 1 ||
+      timeMs < 0 ||
+      !Number.isFinite(timestamp)
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        mode: mode.trim(),
+        score,
+        accuracy: Math.max(0, Math.min(1, accuracy)),
+        rounds: Math.floor(rounds),
+        date: new Date(timestamp).toISOString(),
+        timeMs,
+      },
+    ];
+  });
+}
+
 export interface WeakModeCluster {
   mode: string;
   label: string;
@@ -228,18 +280,9 @@ export function buildProgressInsights(
   now: Date = new Date(),
 ): ProgressInsights {
   const nowMs = now.getTime();
-  const normalized = results.flatMap((result) => {
-    const timestamp = Date.parse(result.date);
-    if (!Number.isFinite(result.accuracy) || !Number.isFinite(timestamp) || timestamp > nowMs) {
-      return [];
-    }
-
-    return [{
-      ...result,
-      accuracy: Math.max(0, Math.min(1, result.accuracy)),
-      date: new Date(timestamp).toISOString(),
-    }];
-  });
+  const normalized = normalizeProgressResults(results).filter(
+    (result) => Date.parse(result.date) <= nowMs,
+  );
 
   const momentum = buildMomentum(normalized, now);
   const weakModes = buildWeakModeClusters(normalized, topWeakModes);
