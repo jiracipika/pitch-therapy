@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Component, type ReactNode, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { ToastProvider } from '@/components/Toast';
+import { AuthProvider } from '@/lib/auth';
 import { prewarmAudioSession } from '@/lib/audio';
 import { preloadAppSettings } from '@/lib/settings';
 import {
@@ -89,32 +90,34 @@ export default function RootLayout() {
 
   return (
     <RootErrorBoundary>
-      <ToastProvider>
-        <StatusBar style="light" translucent={false} backgroundColor={colors.background} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          headerStyle: { backgroundColor: colors.background },
-          headerTintColor: colors.text,
-          headerShadowVisible: false,
-          contentStyle: { backgroundColor: colors.background },
-          animation: 'slide_from_right',
-          animationDuration: 280,
-          statusBarStyle: 'light',
-          statusBarAnimation: 'fade',
-          statusBarTranslucent: false,
-        }}
-      >
-        <Stack.Screen name="index" options={{ animation: 'fade' }} />
-        <Stack.Screen name="dashboard" options={{ animation: 'fade' }} />
-        <Stack.Screen name="play-modes" />
-        <Stack.Screen name="daily" options={{ animation: 'fade' }} />
-        <Stack.Screen name="progress" options={{ animation: 'fade' }} />
-        <Stack.Screen name="settings" options={{ animation: 'fade' }} />
-        {/* Individual play/ screens are auto-registered by Expo Router's
-            file-based routing. No explicit Stack.Screen entries needed. */}
-      </Stack>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <StatusBar style="light" translucent={false} backgroundColor={colors.background} />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            headerStyle: { backgroundColor: colors.background },
+            headerTintColor: colors.text,
+            headerShadowVisible: false,
+            contentStyle: { backgroundColor: colors.background },
+            animation: 'slide_from_right',
+            animationDuration: 280,
+            statusBarStyle: 'light',
+            statusBarAnimation: 'fade',
+            statusBarTranslucent: false,
+          }}
+        >
+          <Stack.Screen name="index" options={{ animation: 'fade' }} />
+          <Stack.Screen name="dashboard" options={{ animation: 'fade' }} />
+          <Stack.Screen name="play-modes" />
+          <Stack.Screen name="daily" options={{ animation: 'fade' }} />
+          <Stack.Screen name="progress" options={{ animation: 'fade' }} />
+          <Stack.Screen name="settings" options={{ animation: 'fade' }} />
+          {/* Individual play/ screens are auto-registered by Expo Router's
+              file-based routing. No explicit Stack.Screen entries needed. */}
+        </Stack>
+        </ToastProvider>
+      </AuthProvider>
     </RootErrorBoundary>
   );
 }

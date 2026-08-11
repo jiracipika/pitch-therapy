@@ -305,6 +305,35 @@ describe("normalizeProgressResults", () => {
       },
     ]);
   });
+
+  it("handles non-finite and null values from corrupt storage (mobile sessionResults)", () => {
+    const normalized = normalizeProgressResults([
+      null,
+      undefined,
+      { mode: "pitch-match", score: NaN, accuracy: 0.8, rounds: 5, date: "2026-07-03", timeMs: 100 },
+      { mode: "pitch-match", score: 100, accuracy: Infinity, rounds: 5, date: "2026-07-03", timeMs: 100 },
+      { mode: "pitch-match", score: 100, accuracy: 0.8, rounds: 5, date: "2026-07-03", timeMs: -1 },
+      "string-instead-of-object",
+      42,
+      { mode: "note-id", score: 80, accuracy: -0.5, rounds: 3, date: "2026-07-03T12:00:00Z", timeMs: 5000 },
+    ]);
+
+    // Only the last entry survives — negative accuracy is clamped to 0.
+    expect(normalized).toEqual([
+      {
+        mode: "note-id",
+        score: 80,
+        accuracy: 0,
+        rounds: 3,
+        date: "2026-07-03T12:00:00.000Z",
+        timeMs: 5000,
+      },
+    ]);
+  });
+
+  it("handles an empty array input", () => {
+    expect(normalizeProgressResults([])).toEqual([]);
+  });
 });
 
 describe("buildDailyActivityMap", () => {

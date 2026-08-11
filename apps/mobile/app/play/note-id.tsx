@@ -239,7 +239,7 @@ export default function NoteIdScreen() {
   // ── Select Difficulty ──────────────────────────────────────────────────────
   if (phase === "select-difficulty") {
     return (
-      <View style={{ flex: 1, backgroundColor: "#10130E" }}>
+      <View style={{ flex: 1, backgroundColor: pc.screen }}>
         <View
           style={{
             paddingTop: 56,
@@ -251,13 +251,13 @@ export default function NoteIdScreen() {
           }}
         >
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
-          <Text style={{ color: "#F8FAFC", fontSize: 22, fontWeight: "700" }}>{MODE.label}</Text>
+          <Text style={{ color: pc.text, fontSize: 22, fontWeight: "700" }}>{MODE.label}</Text>
         </View>
         <View style={{ flex: 1, paddingHorizontal: 20, justifyContent: "center" }}>
-          <Text style={{ color: "#97A3B6", fontSize: 14, marginBottom: 8 }}>
+          <Text style={{ color: pc.textSecondary, fontSize: 14, marginBottom: 8 }}>
             Identify the note you hear.
           </Text>
-          <Text style={{ color: "#F8FAFC", fontSize: 18, fontWeight: "600", marginBottom: 32 }}>
+          <Text style={{ color: pc.text, fontSize: 18, fontWeight: "600", marginBottom: 32 }}>
             Select difficulty
           </Text>
           {(["easy", "medium", "hard"] as Difficulty[]).map((d) => (
@@ -268,11 +268,11 @@ export default function NoteIdScreen() {
               accessibilityLabel={`Start ${d} difficulty`}
               accessibilityHint={`${DIFFICULTY_NOTES[d].length} notes · ${DIFFICULTY_CONFIG[d].rounds} rounds${DIFFICULTY_CONFIG[d].timeLimit > 0 ? ` · ${DIFFICULTY_CONFIG[d].timeLimit}s per round` : ""}`}
               style={({ pressed }) => ({
-                backgroundColor: "rgba(21,24,32,0.86)",
+                backgroundColor: pc.cardSurface,
                 borderRadius: 16,
                 padding: 20,
                 borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.10)",
+                borderColor: pc.cardBorder,
                 marginBottom: 12,
                 minHeight: 48,
                 opacity: pressed ? 0.75 : 1,
@@ -280,7 +280,7 @@ export default function NoteIdScreen() {
             >
               <Text
                 style={{
-                  color: "#F8FAFC",
+                  color: pc.text,
                   fontWeight: "600",
                   fontSize: 16,
                   textTransform: "capitalize",
@@ -288,7 +288,7 @@ export default function NoteIdScreen() {
               >
                 {d}
               </Text>
-              <Text style={{ color: "#97A3B6", fontSize: 13, marginTop: 3 }}>
+              <Text style={{ color: pc.textSecondary, fontSize: 13, marginTop: 3 }}>
                 {DIFFICULTY_NOTES[d].length} notes · {DIFFICULTY_CONFIG[d].rounds} rounds
                 {DIFFICULTY_CONFIG[d].timeLimit > 0
                   ? ` · ${DIFFICULTY_CONFIG[d].timeLimit}s timer`
@@ -298,7 +298,7 @@ export default function NoteIdScreen() {
           ))}
         </View>
         <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
-          <Text style={{ color: "#97A3B6", textAlign: "center" }}>← Back</Text>
+          <Text style={{ color: pc.textSecondary, textAlign: "center" }}>← Back</Text>
         </Pressable>
       </View>
     );
@@ -341,7 +341,7 @@ export default function NoteIdScreen() {
   const timerPct = isTimed ? Math.max(0, Math.min(1, timeLeft / timeLimit)) : 0;
   const timerUrgent = isTimed && timeLeft <= 3;
   return (
-    <View style={{ flex: 1, backgroundColor: "#10130E" }}>
+    <View style={{ flex: 1, backgroundColor: pc.screen }}>
       <GameHeader
         score={score}
         round={round}
@@ -357,11 +357,11 @@ export default function NoteIdScreen() {
             <View
               style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }}
             >
-              <Text style={{ color: "#97A3B6", fontSize: 12, fontWeight: "600" }}>Time</Text>
+              <Text style={{ color: pc.textSecondary, fontSize: 12, fontWeight: "600" }}>Time</Text>
               <Text
                 accessibilityLabel={`${timeLeft} seconds remaining`}
                 style={{
-                  color: timerUrgent ? "#f87171" : "#F8FAFC",
+                  color: timerUrgent ? pc.danger : pc.text,
                   fontSize: 13,
                   fontWeight: "700",
                   fontVariant: ["tabular-nums"],
@@ -374,7 +374,7 @@ export default function NoteIdScreen() {
               style={{
                 height: 6,
                 borderRadius: 3,
-                backgroundColor: "rgba(255,255,255,0.08)",
+                backgroundColor: pc.cardAmbient,
                 overflow: "hidden",
               }}
             >
@@ -383,7 +383,7 @@ export default function NoteIdScreen() {
                   height: "100%",
                   width: `${timerPct * 100}%`,
                   borderRadius: 3,
-                  backgroundColor: timerUrgent ? "#f87171" : ACCENT,
+                  backgroundColor: timerUrgent ? pc.danger : ACCENT,
                 }}
               />
             </View>
@@ -410,7 +410,7 @@ export default function NoteIdScreen() {
           >
             <Text style={{ fontSize: 36 }}>▶</Text>
           </Pressable>
-          <Text style={{ color: "#97A3B6", marginTop: 12, fontSize: 14 }}>Tap to replay tone</Text>
+          <Text style={{ color: pc.textSecondary, marginTop: 12, fontSize: 14 }}>Tap to replay tone</Text>
         </View>
 
         {/* Feedback banner */}
@@ -418,18 +418,18 @@ export default function NoteIdScreen() {
           <View
             style={{
               backgroundColor:
-                feedback === "correct" ? "rgba(74,222,128,0.12)" : "rgba(248,113,113,0.12)",
+                feedback === "correct" ? pc.success + "1E" : pc.danger + "1E",
               borderRadius: 12,
               padding: 12,
               marginBottom: 20,
               alignItems: "center",
               borderWidth: 1,
-              borderColor: feedback === "correct" ? "#4ade80" : "#f87171",
+              borderColor: feedback === "correct" ? pc.success : pc.danger,
             }}
           >
             <Text
               style={{
-                color: feedback === "correct" ? "#4ade80" : "#f87171",
+                color: feedback === "correct" ? pc.success : pc.danger,
                 fontWeight: "700",
                 fontSize: 16,
               }}
@@ -497,7 +497,7 @@ export default function NoteIdScreen() {
       </View>
 
       <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
-        <Text style={{ color: "#97A3B6", textAlign: "center", fontSize: 13 }}>← Dashboard</Text>
+        <Text style={{ color: pc.textSecondary, textAlign: "center", fontSize: 13 }}>← Dashboard</Text>
       </Pressable>
     </View>
   );

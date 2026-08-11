@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   GAME_MODE_META,
