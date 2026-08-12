@@ -492,6 +492,25 @@ export default function FrequencySliderPage() {
                 background: "var(--ios-bg3)",
                 cursor: "pointer",
               }}
+              role="slider"
+              tabIndex={0}
+              aria-label={`Frequency slider, current position: ${sliderPos}%`}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={sliderPos}
+              onKeyDown={(e) => {
+                if (phase !== "playing") return;
+                if (e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  setSliderPos((p) => Math.max(0, p - 2));
+                } else if (e.key === "ArrowRight") {
+                  e.preventDefault();
+                  setSliderPos((p) => Math.min(100, p + 2));
+                } else if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
