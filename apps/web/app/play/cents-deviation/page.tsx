@@ -508,6 +508,25 @@ export default function CentsDeviationPage() {
               cursor: "pointer",
               overflow: "hidden",
             }}
+            role="slider"
+            tabIndex={0}
+            aria-label={`Cents deviation meter, current guess: ${needlePos} cents out of ${config.centsRange}`}
+            aria-valuemin={-config.centsRange}
+            aria-valuemax={config.centsRange}
+            aria-valuenow={needlePos}
+            onKeyDown={(e) => {
+              if (phase !== "playing" || submitted) return;
+              if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                setNeedlePos((p) => Math.max(-config.centsRange, p - 2));
+              } else if (e.key === "ArrowRight") {
+                e.preventDefault();
+                setNeedlePos((p) => Math.min(config.centsRange, p + 2));
+              } else if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
             onPointerDown={(e) => {
               setIsDragging(true);
               handleDrag(e.clientX);
