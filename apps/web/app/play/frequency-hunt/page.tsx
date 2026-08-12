@@ -221,6 +221,7 @@ export default function FrequencyHuntPage() {
           }}
         >
           <button
+            aria-label="Back to dashboard"
             onClick={() => {
               stopPreview();
               router.push("/dashboard");

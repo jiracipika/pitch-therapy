@@ -351,6 +351,7 @@ export default function ChordDetectivePage() {
           }}
         >
           <button
+            aria-label="Back to dashboard"
             onClick={() => router.push("/dashboard")}
             style={{
               width: 36,

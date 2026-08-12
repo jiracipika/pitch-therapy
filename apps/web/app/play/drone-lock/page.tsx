@@ -288,6 +288,7 @@ export default function DroneLockPage() {
           }}
         >
           <button
+            aria-label="Back to dashboard"
             onClick={() => {
               stopMic();
               stopDrone();

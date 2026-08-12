@@ -378,6 +378,7 @@ export default function NoteIdPage() {
           }}
         >
           <button
+            aria-label="Back to dashboard"
             onClick={() => router.push("/dashboard")}
             style={{
               width: 36,

@@ -324,6 +324,7 @@ export default function PianoTapPage() {
           }}
         >
           <button
+            aria-label="Back to dashboard"
             onClick={() => router.push("/dashboard")}
             style={{
               width: 36,

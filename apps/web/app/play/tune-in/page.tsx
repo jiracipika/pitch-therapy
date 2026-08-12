@@ -475,6 +475,7 @@ export default function TuneInPage() {
           }}
         >
           <button
+            aria-label="Back to dashboard"
             onClick={() => {
               stopMic();
               router.push("/dashboard");
