@@ -53,6 +53,7 @@ export default function PitchMatchPage() {
   };
 
   const startMic = async () => {
+    try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     streamRef.current = stream;
     const ctx = new AudioContext();
@@ -80,6 +81,9 @@ export default function PitchMatchPage() {
       rafRef.current = requestAnimationFrame(detect);
     };
     detect();
+    } catch (err) {
+      console.error('Mic access failed:', err);
+    }
   };
 
   const stopMic = () => {

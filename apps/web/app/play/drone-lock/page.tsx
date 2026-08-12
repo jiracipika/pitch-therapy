@@ -75,9 +75,12 @@ export default function DroneLockPage() {
     [stopDrone],
   );
 
+  const [micError, setMicError] = useState<string | null>(null);
+
   const startMic = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    streamRef.current = stream;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
     const ctx = new AudioContext();
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
@@ -104,6 +107,13 @@ export default function DroneLockPage() {
       rafRef.current = requestAnimationFrame(detect);
     };
     detect();
+    } catch (err) {
+      setMicError(
+        err instanceof Error && err.name === 'NotAllowedError'
+          ? 'Microphone access denied. Please allow mic access in your browser settings.'
+          : 'Could not access microphone. Please check your device.'
+      );
+    }
   };
 
   const stopMic = useCallback(() => {
