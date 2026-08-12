@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
   GAME_MODE_META,
@@ -79,7 +79,7 @@ export default function PlayModesScreen() {
           <View style={{ gap: 9 }}>
             <Pill label={modeCountLabel(GAME_MODES.length)} color={colors.green} />
             <Text style={{ color: colors.text, ...typography.title2 }}>
-              Every game is still here.
+              Pick a skill and start listening.
             </Text>
             <Text
               style={{
@@ -88,8 +88,7 @@ export default function PlayModesScreen() {
                 lineHeight: 18,
               }}
             >
-              Modes are grouped from the shared game catalog, so mobile stays in sync with web as
-              new drills ship.
+              Browse focused drills for pitch, notes, frequency, memory, and advanced listening.
             </Text>
           </View>
 
@@ -97,17 +96,27 @@ export default function PlayModesScreen() {
             {featuredModes.map((modeId) => {
               const mode = GAME_MODE_META[modeId];
               return (
-                <View
+                <Pressable
                   key={mode.id}
-                  style={{
+                  onPress={() => {
+                    void triggerSelectionHaptic();
+                    router.push(`/play/${mode.id}`);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Play featured mode ${mode.label}`}
+                  accessibilityHint={mode.description}
+                  style={({ pressed }) => ({
                     flex: 1,
+                    minHeight: 48,
                     borderRadius: 14,
                     borderWidth: 1,
                     borderColor: mode.accentHex + "35",
                     backgroundColor: mode.accentHex + "14",
                     padding: 10,
                     gap: 3,
-                  }}
+                    opacity: pressed ? 0.8 : 1,
+                    transform: [{ scale: pressed ? 0.985 : 1 }],
+                  })}
                 >
                   <Text
                     style={{
@@ -121,7 +130,7 @@ export default function PlayModesScreen() {
                   <Text style={{ color: colors.text, ...typography.footnote }} numberOfLines={1}>
                     {mode.label}
                   </Text>
-                </View>
+                </Pressable>
               );
             })}
           </View>

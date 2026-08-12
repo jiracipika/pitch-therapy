@@ -1169,6 +1169,26 @@ body.pt-has-nav .pt-main-shell {
   width: 100%;
 }
 
+.pt-dashboard-glance {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.pt-dashboard-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 30rem) {
+  .pt-dashboard-glance,
+  .pt-dashboard-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* ============================================================
    MOBILE GAME GRID
    ============================================================ */

@@ -1,4 +1,4 @@
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
   GAME_MODE_META,
@@ -9,7 +9,6 @@ import { AnimatedModeCard } from "@/components/AnimatedModeCard";
 import {
   AnimatedStatItem,
   GlassCard,
-  MotionStatusCard,
   Pill,
   RecommendedPath,
   SectionHeader,
@@ -35,14 +34,9 @@ export default function DashboardScreen() {
       subtitle="A focused ear-training studio for daily reps."
       showSwipeHint
       heroVariant="dashboard"
-      heroHint="Flow: Warm-up -> Featured Mode -> Daily"
+      heroHint="Warm up, focus, then review."
     >
-      <MotionStatusCard
-        tone="success"
-        title="Studio is ready"
-        message="Your personalized dashboard is loaded and tuned for your next session."
-      />
-      <GlassCard accent={colors.teal} padding={18} style={{ gap: 18 }}>
+      <GlassCard accent={colors.signal} padding={18} style={{ gap: 18 }}>
         <View
           style={{
             flexDirection: isTablet ? "row" : "column",
@@ -50,23 +44,40 @@ export default function DashboardScreen() {
             gap: 14,
           }}
         >
-          <Image
-            source={require("../assets/logo-placeholder.png")}
+          <View
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
             style={{
               width: 66,
               height: 66,
               borderRadius: radii.lg,
               borderWidth: 1,
-              borderColor: "rgba(255,255,255,0.18)",
+              borderColor: colors.signal + "66",
+              backgroundColor: colors.signal + "18",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-          />
+          >
+            <Text style={{ color: colors.signal, fontSize: 25, fontWeight: "900", letterSpacing: -1 }}>
+              PT
+            </Text>
+            <View
+              style={{
+                width: 30,
+                height: 3,
+                marginTop: 4,
+                borderRadius: 2,
+                backgroundColor: colors.coral,
+              }}
+            />
+          </View>
           <View style={{ flex: 1, gap: 7 }}>
-            <Pill label="Ready for today" color={colors.green} />
+            <Pill label={practicePlan.personalized ? "Tuned to your progress" : "Ready for today"} color={colors.signal} />
             <Text style={{ color: colors.text, ...typography.title2 }}>
-              Train smarter, not louder.
+              {practicePlan.title}
             </Text>
             <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
-              Quick rounds, daily challenges, and precise pitch drills are all one swipe away.
+              {practicePlan.summary}
             </Text>
           </View>
         </View>
@@ -78,7 +89,7 @@ export default function DashboardScreen() {
               router.push("/play-modes");
             }}
             accessibilityRole="button"
-            accessibilityLabel="Start play"
+            accessibilityLabel="Browse play modes"
             accessibilityHint="Open the full play mode catalog"
             style={({ pressed }) => ({
               flex: 1,
@@ -90,7 +101,7 @@ export default function DashboardScreen() {
               opacity: pressed ? 0.82 : 1,
             })}
           >
-            <Text style={{ color: colors.background, ...typography.headline }}>Start Play</Text>
+            <Text style={{ color: colors.background, ...typography.headline }}>Browse Modes</Text>
           </Pressable>
           <Pressable
             onPress={() => {
@@ -164,9 +175,11 @@ export default function DashboardScreen() {
                 </View>
               )}
             </View>
-            <Text style={{ color: colors.text, ...typography.title2 }}>{practicePlan.title}</Text>
+            <Text style={{ color: colors.text, ...typography.title2 }}>Keep the signal alive</Text>
             <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
-              {practicePlan.summary}
+              {stats.streak > 0
+                ? `${stats.streak} day${stats.streak === 1 ? "" : "s"} strong. Complete one focused session today.`
+                : "Complete one focused session today to begin a practice streak."}
             </Text>
           </View>
           <StreakRing streak={stats.streak} size={88} pulse={stats.streak > 0} />

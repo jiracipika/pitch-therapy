@@ -134,7 +134,7 @@ function CountdownTimer() {
       );
     };
     calc();
-    const id = setInterval(calc, 1000);
+    const id = setInterval(calc, 30000);
     return () => clearInterval(id);
   }, []);
 
@@ -216,18 +216,17 @@ export default function Dashboard() {
           <div className="pt-dashboard-main">
             {/* ── STREAK + DAILY ROW ── */}
             <motion.div
-              className="pt-desktop-card mb-3 grid grid-cols-2 gap-3"
+              className="pt-desktop-card pt-dashboard-glance mb-3"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             >
               {/* Streak card */}
               <div
-                className="ios-card ios-card-lift flex items-center gap-4 p-4"
+                className="ios-card flex items-center gap-4 p-4"
                 style={{
                   minHeight: 96,
-                  background:
-                    "linear-gradient(135deg, rgba(255,159,10,0.08) 0%, rgba(255,55,95,0.04) 100%)",
+                  background: "color-mix(in srgb, var(--ios-orange) 7%, var(--pt-surface-1))",
                 }}
               >
                 <StreakRing streak={stats.streak} />
@@ -251,7 +250,7 @@ export default function Dashboard() {
 
               {/* Daily card */}
               <div
-                className="ios-card ios-card-lift flex flex-col justify-between p-4"
+                className="ios-card flex flex-col justify-between p-4"
                 style={{
                   minHeight: 96,
                   background:
@@ -280,8 +279,8 @@ export default function Dashboard() {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: 4,
-                    height: 32,
-                    borderRadius: 8,
+                    minHeight: 44,
+                    borderRadius: 4,
                     background: "var(--ios-blue)",
                     color: "var(--pt-on-accent)",
                     fontSize: 13,
@@ -305,7 +304,7 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.06, duration: 0.4 }}
-              style={{ display: "flex", gap: 8, marginBottom: 12 }}
+              className="pt-dashboard-actions"
             >
               <Link
                 href="/daily"
@@ -316,19 +315,19 @@ export default function Dashboard() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 8,
-                  height: 48,
-                  borderRadius: 14,
-                  background: "linear-gradient(135deg, var(--ios-blue) 0%, color-mix(in srgb, var(--ios-blue) 70%, var(--ios-indigo)) 100%)",
+                  minHeight: 48,
+                  borderRadius: 4,
+                  background: "var(--ios-blue)",
                   color: "var(--pt-on-accent)",
                   fontSize: 15,
                   fontWeight: 700,
                   letterSpacing: "-0.2px",
                   textDecoration: "none",
-                  boxShadow: "0 4px 14px color-mix(in srgb, var(--ios-blue) 30%, transparent)",
+                  boxShadow: "3px 4px 0 var(--pt-shadow)",
                 }}
               >
-                <span style={{ fontSize: 18 }}>▶</span>
-                Play Daily Challenge
+                <span aria-hidden="true" style={{ fontSize: 18 }}>▶</span>
+                Start Daily Drill
               </Link>
               <Link
                 href="/play-modes"
@@ -339,8 +338,8 @@ export default function Dashboard() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 8,
-                  height: 48,
-                  borderRadius: 14,
+                  minHeight: 48,
+                  borderRadius: 4,
                   background: "var(--pt-surface-1)",
                   border: "1px solid var(--pt-stroke)",
                   color: "var(--ios-label)",
@@ -350,8 +349,8 @@ export default function Dashboard() {
                   textDecoration: "none",
                 }}
               >
-                <span style={{ fontSize: 18 }}>🎯</span>
-                Browse All Modes
+                <span aria-hidden="true" style={{ fontSize: 18 }}>◎</span>
+                Browse Modes
               </Link>
             </motion.div>
 
@@ -366,9 +365,8 @@ export default function Dashboard() {
                 className="ios-card"
                 style={{
                   padding: "14px 16px",
-                  background:
-                    "linear-gradient(135deg, rgba(48,209,88,0.06) 0%, rgba(90,200,250,0.04) 100%)",
-                  border: "1px solid rgba(48,209,88,0.1)",
+                  background: "color-mix(in srgb, var(--ios-green) 6%, var(--pt-surface-1))",
+                  border: "1px solid color-mix(in srgb, var(--ios-green) 18%, var(--pt-stroke))",
                 }}
               >
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
