@@ -137,7 +137,9 @@ export default function DailyPage() {
                     Streak
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>0</span>
+                    <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>
+                      {loaded ? stats.streak : 0}
+                    </span>
                     <span style={{ fontSize: 18 }}>🔥</span>
                   </div>
                 </div>

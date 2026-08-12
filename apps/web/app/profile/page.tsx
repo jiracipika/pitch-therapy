@@ -1,9 +1,16 @@
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
 import { useStatsContext } from '@/components/StatsProvider';
+import {
+  evaluateAchievements,
+  getNextGoals,
+  getLatestBadges,
+  type AchievementStatus,
+} from '@pitch-therapy/core';
 
 const MODES = [
   { id: 'pitch-match',      label: 'Pitch Match',      icon: '🎤', color: '#0A84FF', category: 'Voice' },
@@ -33,6 +40,31 @@ const CATEGORIES = [
   { label: 'Advanced', color: '#FF375F', desc: 'Complex musical skills' },
 ];
 
+/** Format the progress metric for a locked tier as "current / target". */
+function formatMetricProgress(s: AchievementStatus): string {
+  const { tier, progress } = s;
+  switch (tier.category) {
+    case 'volume':
+      return `${Math.round(progress)} / ${tier.threshold} sessions`;
+    case 'consistency':
+      return `${Math.round(progress)} / ${tier.threshold} day streak`;
+    case 'accuracy':
+      return `${Math.round(progress * 100)}% / ${Math.round(tier.threshold * 100)}%`;
+    case 'versatility':
+      return `${Math.round(progress)} / ${tier.threshold} modes`;
+    case 'mastery':
+      return `${Math.round(progress)} / ${tier.threshold} mastered`;
+    case 'speed': {
+      const targetSec = (tier.threshold / 1000).toFixed(0);
+      const currentSec =
+        Number.isFinite(progress) && progress > 0 ? (progress / 1000).toFixed(1) : '—';
+      return `${currentSec}s avg / under ${targetSec}s`;
+    }
+    default:
+      return '';
+  }
+}
+
 export default function ProfilePage() {
   const { stats, loaded } = useStatsContext();
 
@@ -46,6 +78,11 @@ export default function ProfilePage() {
   const varietyScore = Math.min(100, Math.round((modesPlayed / 18) * 50));
   const accuracyScore = Math.min(100, avgAccuracy);
   const earProfileScore = Math.round((varietyScore * 0.4) + (accuracyScore * 0.4) + (Math.min(stats.bestStreak, 7) / 7 * 20));
+
+  // Achievements derived from the same stats context as the rest of the page.
+  const achievements = useMemo(() => evaluateAchievements(stats.results), [stats.results]);
+  const nextGoals = useMemo(() => getNextGoals(stats.results), [stats.results]);
+  const latestBadges = useMemo(() => getLatestBadges(stats.results), [stats.results]);
 
   const categoryScores = CATEGORIES.map((cat) => {
     const catModes = MODES.filter((m) => m.category === cat.label);
@@ -289,6 +326,169 @@ export default function ProfilePage() {
             </motion.div>
           </div>
         </div>
+
+        {/* ── ACHIEVEMENTS / BADGES ── */}
+        {loaded && totalGames > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.22, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            style={{ marginTop: 16 }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 4px 10px' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '-0.08px' }}>
+                Achievements
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ios-label2)' }}>
+                {achievements.unlockedCount}<span style={{ color: 'var(--ios-label3)' }}> / {achievements.totalCount}</span>
+              </div>
+            </div>
+
+            <div className="ios-card pt-desktop-card" style={{ padding: 18, marginBottom: 12 }}>
+              {/* Summary bar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ios-label)', marginBottom: 6 }}>
+                    {achievements.unlockedCount === 0
+                      ? 'Start unlocking badges'
+                      : `${achievements.unlockedCount} badge${achievements.unlockedCount !== 1 ? 's' : ''} unlocked`}
+                  </div>
+                  <div style={{ height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(achievements.unlockedCount / achievements.totalCount) * 100}%` }}
+                      transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                      style={{
+                        height: '100%',
+                        borderRadius: 3,
+                        background: 'linear-gradient(90deg, var(--ios-green), var(--ios-blue))',
+                        boxShadow: '0 0 8px rgba(48,209,88,0.3)',
+                      }}
+                    />
+                  </div>
+                </div>
+                {achievements.latestUnlock && (
+                  <div
+                    title={`Latest: ${achievements.latestUnlock.label}`}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      padding: '4px 10px', borderRadius: 999, flexShrink: 0,
+                      background: 'linear-gradient(135deg, rgba(48,209,88,0.18), rgba(10,132,255,0.10))',
+                      border: '0.5px solid rgba(48,209,88,0.35)',
+                      fontSize: 11, fontWeight: 600, color: 'var(--ios-label)',
+                    }}
+                  >
+                    <span style={{ fontSize: 12 }}>{achievements.latestUnlock.icon}</span>
+                    <span>{achievements.latestUnlock.label}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Current badges — strongest unlocked tier per category */}
+              {latestBadges.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+                  {latestBadges.map((b) => (
+                    <div
+                      key={b.tier.id}
+                      title={`${b.tier.label} — your current best in ${b.tier.category}`}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        padding: '4px 10px', borderRadius: 999,
+                        background: 'linear-gradient(135deg, rgba(48,209,88,0.18), rgba(10,132,255,0.10))',
+                        border: '0.5px solid rgba(48,209,88,0.35)',
+                        fontSize: 11, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.08px',
+                      }}
+                    >
+                      <span style={{ fontSize: 12 }}>{b.tier.icon}</span>
+                      <span>{b.tier.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Tier grid with staggered entrance */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                  gap: 8,
+                }}
+              >
+                {achievements.statuses.map((s, i) => {
+                  const goal = nextGoals.find(
+                    (g) => g.tier.category === s.tier.category && !g.unlocked,
+                  );
+                  const isNext = goal?.tier.id === s.tier.id;
+                  return (
+                    <motion.div
+                      key={s.tier.id}
+                      initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{
+                        delay: 0.3 + i * 0.04,
+                        duration: 0.35,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      style={{
+                        padding: 12,
+                        borderRadius: 12,
+                        background: s.unlocked
+                          ? 'linear-gradient(135deg, rgba(48,209,88,0.12), rgba(10,132,255,0.06))'
+                          : 'rgba(255,255,255,0.03)',
+                        border: isNext
+                          ? '0.5px solid var(--ios-blue)'
+                          : s.unlocked
+                            ? '0.5px solid rgba(48,209,88,0.2)'
+                            : '0.5px solid var(--ios-sep)',
+                        opacity: s.unlocked ? 1 : 0.7,
+                      }}
+                    >
+                      {/* Icon + title */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                        <span style={{ fontSize: 18, filter: s.unlocked ? 'none' : 'grayscale(0.7)' }}>
+                          {s.tier.icon}
+                        </span>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.1px' }}>
+                          {s.tier.label}
+                        </span>
+                      </div>
+
+                      {/* Description */}
+                      <div style={{ fontSize: 10, color: 'var(--ios-label3)', lineHeight: 1.4, marginBottom: 8 }}>
+                        {s.tier.description}
+                      </div>
+
+                      {/* Status / progress */}
+                      {s.unlocked ? (
+                        <div style={{ fontSize: 10, color: 'var(--ios-green)', fontWeight: 600 }}>
+                          ✓ Unlocked
+                        </div>
+                      ) : (
+                        <>
+                          <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.06)', overflow: 'hidden', marginBottom: 3 }}>
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.round(s.progressFraction * 100)}%` }}
+                              transition={{ duration: 0.8, delay: 0.5 + i * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                              style={{
+                                height: '100%',
+                                borderRadius: 2,
+                                background: isNext ? 'var(--ios-blue)' : 'var(--ios-label3)',
+                              }}
+                            />
+                          </div>
+                          <div style={{ fontSize: 9, color: 'var(--ios-label3)' }}>
+                            {formatMetricProgress(s)}
+                          </div>
+                        </>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         <div style={{ height: 20 }} />
       </div>
