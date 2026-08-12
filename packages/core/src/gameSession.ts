@@ -98,10 +98,6 @@ function getWordleFeedback(
   return [];
 }
 
-const ALL_NOTES_FOR_WORDLE = [
-  "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-];
-
 // ─── Initial State ───────────────────────────────────────────────────────────
 
 export const initialSessionState: SessionState = {

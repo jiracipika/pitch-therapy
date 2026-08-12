@@ -37,6 +37,7 @@ export default function PitchMatchPage() {
     }[]
   >([]);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [micError, setMicError] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number>(0);
   const roundStart = useRef(0);
@@ -54,8 +55,9 @@ export default function PitchMatchPage() {
 
   const startMic = async () => {
     try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    streamRef.current = stream;
+      setMicError(null);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
     const ctx = new AudioContext();
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
@@ -82,7 +84,11 @@ export default function PitchMatchPage() {
     };
     detect();
     } catch (err) {
-      console.error('Mic access failed:', err);
+      setMicError(
+        err instanceof Error && err.name === 'NotAllowedError'
+          ? 'Microphone access denied. Please allow mic access in your browser settings.'
+          : 'Could not access microphone. Please check your device.',
+      );
     }
   };
 
@@ -347,6 +353,22 @@ export default function PitchMatchPage() {
             >
               Start Training
             </button>
+            {micError && (
+              <div
+                style={{
+                  marginTop: 12,
+                  borderRadius: 12,
+                  padding: "12px 16px",
+                  background: "rgba(255,69,58,0.12)",
+                  border: "1px solid var(--ios-red)",
+                  fontSize: 13,
+                  color: "var(--ios-red)",
+                  textAlign: "left",
+                }}
+              >
+                ⚠️ {micError}
+              </div>
+            )}
           </div>
         )}
 

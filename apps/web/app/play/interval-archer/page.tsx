@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { playTone, getAudioContext, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
-import { INTERVALS as CORE_INTERVALS, type IntervalDef } from "@pitch-therapy/core";
+import { INTERVALS as CORE_INTERVALS } from "@pitch-therapy/core";
 
 const ACCENT = "#D946EF";
 

@@ -371,6 +371,22 @@ export default function DroneLockPage() {
             >
               Start Session
             </button>
+            {micError && (
+              <div
+                style={{
+                  marginTop: 12,
+                  borderRadius: 12,
+                  padding: "12px 16px",
+                  background: "rgba(255,69,58,0.12)",
+                  border: "1px solid var(--ios-red)",
+                  fontSize: 13,
+                  color: "var(--ios-red)",
+                  textAlign: "left",
+                }}
+              >
+                ⚠️ {micError}
+              </div>
+            )}
           </div>
         )}
 
