@@ -4,24 +4,12 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useStatsContext } from "@/components/StatsProvider";
-import { playTone } from "@/lib/audio";
+import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 
 const ACCENT = "#FF453A";
-const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const NOTE_FREQS: Record<string, number> = {
-  C: 261.63,
-  "C#": 277.18,
-  D: 293.66,
-  "D#": 311.13,
-  E: 329.63,
-  F: 349.23,
-  "F#": 369.99,
-  G: 392.0,
-  "G#": 415.3,
-  A: 440.0,
-  "A#": 466.16,
-  B: 493.88,
-};
+const NOTE_FREQS: Record<string, number> = Object.fromEntries(
+  NOTE_NAMES.map((n) => [n, NOTE_FREQUENCIES[`${n}4`] ?? 440]),
+);
 
 function pickRandom() {
   return NOTE_NAMES[Math.floor(Math.random() * NOTE_NAMES.length)];
@@ -109,7 +97,8 @@ export default function TuningBattlePage() {
     const p = players[playerIdx];
     if (!p.selectedNote || p.lockedIn) return;
 
-    const cents = p.selectedNote === targetNote ? 0 : Math.random() * 8 - 4;
+    const isCorrect = p.selectedNote === targetNote;
+    const cents = isCorrect ? 0 : 50; // simplified: correct = 0 cents off, wrong = far off
 
     setPlayers((prev) => {
       const next = [...prev] as [Player, Player];
@@ -166,7 +155,7 @@ export default function TuningBattlePage() {
         score: players[0]?.score ?? 0,
         accuracy:
           totalRounds > 0
-            ? Math.min(1, (players[0]?.score ?? 0) / Math.max(1, totalRounds * 100))
+            ? Math.min(1, (players[0]?.score ?? 0) / totalRounds)
             : 0,
         rounds: totalRounds,
         date: new Date().toISOString(),
@@ -175,8 +164,8 @@ export default function TuningBattlePage() {
     }
   }, [phase, recordResult]);
 
-  const p1Notes = NOTE_NAMES.slice(0, 6);
-  const p2Notes = NOTE_NAMES.slice(6);
+  const p1Notes = NOTE_NAMES;
+  const p2Notes = NOTE_NAMES;
 
   return (
     <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
