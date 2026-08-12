@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
 
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
@@ -26,6 +26,26 @@ export default function PitchMemoryPage() {
   const [feedback, setFeedback] = useState<"correct" | "wrong">("correct");
   const [lives, setLives] = useState(3);
 
+  // Track all pending timeouts so we can cancel them on unmount / back nav.
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const trackTimeout = useCallback(
+    (fn: () => void, delay: number): ReturnType<typeof setTimeout> => {
+      const id = setTimeout(() => {
+        timeoutsRef.current = timeoutsRef.current.filter((t) => t !== id);
+        fn();
+      }, delay);
+      timeoutsRef.current.push(id);
+      return id;
+    },
+    [],
+  );
+
+  const clearTimeouts = useCallback(() => {
+    timeoutsRef.current.forEach((t) => clearTimeout(t));
+    timeoutsRef.current = [];
+  }, []);
+
   const generateSequence = useCallback((len: number) => {
     const seq: number[] = [];
     for (let i = 0; i < len; i++) seq.push(Math.floor(Math.random() * 12));
@@ -38,22 +58,23 @@ export default function PitchMemoryPage() {
       const gap = Math.max(0.15, 0.4 - level * 0.02);
       seq.forEach((noteIdx, i) => {
         if (i < startFrom) return;
-        setTimeout(
+        trackTimeout(
           () => {
             setPlayingIdx(i);
             playTone(NOTE_FREQS[noteIdx], tempo);
-            setTimeout(() => setPlayingIdx(-1), tempo * 1000 - 50);
+            trackTimeout(() => setPlayingIdx(-1), tempo * 1000 - 50);
           },
           (i - startFrom) * (tempo + gap) * 1000,
         );
       });
       const totalTime = (seq.length - startFrom) * (tempo + gap) * 1000 + 300;
-      setTimeout(() => setPhase("input"), totalTime);
+      trackTimeout(() => setPhase("input"), totalTime);
     },
-    [level],
+    [level, trackTimeout],
   );
 
   const startGame = () => {
+    clearTimeouts();
     const seq = generateSequence(2);
     setSequence(seq);
     setPlayerInput([]);
@@ -62,7 +83,7 @@ export default function PitchMemoryPage() {
     setStreak(0);
     setLives(3);
     setPhase("playing");
-    setTimeout(() => playSequence(seq), 500);
+    trackTimeout(() => playSequence(seq), 500);
   };
 
   const nextLevel = () => {
@@ -71,7 +92,7 @@ export default function PitchMemoryPage() {
     setPlayerInput([]);
     setLevel((l) => l + 1);
     setPhase("playing");
-    setTimeout(() => playSequence(newSeq), 400);
+    trackTimeout(() => playSequence(newSeq), 400);
   };
 
   const handlePianoTap = (noteIdx: number) => {
@@ -87,9 +108,9 @@ export default function PitchMemoryPage() {
       const newLives = lives - 1;
       setLives(newLives);
       if (newLives <= 0) {
-        setTimeout(() => setPhase("done"), 1500);
+        trackTimeout(() => setPhase("done"), 1500);
       } else {
-        setTimeout(() => {
+        trackTimeout(() => {
           setPlayerInput([]);
           setPhase("playing");
           playSequence(sequence);
@@ -104,7 +125,7 @@ export default function PitchMemoryPage() {
       setStreak((s) => s + 1);
       setFeedback("correct");
       setPhase("feedback");
-      setTimeout(nextLevel, 1200);
+      trackTimeout(nextLevel, 1200);
     }
   };
 
@@ -126,6 +147,15 @@ export default function PitchMemoryPage() {
       });
     }
   }, [phase, recordResult]);
+
+  // Clean up all pending timeouts and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach((t) => clearTimeout(t));
+      timeoutsRef.current = [];
+      stopAllTones();
+    };
+  }, []);
 
   if (phase === "done") {
     return (

@@ -1,6 +1,34 @@
 // Singleton AudioContext — reused to avoid browser 6-context limit and memory leaks
 let _ctx: AudioContext | null = null;
 
+// Track active oscillators so stopAllTones() can silence everything on
+// navigation away from a game screen.
+const _activeOscillators = new Set<OscillatorNode>();
+
+/**
+ * Stop every currently-playing tone created by playTone.
+ *
+ * Called on back-navigation / unmount from game screens to prevent tones
+ * from bleeding into the next page.
+ */
+export function stopAllTones(): void {
+  if (_activeOscillators.size === 0) return;
+  const ctx = _ctx;
+  for (const osc of _activeOscillators) {
+    try {
+      osc.stop();
+      osc.disconnect();
+    } catch {
+      // Already stopped — ignore.
+    }
+  }
+  _activeOscillators.clear();
+  // Suspend the context so any scheduled gain ramps are silenced too.
+  if (ctx && ctx.state === 'running') {
+    void ctx.suspend();
+  }
+}
+
 export function getAudioContext(): AudioContext {
   if (!_ctx || _ctx.state === 'closed') {
     _ctx = new AudioContext();
@@ -109,6 +137,11 @@ export function playTone(frequency: number, duration: number = 0.5, options?: To
 
   gain.gain.setValueAtTime(safeVolume, ctx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+  _activeOscillators.add(osc);
+  osc.onended = () => {
+    _activeOscillators.delete(osc);
+    osc.disconnect();
+  };
   osc.start();
   osc.stop(ctx.currentTime + duration);
 }

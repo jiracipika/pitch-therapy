@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { playTone } from "@/lib/audio";
+import { playTone, stopAllTones } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 
@@ -167,6 +167,13 @@ export default function FrequencySliderPage() {
       });
     }
   }, [phase, recordResult]);
+
+  // Stop all audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      stopAllTones();
+    };
+  }, []);
 
   if (phase === "done") {
     const avgCents =

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 
@@ -33,6 +33,7 @@ export default function SpeedRoundPage() {
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const nextNote = useCallback(() => {
     const n = pickRandom();
@@ -87,12 +88,15 @@ export default function SpeedRoundPage() {
     const newNote = nextNote();
     playTone(NOTE_FREQUENCIES[`${newNote}4`] || 261.63, 0.3);
 
-    setTimeout(() => setFeedback(null), 300);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    feedbackTimeoutRef.current = setTimeout(() => setFeedback(null), 300);
   };
 
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+      stopAllTones();
     };
   }, []);
 
