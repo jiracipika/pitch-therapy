@@ -169,7 +169,7 @@ export default function DashboardScreen() {
               {practicePlan.summary}
             </Text>
           </View>
-          <StreakRing streak={Math.max(stats.streak, 1)} size={88} pulse={stats.streak > 0} />
+          <StreakRing streak={stats.streak} size={88} pulse={stats.streak > 0} />
         </View>
       </GlassCard>
 

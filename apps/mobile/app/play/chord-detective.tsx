@@ -155,7 +155,7 @@ export default function ChordDetectiveScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
-        <Pressable accessibilityRole="button" onPress={() => router.back()}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>🕵️ Chord Detective</Text>
         <Text style={{ color: pc.textSecondary }}>{score}</Text>
       </View>

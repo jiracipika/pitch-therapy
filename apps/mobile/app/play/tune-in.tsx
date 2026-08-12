@@ -147,7 +147,7 @@ export default function TuneInScreen() {
           </Pressable>
         </View>
 
-        <Pressable accessibilityRole="button" onPress={() => router.back()} style={{ padding: 20 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={{ padding: 20 }}>
           <Text style={{ color: pc.textSecondary, textAlign: 'center' }}>← Back</Text>
         </Pressable>
       </View>

@@ -128,7 +128,7 @@ export default function PitchMemoryScreen() {
             <View style={styles.statCard}><Text style={styles.statValue}>{level}</Text><Text style={styles.statLabel}>Max Level</Text></View>
           </View>
           <Pressable accessibilityRole="button" onPress={startGame} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}><Text style={styles.btnPrimaryText}>Play Again</Text></Pressable>
-          <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Dashboard</Text></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Dashboard</Text></Pressable>
         </View>
       </View>
     );
@@ -144,7 +144,7 @@ export default function PitchMemoryScreen() {
           <Text style={[styles.title, { fontSize: 24 }]}>Pitch Memory</Text>
           <Text style={styles.subtitle}>Listen and reproduce note sequences</Text>
           <Pressable accessibilityRole="button" onPress={startGame} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}><Text style={styles.btnPrimaryText}>Start Game</Text></Pressable>
-          <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Back</Text></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Back</Text></Pressable>
         </View>
       </View>
     );
@@ -155,7 +155,7 @@ export default function PitchMemoryScreen() {
       <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
         {/* Header */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: pc.textSecondary }}>←</Text></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: pc.textSecondary }}>←</Text></Pressable>
           <Text style={{ fontSize: 16, fontWeight: '600', color: ACCENT }}>Pitch Memory</Text>
           <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
             <Text>{lives > 0 ? '❤️'.repeat(lives) : '🖤'.repeat(3)}</Text>

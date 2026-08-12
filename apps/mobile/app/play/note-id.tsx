@@ -297,7 +297,12 @@ export default function NoteIdScreen() {
             </Pressable>
           ))}
         </View>
-        <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          style={{ padding: 20 }}
+        >
           <Text style={{ color: pc.textSecondary, textAlign: "center" }}>← Back</Text>
         </Pressable>
       </View>
@@ -496,7 +501,12 @@ export default function NoteIdScreen() {
         </View>
       </View>
 
-      <Pressable onPress={() => router.back()} style={{ padding: 20 }}>
+      <Pressable
+        onPress={() => router.back()}
+        accessibilityRole="button"
+        accessibilityLabel="Back to Dashboard"
+        style={{ padding: 20 }}
+      >
         <Text style={{ color: pc.textSecondary, textAlign: "center", fontSize: 13 }}>← Dashboard</Text>
       </Pressable>
     </View>

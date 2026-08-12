@@ -131,7 +131,7 @@ export default function FrequencyHuntScreen() {
             <View style={styles.statCard}><Text style={styles.statValue}>{avgDiff} Hz</Text><Text style={styles.statLabel}>Avg Error</Text></View>
           </View>
           <Pressable accessibilityRole="button" onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}><Text style={styles.btnPrimaryText}>Play Again</Text></Pressable>
-          <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Dashboard</Text></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Dashboard</Text></Pressable>
         </View>
       </View>
     );
@@ -147,7 +147,7 @@ export default function FrequencyHuntScreen() {
           <Text style={[styles.title, { fontSize: 24 }]}>Frequency Hunt</Text>
           <Text style={styles.subtitle}>Find exact frequencies by ear</Text>
           <Pressable accessibilityRole="button" onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}><Text style={styles.btnPrimaryText}>Start Hunting</Text></Pressable>
-          <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Back</Text></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Back</Text></Pressable>
         </View>
       </View>
     );
@@ -159,7 +159,7 @@ export default function FrequencyHuntScreen() {
     <View style={styles.container}>
       <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: pc.textSecondary }}>←</Text></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: pc.textSecondary }}>←</Text></Pressable>
           <Text style={{ fontSize: 16, fontWeight: '600', color: ACCENT }}>Frequency Hunt</Text>
           <View style={styles.scoreBadge}><Text style={styles.scoreText}>{score}</Text></View>
         </View>
