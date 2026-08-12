@@ -36,6 +36,19 @@ export default function TuneInScreen() {
   const [results, setResults] = useState<RoundResult[]>([]);
   const sessionStartRef = useRef(0);
   const recordedRef = useRef(false);
+  const answerLockedRef = useRef(false);
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearTransition = useCallback(() => {
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+      transitionTimeoutRef.current = null;
+    }
+  }, []);
+
+  // A pending round transition must never outlive this screen. Without this,
+  // leaving or immediately restarting can advance the replacement session.
+  useEffect(() => clearTransition, [clearTransition]);
 
   // Persist session result once when the game completes.
   useEffect(() => {
@@ -60,6 +73,8 @@ export default function TuneInScreen() {
   }, []);
 
   const startGame = useCallback(() => {
+    clearTransition();
+    answerLockedRef.current = false;
     setRound(0);
     setScore(0);
     setStreak(0);
@@ -71,9 +86,29 @@ export default function TuneInScreen() {
     setRound(1);
     setPhase('playing');
     playTone(note, freq);
-  }, [pickTarget]);
+  }, [clearTransition, pickTarget]);
+
+  const scheduleNextRound = useCallback(() => {
+    clearTransition();
+    transitionTimeoutRef.current = setTimeout(() => {
+      transitionTimeoutRef.current = null;
+      if (round >= TOTAL_ROUNDS) {
+        setPhase('results');
+      } else {
+        const { note, freq } = pickTarget();
+        setRound(r => r + 1);
+        answerLockedRef.current = false;
+        playTone(note, freq);
+      }
+    }, 600);
+  }, [clearTransition, pickTarget, round]);
 
   const handleSuccess = useCallback(() => {
+    // Pressable callbacks can run more than once before React commits a state
+    // update. Lock synchronously so rapid taps cannot record duplicate rounds.
+    if (answerLockedRef.current) return;
+    answerLockedRef.current = true;
+
     // Scoring: base 80 pts + up to 50 streak bonus (matches web's accuracy + time formula)
     const newStreak = streak + 1;
     const points = 80 + Math.min(newStreak * 5, 50);
@@ -84,31 +119,17 @@ export default function TuneInScreen() {
     setBestStreak(newBestStreak);
     setResults(r => [...r, { round, target, correct: true, points }]);
 
-    setTimeout(() => {
-      if (round >= TOTAL_ROUNDS) {
-        setPhase('results');
-      } else {
-        const { note, freq } = pickTarget();
-        setRound(r => r + 1);
-        playTone(note, freq);
-      }
-    }, 600);
-  }, [streak, bestStreak, round, target, pickTarget]);
+    scheduleNextRound();
+  }, [streak, bestStreak, round, target, scheduleNextRound]);
 
   const handleSkip = useCallback(() => {
+    if (answerLockedRef.current) return;
+    answerLockedRef.current = true;
+
     setStreak(0);
     setResults(r => [...r, { round, target, correct: false, points: 0 }]);
-
-    setTimeout(() => {
-      if (round >= TOTAL_ROUNDS) {
-        setPhase('results');
-      } else {
-        const { note, freq } = pickTarget();
-        setRound(r => r + 1);
-        playTone(note, freq);
-      }
-    }, 600);
-  }, [round, target, pickTarget]);
+    scheduleNextRound();
+  }, [round, target, scheduleNextRound]);
 
   if (phase === 'setup') {
     return (
@@ -239,6 +260,8 @@ export default function TuneInScreen() {
             onPress={handleSuccess}
             accessibilityRole="button"
             accessibilityLabel="Mark as matched correctly"
+            accessibilityState={{ disabled: answerLockedRef.current }}
+            disabled={answerLockedRef.current}
             style={({ pressed }) => ({
               flex: 1,
               paddingVertical: 28,
@@ -258,6 +281,8 @@ export default function TuneInScreen() {
             onPress={handleSkip}
             accessibilityRole="button"
             accessibilityLabel="Skip this note"
+            accessibilityState={{ disabled: answerLockedRef.current }}
+            disabled={answerLockedRef.current}
             style={({ pressed }) => ({
               flex: 1,
               paddingVertical: 28,
