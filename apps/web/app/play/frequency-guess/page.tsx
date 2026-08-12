@@ -162,11 +162,9 @@ export default function FrequencyGuessPage() {
                         results.reduce(
                           (a, r) =>
                             a +
-                            (r.points > 0
-                              ? (Math.abs(parseFloat(r.answer) - parseFloat(r.target)) /
-                                  parseFloat(r.target)) *
-                                100
-                              : 20),
+                            (Math.abs(parseFloat(r.answer) - parseFloat(r.target)) /
+                              parseFloat(r.target)) *
+                            100,
                           0,
                         ) / results.length,
                       )
