@@ -24,7 +24,7 @@ export function GameResultsScreen({
   onPlayAgain,
   children,
   onExit,
-  exitLabel = "Back to Dashboard",
+  exitLabel = "Back to dashboard",
 }: GameResultsScreenProps) {
   const insets = useSafeAreaInsets();
 

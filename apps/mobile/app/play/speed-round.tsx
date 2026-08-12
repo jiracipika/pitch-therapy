@@ -255,7 +255,7 @@ export default function SpeedRoundScreen() {
             onPress={() => router.back()}
             style={styles.linkBtn}
             accessibilityRole="button"
-            accessibilityLabel="Go back"
+            accessibilityLabel="Back to dashboard"
           >
             <Text style={styles.linkBtnText}>← Back</Text>
           </Pressable>

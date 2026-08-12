@@ -160,7 +160,7 @@ export default function PitchMatchScreen() {
             onPress={() => router.back()}
             style={styles.linkBtn}
             accessibilityRole="button"
-            accessibilityLabel="Go back"
+            accessibilityLabel="Back to dashboard"
           >
             <Text style={styles.linkBtnText}>← Back</Text>
           </Pressable>

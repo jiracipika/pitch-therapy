@@ -128,7 +128,7 @@ export default function DroneLockScreen() {
           <Pressable accessibilityRole="button" onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}>
             <Text style={styles.btnPrimaryText}>Play Again</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.linkBtn}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={styles.linkBtn}>
             <Text style={styles.linkBtnText}>← Dashboard</Text>
           </Pressable>
         </View>
@@ -157,7 +157,7 @@ export default function DroneLockScreen() {
           <Pressable accessibilityRole="button" onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}>
             <Text style={styles.btnPrimaryText}>Start Session</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.linkBtn}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={styles.linkBtn}>
             <Text style={styles.linkBtnText}>← Back</Text>
           </Pressable>
         </View>
@@ -169,7 +169,7 @@ export default function DroneLockScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.backBtn}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={styles.backBtn}>
           <Text style={{ color: pc.textSecondary }}>←</Text>
         </Pressable>
         <Text style={{ fontSize: 16, fontWeight: '600', color: ACCENT }}>Drone Lock</Text>

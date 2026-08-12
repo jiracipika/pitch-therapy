@@ -158,7 +158,7 @@ export default function FrequencySliderScreen() {
             <>
               <Text style={{ color: colors.text, ...typography.title2, marginBottom: 4 }}>Frequency Slider</Text>
               <Text style={{ color: colors.textSecondary, fontSize: 14, marginBottom: 20 }}>Drag the thumb to match a hidden frequency. No typing, no clipped labels.</Text>
-              <Pressable onPress={() => router.back()} style={{ alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' }}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' }}>
                 <Text style={{ color: ACCENT, fontWeight: '700' }}>← Back</Text>
               </Pressable>
             </>

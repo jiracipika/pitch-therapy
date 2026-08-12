@@ -126,7 +126,7 @@ export default function PianoTapScreen() {
             </Pressable>
           ))}
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={{ padding: 20 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ padding: 20 }}>
           <Text style={{ color: pc.textSecondary, textAlign: 'center' }}>← Back</Text>
         </Pressable>
       </View>

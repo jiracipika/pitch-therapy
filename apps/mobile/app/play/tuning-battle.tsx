@@ -207,7 +207,7 @@ export default function TuningBattleScreen() {
         <Pressable accessibilityRole="button" onPress={startGame} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24, width: '100%' }}>
           <Text style={{ color: pc.text, fontWeight: '700', fontSize: 16 }}>Rematch</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={{ marginTop: 12 }}><Text style={{ color: pc.textSecondary, textAlign: 'center' }}>← Dashboard</Text></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ marginTop: 12 }}><Text style={{ color: pc.textSecondary, textAlign: 'center' }}>← Dashboard</Text></Pressable>
       </View>
     );
   }
@@ -216,7 +216,7 @@ export default function TuningBattleScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>⚔️ Tuning Battle</Text>
         <Text style={{ color: pc.textSecondary }}>R{currentRound}/{totalRounds}</Text>
       </View>

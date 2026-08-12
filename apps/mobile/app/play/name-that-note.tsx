@@ -121,7 +121,7 @@ export default function NameThatNoteScreen() {
             <View style={styles.statCard}><Text style={styles.statValue}>{correct}/{totalRounds}</Text><Text style={styles.statLabel}>Correct</Text></View>
           </View>
           <Pressable accessibilityRole="button" onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}><Text style={styles.btnPrimaryText}>Play Again</Text></Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Dashboard</Text></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Dashboard</Text></Pressable>
         </View>
       </View>
     );
@@ -137,7 +137,7 @@ export default function NameThatNoteScreen() {
           <Text style={[styles.title, { fontSize: 24 }]}>Name That Note</Text>
           <Text style={styles.subtitle}>Identify notes on the staff</Text>
           <Pressable accessibilityRole="button" onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}><Text style={styles.btnPrimaryText}>Start</Text></Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Back</Text></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={styles.linkBtn}><Text style={styles.linkBtnText}>← Back</Text></Pressable>
         </View>
       </View>
     );
@@ -149,7 +149,7 @@ export default function NameThatNoteScreen() {
     <View style={styles.container}>
       <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: pc.textSecondary }}>←</Text></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: pc.textSecondary }}>←</Text></Pressable>
           <Text style={{ fontSize: 16, fontWeight: '600', color: ACCENT }}>Name That Note</Text>
           <View style={styles.scoreBadge}><Text style={styles.scoreText}>{score}</Text></View>
         </View>

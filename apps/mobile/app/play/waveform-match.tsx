@@ -117,7 +117,7 @@ export default function WaveformMatchScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>🌊 Waveform Match</Text>
         <Text style={{ color: pc.textSecondary }}>{round}/{ROUNDS}</Text>
       </View>

@@ -205,7 +205,7 @@ export default function FrequencyGuessScreen() {
             </Pressable>
           ))}
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={{ padding: 20 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ padding: 20 }}>
           <Text style={{ color: pc.textSecondary, textAlign: 'center' }}>← Back</Text>
         </Pressable>
       </View>
@@ -252,7 +252,7 @@ export default function FrequencyGuessScreen() {
           <Pressable accessibilityRole="button" onPress={() => startGame(difficulty)} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24 }}>
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Play Again</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={{ padding: 16 }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ padding: 16 }}>
             <Text style={{ color: pc.textSecondary, textAlign: 'center' }}>← Dashboard</Text>
           </Pressable>
         </ScrollView>
@@ -339,7 +339,7 @@ export default function FrequencyGuessScreen() {
         )}
       </View>
 
-      <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={{ padding: 20 }}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ padding: 20 }}>
         <Text style={{ color: pc.textSecondary, textAlign: 'center', fontSize: 13 }}>← Dashboard</Text>
       </Pressable>
     </View>

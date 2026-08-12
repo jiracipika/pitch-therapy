@@ -140,7 +140,7 @@ export default function NoteWordleScreen() {
       <View style={styles.header}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back"
+          accessibilityLabel="Back to dashboard"
           hitSlop={8}
           onPress={() => router.back()}
           style={styles.headerAction}

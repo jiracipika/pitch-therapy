@@ -300,7 +300,7 @@ export default function NoteIdScreen() {
         <Pressable
           onPress={() => router.back()}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel="Back to dashboard"
           style={{ padding: 20 }}
         >
           <Text style={{ color: pc.textSecondary, textAlign: "center" }}>← Back</Text>
@@ -504,7 +504,7 @@ export default function NoteIdScreen() {
       <Pressable
         onPress={() => router.back()}
         accessibilityRole="button"
-        accessibilityLabel="Back to Dashboard"
+        accessibilityLabel="Back to dashboard"
         style={{ padding: 20 }}
       >
         <Text style={{ color: pc.textSecondary, textAlign: "center", fontSize: 13 }}>← Dashboard</Text>

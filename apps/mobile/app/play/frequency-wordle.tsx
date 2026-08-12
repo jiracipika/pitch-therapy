@@ -147,7 +147,7 @@ export default function FrequencyWordleScreen() {
       <View style={styles.header}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back"
+          accessibilityLabel="Back to dashboard"
           hitSlop={8}
           onPress={() => router.back()}
           style={styles.headerAction}

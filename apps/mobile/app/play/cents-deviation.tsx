@@ -127,6 +127,9 @@ export default function CentsDeviationScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
         <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ marginBottom: 12 }}>
+            <Text style={{ color: pc.textSecondary }}>← Back</Text>
+          </Pressable>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
           <Text style={{ color: pc.text, fontSize: 22, fontWeight: '700', marginTop: 12 }}>Cents Deviation</Text>
           <Text style={{ color: pc.textSecondary, fontSize: 14, marginTop: 4 }}>Detect microtonal shifts</Text>
