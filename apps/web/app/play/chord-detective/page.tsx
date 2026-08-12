@@ -402,7 +402,7 @@ export default function ChordDetectivePage() {
           <motion.div
             className="ios-progress-fill"
             style={{ background: ACCENT }}
-            animate={{ width: `${(round / ROUNDS) * 100}%` }}
+            animate={{ width: `${Math.min((round / ROUNDS) * 100, 100)}%` }}
             transition={{ duration: 0.5 }}
           />
         </div>

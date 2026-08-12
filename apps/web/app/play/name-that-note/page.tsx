@@ -47,6 +47,7 @@ export default function NameThatNotePage() {
   const [totalRounds] = useState(10);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
   const [targetNote, setTargetNote] = useState(QUIZ_NOTES[0]);
   const [results, setResults] = useState<
     { round: number; correct: boolean; points: number; target: string; answer: string }[]
@@ -99,7 +100,11 @@ export default function NameThatNotePage() {
       : 0;
     setScore((s) => s + points);
     if (correct) {
-      setStreak((s) => s + 1);
+      setStreak((s) => {
+        const ns = s + 1;
+        setBestStreak((b) => Math.max(b, ns));
+        return ns;
+      });
       setFeedback("correct");
     } else {
       setStreak(0);
@@ -211,7 +216,7 @@ export default function NameThatNotePage() {
                     color: "var(--ios-label)",
                   }}
                 >
-                  {streak}
+                  {bestStreak}
                 </div>
                 <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
                   Best Streak

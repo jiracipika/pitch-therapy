@@ -44,7 +44,7 @@ export default function DroneLockPage() {
     if (droneGainRef.current) {
       droneGainRef.current.gain.exponentialRampToValueAtTime(
         0.001,
-        droneCtxRef.current?.currentTime ?? 0 + 0.3,
+        (droneCtxRef.current?.currentTime ?? 0) + 0.3,
       );
       setTimeout(() => {
         droneOscRef.current?.stop();

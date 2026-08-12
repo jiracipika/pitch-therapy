@@ -48,9 +48,9 @@ export default function SpeedRoundPage() {
     setBestStreak(0);
     setTimeLeft(duration);
     setFeedback(null);
-    nextNote();
+    const firstNote = nextNote();
     setPhase("playing");
-    playTone(NOTE_FREQUENCIES["A4"] || 440, 0.1);
+    playTone(NOTE_FREQUENCIES[`${firstNote}4`] || 261.63, 0.4);
 
     timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
@@ -84,8 +84,8 @@ export default function SpeedRoundPage() {
       setFeedback("wrong");
     }
 
-    nextNote();
-    playTone(NOTE_FREQUENCIES[`${note}4`] || 261.63, 0.15);
+    const newNote = nextNote();
+    playTone(NOTE_FREQUENCIES[`${newNote}4`] || 261.63, 0.3);
 
     setTimeout(() => setFeedback(null), 300);
   };

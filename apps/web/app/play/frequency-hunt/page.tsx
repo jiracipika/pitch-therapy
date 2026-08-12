@@ -59,7 +59,7 @@ export default function FrequencyHuntPage() {
     if (gainRef.current) {
       gainRef.current.gain.exponentialRampToValueAtTime(
         0.001,
-        ctxRef.current?.currentTime ?? 0 + 0.1,
+        (ctxRef.current?.currentTime ?? 0) + 0.1,
       );
       setTimeout(() => {
         oscRef.current?.stop();

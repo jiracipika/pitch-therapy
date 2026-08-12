@@ -108,7 +108,10 @@ export default function PitchMatchPage() {
     ]);
     stopMic();
     if (round >= totalRounds) setPhase("done");
-    else setTimeout(startRound, 1500);
+    else setTimeout(async () => {
+      startRound();
+      await startMic();
+    }, 1500);
   };
 
   const handleStart = async () => {
@@ -124,6 +127,11 @@ export default function PitchMatchPage() {
   const handleStop = () => {
     stopMic();
     setPhase("idle");
+    setRound(0);
+    setScore(0);
+    setStreak(0);
+    setResults([]);
+    setCents(0);
   };
 
   useEffect(() => {
