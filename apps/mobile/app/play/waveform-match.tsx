@@ -199,6 +199,8 @@ export default function WaveformMatchScreen() {
 
         <Pressable
           onPress={phase === 'reveal' ? advance : submit}
+          accessibilityRole="button"
+          accessibilityLabel={phase === 'reveal' ? (round >= ROUNDS ? 'See results' : 'Next round') : 'Submit answer'}
           style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center' }}
         >
           <Text style={{ color: pc.text, fontWeight: '700', fontSize: 16 }}>

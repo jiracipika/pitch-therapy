@@ -141,7 +141,7 @@ export default function ChordDetectiveScreen() {
         <Text style={{ color: pc.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 8 }}>Identify chord quality by ear</Text>
         <Pressable accessibilityRole="button" onPress={() => setAdvanced(!advanced)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 24 }}>
           <Text style={{ color: pc.textTertiary, fontSize: 14 }}>Advanced: Identify root too</Text>
-          <View style={{ width: 48, height: 28, borderRadius: 14, backgroundColor: advanced ? ACCENT : 'pc.cardBorder', justifyContent: 'center', paddingHorizontal: 3 }}>
+          <View style={{ width: 48, height: 28, borderRadius: 14, backgroundColor: advanced ? ACCENT : pc.cardBorder, justifyContent: 'center', paddingHorizontal: 3 }}>
             <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#fff', marginLeft: advanced ? 23 : 0 }} />
           </View>
         </Pressable>

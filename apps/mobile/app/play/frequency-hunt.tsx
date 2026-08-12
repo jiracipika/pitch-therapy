@@ -194,7 +194,7 @@ export default function FrequencyHuntScreen() {
             style={{ height: 40, justifyContent: 'center' }}
           >
             {/* Track background */}
-            <View style={{ height: 4, borderRadius: 2, backgroundColor: 'pc.cardBorder', overflow: 'hidden' }}>
+            <View style={{ height: 4, borderRadius: 2, backgroundColor: pc.cardBorder, overflow: 'hidden' }}>
               {/* Filled track */}
               <View style={{ height: 4, width: `${thumbPos * 100}%`, backgroundColor: ACCENT, borderRadius: 2 }} />
             </View>

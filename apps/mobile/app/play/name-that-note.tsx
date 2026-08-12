@@ -167,10 +167,10 @@ export default function NameThatNoteScreen() {
         <View style={{ height: 120, position: 'relative', marginBottom: 24 }}>
           {/* Staff lines */}
           {[0, 20, 40, 60, 80].map((bottom, i) => (
-            <View key={i} style={{ position: 'absolute', left: 0, right: 0, bottom, height: 1, backgroundColor: 'pc.cardBorder' }} />
+            <View key={i} style={{ position: 'absolute', left: 0, right: 0, bottom, height: 1, backgroundColor: pc.cardBorder }} />
           ))}
           {/* Treble clef */}
-          <Text style={{ position: 'absolute', left: 4, bottom: 16, fontSize: 48, color: 'pc.textTertiary' }}>𝄞</Text>
+          <Text style={{ position: 'absolute', left: 4, bottom: 16, fontSize: 48, color: pc.textTertiary }}>𝄞</Text>
           {/* Note head */}
           <View style={{
             position: 'absolute', width: 20, height: 16, borderRadius: 8,
@@ -201,10 +201,12 @@ export default function NameThatNoteScreen() {
               key={note.name}
               onPress={() => handleAnswer(note.label)}
               disabled={phase !== 'playing'}
+              accessibilityRole="button"
+              accessibilityLabel={`Answer ${note.label}`}
               style={{
                 width: 44, height: 56, borderRadius: 8,
-                backgroundColor: pc.cardBorder,
-                borderWidth: 1, borderColor: 'pc.cardBorder',
+                backgroundColor: pc.cardSurface,
+                borderWidth: 1, borderColor: pc.cardBorder,
                 alignItems: 'center', justifyContent: 'center',
                 opacity: phase === 'playing' ? 1 : 0.4,
               }}

@@ -135,6 +135,8 @@ export default function TuneInScreen() {
 
           <Pressable
             onPress={startGame}
+            accessibilityRole="button"
+            accessibilityLabel="Start tuning game"
             style={({ pressed }) => ({
               backgroundColor: ACCENT,
               borderRadius: 14,
@@ -206,6 +208,8 @@ export default function TuneInScreen() {
           {/* Hear button */}
           <Pressable
             onPress={() => playTone(target, targetFreq)}
+            accessibilityRole="button"
+            accessibilityLabel="Hear target note"
             style={({ pressed }) => ({
               marginTop: 24,
               paddingVertical: 12,
@@ -233,6 +237,8 @@ export default function TuneInScreen() {
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <Pressable
             onPress={handleSuccess}
+            accessibilityRole="button"
+            accessibilityLabel="Mark as matched correctly"
             style={({ pressed }) => ({
               flex: 1,
               paddingVertical: 28,
@@ -250,6 +256,8 @@ export default function TuneInScreen() {
 
           <Pressable
             onPress={handleSkip}
+            accessibilityRole="button"
+            accessibilityLabel="Skip this note"
             style={({ pressed }) => ({
               flex: 1,
               paddingVertical: 28,

@@ -207,6 +207,8 @@ export default function DroneLockScreen() {
 
         {/* Hear target button */}
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Hear drone and target interval"
           onPress={() => {
             const droneHz = NOTE_FREQS[droneNote];
             playFrequency(droneHz, 2.0);
@@ -237,6 +239,8 @@ export default function DroneLockScreen() {
               <Pressable
                 key={option.label}
                 onPress={() => handleAssess(option)}
+                accessibilityRole="button"
+                accessibilityLabel={`${option.label} — ${option.points} points`}
                 style={({ pressed }) => ({
                   flexDirection: 'row',
                   alignItems: 'center',

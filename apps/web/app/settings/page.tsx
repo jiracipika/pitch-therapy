@@ -5,17 +5,26 @@ import { motion } from 'framer-motion';
 import { PageHero } from '@/components/PremiumMotion';
 import { useStatsContext } from '@/components/StatsProvider';
 import { useSettingsContext } from '@/components/SettingsProvider';
+import { GAME_MODE_META } from '@pitch-therapy/core';
 import type { Difficulty } from '@/lib/useSettings';
 
 type Diff = 'easy' | 'medium' | 'hard';
 
-const MODES = [
-  { id: 'pitch-match',      label: 'Pitch Match',      icon: '🎤', color: '#0A84FF' },
-  { id: 'note-id',          label: 'Note ID',           icon: '🎵', color: '#BF5AF2' },
-  { id: 'frequency-guess',  label: 'Freq Guess',        icon: '📡', color: '#FF9F0A' },
-  { id: 'note-wordle',      label: 'Note Wordle',       icon: '🟩', color: '#30D158' },
-  { id: 'frequency-wordle', label: 'Freq Wordle',       icon: '🔊', color: '#5AC8FA' },
-];
+// Mode ids that support per-mode difficulty in the settings panel.
+// Kept as a local constant (not GAME_MODES) because not every play mode
+// has a difficulty selector — only the core five.
+const DIFFICULTY_MODE_IDS = [
+  'pitch-match',
+  'note-id',
+  'frequency-guess',
+  'note-wordle',
+  'frequency-wordle',
+] as const;
+
+const MODES = DIFFICULTY_MODE_IDS.map((id) => {
+  const meta = GAME_MODE_META[id];
+  return { id: meta.id, label: meta.label, icon: meta.icon, color: meta.accentHex };
+});
 
 const SOUND_TYPES = [
   { id: 'sine',     label: 'Sine',     desc: 'Pure, clean' },

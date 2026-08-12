@@ -60,7 +60,7 @@ function FreqSlider({ value, onChange, accent }: { value: number; onChange: (v: 
     <View style={{ paddingVertical: 20 }} {...panResponder.panHandlers}>
       <View
         onLayout={handleLayout}
-        style={{ height: 6, backgroundColor: 'pc.cardBorder', borderRadius: 3, position: 'relative' }}
+        style={{ height: 6, backgroundColor: pc.cardBorder, borderRadius: 3, position: 'relative' }}
       >
         <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${ratio * 100}%`, backgroundColor: accent, borderRadius: 3 }} />
         <View style={{
@@ -190,6 +190,8 @@ export default function FrequencyGuessScreen() {
             <Pressable
               key={d}
               onPress={() => startGame(d)}
+              accessibilityRole="button"
+              accessibilityLabel={`Start ${d} difficulty`}
               style={({ pressed }) => ({
                 backgroundColor: pc.cardSurface,
                 borderRadius: 16,
@@ -270,6 +272,8 @@ export default function FrequencyGuessScreen() {
         <View style={{ alignItems: 'center', marginBottom: 36 }}>
           <Pressable
             onPress={handlePlay}
+            accessibilityRole="button"
+            accessibilityLabel="Play target tone"
             style={({ pressed }) => ({
               width: 88,
               height: 88,
@@ -332,6 +336,8 @@ export default function FrequencyGuessScreen() {
         {feedback === null && (
           <Pressable
             onPress={handleSubmit}
+            accessibilityRole="button"
+            accessibilityLabel="Submit guess"
             style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center' }}
           >
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Submit Guess</Text>

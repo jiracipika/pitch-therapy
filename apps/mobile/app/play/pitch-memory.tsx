@@ -186,6 +186,8 @@ export default function PitchMemoryScreen() {
             <Pressable
               key={name}
               onPress={() => handlePianoTap(i)}
+              accessibilityRole="button"
+              accessibilityLabel={`Play note ${name}`}
               style={{
                 width: '7.5%', maxWidth: 34, height: 90, borderRadius: 6,
                 backgroundColor: name.includes('#') ? pc.cardAmbient : pc.cardBorder,
