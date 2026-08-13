@@ -61,6 +61,39 @@ export function normalizeProgressResults(results: readonly unknown[]): ProgressR
   });
 }
 
+/**
+ * Merge an on-device storage snapshot with the live in-memory queue.
+ *
+ * Native writes are intentionally non-blocking. A pull-to-refresh can therefore
+ * race an older AsyncStorage snapshot; replacing memory outright would discard
+ * the session the player just completed. This deterministic merge keeps both
+ * sources, removes exact duplicates, sorts chronologically, and enforces the cap.
+ */
+export function reconcilePersistedProgressResults(
+  persisted: readonly unknown[],
+  inMemory: readonly unknown[],
+  maxResults = 500,
+): ProgressResult[] {
+  if (maxResults <= 0) return [];
+
+  const byIdentity = new Map<string, ProgressResult>();
+  for (const result of normalizeProgressResults([...persisted, ...inMemory])) {
+    const identity = [
+      result.mode,
+      result.score,
+      result.accuracy,
+      result.rounds,
+      result.date,
+      result.timeMs,
+    ].join("\u0000");
+    byIdentity.set(identity, result);
+  }
+
+  return [...byIdentity.values()]
+    .sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
+    .slice(-maxResults);
+}
+
 export interface WeakModeCluster {
   mode: string;
   label: string;

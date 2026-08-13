@@ -134,6 +134,7 @@ export {
   buildDailyActivityMap,
   buildModeBreakdown,
   normalizeProgressResults,
+  reconcilePersistedProgressResults,
   MODE_TREND_THRESHOLD,
 } from "./progressInsights";
 export type {

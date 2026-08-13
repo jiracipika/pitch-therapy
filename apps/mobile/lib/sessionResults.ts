@@ -13,6 +13,7 @@ import {
   calculateLongestStreak,
   calculateStreak,
   normalizeProgressResults,
+  reconcilePersistedProgressResults,
   type ProgressResult,
 } from '@pitch-therapy/core';
 
@@ -99,7 +100,11 @@ async function hydrate() {
       if (raw) {
         const parsed = JSON.parse(raw) as unknown;
         if (Array.isArray(parsed)) {
-          cachedResults = normalizeProgressResults(parsed).slice(-MAX_STORED_RESULTS);
+          cachedResults = reconcilePersistedProgressResults(
+            parsed,
+            cachedResults,
+            MAX_STORED_RESULTS,
+          );
           recomputeStats();
           notify();
         }

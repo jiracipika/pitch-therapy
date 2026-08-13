@@ -3,6 +3,7 @@ import {
   buildModeBreakdown,
   buildProgressInsights,
   normalizeProgressResults,
+  reconcilePersistedProgressResults,
   type ProgressResult,
 } from "../progressInsights";
 import {
@@ -110,6 +111,23 @@ describe("normalizeProgressResults — mobile persistence edge cases", () => {
     ]);
 
     expect(normalized[0]!.rounds).toBe(5);
+  });
+});
+
+describe("reconcilePersistedProgressResults — offline-safe storage merges", () => {
+  const first = makeResult("note-id", 0.8, 2, 400);
+  const second = makeResult("speed-round", 0.9, 1, 600);
+
+  it("preserves unsaved in-memory sessions when an older storage snapshot reloads", () => {
+    expect(reconcilePersistedProgressResults([first], [first, second])).toEqual([first, second]);
+  });
+
+  it("keeps externally added storage sessions while deduplicating identical entries", () => {
+    expect(reconcilePersistedProgressResults([first, second], [second])).toEqual([first, second]);
+  });
+
+  it("sorts merged sessions chronologically and applies the storage cap", () => {
+    expect(reconcilePersistedProgressResults([second], [first], 1)).toEqual([second]);
   });
 });
 
