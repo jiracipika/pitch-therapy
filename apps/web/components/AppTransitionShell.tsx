@@ -3,6 +3,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { useSwipeNav } from '@/lib/useSwipeNav';
+
+const SWIPE_ROUTES = [
+  '/dashboard',
+  '/play-modes',
+  '/daily',
+  '/progress',
+  '/profile',
+  '/settings',
+];
 
 export default function AppTransitionShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -10,6 +20,12 @@ export default function AppTransitionShell({ children }: { children: React.React
   const [isSafari, setIsSafari] = useState(false);
   const [isLowResourceProfile, setIsLowResourceProfile] = useState(false);
   const motionLite = reducedMotion || isSafari || isLowResourceProfile;
+
+  // Swipe navigation: live drag feedback + keyboard arrows
+  const { dragOffset, dragOpacity, canSwipe } = useSwipeNav({
+    routes: SWIPE_ROUTES,
+    enabled: !SWIPE_ROUTES.every((r) => pathname === r || !pathname.startsWith('/')),
+  });
 
   useEffect(() => {
     const ua = navigator.userAgent;
@@ -36,6 +52,10 @@ export default function AppTransitionShell({ children }: { children: React.React
     [motionLite],
   );
 
+  // Determine direction for enter animation based on route order
+  const routeIndex = SWIPE_ROUTES.indexOf(pathname);
+  const enterDirection = routeIndex >= 0 ? 1 : 0;
+
   return (
     <div className="pt-route-root">
       <div className="pt-ambient" aria-hidden>
@@ -60,10 +80,15 @@ export default function AppTransitionShell({ children }: { children: React.React
         <motion.div
           key={pathname}
           className="pt-route-page"
-          initial={motionLite ? { opacity: 1 } : { opacity: 0, y: 12 }}
-          animate={motionLite ? { opacity: 1 } : { opacity: 1, y: 0 }}
-          exit={motionLite ? { opacity: 1 } : { opacity: 0, y: -8 }}
-          transition={{ duration: motionLite ? 0.22 : 0.42, ease: [0.22, 1, 0.36, 1] }}
+          initial={motionLite ? { opacity: 1 } : { opacity: 0, x: enterDirection * 20 }}
+          animate={motionLite ? { opacity: 1 } : { opacity: 1, x: 0 }}
+          exit={motionLite ? { opacity: 0 } : { opacity: 0, x: -enterDirection * 12 }}
+          transition={{ duration: motionLite ? 0.22 : 0.38, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            // Live drag feedback during touch swipe
+            transform: canSwipe && dragOffset !== 0 ? `translateX(${dragOffset}px)` : undefined,
+            opacity: canSwipe && dragOpacity < 1 ? dragOpacity : undefined,
+          }}
         >
           {children}
         </motion.div>

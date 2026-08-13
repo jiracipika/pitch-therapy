@@ -139,6 +139,10 @@
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+
+    /* Momentum scrolling on iOS + prevent pull-to-refresh interfering with swipe nav */
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   body {
@@ -153,6 +157,13 @@
     position: relative;
     overflow-x: clip;
     -webkit-tap-highlight-color: transparent;
+    /* Prevent horizontal overflow during swipe drag */
+    touch-action: pan-y;
+  }
+
+  /* Smooth focus ring for keyboard navigation */
+  :focus-visible {
+    transition: box-shadow 120ms ease-out;
   }
 
   * {

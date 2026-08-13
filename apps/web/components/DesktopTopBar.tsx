@@ -91,6 +91,7 @@ export default function DesktopTopBar() {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={active ? 'page' : undefined}
                 className={`pt-desktop-action ${active ? 'is-active' : ''}`}
               >
                 <span className="pt-desktop-action-icon">
