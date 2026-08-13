@@ -67,6 +67,17 @@ function reduceRgbaAlpha(value: string, alpha: string) {
   return value.replace(/,\s*0\.\d+\)$/, `,${alpha})`);
 }
 
+// ─── Swipe constants ─────────────────────────────────────────────────────────
+
+/** Distance (px) the finger must travel to trigger a tab switch — 20% of screen width. */
+const SWIPE_THRESHOLD_RATIO = 0.20;
+/** Maximum translateX for live drag feedback, prevents over-dragging (px). */
+const MAX_DRAG_DISTANCE = 140;
+/** Horizontal-to-vertical ratio required to claim the gesture as a horizontal swipe. */
+const HORIZONTAL_DOMINANCE = 1.6;
+/** Minimum horizontal movement before we start caring about the gesture (px). */
+const CLAIM_THRESHOLD = 14;
+
 export function AppPage({
   title,
   subtitle,
@@ -85,13 +96,21 @@ export function AppPage({
   const { contentMaxWidth, pagePadding, prefersRailNav, isDesktop, motionProfile } = useResponsiveLayout(reducedMotion);
   const { glassMode } = useAppSettings();
   const reducedGlass = glassMode === 'reduced';
+
+  // ── Animation values ──
   const opacity = useRef(new Animated.Value(0)).current;
-  const translateX = useRef(new Animated.Value(0)).current;
+  const enterTranslate = useRef(new Animated.Value(0)).current;
+  const dragTranslate = useRef(new Animated.Value(0)).current;     // live drag offset
+  const dragScale = useRef(new Animated.Value(1)).current;          // subtle scale during drag
   const ambientShiftA = useRef(new Animated.Value(0)).current;
   const ambientShiftB = useRef(new Animated.Value(0)).current;
   const heroShift = useRef(new Animated.Value(0)).current;
   const childAnimationsRef = useRef<Animated.Value[]>([]);
+
+  // ── Navigation tracking ──
   const previousIndex = useRef<number | null>(null);
+  const lastDirection = useRef<1 | -1 | 0>(0);     // tracks swipe direction for enter animation
+  const isNavigating = useRef(false);               // lock during exit animation
   const childArray = useMemo(() => Children.toArray(children), [children]);
 
   if (childAnimationsRef.current.length !== childArray.length) {
@@ -101,34 +120,136 @@ export function AppPage({
   }
 
   const activeIndex = MAIN_TABS.findIndex((tab) => tab.route === pathname);
-  const canSwipeTabs = activeIndex >= 0 && !prefersRailNav;
+  const canSwipeTabs = activeIndex >= 0 && !prefersRailNav && !reducedMotion;
+  const swipeThreshold = width * SWIPE_THRESHOLD_RATIO;
 
+  // ── PanResponder: live drag + snap-back/commit ──
   const panResponder = useMemo(
     () =>
       PanResponder.create({
         onMoveShouldSetPanResponder: (_, gestureState) => {
-          if (!canSwipeTabs) return false;
-          const awayFromBackGestureEdge = gestureState.x0 > 28 && gestureState.x0 < width - 28;
-          if (!awayFromBackGestureEdge) return false;
+          if (!canSwipeTabs || isNavigating.current) return false;
+          // Don't claim gestures that start too close to the screen edge
+          // (those are iOS back-gesture territory)
+          if (gestureState.x0 < 24 || gestureState.x0 > width - 24) return false;
           const dx = Math.abs(gestureState.dx);
           const dy = Math.abs(gestureState.dy);
-          return dx > 20 && dx > dy * 1.2;
+          // Need enough movement to distinguish from a tap
+          if (dx < CLAIM_THRESHOLD) return false;
+          // Must be clearly horizontal — strict ratio avoids stealing scroll gestures
+          return dx > dy * HORIZONTAL_DOMINANCE;
         },
-        onPanResponderRelease: (_, gestureState) => {
-          if (!canSwipeTabs) return;
-          const trigger = Math.abs(gestureState.dx) > 72 && Math.abs(gestureState.vx) > 0.12;
-          if (!trigger) return;
 
-          const targetIndex = gestureState.dx < 0 ? activeIndex + 1 : activeIndex - 1;
-          const targetTab = MAIN_TABS[targetIndex];
-          if (!targetTab) return;
-          void triggerSelectionHaptic();
-          router.replace(targetTab.route as Href);
+        onPanResponderMove: (_, gestureState) => {
+          // Resist at edges (can't swipe past the first/last tab)
+          let rawDx = gestureState.dx;
+          if (activeIndex === 0 && rawDx > 0) {
+            // Swiping right on the leftmost tab — rubber-band
+            rawDx = rawDx * 0.3;
+          }
+          if (activeIndex === MAIN_TABS.length - 1 && rawDx < 0) {
+            // Swiping left on the rightmost tab — rubber-band
+            rawDx = rawDx * 0.3;
+          }
+          // Clamp to max drag distance
+          const clamped = Math.max(-MAX_DRAG_DISTANCE, Math.min(MAX_DRAG_DISTANCE, rawDx));
+          dragTranslate.setValue(clamped);
+
+          // Subtle scale-down as you drag (depth effect)
+          const dragRatio = Math.min(Math.abs(clamped) / MAX_DRAG_DISTANCE, 1);
+          dragScale.setValue(1 - dragRatio * 0.04);
+
+          // Fade slightly during drag
+          opacity.setValue(1 - dragRatio * 0.25);
+        },
+
+        onPanResponderRelease: (_, gestureState) => {
+          const dx = gestureState.dx;
+          const vx = gestureState.vx;
+          const distance = Math.abs(dx);
+          const fastFlick = Math.abs(vx) > 0.6;
+
+          // Trigger if: traveled past threshold OR a fast flick past half-threshold
+          const shouldCommit = distance > swipeThreshold || (fastFlick && distance > swipeThreshold * 0.4);
+
+          if (shouldCommit) {
+            const targetIndex = dx < 0 ? activeIndex + 1 : activeIndex - 1;
+            const targetTab = MAIN_TABS[targetIndex];
+            if (!targetTab) {
+              // Rubber-banded past edge — snap back
+              snapBack();
+              return;
+            }
+
+            // Lock and animate the exit
+            isNavigating.current = true;
+            const exitDirection = dx < 0 ? -1 : 1;
+            lastDirection.current = exitDirection as 1 | -1;
+
+            const exitDistance = width;
+            Animated.parallel([
+              Animated.timing(dragTranslate, {
+                toValue: exitDirection * exitDistance,
+                duration: 220,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: true,
+              }),
+              Animated.timing(opacity, {
+                toValue: 0,
+                duration: 180,
+                useNativeDriver: true,
+              }),
+              Animated.timing(dragScale, {
+                toValue: 0.92,
+                duration: 220,
+                useNativeDriver: true,
+              }),
+            ]).start(() => {
+              void triggerSelectionHaptic();
+              router.replace(targetTab.route as Href);
+              // Reset isNavigating on next tick (new screen mounts)
+              setTimeout(() => { isNavigating.current = false; }, 50);
+            });
+          } else {
+            snapBack();
+          }
+        },
+
+        onPanResponderTerminate: () => {
+          snapBack();
         },
       }),
-    [activeIndex, canSwipeTabs, router, width],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeIndex, canSwipeTabs, router, width, swipeThreshold],
   );
 
+  function snapBack() {
+    Animated.parallel([
+      Animated.spring(dragTranslate, {
+        toValue: 0,
+        useNativeDriver: true,
+        stiffness: 320,
+        damping: 28,
+        mass: 0.8,
+      }),
+      Animated.spring(dragScale, {
+        toValue: 1,
+        useNativeDriver: true,
+        stiffness: 320,
+        damping: 28,
+        mass: 0.8,
+      }),
+      Animated.spring(opacity, {
+        toValue: 1,
+        useNativeDriver: true,
+        stiffness: 320,
+        damping: 28,
+        mass: 0.8,
+      }),
+    ]).start();
+  }
+
+  // ── Enter animation when route changes ──
   useEffect(() => {
     const direction =
       previousIndex.current === null || activeIndex < 0 || previousIndex.current < 0
@@ -137,27 +258,36 @@ export function AppPage({
           ? 1
           : -1;
 
+    // If the swipe handler already set a direction, use that for consistency
+    const effectiveDirection = lastDirection.current || direction;
+
+    // Reset drag state (fresh screen)
+    dragTranslate.setValue(0);
+    dragScale.setValue(1);
     opacity.setValue(0);
-    translateX.setValue(direction * 24);
+    enterTranslate.setValue(effectiveDirection * 28);
 
     Animated.parallel([
       Animated.timing(opacity, {
         toValue: 1,
         duration: motionProfile.routeDuration,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
-      Animated.spring(translateX, {
+      Animated.spring(enterTranslate, {
         toValue: 0,
         useNativeDriver: true,
-        stiffness: 220,
-        damping: 24,
-        mass: 0.8,
+        stiffness: 260,
+        damping: 26,
+        mass: 0.85,
       }),
     ]).start();
 
     previousIndex.current = activeIndex;
-  }, [activeIndex, motionProfile.routeDuration, opacity, translateX]);
+    lastDirection.current = 0;
+  }, [activeIndex, motionProfile.routeDuration, opacity, enterTranslate, dragTranslate, dragScale]);
 
+  // ── Ambient ribbons ──
   useEffect(() => {
     if (reducedMotion) {
       ambientShiftA.setValue(0.5);
@@ -207,6 +337,7 @@ export function AppPage({
     };
   }, [ambientShiftA, ambientShiftB, motionProfile.ambientA, motionProfile.ambientB, reducedMotion]);
 
+  // ── Hero parallax ──
   useEffect(() => {
     if (reducedMotion) {
       heroShift.setValue(0.5);
@@ -233,6 +364,7 @@ export function AppPage({
     return () => heroLoop.stop();
   }, [heroShift, motionProfile.heroDuration, reducedMotion]);
 
+  // ── Child stagger ──
   useEffect(() => {
     if (reducedMotion) {
       childAnimationsRef.current.forEach((value) => value.setValue(1));
@@ -254,6 +386,7 @@ export function AppPage({
     stagger.start();
   }, [childArray.length, motionProfile.staggerDelay, pathname, reducedMotion]);
 
+  // ── Derived interpolations ──
   const ambientTranslateAX = ambientShiftA.interpolate({
     inputRange: [0, 1],
     outputRange: [-48, 48],
@@ -292,6 +425,37 @@ export function AppPage({
         : [0.985, 1.015],
   });
   const heroSpec = getHeroSpec(heroVariant);
+
+  // Combined translate: enter offset + live drag
+  const contentTranslate = Animated.add(enterTranslate, dragTranslate);
+
+  // Accessibility actions for VoiceOver: swipe up/down to cycle tabs
+  const accessibilityActions = useMemo(
+    () =>
+      canSwipeTabs
+        ? [
+            { name: 'increment', label: 'Next tab' },
+            { name: 'decrement', label: 'Previous tab' },
+          ]
+        : undefined,
+    [canSwipeTabs],
+  );
+
+  const handleAccessibilityAction = useMemo(
+    () =>
+      canSwipeTabs
+        ? (event: { nativeEvent: { actionName: string } }) => {
+            if (event.nativeEvent.actionName === 'increment' && activeIndex < MAIN_TABS.length - 1) {
+              void triggerSelectionHaptic();
+              router.replace(MAIN_TABS[activeIndex + 1].route as Href);
+            } else if (event.nativeEvent.actionName === 'decrement' && activeIndex > 0) {
+              void triggerSelectionHaptic();
+              router.replace(MAIN_TABS[activeIndex - 1].route as Href);
+            }
+          }
+        : undefined,
+    [canSwipeTabs, activeIndex, router],
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -390,7 +554,14 @@ export function AppPage({
         ) : null}
 
         <Animated.View
-          style={{ flex: 1, opacity, transform: [{ translateX }] }}
+          // Accessibility: VoiceOver users can navigate tabs with custom actions
+          accessibilityActions={accessibilityActions}
+          onAccessibilityAction={handleAccessibilityAction}
+          style={{
+            flex: 1,
+            opacity,
+            transform: [{ translateX: contentTranslate }, { scale: dragScale }],
+          }}
           {...(canSwipeTabs ? panResponder.panHandlers : {})}
         >
           <ScrollView
@@ -402,6 +573,7 @@ export function AppPage({
               paddingHorizontal: pagePadding,
               paddingBottom: insets.bottom + (prefersRailNav ? 28 : 120),
             }}
+            scrollEventThrottle={16}
             refreshControl={
               onRefresh ? (
                 <RefreshControl
