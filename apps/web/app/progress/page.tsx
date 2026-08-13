@@ -17,6 +17,13 @@ import {
 import { useStatsContext } from "@/components/StatsProvider";
 import Link from "next/link";
 import { AnimatedStatCard, PageHero, Reveal, StatusCard } from "@/components/PremiumMotion";
+import {
+  buildCategoryMastery,
+  calculateTotalXP,
+  getLevelProgress,
+  levelTitle,
+  MASTERY_CONFIG,
+} from "@/lib/gamification";
 
 const MODES = GAME_MODES.map((id) => {
   const mode = GAME_MODE_META[id];
@@ -73,6 +80,14 @@ export default function ProgressPage() {
   // Per-mode trend (improving / steady / slipping) from shared core analytics.
   // Mirrors the mobile Progress screen so both surfaces agree.
   const modeBreakdown = useMemo(() => buildModeBreakdown(stats.results), [stats.results]);
+
+  // Gamification: XP, level, category mastery
+  const totalXP = useMemo(() => calculateTotalXP(stats.results), [stats.results]);
+  const levelInfo = useMemo(() => getLevelProgress(totalXP), [totalXP]);
+  const categoryMastery = useMemo(
+    () => buildCategoryMastery(stats.results, getModeStats),
+    [stats.results, getModeStats],
+  );
   const breakdownByMode = useMemo(() => {
     const map = new Map<string, ModeBreakdownEntry>();
     for (const entry of modeBreakdown) map.set(entry.mode, entry);
@@ -205,9 +220,94 @@ export default function ProgressPage() {
               />
             </div>
 
+            {/* ── XP / LEVEL BAR ── */}
+            {loaded && totalGames > 0 && (
+              <div className="pt-xp-header" style={{ marginTop: 12, marginBottom: 12 }}>
+                <div className="pt-xp-badge">{levelInfo.level}</div>
+                <div className="pt-xp-info">
+                  <div className="pt-xp-title-row">
+                    <span className="pt-xp-level">Level {levelInfo.level}</span>
+                    <span className="pt-xp-title">{levelTitle(levelInfo.level)}</span>
+                  </div>
+                  <div className="pt-xp-bar-track">
+                    <div className="pt-xp-bar-fill" style={{ width: `${levelInfo.pct}%` }} />
+                  </div>
+                  <div className="pt-xp-numbers">
+                    <span>{levelInfo.xpInLevel} XP earned</span>
+                    <span>{levelInfo.xpForNext - levelInfo.xpInLevel} XP to next</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── MASTERY OVERVIEW ── */}
+            {loaded && totalGames > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.12, duration: 0.4 }}
+                className="ios-card pt-desktop-card"
+                style={{ padding: 16, marginBottom: 12 }}
+              >
+                <div style={{
+                  fontSize: 13, fontWeight: 400, letterSpacing: "-0.08px",
+                  textTransform: "uppercase", color: "var(--ios-label3)", marginBottom: 12,
+                }}>
+                  Mastery by Course
+                </div>
+                <div style={{ display: "grid", gap: 10 }}>
+                  {categoryMastery.map((cat) => {
+                    const mc = MASTERY_CONFIG[cat.level];
+                    return (
+                      <div key={cat.categoryId} style={{
+                        display: "flex", alignItems: "center", gap: 12,
+                        padding: "10px 12px",
+                        borderRadius: 12,
+                        background: cat.masteryPct > 0 ? mc.bg : "transparent",
+                        border: `1px solid ${cat.masteryPct > 0 ? cat.accentHex + "22" : "var(--pt-stroke)"}`,
+                      }}>
+                        <div style={{
+                          width: 36, height: 36, borderRadius: 10,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 18, flexShrink: 0,
+                          background: `color-mix(in srgb, ${cat.accentHex} 14%, transparent)`,
+                        }}>
+                          {cat.icon}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            fontSize: 14, fontWeight: 700, letterSpacing: "-0.2px",
+                            color: "var(--ios-label)",
+                          }}>
+                            {cat.label}
+                          </div>
+                          <div className="pt-mastery-bar-track" style={{ marginTop: 6 }}>
+                            <div className="pt-mastery-bar-fill" style={{
+                              width: `${cat.masteryPct}%`,
+                              background: cat.accentHex,
+                            }} />
+                          </div>
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <div style={{
+                            fontSize: 16, fontWeight: 800,
+                            color: cat.masteryPct > 0 ? mc.color : "var(--ios-label3)",
+                          }}>
+                            {cat.masteryPct}%
+                          </div>
+                          <div style={{ fontSize: 10, color: "var(--ios-label3)", marginTop: 1 }}>
+                            {cat.masteredModes}/{cat.totalModes} mastered
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+
             {loaded && totalGames > 0 && (
               <>
-                {/* ── ACTIVITY CALENDAR ── */}
                 <div
                   style={{
                     fontSize: 13,

@@ -1,373 +1,372 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useStatsContext } from "@/components/StatsProvider";
 import {
   GAME_MODE_META,
   GAME_MODES,
   MODE_CATEGORIES,
   getModeTrainingCue,
+  type ModeCategoryId,
 } from "@pitch-therapy/core";
-import { PageHero, Reveal } from "@/components/PremiumMotion";
+import {
+  buildCategoryMastery,
+  MASTERY_CONFIG,
+  type CategoryMastery,
+} from "@/lib/gamification";
 
-function tint(color: string, amount = 12) {
-  return `color-mix(in srgb, ${color} ${amount}%, transparent)`;
+function MasteryRing({ pct, size = 48, color = "var(--ios-blue)" }: { pct: number; size?: number; color?: string }) {
+  const sw = 4;
+  const r = (size - sw * 2) / 2;
+  const circ = 2 * Math.PI * r;
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <div className="pt-mastery-ring" style={{ width: size, height: size }}>
+      <svg width={size} height={size}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--pt-stroke)" strokeWidth={sw} />
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth={sw}
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          initial={{ strokeDashoffset: circ }}
+          animate={{ strokeDashoffset: circ * (1 - pct / 100) }}
+          transition={{ duration: reduceMotion ? 0.3 : 1.0, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </svg>
+      <div className="pt-mastery-ring-pct">{pct}%</div>
+    </div>
+  );
+}
+
+function CategorySection({ cat, index }: { cat: CategoryMastery; index: number }) {
+  const [expanded, setExpanded] = useState(index === 0);
+  const reduceMotion = useReducedMotion();
+  const mc = MASTERY_CONFIG[cat.level];
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.04, duration: 0.35 }}
+      style={{ marginBottom: 16 }}
+    >
+      {/* Category Banner */}
+      <button
+        onClick={() => setExpanded((e) => !e)}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+          padding: "16px 18px",
+          borderRadius: 18,
+          background: `linear-gradient(135deg, ${cat.accentHex} 0%, color-mix(in srgb, ${cat.accentHex} 70%, #000) 100%)`,
+          border: "none",
+          cursor: "pointer",
+          textAlign: "left",
+          position: "relative",
+          overflow: "hidden",
+          transition: "transform 0.15s ease",
+        }}
+        className="pt-category-banner-trigger"
+      >
+        {/* Decorative pattern overlay */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: "radial-gradient(circle at 85% 50%, rgba(255,255,255,0.10), transparent 50%)",
+          pointerEvents: "none",
+        }} />
+
+        <div style={{
+          width: 54,
+          height: 54,
+          borderRadius: 16,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 28,
+          flexShrink: 0,
+          background: "rgba(255,255,255,0.15)",
+          backdropFilter: "blur(10px)",
+        }}>
+          {cat.icon}
+        </div>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontSize: 19,
+            fontWeight: 800,
+            letterSpacing: "-0.4px",
+            color: "#fff",
+            textShadow: "0 1px 4px rgba(0,0,0,0.2)",
+          }}>
+            {cat.label}
+          </div>
+          <div style={{
+            fontSize: 13,
+            color: "rgba(255,255,255,0.85)",
+            marginTop: 2,
+          }}>
+            {cat.description}
+          </div>
+          {/* Mastery bar */}
+          <div style={{
+            height: 6,
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.2)",
+            marginTop: 8,
+            overflow: "hidden",
+          }}>
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${cat.masteryPct}%` }}
+              transition={{ duration: reduceMotion ? 0.3 : 0.8, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                height: "100%",
+                borderRadius: 999,
+                background: "rgba(255,255,255,0.9)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Mastery ring */}
+        <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+          <div style={{
+            width: 48,
+            height: 48,
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.15)",
+            backdropFilter: "blur(10px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 16,
+            fontWeight: 800,
+            color: "#fff",
+          }}>
+            {cat.masteryPct}%
+          </div>
+          <span style={{
+            fontSize: 9,
+            fontWeight: 700,
+            color: "rgba(255,255,255,0.8)",
+            textTransform: "uppercase",
+            letterSpacing: 0.3,
+          }}>
+            {mc.label}
+          </span>
+        </div>
+
+        {/* Expand chevron */}
+        <div style={{
+          flexShrink: 0,
+          color: "rgba(255,255,255,0.7)",
+          fontSize: 14,
+          transition: "transform 0.2s ease",
+          transform: expanded ? "rotate(180deg)" : "none",
+        }}>
+          ▾
+        </div>
+      </button>
+
+      {/* Expanded mode list */}
+      {expanded && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          transition={{ duration: 0.25 }}
+          style={{ display: "grid", gap: 8, padding: "12px 4px 4px" }}
+        >
+          {cat.modes.map((mode, modeIdx) => {
+            const cue = getModeTrainingCue(mode.modeId);
+            const mmc = MASTERY_CONFIG[mode.level];
+            return (
+              <motion.div
+                key={mode.modeId}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: modeIdx * 0.02, duration: 0.25 }}
+              >
+                <Link href={`/play/${mode.modeId}`} className="pt-mode-list-item">
+                  <div className="pt-mode-list-icon" style={{
+                    background: `color-mix(in srgb, ${mode.accentHex} 14%, transparent)`,
+                    position: "relative",
+                  }}>
+                    {mode.icon}
+                    {mode.level === "mastered" && (
+                      <div style={{
+                        position: "absolute",
+                        top: -4,
+                        right: -4,
+                        width: 18,
+                        height: 18,
+                        borderRadius: 999,
+                        background: "#30D158",
+                        color: "#fff",
+                        fontSize: 10,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                      }}>
+                        ✓
+                      </div>
+                    )}
+                  </div>
+                  <div className="pt-mode-list-body">
+                    <div className="pt-mode-list-title">{mode.label}</div>
+                    <div className="pt-mode-list-sub">
+                      {mode.gamesPlayed > 0
+                        ? `${mode.gamesPlayed} games · Best: ${mode.bestScore} · ${Math.round(mode.avgAccuracy * 100)}% avg`
+                        : cue.sessionGoal}
+                    </div>
+                  </div>
+
+                  {/* Mastery indicator */}
+                  {mode.gamesPlayed > 0 ? (
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
+                      <div style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 999,
+                        border: `3px solid ${mmc.ringColor}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 10,
+                        fontWeight: 800,
+                        color: mmc.color,
+                        background: mmc.bg,
+                      }}>
+                        {mode.masteryPct}%
+                      </div>
+                    </div>
+                  ) : (
+                    <span style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: mode.accentHex,
+                      background: `color-mix(in srgb, ${mode.accentHex} 14%, transparent)`,
+                      borderRadius: 999,
+                      padding: "4px 8px",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}>
+                      {cue.durationLabel}
+                    </span>
+                  )}
+
+                  <span style={{
+                    flexShrink: 0,
+                    color: "var(--ios-label4)",
+                    marginLeft: 4,
+                  }}>
+                    <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
+                      <path d="M1 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      )}
+    </motion.section>
+  );
 }
 
 export default function PlayModesPage() {
-  const reduceMotion = useReducedMotion();
-  const modes = GAME_MODES.map((id) => GAME_MODE_META[id]);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scrollByAmount = useCallback((dir: number) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * 320, behavior: reduceMotion ? "auto" : "smooth" });
-  }, [reduceMotion]);
+  const { stats, loaded, getModeStats } = useStatsContext();
+  const categoryMastery = useMemo(
+    () => buildCategoryMastery(stats.results, getModeStats),
+    [stats.results, getModeStats],
+  );
 
   return (
     <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
       <div className="pt-page-shell px-4 pt-14">
-        <PageHero
-          variant="dashboard"
-          eyebrow="Training library"
-          title="Pick your next drill"
-          subtitle="Swipe through 18 focused ear-training modes, grouped by the skill they train."
-        />
+        {/* ── Header ── */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{ padding: "8px 4px 16px" }}
+        >
+          <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.6px", color: "var(--ios-label)" }}>
+            All Courses
+          </h1>
+          <p style={{ fontSize: 14, color: "var(--ios-label3)", marginTop: 4 }}>
+            {GAME_MODES.length} ear-training modes across {MODE_CATEGORIES.length} skill tracks. Tap a track to expand.
+          </p>
+        </motion.div>
 
-        {/* ── HORIZONTAL CAROUSEL: All Modes ── */}
-        <Reveal delay={0.04}>
-          <div style={{ marginTop: 20, marginBottom: 28 }}>
-            <div style={{
+        {/* ── Overall mastery summary ── */}
+        {loaded && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.04, duration: 0.4 }}
+            style={{
               display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 12,
-              paddingLeft: 4,
-            }}>
-              <div>
-                <h2 style={{
-                  color: "var(--ios-label)",
-                  fontSize: 22,
-                  fontWeight: 760,
-                  letterSpacing: "-0.04em",
+              gap: 10,
+              marginBottom: 20,
+            }}
+          >
+            {Object.entries(
+              categoryMastery.reduce((acc, cat) => {
+                acc[cat.level] = (acc[cat.level] || 0) + 1;
+                return acc;
+              }, {} as Record<string, number>)
+            ).filter(([level]) => level !== "not-started").map(([level, count]) => {
+              const mc = MASTERY_CONFIG[level as keyof typeof MASTERY_CONFIG];
+              return (
+                <div key={level} style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 12px",
+                  borderRadius: 999,
+                  background: mc.bg,
+                  border: `1px solid ${mc.ringColor}33`,
                 }}>
-                  All Modes
-                </h2>
-                <p style={{ color: "var(--ios-label3)", fontSize: 13, marginTop: 2 }}>
-                  {GAME_MODES.length} drills · swipe horizontally to browse
-                </p>
-              </div>
-              {/* Scroll buttons */}
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  type="button"
-                  onClick={() => scrollByAmount(-1)}
-                  aria-label="Scroll modes left"
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 999,
-                    border: "1px solid var(--pt-stroke)",
-                    background: "var(--pt-surface-1)",
-                    color: "var(--ios-label2)",
-                    cursor: "pointer",
-                    display: "grid",
-                    placeItems: "center",
-                    fontSize: 16,
-                    transition: "transform 120ms ease-out, opacity 120ms",
-                  }}
-                  className="pt-carousel-btn"
-                >
-                  ‹
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollByAmount(1)}
-                  aria-label="Scroll modes right"
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 999,
-                    border: "1px solid var(--pt-stroke)",
-                    background: "var(--pt-surface-1)",
-                    color: "var(--ios-label2)",
-                    cursor: "pointer",
-                    display: "grid",
-                    placeItems: "center",
-                    fontSize: 16,
-                    transition: "transform 120ms ease-out, opacity 120ms",
-                  }}
-                  className="pt-carousel-btn"
-                >
-                  ›
-                </button>
-              </div>
-            </div>
+                  <span style={{
+                    width: 8, height: 8, borderRadius: 999,
+                    background: mc.ringColor,
+                  }} />
+                  <span style={{
+                    fontSize: 12, fontWeight: 700,
+                    color: mc.color,
+                  }}>
+                    {count} {mc.label}
+                  </span>
+                </div>
+              );
+            })}
+          </motion.div>
+        )}
 
-            {/* Scrollable carousel */}
-            <div
-              ref={scrollRef}
-              style={{
-                display: "flex",
-                gap: 12,
-                overflowX: "auto",
-                scrollSnapType: "x mandatory",
-                paddingBottom: 12,
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-                WebkitOverflowScrolling: "touch",
-              }}
-              className="pt-carousel-track"
-            >
-              {modes.map((mode, index) => {
-                const cue = getModeTrainingCue(mode.id);
-                return (
-                  <motion.div
-                    key={mode.id}
-                    initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-                    whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ delay: Math.min(index * 0.02, 0.12), duration: 0.28 }}
-                    style={{ scrollSnapAlign: "start", flexShrink: 0 }}
-                  >
-                    <Link
-                      href={`/play/${mode.id}`}
-                      className="ios-game-card pt-carousel-card"
-                      style={{
-                        width: 220,
-                        minHeight: 200,
-                        display: "flex",
-                        flexDirection: "column",
-                        textDecoration: "none",
-                        padding: 18,
-                        borderColor: tint(mode.accentHex, 24),
-                        background: `linear-gradient(160deg, ${tint(mode.accentHex, 14)} 0%, var(--ios-bg2) 70%)`,
-                      }}
-                    >
-                      <div style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginBottom: 14,
-                      }}>
-                        <span style={{ fontSize: 30 }}>{mode.icon}</span>
-                        <span
-                          style={{
-                            color: mode.accentHex,
-                            fontWeight: 800,
-                            fontSize: 12,
-                            background: tint(mode.accentHex, 18),
-                            borderRadius: 999,
-                            padding: "3px 8px",
-                          }}
-                        >
-                          {cue.durationLabel}
-                        </span>
-                      </div>
-                      <div style={{ marginTop: "auto" }}>
-                        <div style={{
-                          color: "var(--ios-label)",
-                          fontSize: 16,
-                          fontWeight: 700,
-                          letterSpacing: "-0.03em",
-                        }}>
-                          {mode.label}
-                        </div>
-                        <div style={{
-                          color: "var(--ios-label3)",
-                          fontSize: 12,
-                          lineHeight: 1.4,
-                          marginTop: 4,
-                        }}>
-                          {mode.description}
-                        </div>
-                        <div style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                          marginTop: 12,
-                          color: mode.accentHex,
-                          fontSize: 11,
-                          fontWeight: 700,
-                        }}>
-                          <span style={{
-                            background: tint(mode.accentHex, 16),
-                            border: `1px solid ${tint(mode.accentHex, 24)}`,
-                            borderRadius: 999,
-                            padding: "3px 8px",
-                          }}>
-                            {cue.skillLabel}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </Reveal>
+        {/* ── Category Sections ── */}
+        <div>
+          {categoryMastery.map((cat, idx) => (
+            <CategorySection key={cat.categoryId} cat={cat} index={idx} />
+          ))}
+        </div>
 
-        {/* ── CATEGORY SECTIONS ── */}
-        <div style={{ display: "grid", gap: 18 }}>
-          {MODE_CATEGORIES.map((category, categoryIndex) => {
-            const categoryModes = modes.filter((mode) => mode.category === category.id);
-            return (
-              <Reveal key={category.id} delay={0.04 + categoryIndex * 0.03}>
-                <section className="pt-desktop-card">
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 16,
-                      marginBottom: 10,
-                      paddingLeft: 4,
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <div
-                        style={{
-                          width: 42,
-                          height: 42,
-                          borderRadius: 14,
-                          display: "grid",
-                          placeItems: "center",
-                          background: tint(category.accentHex, 16),
-                          fontSize: 22,
-                        }}
-                      >
-                        {category.icon}
-                      </div>
-                      <div>
-                        <h2
-                          style={{
-                            color: "var(--ios-label)",
-                            fontSize: 20,
-                            fontWeight: 760,
-                            letterSpacing: "-0.035em",
-                          }}
-                        >
-                          {category.label}
-                        </h2>
-                        <p style={{ color: "var(--ios-label3)", fontSize: 13, marginTop: 2 }}>
-                          {category.description}
-                        </p>
-                      </div>
-                    </div>
-                    <span style={{ color: category.accentHex, fontSize: 13, fontWeight: 800 }}>
-                      {categoryModes.length}
-                    </span>
-                  </div>
-
-                  <div className="pt-mobile-game-grid">
-                    {categoryModes.map((mode, modeIndex) => {
-                      const cue = getModeTrainingCue(mode.id);
-                      return (
-                        <motion.div
-                          key={mode.id}
-                          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                          viewport={{ once: true, margin: "-40px" }}
-                          transition={{ delay: Math.min(modeIndex * 0.025, 0.12), duration: 0.28 }}
-                        >
-                          <Link
-                            href={`/play/${mode.id}`}
-                            className="ios-game-card"
-                            style={{
-                              minHeight: 148,
-                              display: "flex",
-                              flexDirection: "column",
-                              textDecoration: "none",
-                              padding: 16,
-                              borderColor: tint(mode.accentHex, 24),
-                              background: `linear-gradient(135deg, ${tint(mode.accentHex, 12)} 0%, var(--ios-bg2) 80%)`,
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                marginBottom: 16,
-                              }}
-                            >
-                              <span style={{ fontSize: 28 }}>{mode.icon}</span>
-                              <span style={{ color: mode.accentHex, fontWeight: 800 }}>→</span>
-                            </div>
-                            <div style={{ marginTop: "auto" }}>
-                              <div
-                                style={{
-                                  color: "var(--ios-label)",
-                                  fontSize: 16,
-                                  fontWeight: 700,
-                                  letterSpacing: "-0.03em",
-                                }}
-                              >
-                                {mode.label}
-                              </div>
-                              <div
-                                style={{
-                                  color: "var(--ios-label3)",
-                                  fontSize: 12,
-                                  lineHeight: 1.35,
-                                  marginTop: 3,
-                                }}
-                              >
-                                {mode.description}
-                              </div>
-                              <div
-                                style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 12 }}
-                              >
-                                <span
-                                  style={{
-                                    color: mode.accentHex,
-                                    background: tint(mode.accentHex, 16),
-                                    border: `1px solid ${tint(mode.accentHex, 24)}`,
-                                    borderRadius: 999,
-                                    fontSize: 11,
-                                    fontWeight: 800,
-                                    padding: "4px 8px",
-                                  }}
-                                >
-                                  {cue.durationLabel}
-                                </span>
-                                <span
-                                  style={{
-                                    color: "var(--ios-label2)",
-                                    background: "rgba(255,255,255,0.06)",
-                                    border: "1px solid var(--ios-sep)",
-                                    borderRadius: 999,
-                                    fontSize: 11,
-                                    fontWeight: 700,
-                                    padding: "4px 8px",
-                                  }}
-                                >
-                                  {cue.skillLabel}
-                                </span>
-                              </div>
-                              <p
-                                style={{
-                                  color: "var(--ios-label3)",
-                                  fontSize: 11,
-                                  lineHeight: 1.4,
-                                  marginTop: 10,
-                                }}
-                              >
-                                {cue.sessionGoal}
-                              </p>
-                            </div>
-                          </Link>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </section>
-              </Reveal>
-            );
-          })}
+        {/* ── Footer hint ── */}
+        <div style={{ textAlign: "center", padding: "24px 16px 40px" }}>
+          <p style={{ fontSize: 13, color: "var(--ios-label3)" }}>
+            Play each mode 5+ times at 80%+ accuracy to achieve mastery 🏆
+          </p>
         </div>
       </div>
     </div>

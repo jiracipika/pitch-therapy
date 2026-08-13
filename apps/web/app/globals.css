@@ -2026,3 +2026,699 @@ picture, img, video, svg {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.6; transform: scale(1.1); }
 }
+
+/* ============================================================
+   GAMIFIED UI LAYER — Duolingo polish × Khan Academy structure
+   ============================================================ */
+
+/* ── XP / Level Header Bar ── */
+
+.pt-xp-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--ios-blue) 12%, var(--pt-surface-1)),
+    color-mix(in srgb, var(--ios-purple) 8%, var(--pt-surface-1)));
+  border: 1px solid color-mix(in srgb, var(--ios-blue) 20%, var(--pt-stroke));
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+
+.pt-xp-badge {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--pt-on-accent);
+  background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ios-blue) 40%, transparent);
+}
+
+.pt-xp-badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: var(--pt-highlight);
+  pointer-events: none;
+}
+
+.pt-xp-info { flex: 1; min-width: 0; }
+
+.pt-xp-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.pt-xp-level {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--ios-label);
+}
+
+.pt-xp-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ios-label3);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.pt-xp-bar-track {
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ios-label) 8%, transparent);
+  overflow: hidden;
+  position: relative;
+}
+
+.pt-xp-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--ios-blue), var(--ios-purple));
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+}
+
+.pt-xp-bar-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent 60%);
+  border-radius: 999px;
+}
+
+.pt-xp-numbers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ios-label3);
+  margin-top: 4px;
+}
+
+/* ── Streak / Daily Goal Pills ── */
+
+.pt-stat-pills {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pt-stat-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--pt-surface-1);
+  border: 1px solid var(--pt-stroke);
+  box-shadow: var(--ios-shadow-xs);
+}
+
+.pt-stat-pill-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.pt-stat-pill-data { min-width: 0; }
+
+.pt-stat-pill-value {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--ios-label);
+  line-height: 1.1;
+}
+
+.pt-stat-pill-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ios-label3);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-top: 2px;
+}
+
+/* ── Resume Card (big CTA) ── */
+
+.pt-resume-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--ios-blue) 10%, var(--pt-surface-1)),
+    var(--pt-surface-1));
+  border: 1px solid color-mix(in srgb, var(--ios-blue) 24%, var(--pt-stroke));
+  box-shadow: var(--ios-shadow-sm);
+  text-decoration: none;
+  transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s ease;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pt-resume-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ios-shadow-md);
+  }
+}
+
+.pt-resume-card:active { transform: scale(0.98); }
+
+.pt-resume-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: color-mix(in srgb, var(--ios-blue) 15%, transparent);
+  flex-shrink: 0;
+}
+
+.pt-resume-body { flex: 1; min-width: 0; }
+
+.pt-resume-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ios-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.pt-resume-title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--ios-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pt-resume-sub {
+  font-size: 12px;
+  color: var(--ios-label3);
+  margin-top: 2px;
+}
+
+.pt-resume-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--ios-blue);
+  color: var(--pt-on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* ── Daily Goal Ring ── */
+
+.pt-goal-ring-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--pt-surface-1);
+  border: 1px solid var(--pt-stroke);
+  box-shadow: var(--ios-shadow-xs);
+  margin-bottom: 16px;
+}
+
+/* ── Section Heading ── */
+
+.pt-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.pt-section-heading h2 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--ios-label);
+  margin: 0;
+}
+
+.pt-section-heading p {
+  font-size: 13px;
+  color: var(--ios-label3);
+  margin: 2px 0 0;
+}
+
+/* ── Course Cards (Khan Academy style) ── */
+
+.pt-course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.pt-course-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--pt-surface-1);
+  border: 1px solid var(--pt-stroke);
+  box-shadow: var(--ios-shadow-sm);
+  text-decoration: none;
+  transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s ease, border-color 0.2s;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pt-course-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--ios-shadow-md);
+  }
+}
+
+.pt-course-card:active { transform: scale(0.98); }
+
+.pt-course-card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.pt-course-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.pt-course-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.pt-course-title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--ios-label);
+  line-height: 1.2;
+}
+
+.pt-course-subtitle {
+  font-size: 12px;
+  color: var(--ios-label3);
+  margin-top: 2px;
+}
+
+/* ── Mastery Ring (SVG) ── */
+
+.pt-mastery-ring {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.pt-mastery-ring svg {
+  transform: rotate(-90deg);
+}
+
+.pt-mastery-ring-pct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ios-label);
+  letter-spacing: -0.5px;
+}
+
+/* ── Mastery Level Badge ── */
+
+.pt-mastery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.pt-mastery-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+}
+
+/* ── Course Card Footer ── */
+
+.pt-course-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+.pt-course-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ios-label3);
+}
+
+/* ── Mode List inside Course Detail ── */
+
+.pt-mode-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--pt-surface-1);
+  border: 1px solid var(--pt-stroke);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pt-mode-list-item:hover {
+    transform: translateX(4px);
+    box-shadow: var(--ios-shadow-xs);
+  }
+}
+
+.pt-mode-list-item:active { transform: scale(0.99); }
+
+.pt-mode-list-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.pt-mode-list-body { flex: 1; min-width: 0; }
+
+.pt-mode-list-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--ios-label);
+}
+
+.pt-mode-list-sub {
+  font-size: 12px;
+  color: var(--ios-label3);
+  margin-top: 1px;
+}
+
+/* ── Lesson Path Nodes (Duolingo-style winding path) ── */
+
+.pt-lesson-path {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 24px 0;
+}
+
+.pt-lesson-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pt-lesson-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  position: relative;
+  border: none;
+  outline: none;
+}
+
+.pt-lesson-circle:active { transform: scale(0.92); }
+
+.pt-lesson-circle.is-completed {
+  box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+}
+
+.pt-lesson-circle.is-current {
+  animation: pt-bounce-soft 2s ease-in-out infinite;
+}
+
+.pt-lesson-circle.is-locked {
+  opacity: 0.45;
+  filter: grayscale(0.5);
+}
+
+@keyframes pt-bounce-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.pt-lesson-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--ios-label);
+  margin-top: 6px;
+  text-align: center;
+}
+
+.pt-lesson-sub {
+  font-size: 10px;
+  color: var(--ios-label3);
+  margin-top: 1px;
+}
+
+/* Path connector */
+.pt-lesson-connector {
+  width: 4px;
+  height: 28px;
+  background: var(--pt-stroke);
+  border-radius: 2px;
+}
+
+.pt-lesson-connector.is-completed {
+  background: var(--ios-green);
+}
+
+/* ── Achievements Row ── */
+
+.pt-achievement-strip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 0;
+}
+
+.pt-achievement-strip::-webkit-scrollbar { display: none; }
+
+.pt-achievement-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 68px;
+  padding: 10px 8px;
+  border-radius: 14px;
+  background: var(--pt-surface-1);
+  border: 1px solid var(--pt-stroke);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.pt-achievement-chip.is-unlocked {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--ios-green) 12%, var(--pt-surface-1)),
+    color-mix(in srgb, var(--ios-blue) 6%, var(--pt-surface-1)));
+  border-color: color-mix(in srgb, var(--ios-green) 30%, var(--pt-stroke));
+}
+
+.pt-achievement-chip-icon { font-size: 22px; }
+.pt-achievement-chip-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--ios-label2);
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+}
+
+.pt-achievement-chip.is-unlocked .pt-achievement-chip-label {
+  color: var(--ios-label);
+}
+
+/* ── Empty State Illustration ── */
+
+.pt-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px;
+  border-radius: 20px;
+  background: var(--pt-surface-1);
+  border: 2px dashed var(--pt-stroke-strong);
+  margin-bottom: 16px;
+}
+
+.pt-empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.pt-empty-state-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--ios-label);
+  margin-bottom: 4px;
+}
+
+.pt-empty-state-body {
+  font-size: 14px;
+  color: var(--ios-label3);
+  max-width: 300px;
+  line-height: 1.45;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 640px) {
+  .pt-stat-pills {
+    flex-wrap: wrap;
+  }
+  .pt-stat-pill {
+    flex: 1 1 calc(50% - 5px);
+    min-width: 0;
+  }
+  .pt-course-grid {
+    grid-template-columns: 1fr;
+  }
+  .pt-xp-badge {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+    border-radius: 12px;
+  }
+}
+
+/* ── Category header banner ── */
+
+.pt-category-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pt-category-banner-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+}
+
+.pt-category-banner-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.pt-category-banner-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+  margin-top: 2px;
+}
+
+/* ── Mastery Progress Bar (category-level) ── */
+
+.pt-mastery-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ios-label) 8%, transparent);
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.pt-mastery-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
