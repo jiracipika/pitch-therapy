@@ -161,6 +161,19 @@ export default function ProgressPage() {
           subtitle="Track consistency, precision, and growth across every mode."
         />
         <Reveal delay={0.04} className="mb-3">
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+            <Link
+              href="/profile"
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--ios-blue)",
+                textDecoration: "none",
+              }}
+            >
+              View Ear Profile →
+            </Link>
+          </div>
           <StatusCard
             tone={statusTone}
             title={statusTitle}
