@@ -54,6 +54,15 @@ export {
 } from "./dailyChallenge";
 export type { DailyChallengeResult, DailyChallengeMode } from "./dailyChallenge";
 
+export { createAsyncWriteQueue } from "./asyncWriteQueue";
+
+export {
+  formatAdaptiveCountdown,
+  formatClockCountdown,
+  getCountdownRefreshInterval,
+  getSecondsUntilLocalMidnight,
+} from "./dailyCountdown";
+
 // ─── Staff (pure math) ──────────────────────────────────────────────────────
 
 export { noteToStaffPos, staffPosToY, STAFF_LINES } from "./staff";

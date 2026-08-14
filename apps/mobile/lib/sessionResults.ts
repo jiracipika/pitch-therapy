@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
 import {
   calculateLongestStreak,
   calculateStreak,
+  createAsyncWriteQueue,
   normalizeProgressResults,
   reconcilePersistedProgressResults,
   type ProgressResult,
@@ -37,6 +38,8 @@ export interface SessionStats {
   bestStreak: number;
   /** YYYY-MM-DD of the most recent session, or null. */
   lastPlayDate: string | null;
+  /** Non-null when the latest local storage operation failed. */
+  persistenceError: string | null;
 }
 
 const EMPTY_STATS: SessionStats = {
@@ -48,11 +51,13 @@ const EMPTY_STATS: SessionStats = {
   streak: 0,
   bestStreak: 0,
   lastPlayDate: null,
+  persistenceError: null,
 };
 
 // ─── External store (module-level singleton) ─────────────────────────────────
 
 let cachedResults: SessionResult[] = [];
+let persistenceError: string | null = null;
 let isHydrated = false;
 let hydratePromise: Promise<void> | null = null;
 const listeners = new Set<() => void>();
@@ -62,7 +67,7 @@ function notify() {
 }
 
 function deriveStats(results: SessionResult[]): SessionStats {
-  if (results.length === 0) return { ...EMPTY_STATS, results: [] };
+  if (results.length === 0) return { ...EMPTY_STATS, results: [], persistenceError };
 
   const dayKeys = results.map((r) => r.date.slice(0, 10));
   const lastPlayDate = dayKeys.reduce((latest, key) => (key > latest ? key : latest), dayKeys[0]!);
@@ -81,6 +86,7 @@ function deriveStats(results: SessionResult[]): SessionStats {
     streak: calculateStreak(dayKeys),
     bestStreak: calculateLongestStreak(dayKeys),
     lastPlayDate,
+    persistenceError,
   };
 }
 
@@ -97,22 +103,22 @@ async function hydrate() {
   hydratePromise = (async () => {
     try {
       const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      const hadPersistenceError = persistenceError !== null;
+      persistenceError = null;
       if (raw) {
         const parsed = JSON.parse(raw) as unknown;
-        if (Array.isArray(parsed)) {
-          cachedResults = reconcilePersistedProgressResults(
-            parsed,
-            cachedResults,
-            MAX_STORED_RESULTS,
-          );
-          recomputeStats();
-          notify();
-        }
+        if (!Array.isArray(parsed)) throw new Error('Stored progress is not an array');
+        cachedResults = reconcilePersistedProgressResults(parsed, cachedResults, MAX_STORED_RESULTS);
+      }
+      if (raw || hadPersistenceError) {
+        recomputeStats();
+        notify();
       }
     } catch {
-      // Corrupt data — start fresh.
-      cachedResults = [];
+      // Preserve live sessions if storage is corrupt or temporarily unreadable.
+      persistenceError = 'Saved progress could not be read. New sessions will remain available in this app session.';
       recomputeStats();
+      notify();
     } finally {
       isHydrated = true;
       hydratePromise = null;
@@ -122,10 +128,24 @@ async function hydrate() {
   return hydratePromise;
 }
 
+const persistenceQueue = createAsyncWriteQueue<SessionResult[]>(
+  async (results) => {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+    if (persistenceError) {
+      persistenceError = null;
+      recomputeStats();
+      notify();
+    }
+  },
+  () => {
+    persistenceError = 'Progress is saved in memory, but could not be written to this device. Try again when storage is available.';
+    recomputeStats();
+    notify();
+  },
+);
+
 function persist(results: SessionResult[]) {
-  void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(results)).catch(() => {
-    // Keep UI responsive even when persistence fails.
-  });
+  void persistenceQueue.enqueue([...results]);
 }
 
 function subscribe(listener: () => void) {

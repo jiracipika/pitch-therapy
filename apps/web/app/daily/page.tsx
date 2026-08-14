@@ -5,21 +5,18 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
 import { useStatsContext } from '@/components/StatsProvider';
-import { DAILY_CHALLENGE_MODES, getDailyChallengeCompletion } from '@pitch-therapy/core';
+import {
+  DAILY_CHALLENGE_MODES,
+  formatClockCountdown,
+  getDailyChallengeCompletion,
+  getSecondsUntilLocalMidnight,
+} from '@pitch-therapy/core';
 
 function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState('');
   useEffect(() => {
     const calc = () => {
-      const now = new Date();
-      const next = new Date(now);
-      next.setDate(next.getDate() + 1);
-      next.setHours(0, 0, 0, 0);
-      const diff = next.getTime() - now.getTime();
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setTimeLeft(`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`);
+      setTimeLeft(formatClockCountdown(getSecondsUntilLocalMidnight()));
     };
     calc();
     const id = setInterval(calc, 1000);

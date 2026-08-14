@@ -1,22 +1,17 @@
 import { describe, it, expect } from "vitest";
+import {
+  formatAdaptiveCountdown,
+  formatClockCountdown,
+  getCountdownRefreshInterval,
+  getSecondsUntilLocalMidnight,
+} from "../dailyCountdown";
 
 // Mirror of the formatting logic from apps/mobile/app/daily.tsx
 // These are pure functions that drive the countdown timer.
 // We test the math here so the mobile countdown stays correct.
 
-function getSecondsUntilMidnight(from: Date): number {
-  const midnight = new Date(from);
-  midnight.setHours(24, 0, 0, 0);
-  return Math.floor((midnight.getTime() - from.getTime()) / 1000);
-}
-
-function formatTimeUntilMidnight(from: Date): string {
-  const diff = getSecondsUntilMidnight(from);
-  const h = Math.floor(diff / 3600);
-  const m = Math.floor((diff % 3600) / 60);
-  const s = diff % 60;
-  return `${h}h ${m}m ${s}s`;
-}
+const getSecondsUntilMidnight = getSecondsUntilLocalMidnight;
+const formatTimeUntilMidnight = formatClockCountdown;
 
 describe("daily countdown timer", () => {
   it("returns the full day (86400s) at midnight", () => {
@@ -84,14 +79,22 @@ describe("daily countdown battery-saving interval", () => {
     // and wrongly chosen the 1s interval. The correct value is ~21600.
     expect(totalSeconds).toBeGreaterThan(21000);
     expect(totalSeconds).toBeLessThan(22000);
-    // This should trigger the 30s interval (totalSeconds >= 60)
-    expect(totalSeconds >= 60).toBe(true);
+    expect(getCountdownRefreshInterval(totalSeconds)).toBe(30_000);
   });
 
   it("correctly identifies the final-minute case for 1s updates", () => {
     const justBefore = new Date("2026-01-15T23:59:30");
     const totalSeconds = getSecondsUntilMidnight(justBefore);
     expect(totalSeconds).toBe(30);
-    expect(totalSeconds < 60).toBe(true);
+    expect(getCountdownRefreshInterval(totalSeconds)).toBe(1_000);
+  });
+
+  it("does not display stale seconds while using the battery-saving cadence", () => {
+    expect(formatAdaptiveCountdown(19_845)).toBe("5h 30m");
+    expect(formatAdaptiveCountdown(45)).toBe("0h 0m 45s");
+  });
+
+  it("formats a stable clock string for the web countdown", () => {
+    expect(formatClockCountdown(3_661)).toBe("1h 1m 1s");
   });
 });

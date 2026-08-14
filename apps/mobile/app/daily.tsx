@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
-import { DAILY_CHALLENGE_MODES, GAME_MODE_META, getDailyChallengeCompletion } from '@pitch-therapy/core';
+import {
+  DAILY_CHALLENGE_MODES,
+  GAME_MODE_META,
+  formatAdaptiveCountdown,
+  getCountdownRefreshInterval,
+  getDailyChallengeCompletion,
+  getSecondsUntilLocalMidnight,
+} from '@pitch-therapy/core';
 import { AnimatedModeCard } from '@/components/AnimatedModeCard';
 import { AnimatedProgressBar } from '@/lib/motion';
 import { GlassCard, MotionStatusCard, Pill, SectionHeader } from '@/components/AppleUI';
@@ -9,20 +16,6 @@ import { useResponsiveLayout } from '@/lib/responsive';
 import { useSessionResults } from '@/lib/sessionResults';
 import { colors, typography } from '@/lib/theme';
 
-function getSecondsUntilMidnight(): number {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0);
-  return Math.floor((midnight.getTime() - now.getTime()) / 1000);
-}
-
-function formatTimeUntilMidnight(): string {
-  const diff = getSecondsUntilMidnight();
-  const h = Math.floor(diff / 3600);
-  const m = Math.floor((diff % 3600) / 60);
-  const s = diff % 60;
-  return `${h}h ${m}m ${s}s`;
-}
 
 export default function DailyScreen() {
   const { isDesktop } = useResponsiveLayout();
@@ -34,17 +27,17 @@ export default function DailyScreen() {
     // Battery-efficient countdown: tick every second only in the final
     // minute, otherwise every 30 seconds — avoids waking the CPU 60x/min
     // for hours on end while showing a countdown the user rarely watches.
-    let intervalId: ReturnType<typeof setInterval>;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const tick = () => {
-      setTimeRemaining(formatTimeUntilMidnight());
-      const totalSeconds = getSecondsUntilMidnight();
-      // If under 60 seconds, keep 1s updates; otherwise slow down to 30s.
-      clearInterval(intervalId);
-      intervalId = setInterval(tick, totalSeconds < 60 ? 1000 : 30_000);
+      const totalSeconds = getSecondsUntilLocalMidnight();
+      setTimeRemaining(formatAdaptiveCountdown(totalSeconds));
+      timeoutId = setTimeout(tick, getCountdownRefreshInterval(totalSeconds));
     };
     tick();
 
-    return () => clearInterval(intervalId);
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   return (

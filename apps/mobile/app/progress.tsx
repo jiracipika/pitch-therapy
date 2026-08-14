@@ -92,6 +92,12 @@ export default function ProgressScreen() {
         title: 'Analyzing your sessions',
         message: 'Pulling mode accuracy and momentum trends.',
       }
+    : stats.persistenceError
+      ? {
+          tone: 'error' as const,
+          title: 'Local save needs attention',
+          message: stats.persistenceError,
+        }
     : hasStats
       ? {
           tone: 'success' as const,

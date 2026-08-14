@@ -1,4 +1,4 @@
-import { Image, Pressable, Switch, Text, View } from 'react-native';
+import { Image, Modal, Pressable, Switch, Text, View } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { GlassCard, MotionStatusCard, SectionHeader } from '@/components/AppleUI';
 import { AppPage } from '@/components/AppPage';
@@ -139,7 +139,7 @@ export default function SettingsScreen() {
                         }}
                         style={({ pressed }) => ({
                           flex: 1,
-                          minHeight: 36,
+                          minHeight: 48,
                           borderRadius: 8,
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -149,6 +149,9 @@ export default function SettingsScreen() {
                           opacity: pressed ? 0.78 : 1,
                           transform: [{ scale: pressed ? 0.985 : 1 }],
                         })}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${mode === 'high' ? 'High' : 'Reduced'} visual effects`}
+                        accessibilityState={{ selected: active }}
                       >
                         <Text style={{ color: active ? colors.text : colors.textSecondary, ...typography.caption1, fontWeight: '800' }}>
                           {mode === 'high' ? 'High' : 'Reduced'}
@@ -270,7 +273,7 @@ export default function SettingsScreen() {
               void triggerSelectionHaptic();
             }}
             style={({ pressed }) => ({
-              minHeight: 40,
+              minHeight: 48,
               borderRadius: 8,
               alignItems: 'center',
               justifyContent: 'center',
@@ -290,19 +293,25 @@ export default function SettingsScreen() {
         </View>
       </GlassCard>
 
-      {showResetConfirm && (
+      <Modal
+        animationType="fade"
+        transparent
+        visible={showResetConfirm}
+        onRequestClose={() => setShowResetConfirm(false)}
+      >
         <View
+          accessibilityViewIsModal
+          accessibilityLabel="Reset progress confirmation"
           style={{
-            position: 'absolute',
-            top: 0, left: 0, right: 0, bottom: 0,
+            flex: 1,
             backgroundColor: 'rgba(0,0,0,0.6)',
             justifyContent: 'center',
             alignItems: 'center',
             padding: 32,
           }}
         >
-          <View style={{ backgroundColor: colors.surfaceElevated, borderRadius: 14, padding: 24, gap: 14, width: '100%' }}>
-            <Text style={{ color: colors.text, ...typography.headline }}>Reset all progress?</Text>
+          <View style={{ backgroundColor: colors.surfaceElevated, borderRadius: 14, padding: 24, gap: 14, width: '100%', maxWidth: 480 }}>
+            <Text accessibilityRole="header" style={{ color: colors.text, ...typography.headline }}>Reset all progress?</Text>
             <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
               This permanently deletes {stats.totalSessions} session{stats.totalSessions === 1 ? '' : 's'}, your {stats.bestStreak}-day best streak, and all achievements from this device.
             </Text>
@@ -314,7 +323,7 @@ export default function SettingsScreen() {
                 }}
                 style={({ pressed }) => ({
                   flex: 1,
-                  minHeight: 42,
+                  minHeight: 48,
                   borderRadius: 8,
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -322,6 +331,8 @@ export default function SettingsScreen() {
                   borderColor: colors.borderStrong,
                   opacity: pressed ? 0.78 : 1,
                 })}
+                accessibilityRole="button"
+                accessibilityLabel="Cancel progress reset"
               >
                 <Text style={{ color: colors.textSecondary, ...typography.subhead }}>Cancel</Text>
               </Pressable>
@@ -333,13 +344,15 @@ export default function SettingsScreen() {
                 }}
                 style={({ pressed }) => ({
                   flex: 1,
-                  minHeight: 42,
+                  minHeight: 48,
                   borderRadius: 8,
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor: colors.danger,
                   opacity: pressed ? 0.82 : 1,
                 })}
+                accessibilityRole="button"
+                accessibilityLabel="Permanently delete all progress"
               >
                 <Text style={{ color: colors.background, ...typography.subhead, fontWeight: '700' }}>
                   Delete
@@ -348,7 +361,7 @@ export default function SettingsScreen() {
             </View>
           </View>
         </View>
-      )}
+      </Modal>
     </AppPage>
   );
 }
