@@ -9,6 +9,61 @@
    ============================================================ */
 
 :root {
+    --ios-bg:           #0a0a0f;
+    --ios-bg2:          #111118;
+    --ios-bg3:          #232338;
+    --ios-bg4:          #2a2a44;
+
+    --ios-label:        #f5f5fa;
+    --ios-label2:       rgba(245, 245, 250, 0.70);
+    --ios-label3:       rgba(245, 245, 250, 0.48);
+    --ios-label4:       rgba(245, 245, 250, 0.22);
+
+    --ios-sep:          rgba(245, 245, 250, 0.14);
+    --ios-sep-opaque:   #2a2a44;
+
+    --ios-blue:         #22d3ee;
+    --ios-green:        #34d399;
+    --ios-indigo:       #818cf8;
+    --ios-orange:       #fb923c;
+    --ios-pink:         #f472b6;
+    --ios-purple:       #a78bfa;
+    --ios-red:          #f87171;
+    --ios-teal:         #2dd4bf;
+    --ios-yellow:       #facc15;
+    --ios-mint:         #6ee7b7;
+    --ios-cyan:         #22d3ee;
+
+    --pt-surface-1:     rgba(28, 28, 46, 0.94);
+    --pt-surface-2:     rgba(35, 35, 56, 0.82);
+    --pt-surface-3:     rgba(35, 35, 56, 0.62);
+    --pt-surface-hover: #2a2a44;
+    --pt-stroke:        rgba(255, 255, 255, 0.10);
+    --pt-stroke-strong: rgba(255, 255, 255, 0.24);
+    --pt-highlight:     linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 45%, transparent 100%);
+
+    --ios-shadow-xs:    0 1px 2px rgba(0,0,0,0.30), 0 0 0 0.5px rgba(255,255,255,0.04);
+    --ios-shadow-sm:    0 2px 8px rgba(0,0,0,0.40), 0 0 0 0.5px rgba(255,255,255,0.04);
+    --ios-shadow:       0 4px 16px rgba(0,0,0,0.50), 0 1px 4px rgba(0,0,0,0.30);
+    --ios-shadow-md:    0 8px 28px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.35);
+    --ios-shadow-lg:    0 16px 44px rgba(0,0,0,0.60), 0 4px 16px rgba(0,0,0,0.40);
+    --ios-shadow-blue:  5px 5px 0 rgba(0,0,0,0.48);
+    --pt-shadow:        rgba(0, 0, 0, 0.48);
+    --pt-on-accent:     #0a0a0f;
+
+
+  --nav-bar-height:   44px;
+  --tab-bar-height:   49px;
+  --track-tight:      -0.025em;
+  --track-body:       -0.015em;
+  --pt-focus-ring:    0 0 0 3px rgba(52, 211, 153, 0.42);
+  --pt-ambient-a:     rgba(52, 211, 153, 0.10);
+  --pt-ambient-b:     rgba(129, 140, 248, 0.08);
+}
+
+/* ── Light Mode (opt-in via system preference) ── */
+@media (prefers-color-scheme: light) {
+  :root {
   /* ── iOS System Colors (light) ── */
   --ios-bg:           #F1EFE7;
   --ios-bg2:          #FAF8F0;
@@ -69,59 +124,8 @@
 
   /* ── Ambient ── */
   --pt-ambient-a:     rgba(183, 243, 74, 0.13);
-  --pt-ambient-b:     rgba(255, 107, 74, 0.08);
+  --pt-ambient-b:     rgba(129, 140, 248, 0.08);
 }
-
-/* ── Dark Mode ── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ios-bg:           #10130E;
-    --ios-bg2:          #191E16;
-    --ios-bg3:          #22291E;
-    --ios-bg4:          #30392A;
-
-    --ios-label:        #F4F6EC;
-    --ios-label2:       rgba(244, 246, 236, 0.70);
-    --ios-label3:       rgba(244, 246, 236, 0.48);
-    --ios-label4:       rgba(244, 246, 236, 0.22);
-
-    --ios-sep:          rgba(244, 246, 236, 0.18);
-    --ios-sep-opaque:   #394333;
-
-    --ios-blue:         #B7F34A;
-    --ios-green:        #73E879;
-    --ios-indigo:       #9B8CFF;
-    --ios-orange:       #FF815F;
-    --ios-pink:         #FF6B93;
-    --ios-purple:       #D683F2;
-    --ios-red:          #FF6B5F;
-    --ios-teal:         #5FD7D9;
-    --ios-yellow:       #F5D75A;
-    --ios-mint:         #76E3C1;
-    --ios-cyan:         #65CBEF;
-
-    --pt-surface-1:     rgba(25, 30, 22, 0.94);
-    --pt-surface-2:     rgba(34, 41, 30, 0.82);
-    --pt-surface-3:     rgba(34, 41, 30, 0.62);
-    --pt-surface-hover: #293222;
-    --pt-stroke:        rgba(244, 246, 236, 0.12);
-    --pt-stroke-strong: rgba(244, 246, 236, 0.26);
-    --pt-highlight:     linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 45%, transparent 100%);
-
-    --ios-shadow-xs:    0 1px 2px rgba(0,0,0,0.30), 0 0 0 0.5px rgba(255,255,255,0.04);
-    --ios-shadow-sm:    0 2px 8px rgba(0,0,0,0.40), 0 0 0 0.5px rgba(255,255,255,0.04);
-    --ios-shadow:       0 4px 16px rgba(0,0,0,0.50), 0 1px 4px rgba(0,0,0,0.30);
-    --ios-shadow-md:    0 8px 28px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.35);
-    --ios-shadow-lg:    0 16px 44px rgba(0,0,0,0.60), 0 4px 16px rgba(0,0,0,0.40);
-    --ios-shadow-blue:  5px 5px 0 rgba(0,0,0,0.48);
-    --pt-shadow:        rgba(0, 0, 0, 0.48);
-    --pt-on-accent:     #10130E;
-
-    --pt-focus-ring:    0 0 0 3px rgba(183, 243, 74, 0.42);
-
-    --pt-ambient-a:     rgba(183, 243, 74, 0.11);
-    --pt-ambient-b:     rgba(255, 107, 74, 0.08);
-  }
 }
 
 /* ============================================================
@@ -420,7 +424,7 @@ button:focus-visible,
   height: 52px;
   border-radius: 6px;
   background: var(--ios-blue);
-  color: #10130e;
+  color: #0a0a0f;
   font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -768,7 +772,7 @@ button:focus-visible,
   justify-content: center;
   border-radius: 4px;
   background: var(--ios-blue);
-  color: #10130e;
+  color: #0a0a0f;
   border: 1px solid var(--pt-stroke-strong);
   box-shadow: 4px 4px 0 var(--ios-orange);
   flex-shrink: 0;
@@ -829,7 +833,7 @@ body.pt-has-nav .pt-main-shell {
   height: 40px;
   border-radius: 4px;
   background: var(--ios-blue);
-  color: #10130e;
+  color: #0a0a0f;
   box-shadow: 3px 3px 0 var(--ios-orange);
   display: inline-flex;
   align-items: center;
@@ -1700,12 +1704,12 @@ picture, img, video, svg {
 
 .pt-signal-home {
   --signal-ink: #0f120d;
-  --signal-panel: #171c14;
+  --signal-panel: #1c1c2e;
   --signal-panel-2: #20271b;
   --signal-cream: #f1f2e9;
   --signal-muted: #9ba394;
   --signal-line: rgba(241, 242, 233, 0.17);
-  --signal-lime: #b7f34a;
+  --signal-lime: #34d399;
   --signal-coral: #ff7857;
   min-height: 100dvh;
   color: var(--signal-cream);
