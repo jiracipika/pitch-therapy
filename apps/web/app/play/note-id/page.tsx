@@ -8,6 +8,7 @@ import WaveVisualizer from "@/components/WaveVisualizer";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { useStatsContext } from "@/components/StatsProvider";
+import TrainingShell from "@/components/training/TrainingShell";
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -201,7 +202,7 @@ export default function NoteIdPage() {
         timeMs: config.rounds * 5000,
       });
     }
-  }, [phase, recordResult]);
+  }, [phase, recordResult, results, score, config.rounds]);
 
   if (phase === "done") {
     return (
@@ -287,80 +288,93 @@ export default function NoteIdPage() {
 
   if (phase === "setup") {
     return (
-      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-        <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🎵</div>
+      <TrainingShell
+        title="🎵 Note ID"
+        round={0}
+        totalRounds={config.rounds}
+        scoreLabel={isPractice ? "Practice" : null}
+        accent={ACCENT}
+        exitHref="/dashboard"
+      >
+        <div style={{ textAlign: "center", paddingTop: 40 }}>
+          <div style={{ fontSize: 64, marginBottom: 20 }}>🎵</div>
+          <div
+            style={{
+              fontSize: 24,
+              fontWeight: 700,
+              color: "var(--ios-label)",
+              letterSpacing: "-0.5px",
+              marginBottom: 8,
+            }}
+          >
+            Note ID
+          </div>
+          <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 32 }}>
+            Identify notes by ear
+          </div>
+
+          <div style={{ marginBottom: 24 }}>
             <div
               style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
+                fontSize: 13,
+                color: "var(--ios-label3)",
+                letterSpacing: "-0.08px",
+                marginBottom: 10,
               }}
             >
-              Note ID
+              Select Difficulty
             </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 32 }}>
-              Identify notes by ear
+            <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+              {(["easy", "medium", "hard"] as const).map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDifficulty(d)}
+                  style={{
+                    height: 34,
+                    borderRadius: 17,
+                    padding: "0 16px",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    border: "none",
+                    cursor: "pointer",
+                    background: difficulty === d ? ACCENT : "var(--ios-bg2)",
+                    color: difficulty === d ? "#000" : "var(--ios-label3)",
+                    transition: "background 0.15s, color 0.15s",
+                  }}
+                >
+                  {d.charAt(0).toUpperCase() + d.slice(1)}
+                </button>
+              ))}
             </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <div
-                style={{
-                  fontSize: 13,
-                  color: "var(--ios-label3)",
-                  letterSpacing: "-0.08px",
-                  marginBottom: 10,
-                }}
-              >
-                Select Difficulty
-              </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-                {(["easy", "medium", "hard"] as const).map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setDifficulty(d)}
-                    style={{
-                      height: 34,
-                      borderRadius: 17,
-                      padding: "0 16px",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      border: "none",
-                      cursor: "pointer",
-                      background: difficulty === d ? ACCENT : "var(--ios-bg2)",
-                      color: difficulty === d ? "#000" : "var(--ios-label3)",
-                      transition: "background 0.15s, color 0.15s",
-                    }}
-                  >
-                    {d.charAt(0).toUpperCase() + d.slice(1)}
-                  </button>
-                ))}
-              </div>
-              <div style={{ fontSize: 12, color: "var(--ios-label3)", marginTop: 8 }}>
-                {config.options} notes • {config.rounds} rounds
-                {config.timeLimit ? ` • ${config.timeLimit}s timer` : ""}
-              </div>
+            <div style={{ fontSize: 12, color: "var(--ios-label3)", marginTop: 8 }}>
+              {config.options} notes • {config.rounds} rounds
+              {config.timeLimit ? ` • ${config.timeLimit}s timer` : ""}
             </div>
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
-              {isPractice ? "🎓 Start Practicing" : "Start Game"}
-            </button>
-            {isPractice && (
-              <div style={{ marginTop: 10, fontSize: 12, color: "var(--ios-label3)" }}>
-                Practice mode — no scores, just learn
-              </div>
-            )}
           </div>
+          <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+            {isPractice ? "🎓 Start Practicing" : "Start Game"}
+          </button>
+          {isPractice && (
+            <div style={{ marginTop: 10, fontSize: 12, color: "var(--ios-label3)" }}>
+              Practice mode — no scores, just learn
+            </div>
+          )}
         </div>
-      </div>
+      </TrainingShell>
     );
   }
 
   return (
-    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-      <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+    <TrainingShell
+      title="🎵 Note ID"
+      round={round}
+      totalRounds={config.rounds}
+      scoreLabel={isPractice ? "Practice" : `${score} pts`}
+      accent={ACCENT}
+      confirmExit={phase === "playing"}
+      exitHref="/dashboard"
+    >
+      <div>
         <FeedbackOverlay
           correct={feedback === "correct"}
           show={showFeedbackOverlay}
@@ -368,75 +382,8 @@ export default function NoteIdPage() {
           onDone={() => setShowFeedbackOverlay(false)}
         />
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 16,
-            minHeight: 44,
-          }}
-        >
-          <button
-            aria-label="Back to dashboard"
-            onClick={() => router.push("/dashboard")}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              background: "var(--ios-bg2)",
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
-            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
-              <path
-                d="M8.5 1.5L1.5 8.5L8.5 15.5"
-                stroke="var(--ios-blue)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <div
-            style={{
-              fontSize: 17,
-              fontWeight: 600,
-              color: "var(--ios-label)",
-              letterSpacing: "-0.43px",
-            }}
-          >
-            🎵 Note ID
-          </div>
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: "var(--ios-label2)",
-              background: "var(--ios-bg2)",
-              borderRadius: 10,
-              padding: "4px 10px",
-            }}
-          >
-            {isPractice ? "Practice" : `${score} pts`}
-          </div>
-        </div>
-
-        <div className="ios-progress-track mb-6">
-          <motion.div
-            className="ios-progress-fill"
-            style={{ background: ACCENT }}
-            animate={{ width: isPractice ? "100%" : `${(round / config.rounds) * 100}%` }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          />
-        </div>
-
         {!isPractice && config.timeLimit > 0 && (
-          <div className="ios-progress-track mb-4">
+          <div className="ios-progress-track mb-4" role="timer" aria-label="Time remaining">
             <motion.div
               className="ios-progress-fill"
               style={{
@@ -562,6 +509,6 @@ export default function NoteIdPage() {
           {isPractice && <span>🎓 Practice • Round {round}</span>}
         </div>
       </div>
-    </div>
+    </TrainingShell>
   );
 }

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import WaveVisualizer from "@/components/WaveVisualizer";
 import { useStatsContext } from "@/components/StatsProvider";
+import TrainingShell, { type MicStatus } from "@/components/training/TrainingShell";
 
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
 const freq = (i: number) => NOTE_FREQS[i] ?? 261.63;
@@ -38,6 +39,7 @@ export default function PitchMatchPage() {
   >([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
+  const [micStatus, setMicStatus] = useState<MicStatus>("idle");
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number>(0);
   const roundStart = useRef(0);
@@ -56,8 +58,10 @@ export default function PitchMatchPage() {
   const startMic = async () => {
     try {
       setMicError(null);
+      setMicStatus("requesting");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
+      setMicStatus("active");
     const ctx = new AudioContext();
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
@@ -84,8 +88,10 @@ export default function PitchMatchPage() {
     };
     detect();
     } catch (err) {
+      const denied = err instanceof Error && err.name === 'NotAllowedError';
+      setMicStatus(denied ? "denied" : "unavailable");
       setMicError(
-        err instanceof Error && err.name === 'NotAllowedError'
+        denied
           ? 'Microphone access denied. Please allow mic access in your browser settings.'
           : 'Could not access microphone. Please check your device.',
       );
@@ -142,6 +148,7 @@ export default function PitchMatchPage() {
     setStreak(0);
     setResults([]);
     setCents(0);
+    setMicStatus("idle");
   };
 
   useEffect(() => {
@@ -167,7 +174,7 @@ export default function PitchMatchPage() {
         timeMs: totalRounds * 5000,
       });
     }
-  }, [phase, recordResult]);
+  }, [phase, recordResult, results, score, totalRounds]);
 
   if (phase === "done") {
     const correct = results.filter((r) => r.correct).length;
@@ -259,76 +266,18 @@ export default function PitchMatchPage() {
   }
 
   return (
-    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-      <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
-        {/* ── HEADER ── */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 16,
-            minHeight: 44,
-          }}
-        >
-          <button
-            aria-label="Back to dashboard"
-            onClick={() => router.push("/dashboard")}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              background: "var(--ios-bg2)",
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
-            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
-              <path
-                d="M8.5 1.5L1.5 8.5L8.5 15.5"
-                stroke="var(--ios-blue)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <div
-            style={{
-              fontSize: 17,
-              fontWeight: 600,
-              color: "var(--ios-label)",
-              letterSpacing: "-0.43px",
-            }}
-          >
-            Pitch Match
-          </div>
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: "var(--ios-label2)",
-              background: "var(--ios-bg2)",
-              borderRadius: 10,
-              padding: "4px 10px",
-            }}
-          >
-            {isPractice ? "Practice" : `${score} pts`}
-          </div>
-        </div>
-
-        {/* ── PROGRESS BAR ── */}
-        <div className="ios-progress-track mb-6">
-          <div
-            className="ios-progress-fill"
-            style={{ width: `${(round / totalRounds) * 100}%`, background: ACCENT }}
-          />
-        </div>
-
-        {/* ── IDLE STATE ── */}
+    <TrainingShell
+      title="Pitch Match"
+      round={round}
+      totalRounds={totalRounds}
+      scoreLabel={isPractice ? "Practice" : `${score} pts`}
+      accent={ACCENT}
+      micStatus={micStatus}
+      micError={micError}
+      confirmExit={phase === "playing"}
+      exitHref="/dashboard"
+    >
+      {/* ── IDLE STATE ── */}
         {phase === "idle" && (
           <div style={{ textAlign: "center", paddingTop: 40 }}>
             <div style={{ fontSize: 64, marginBottom: 20 }}>🎤</div>
@@ -353,22 +302,6 @@ export default function PitchMatchPage() {
             >
               Start Training
             </button>
-            {micError && (
-              <div
-                style={{
-                  marginTop: 12,
-                  borderRadius: 12,
-                  padding: "12px 16px",
-                  background: "rgba(255,69,58,0.12)",
-                  border: "1px solid var(--ios-red)",
-                  fontSize: 13,
-                  color: "var(--ios-red)",
-                  textAlign: "left",
-                }}
-              >
-                ⚠️ {micError}
-              </div>
-            )}
           </div>
         )}
 
@@ -546,8 +479,7 @@ export default function PitchMatchPage() {
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </TrainingShell>
   );
 }
 

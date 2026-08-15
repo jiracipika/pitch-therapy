@@ -7,6 +7,7 @@ import { playTone } from "@/lib/audio";
 import WaveVisualizer from "@/components/WaveVisualizer";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
+import TrainingShell from "@/components/training/TrainingShell";
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -98,7 +99,7 @@ export default function FrequencyGuessPage() {
         timeMs: config.rounds * 5000,
       });
     }
-  }, [phase, recordResult]);
+  }, [phase, recordResult, results, score, config.rounds]);
 
   if (phase === "done") {
     return (
@@ -196,131 +197,79 @@ export default function FrequencyGuessPage() {
 
   if (phase === "setup") {
     return (
-      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-        <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🎯</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Frequency Guess
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 32 }}>
-              Guess the frequency of a tone
-            </div>
-            <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 10 }}>
-              {(["easy", "medium", "hard"] as const).map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setDifficulty(d)}
-                  style={{
-                    height: 34,
-                    borderRadius: 17,
-                    padding: "0 16px",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    border: "none",
-                    cursor: "pointer",
-                    background: difficulty === d ? ACCENT : "var(--ios-bg2)",
-                    color: difficulty === d ? "#000" : "var(--ios-label3)",
-                    transition: "background 0.15s, color 0.15s",
-                  }}
-                >
-                  {d.charAt(0).toUpperCase() + d.slice(1)}
-                </button>
-              ))}
-            </div>
-            <div style={{ fontSize: 12, color: "var(--ios-label3)", marginBottom: 28 }}>
-              {config.min}–{config.max} Hz • {config.rounds} rounds
-            </div>
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
-              Start Game
-            </button>
+      <TrainingShell
+        title="🎯 Frequency Guess"
+        round={0}
+        totalRounds={config.rounds}
+        scoreLabel={null}
+        accent={ACCENT}
+        exitHref="/dashboard"
+      >
+        <div style={{ textAlign: "center", paddingTop: 40 }}>
+          <div style={{ fontSize: 64, marginBottom: 20 }}>🎯</div>
+          <div
+            style={{
+              fontSize: 24,
+              fontWeight: 700,
+              color: "var(--ios-label)",
+              letterSpacing: "-0.5px",
+              marginBottom: 8,
+            }}
+          >
+            Frequency Guess
           </div>
+          <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 32 }}>
+            Guess the frequency of a tone
+          </div>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 10 }}>
+            {(["easy", "medium", "hard"] as const).map((d) => (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                style={{
+                  height: 34,
+                  borderRadius: 17,
+                  padding: "0 16px",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  border: "none",
+                  cursor: "pointer",
+                  background: difficulty === d ? ACCENT : "var(--ios-bg2)",
+                  color: difficulty === d ? "#000" : "var(--ios-label3)",
+                  transition: "background 0.15s, color 0.15s",
+                }}
+              >
+                {d.charAt(0).toUpperCase() + d.slice(1)}
+              </button>
+            ))}
+          </div>
+          <div style={{ fontSize: 12, color: "var(--ios-label3)", marginBottom: 28 }}>
+            {config.min}–{config.max} Hz • {config.rounds} rounds
+          </div>
+          <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+            Start Game
+          </button>
         </div>
-      </div>
+      </TrainingShell>
     );
   }
 
   return (
-    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-      <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+    <TrainingShell
+      title="🎯 Frequency Guess"
+      round={round}
+      totalRounds={config.rounds}
+      scoreLabel={isPractice ? "Practice" : `${score} pts`}
+      accent={ACCENT}
+      confirmExit={phase === "playing"}
+      exitHref="/dashboard"
+    >
+      <div>
         <FeedbackOverlay
           correct={showFeedback && errorPct < 5}
           show={showFeedbackOverlay}
           onDone={() => setShowFeedbackOverlay(false)}
         />
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 16,
-            minHeight: 44,
-          }}
-        >
-          <button
-            aria-label="Back to dashboard"
-            onClick={() => router.push("/dashboard")}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              background: "var(--ios-bg2)",
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
-            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
-              <path
-                d="M8.5 1.5L1.5 8.5L8.5 15.5"
-                stroke="var(--ios-blue)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <div
-            style={{
-              fontSize: 17,
-              fontWeight: 600,
-              color: "var(--ios-label)",
-              letterSpacing: "-0.43px",
-            }}
-          >
-            🎯 Frequency Guess
-          </div>
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: "var(--ios-label2)",
-              background: "var(--ios-bg2)",
-              borderRadius: 10,
-              padding: "4px 10px",
-            }}
-          >
-            {isPractice ? "Practice" : `${score} pts`}
-          </div>
-        </div>
-
-        <div className="ios-progress-track mb-6">
-          <div
-            className="ios-progress-fill"
-            style={{ width: `${(round / config.rounds) * 100}%`, background: ACCENT }}
-          />
-        </div>
 
         <div style={{ marginBottom: 16 }}>
           <WaveVisualizer active={isPlaying} color={ACCENT} height={40} />
@@ -425,6 +374,6 @@ export default function FrequencyGuessPage() {
           </div>
         </div>
       </div>
-    </div>
+    </TrainingShell>
   );
 }
