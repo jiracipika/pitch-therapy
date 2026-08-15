@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
+import TrainingShell from "@/components/training/TrainingShell";
 
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
 const ACCENT = "#FF453A";
@@ -146,7 +147,7 @@ export default function PitchMemoryPage() {
         timeMs: Math.max(level - 1, 1) * 5000,
       });
     }
-  }, [phase, recordResult]);
+  }, [phase, recordResult, level, score]);
 
   // Clean up all pending timeouts and audio on unmount (back navigation).
   useEffect(() => {
@@ -159,8 +160,15 @@ export default function PitchMemoryPage() {
 
   if (phase === "done") {
     return (
-      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-        <div className="mx-auto max-w-sm px-4 pt-12">
+      <TrainingShell
+          title="Pitch Memory"
+          round={0}
+          totalRounds={10}
+          scoreLabel={null}
+          accent={ACCENT}
+          confirmExit={false}
+          exitHref="/dashboard"
+        >
           <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
             <div style={{ fontSize: 60, marginBottom: 12 }}>💔</div>
             <div
@@ -222,81 +230,20 @@ export default function PitchMemoryPage() {
               </button>
             </div>
           </div>
-        </div>
-      </div>
+      </TrainingShell>
     );
   }
 
   return (
-    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-      <div className="mx-auto max-w-sm px-4 pt-12">
-        {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 16,
-            minHeight: 44,
-          }}
-        >
-          <button
-            aria-label="Back to dashboard"
-            onClick={() => router.push("/dashboard")}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              background: "var(--ios-bg2)",
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
-            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
-              <path
-                d="M8.5 1.5L1.5 8.5L8.5 15.5"
-                stroke="var(--ios-blue)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <div
-            style={{
-              fontSize: 17,
-              fontWeight: 600,
-              color: "var(--ios-label)",
-              letterSpacing: "-0.43px",
-            }}
-          >
-            Pitch Memory
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ display: "flex", gap: 2 }}>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <span key={i} style={{ fontSize: 14 }}>
-                  {i < lives ? "❤️" : "🖤"}
-                </span>
-              ))}
-            </div>
-            <div
-              style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: "var(--ios-label2)",
-                background: "var(--ios-bg2)",
-                borderRadius: 10,
-                padding: "4px 10px",
-              }}
-            >
-              {score} pts
-            </div>
-          </div>
-        </div>
+    <TrainingShell
+        title="Pitch Memory"
+        round={level}
+        totalRounds={10}
+        scoreLabel={null}
+        accent={ACCENT}
+        confirmExit={phase === "input"}
+        exitHref="/dashboard"
+      >
 
         {/* Level progress */}
         <div className="ios-progress-track mb-4">
@@ -440,7 +387,6 @@ export default function PitchMemoryPage() {
             )}
           </div>
         )}
-      </div>
-    </div>
+    </TrainingShell>
   );
 }

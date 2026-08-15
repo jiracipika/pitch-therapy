@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { playTone, getAudioContext, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
+import TrainingShell from "@/components/training/TrainingShell";
 import { INTERVALS as CORE_INTERVALS } from "@pitch-therapy/core";
 
 const ACCENT = "#D946EF";
@@ -190,12 +191,19 @@ export default function IntervalArcherPage() {
         timeMs: TOTAL_ROUNDS * 5000,
       });
     }
-  }, [phase, recordResult]);
+  }, [phase, recordResult, results, score, TOTAL_ROUNDS]);
 
   if (phase === "done") {
     return (
-      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-        <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+      <TrainingShell
+          title="Interval Archer"
+          round={0}
+          totalRounds={TOTAL_ROUNDS}
+          scoreLabel={null}
+          accent={ACCENT}
+          confirmExit={false}
+          exitHref="/dashboard"
+        >
           <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
             <div style={{ fontSize: 60, marginBottom: 12 }}>🏹</div>
             <div
@@ -267,15 +275,21 @@ export default function IntervalArcherPage() {
               </button>
             </div>
           </div>
-        </div>
-      </div>
+      </TrainingShell>
     );
   }
 
   if (phase === "setup") {
     return (
-      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-        <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+      <TrainingShell
+          title="Interval Archer"
+          round={0}
+          totalRounds={TOTAL_ROUNDS}
+          scoreLabel={null}
+          accent={ACCENT}
+          confirmExit={false}
+          exitHref="/dashboard"
+        >
           <div style={{ textAlign: "center", paddingTop: 40 }}>
             <div style={{ fontSize: 64, marginBottom: 20 }}>🏹</div>
             <div
@@ -355,81 +369,28 @@ export default function IntervalArcherPage() {
               {isPractice ? "🎓 Start Practicing" : "Start Game"}
             </button>
           </div>
-        </div>
-      </div>
+      </TrainingShell>
     );
   }
 
   const activeIntervals = INTERVALS.filter((i) => pool.includes(i.semitones));
 
   return (
-    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-      <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+    <TrainingShell
+        title="Interval Archer"
+        round={round}
+        totalRounds={TOTAL_ROUNDS}
+        scoreLabel={null}
+        accent={ACCENT}
+        confirmExit={phase === "playing"}
+        exitHref="/dashboard"
+      >
         <FeedbackOverlay
           correct={feedback === "correct"}
           show={showFeedbackOverlay}
           streak={streak}
           onDone={() => setShowFeedbackOverlay(false)}
         />
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 16,
-            minHeight: 44,
-          }}
-        >
-          <button
-            aria-label="Back to dashboard"
-            onClick={() => router.push("/dashboard")}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              background: "var(--ios-bg2)",
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
-            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
-              <path
-                d="M8.5 1.5L1.5 8.5L8.5 15.5"
-                stroke="var(--ios-blue)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <div
-            style={{
-              fontSize: 17,
-              fontWeight: 600,
-              color: "var(--ios-label)",
-              letterSpacing: "-0.43px",
-            }}
-          >
-            🏹 Interval Archer
-          </div>
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: "var(--ios-label2)",
-              background: "var(--ios-bg2)",
-              borderRadius: 10,
-              padding: "4px 10px",
-            }}
-          >
-            {score} pts
-          </div>
-        </div>
-
         <div className="ios-progress-track mb-6">
           <motion.div
             className="ios-progress-fill"
@@ -555,7 +516,6 @@ export default function IntervalArcherPage() {
           🔥 {streak} streak · Round {round}/{TOTAL_ROUNDS}
           {isPractice && <span style={{ marginLeft: 8, color: ACCENT }}>Practice</span>}
         </div>
-      </div>
-    </div>
+    </TrainingShell>
   );
 }

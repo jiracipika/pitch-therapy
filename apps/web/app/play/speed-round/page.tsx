@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
+import TrainingShell from "@/components/training/TrainingShell";
 
 const ACCENT = "#FF9F0A";
 const DURATION_OPTIONS = [30, 60];
@@ -116,13 +117,20 @@ export default function SpeedRoundPage() {
         timeMs: duration * 1000,
       });
     }
-  }, [phase, recordResult]);
+  }, [phase, recordResult, correct, duration, score, total]);
 
   if (phase === "done") {
     const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
     return (
-      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-        <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+      <TrainingShell
+          title="Speed Round"
+          round={0}
+          totalRounds={duration}
+          scoreLabel={null}
+          accent={ACCENT}
+          confirmExit={false}
+          exitHref="/dashboard"
+        >
           <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
             <div style={{ fontSize: 60, marginBottom: 12 }}>⚡</div>
             <div
@@ -211,15 +219,21 @@ export default function SpeedRoundPage() {
               </button>
             </div>
           </div>
-        </div>
-      </div>
+      </TrainingShell>
     );
   }
 
   if (phase === "setup") {
     return (
-      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-        <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+      <TrainingShell
+          title="Speed Round"
+          round={0}
+          totalRounds={duration}
+          scoreLabel={null}
+          accent={ACCENT}
+          confirmExit={false}
+          exitHref="/dashboard"
+        >
           <div style={{ textAlign: "center", paddingTop: 40 }}>
             <div style={{ fontSize: 64, marginBottom: 20 }}>⚡</div>
             <div
@@ -274,79 +288,26 @@ export default function SpeedRoundPage() {
               Start Sprint
             </button>
           </div>
-        </div>
-      </div>
+      </TrainingShell>
     );
   }
 
   return (
-    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-      <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
+    <TrainingShell
+        title="Speed Round"
+        round={timeLeft}
+        totalRounds={duration}
+        scoreLabel={null}
+        accent={ACCENT}
+        confirmExit={phase === "playing"}
+        exitHref="/dashboard"
+      >
         <FeedbackOverlay
           correct={feedback === "correct"}
           show={showOverlay}
           streak={streak}
           onDone={() => setShowOverlay(false)}
         />
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 16,
-            minHeight: 44,
-          }}
-        >
-          <button
-            aria-label="Back to dashboard"
-            onClick={() => router.push("/dashboard")}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              background: "var(--ios-bg2)",
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
-            <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
-              <path
-                d="M8.5 1.5L1.5 8.5L8.5 15.5"
-                stroke="var(--ios-blue)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <div
-            style={{
-              fontSize: 17,
-              fontWeight: 600,
-              color: "var(--ios-label)",
-              letterSpacing: "-0.43px",
-            }}
-          >
-            ⚡ Speed Round
-          </div>
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: "var(--ios-label2)",
-              background: "var(--ios-bg2)",
-              borderRadius: 10,
-              padding: "4px 10px",
-            }}
-          >
-            {score} pts
-          </div>
-        </div>
-
         {/* Timer bar */}
         <div className="ios-progress-track mb-6">
           <motion.div
@@ -456,7 +417,6 @@ export default function SpeedRoundPage() {
         <div style={{ textAlign: "center", fontSize: 13, color: "var(--ios-label3)" }}>
           🔥 {streak} • {correct}/{total} correct • {timeLeft}s left
         </div>
-      </div>
-    </div>
+    </TrainingShell>
   );
 }
