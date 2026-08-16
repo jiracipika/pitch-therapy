@@ -217,6 +217,19 @@ export default function Dashboard() {
                 </div>
                 <div className="pt-resume-arrow">▶</div>
               </Link>
+            ) : totalGames === 0 ? (
+              /* First session: one recommended exercise, not a 18-mode catalog */
+              <Link href="/play/pitch-match" className="pt-resume-card">
+                <div className="pt-resume-icon">🎤</div>
+                <div className="pt-resume-body">
+                  <div className="pt-resume-label">Start here · 3 min</div>
+                  <div className="pt-resume-title">Pitch Match</div>
+                  <div className="pt-resume-sub">
+                    Sing or hum a note and match the target — the friendliest way to start training your ear
+                  </div>
+                </div>
+                <div className="pt-resume-arrow">▶</div>
+              </Link>
             ) : (
               <Link href="/play-modes" className="pt-resume-card">
                 <div className="pt-resume-icon">🎵</div>
