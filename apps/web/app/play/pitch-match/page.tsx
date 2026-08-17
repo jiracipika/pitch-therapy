@@ -123,7 +123,7 @@ export default function PitchMatchPage() {
       },
     ]);
     stopMic();
-    if (round >= totalRounds) setPhase("done");
+    if (!isPractice && round >= totalRounds) setPhase("done");
     else setTimeout(async () => {
       startRound();
       await startMic();
@@ -269,7 +269,7 @@ export default function PitchMatchPage() {
     <TrainingShell
       title="Pitch Match"
       round={round}
-      totalRounds={totalRounds}
+      totalRounds={isPractice ? Math.max(round, totalRounds) : totalRounds}
       scoreLabel={isPractice ? "Practice" : `${score} pts`}
       accent={ACCENT}
       micStatus={micStatus}
@@ -447,7 +447,7 @@ export default function PitchMatchPage() {
               }}
             >
               <span>
-                Round {round}/{totalRounds}
+                Round {isPractice ? round : `${round}/${totalRounds}`}
               </span>
               <span>🔥 {streak}</span>
             </div>
