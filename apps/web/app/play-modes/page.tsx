@@ -1,373 +1,68 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { GAME_MODE_META, MODE_CATEGORIES, getModeTrainingCue, type ModeCategoryId } from "@pitch-therapy/core";
 import { useStatsContext } from "@/components/StatsProvider";
-import {
-  GAME_MODE_META,
-  GAME_MODES,
-  MODE_CATEGORIES,
-  getModeTrainingCue,
-  type ModeCategoryId,
-} from "@pitch-therapy/core";
-import {
-  buildCategoryMastery,
-  MASTERY_CONFIG,
-  type CategoryMastery,
-} from "@/lib/gamification";
-
-function MasteryRing({ pct, size = 48, color = "var(--ios-blue)" }: { pct: number; size?: number; color?: string }) {
-  const sw = 4;
-  const r = (size - sw * 2) / 2;
-  const circ = 2 * Math.PI * r;
-  const reduceMotion = useReducedMotion();
-
-  return (
-    <div className="pt-mastery-ring" style={{ width: size, height: size }}>
-      <svg width={size} height={size}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--pt-stroke)" strokeWidth={sw} />
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth={sw}
-          strokeLinecap="round"
-          strokeDasharray={circ}
-          initial={{ strokeDashoffset: circ }}
-          animate={{ strokeDashoffset: circ * (1 - pct / 100) }}
-          transition={{ duration: reduceMotion ? 0.3 : 1.0, ease: [0.22, 1, 0.36, 1] }}
-        />
-      </svg>
-      <div className="pt-mastery-ring-pct">{pct}%</div>
-    </div>
-  );
-}
-
-function CategorySection({ cat, index }: { cat: CategoryMastery; index: number }) {
-  const [expanded, setExpanded] = useState(index === 0);
-  const reduceMotion = useReducedMotion();
-  const mc = MASTERY_CONFIG[cat.level];
-
-  return (
-    <motion.section
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.35 }}
-      style={{ marginBottom: 16 }}
-    >
-      {/* Category Banner */}
-      <button
-        onClick={() => setExpanded((e) => !e)}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          gap: 14,
-          padding: "16px 18px",
-          borderRadius: 18,
-          background: `linear-gradient(135deg, ${cat.accentHex} 0%, color-mix(in srgb, ${cat.accentHex} 70%, #000) 100%)`,
-          border: "none",
-          cursor: "pointer",
-          textAlign: "left",
-          position: "relative",
-          overflow: "hidden",
-          transition: "transform 0.15s ease",
-        }}
-        className="pt-category-banner-trigger"
-      >
-        {/* Decorative pattern overlay */}
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          background: "radial-gradient(circle at 85% 50%, rgba(255,255,255,0.10), transparent 50%)",
-          pointerEvents: "none",
-        }} />
-
-        <div style={{
-          width: 54,
-          height: 54,
-          borderRadius: 16,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 28,
-          flexShrink: 0,
-          background: "rgba(255,255,255,0.15)",
-          backdropFilter: "blur(10px)",
-        }}>
-          {cat.icon}
-        </div>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: 19,
-            fontWeight: 800,
-            letterSpacing: "-0.4px",
-            color: "#fff",
-            textShadow: "0 1px 4px rgba(0,0,0,0.2)",
-          }}>
-            {cat.label}
-          </div>
-          <div style={{
-            fontSize: 13,
-            color: "rgba(255,255,255,0.85)",
-            marginTop: 2,
-          }}>
-            {cat.description}
-          </div>
-          {/* Mastery bar */}
-          <div style={{
-            height: 6,
-            borderRadius: 999,
-            background: "rgba(255,255,255,0.2)",
-            marginTop: 8,
-            overflow: "hidden",
-          }}>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${cat.masteryPct}%` }}
-              transition={{ duration: reduceMotion ? 0.3 : 0.8, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                height: "100%",
-                borderRadius: 999,
-                background: "rgba(255,255,255,0.9)",
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Mastery ring */}
-        <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-          <div style={{
-            width: 48,
-            height: 48,
-            borderRadius: 999,
-            background: "rgba(255,255,255,0.15)",
-            backdropFilter: "blur(10px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 16,
-            fontWeight: 800,
-            color: "#fff",
-          }}>
-            {cat.masteryPct}%
-          </div>
-          <span style={{
-            fontSize: 9,
-            fontWeight: 700,
-            color: "rgba(255,255,255,0.8)",
-            textTransform: "uppercase",
-            letterSpacing: 0.3,
-          }}>
-            {mc.label}
-          </span>
-        </div>
-
-        {/* Expand chevron */}
-        <div style={{
-          flexShrink: 0,
-          color: "rgba(255,255,255,0.7)",
-          fontSize: 14,
-          transition: "transform 0.2s ease",
-          transform: expanded ? "rotate(180deg)" : "none",
-        }}>
-          ▾
-        </div>
-      </button>
-
-      {/* Expanded mode list */}
-      {expanded && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          transition={{ duration: 0.25 }}
-          style={{ display: "grid", gap: 8, padding: "12px 4px 4px" }}
-        >
-          {cat.modes.map((mode, modeIdx) => {
-            const cue = getModeTrainingCue(mode.modeId);
-            const mmc = MASTERY_CONFIG[mode.level];
-            return (
-              <motion.div
-                key={mode.modeId}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: modeIdx * 0.02, duration: 0.25 }}
-              >
-                <Link href={`/play/${mode.modeId}`} className="pt-mode-list-item">
-                  <div className="pt-mode-list-icon" style={{
-                    background: `color-mix(in srgb, ${mode.accentHex} 14%, transparent)`,
-                    position: "relative",
-                  }}>
-                    {mode.icon}
-                    {mode.level === "mastered" && (
-                      <div style={{
-                        position: "absolute",
-                        top: -4,
-                        right: -4,
-                        width: 18,
-                        height: 18,
-                        borderRadius: 999,
-                        background: "#30D158",
-                        color: "#fff",
-                        fontSize: 10,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                      }}>
-                        ✓
-                      </div>
-                    )}
-                  </div>
-                  <div className="pt-mode-list-body">
-                    <div className="pt-mode-list-title">{mode.label}</div>
-                    <div className="pt-mode-list-sub">
-                      {mode.gamesPlayed > 0
-                        ? `${mode.gamesPlayed} games · Best: ${mode.bestScore} · ${Math.round(mode.avgAccuracy * 100)}% avg`
-                        : cue.sessionGoal}
-                    </div>
-                  </div>
-
-                  {/* Mastery indicator */}
-                  {mode.gamesPlayed > 0 ? (
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
-                      <div style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 999,
-                        border: `3px solid ${mmc.ringColor}`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 10,
-                        fontWeight: 800,
-                        color: mmc.color,
-                        background: mmc.bg,
-                      }}>
-                        {mode.masteryPct}%
-                      </div>
-                    </div>
-                  ) : (
-                    <span style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: mode.accentHex,
-                      background: `color-mix(in srgb, ${mode.accentHex} 14%, transparent)`,
-                      borderRadius: 999,
-                      padding: "4px 8px",
-                      whiteSpace: "nowrap",
-                      flexShrink: 0,
-                    }}>
-                      {cue.durationLabel}
-                    </span>
-                  )}
-
-                  <span style={{
-                    flexShrink: 0,
-                    color: "var(--ios-label4)",
-                    marginLeft: 4,
-                  }}>
-                    <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
-                      <path d="M1 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-      )}
-    </motion.section>
-  );
-}
+import { buildCategoryMastery } from "@/lib/gamification";
 
 export default function PlayModesPage() {
-  const { stats, loaded, getModeStats } = useStatsContext();
-  const categoryMastery = useMemo(
-    () => buildCategoryMastery(stats.results, getModeStats),
-    [stats.results, getModeStats],
-  );
+  const { stats, getModeStats } = useStatsContext();
+  const reduce = useReducedMotion();
+  const categories = useMemo(() => buildCategoryMastery(stats.results, getModeStats), [stats.results, getModeStats]);
+  const [active, setActive] = useState<ModeCategoryId>(categories[0]?.categoryId ?? MODE_CATEGORIES[0].id);
+  const selected = categories.find((category) => category.categoryId === active) ?? categories[0];
 
   return (
-    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-      <div className="pt-page-shell px-4 pt-14">
-        {/* ── Header ── */}
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          style={{ padding: "8px 4px 16px" }}
-        >
-          <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.6px", color: "var(--ios-label)" }}>
-            All Courses
-          </h1>
-          <p style={{ fontSize: 14, color: "var(--ios-label3)", marginTop: 4 }}>
-            {GAME_MODES.length} ear-training modes across {MODE_CATEGORIES.length} skill tracks. Tap a track to expand.
-          </p>
-        </motion.div>
+    <div className="studio-app-page">
+      <div className="pt-page-shell studio-catalog-page">
+        <motion.header className="studio-catalog-header" initial={reduce ? false : { opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
+          <span className="studio-overline">EXERCISE LIBRARY / 18 MODES</span>
+          <h1>Train one thing<br /><em>at a time.</em></h1>
+          <p>Choose the listening skill you want to sharpen. Every drill is short, focused, and built for repetition.</p>
+        </motion.header>
 
-        {/* ── Overall mastery summary ── */}
-        {loaded && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.04, duration: 0.4 }}
-            style={{
-              display: "flex",
-              gap: 10,
-              marginBottom: 20,
-            }}
-          >
-            {Object.entries(
-              categoryMastery.reduce((acc, cat) => {
-                acc[cat.level] = (acc[cat.level] || 0) + 1;
-                return acc;
-              }, {} as Record<string, number>)
-            ).filter(([level]) => level !== "not-started").map(([level, count]) => {
-              const mc = MASTERY_CONFIG[level as keyof typeof MASTERY_CONFIG];
-              return (
-                <div key={level} style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "6px 12px",
-                  borderRadius: 999,
-                  background: mc.bg,
-                  border: `1px solid ${mc.ringColor}33`,
-                }}>
-                  <span style={{
-                    width: 8, height: 8, borderRadius: 999,
-                    background: mc.ringColor,
-                  }} />
-                  <span style={{
-                    fontSize: 12, fontWeight: 700,
-                    color: mc.color,
-                  }}>
-                    {count} {mc.label}
-                  </span>
-                </div>
-              );
-            })}
-          </motion.div>
-        )}
+        <nav className="studio-category-tabs" aria-label="Exercise categories">
+          {categories.map((category, index) => {
+            const isActive = category.categoryId === selected?.categoryId;
+            return (
+              <button key={category.categoryId} type="button" onClick={() => setActive(category.categoryId)} className={isActive ? "is-active" : ""} aria-pressed={isActive} style={{ "--tab-accent": category.accentHex } as React.CSSProperties}>
+                <span>0{index + 1}</span><b>{category.label}</b><small>{category.totalModes} exercises</small>
+              </button>
+            );
+          })}
+        </nav>
 
-        {/* ── Category Sections ── */}
-        <div>
-          {categoryMastery.map((cat, idx) => (
-            <CategorySection key={cat.categoryId} cat={cat} index={idx} />
-          ))}
-        </div>
+        {selected ? (
+          <motion.section key={selected.categoryId} className="studio-catalog-section" initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+            <header style={{ "--category-accent": selected.accentHex } as React.CSSProperties}>
+              <div className="studio-catalog-symbol">{selected.icon}</div>
+              <div><span>SKILL TRACK</span><h2>{selected.label}</h2><p>{selected.description}</p></div>
+              <div className="studio-catalog-mastery"><b>{selected.masteryPct}%</b><span>MASTERY</span><i><em style={{ width: `${selected.masteryPct}%` }} /></i></div>
+            </header>
 
-        {/* ── Footer hint ── */}
-        <div style={{ textAlign: "center", padding: "24px 16px 40px" }}>
-          <p style={{ fontSize: 13, color: "var(--ios-label3)" }}>
-            Play each mode 5+ times at 80%+ accuracy to achieve mastery 🏆
-          </p>
-        </div>
+            <div className="studio-mode-grid">
+              {selected.modes.map((mode, index) => {
+                const meta = GAME_MODE_META[mode.modeId];
+                const cue = getModeTrainingCue(mode.modeId);
+                return (
+                  <motion.article key={mode.modeId} initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.045 }}>
+                    <Link href={`/play/${mode.modeId}`} className="studio-mode-card" style={{ "--mode-accent": meta.accentHex } as React.CSSProperties}>
+                      <div className="studio-mode-card-top"><span>0{index + 1}</span><span>{cue.durationLabel}</span></div>
+                      <div className="studio-mode-card-icon">{meta.icon}</div>
+                      <h3>{meta.label}</h3>
+                      <p>{mode.gamesPlayed ? `${mode.gamesPlayed} sessions · ${Math.round(mode.avgAccuracy * 100)}% average accuracy` : meta.description}</p>
+                      <div className="studio-mode-card-footer"><span>{mode.gamesPlayed ? `${mode.masteryPct}% mastered` : cue.sessionGoal}</span><i aria-hidden="true">↗</i></div>
+                    </Link>
+                  </motion.article>
+                );
+              })}
+            </div>
+          </motion.section>
+        ) : null}
+
+        <footer className="studio-catalog-footer"><span>THE PRACTICE PRINCIPLE</span><p>Five focused repetitions beat one long, distracted session.</p><Link href="/dashboard">Build today&apos;s session →</Link></footer>
       </div>
     </div>
   );
