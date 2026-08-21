@@ -142,7 +142,7 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <LinearGradient
-        colors={[colors.background, '#151B11', colors.ink]}
+        colors={[colors.background, '#0C0C11', '#12101A']}
         locations={[0, 0.5, 1]}
         style={{ position: 'absolute', inset: 0 }}
       />
@@ -208,10 +208,10 @@ export default function HomeScreen() {
           />
           <View style={{ alignItems: 'flex-end', gap: 3 }}>
             <Text style={{ color: colors.signal, ...typography.caption2, letterSpacing: 1.2 }}>
-              SYSTEM ONLINE
+              LISTENING STUDIO
             </Text>
             <Text style={{ color: colors.textTertiary, ...typography.caption2 }}>
-              AUDIO / INPUT 01
+              LIVE INPUT / A4
             </Text>
           </View>
         </View>
@@ -219,13 +219,13 @@ export default function HomeScreen() {
         {/* Hero text with spring slide-in */}
         <Animated.View style={{ opacity: titleOpacity, transform: [{ translateY: titleSlide }] }}>
           <Text style={{ color: colors.signal, ...typography.caption1, letterSpacing: 1.4, marginBottom: 16 }}>
-            LIVE EAR TRAINING SYSTEM
+            EAR TRAINING, RECOMPOSED
           </Text>
           <Text style={{ color: colors.text, fontSize: 62, fontWeight: '900', lineHeight: 57, letterSpacing: -4.2 }}>
-            Hear it.{`\n`}Lock it in.
+            Hear what{`\n`}others miss.
           </Text>
           <Text style={{ color: colors.textSecondary, ...typography.body, marginTop: 20, maxWidth: 330 }}>
-            Precision practice for pitch, frequency, intervals, and musical memory.
+            A sharper musical ear through focused drills for pitch, intervals, frequency, and memory.
           </Text>
 
           {/* Staggered animated meter bars */}
@@ -252,7 +252,7 @@ export default function HomeScreen() {
         <View style={{ borderTopWidth: 1, borderTopColor: colors.borderStrong, paddingTop: 18 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
             <Text style={{ color: colors.textTertiary, ...typography.caption2, letterSpacing: 1 }}>
-              CALIBRATING
+              SIGNAL LOCKED
             </Text>
             <Animated.Text
               style={{

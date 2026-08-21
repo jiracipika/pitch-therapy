@@ -137,7 +137,7 @@ export function AnimatedTabBar() {
         left: 12,
         right: 12,
         flexDirection: 'row',
-        backgroundColor: 'rgba(12,14,19,0.95)',
+        backgroundColor: 'rgba(12,12,17,0.96)',
         borderWidth: 1,
         borderColor: colors.glassBorder,
         paddingVertical: 6,

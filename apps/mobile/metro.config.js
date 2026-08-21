@@ -20,6 +20,10 @@ config.resolver.nodeModulesPaths = [
   ]),
 ];
 
+// expo-sqlite's web worker loads a WebAssembly asset. Keep it as an asset
+// instead of asking Metro to resolve it as a JS module.
+config.resolver.assetExts = [...config.resolver.assetExts, 'wasm'];
+
 // Make sure source resolution works for monorepo packages
 config.resolver.unstable_enablePackageExports = false;
 

@@ -1974,6 +1974,14 @@ picture, img, video, svg {
   box-shadow: 0 6px 20px color-mix(in srgb, var(--ios-blue) 40%, transparent);
 }
 
+/* Resonance Studio micro-polish: tactile instrument depth and clearer actions. */
+.studio-instrument::after { content: ''; position: absolute; inset: -40% -18%; pointer-events: none; opacity: .42; background: linear-gradient(112deg, transparent 42%, rgba(247,246,242,.055) 49%, transparent 56%); transform: translateX(-42%) rotate(8deg); animation: studio-instrument-sheen 9s ease-in-out infinite; }
+.studio-button-primary, .studio-button-ghost, .studio-nav-cta { transition: transform 180ms cubic-bezier(.22,1,.36,1), box-shadow 180ms ease, background 180ms ease; }
+@media (hover: hover) { .studio-instrument { transition: transform 300ms cubic-bezier(.22,1,.36,1), box-shadow 300ms ease; } .studio-instrument:hover { transform: translateY(-6px) rotateX(1deg); box-shadow: 0 55px 135px rgba(0,0,0,.58), 24px 28px 0 rgba(155,140,255,.2); } .studio-button-primary:hover, .studio-nav-cta:hover { transform: translateY(-2px); box-shadow: 0 19px 44px rgba(199,255,74,.23); } .studio-button-ghost:hover { transform: translateY(-2px); background: rgba(247,246,242,.06); } }
+@keyframes studio-instrument-sheen { 0%, 30% { transform: translateX(-48%) rotate(8deg); opacity: 0; } 42% { opacity: .44; } 58%, 100% { transform: translateX(48%) rotate(8deg); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) { .studio-instrument::after { animation: none; opacity: .12; } }
+
 /* ============================================================
    ACCESSIBILITY UTILITIES
    ============================================================ */
