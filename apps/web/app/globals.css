@@ -1366,7 +1366,7 @@ body.pt-has-nav .pt-main-shell {
   }
 
   .pt-main-shell {
-    padding-inline-start: 232px;
+    padding-inline-start: 0;
     padding-bottom: 40px;
   }
 
@@ -1560,8 +1560,12 @@ body.pt-has-nav .pt-main-shell {
 
 @media (min-width: 1400px) {
   .pt-main-shell {
-    padding-inline-start: 232px;
+    padding-inline-start: 0;
     padding-inline-end: 0;
+  }
+
+  body.pt-has-nav .pt-main-shell {
+    padding-inline-start: 232px;
   }
 
   .pt-dashboard-layout {
