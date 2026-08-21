@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { PageHero } from '@/components/PremiumMotion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useStatsContext } from '@/components/StatsProvider';
 import { useSettingsContext } from '@/components/SettingsProvider';
 import { GAME_MODE_META } from '@pitch-therapy/core';
@@ -33,12 +32,13 @@ const SOUND_TYPES = [
   { id: 'sawtooth', label: 'Sawtooth', desc: 'Bright, rich' },
 ] as const;
 
-function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+function Toggle({ on, onToggle, label }: { on: boolean; onToggle: () => void; label: string }) {
   return (
     <button
       onClick={onToggle}
       role="switch"
       aria-checked={on}
+      aria-label={label}
       className="ios-toggle-wrap"
       style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
     >
@@ -48,22 +48,11 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   );
 }
 
-function SectionHeader({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', textTransform: 'uppercase', padding: '24px 4px 8px' }}>
-      {children}
-    </div>
-  );
-}
-
-const rowStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  padding: '12px 16px',
-  minHeight: 44,
-  background: 'var(--ios-bg2)',
-  gap: 12,
-};
+const PRESETS = [
+  { id: 'focus', label: 'Focus Practice', sub: 'Balanced cues for longer sessions' },
+  { id: 'coach', label: 'Coach Mode', sub: 'Louder guidance + tactile feedback' },
+  { id: 'quiet', label: 'Quiet Session', sub: 'Low-volume, distraction-free setup' },
+] as const;
 
 export default function SettingsPage() {
   const { stats, loaded, clearStats } = useStatsContext();
@@ -77,259 +66,181 @@ export default function SettingsPage() {
     applyPreset,
   } = useSettingsContext();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const reduce = useReducedMotion();
 
   const { sound, haptics, soundType, volume, difficulty } = settings;
 
   const handleDifficulty = (mode: string, diff: Difficulty) => setDifficulty(mode, diff);
 
+  const fade = (delay: number) => (reduce ? {} : { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay, duration: 0.42 } });
+
   return (
-    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="pt-page-shell pt-page-settings px-4 pt-14">
+    <div className="studio-page">
+      <div className="pt-page-shell studio-dashboard">
+        <motion.header className="studio-inner-header" {...fade(0)}>
+          <div>
+            <span className="studio-overline">SETTINGS / LISTENING STUDIO</span>
+            <h1>Tune the<br /><em>instrument.</em></h1>
+            <p>Shape audio, feedback, and defaults so every session feels effortless.</p>
+          </div>
+          <div className="studio-header-chip">
+            <span>VERSION</span>
+            <b style={{ fontSize: 22 }}>0.1.0</b>
+            <small>2025-Q1</small>
+          </div>
+        </motion.header>
 
-        <PageHero
-          variant="settings"
-          eyebrow="Tune your training"
-          title="Settings"
-          subtitle="Shape audio, feedback, and defaults so practice feels effortless."
-        />
-
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.08, duration: 0.4 }}>
-          <div className="pt-settings-layout">
-            <div className="pt-settings-main">
-
-          {/* ── AUDIO ── */}
-          <SectionHeader>Audio</SectionHeader>
-          <div className="ios-group pt-desktop-card">
-            {/* Sound Effects */}
-            <div style={{ ...rowStyle }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(10,132,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🔊</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Sound Effects</div>
-                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>Game audio and tones</div>
-              </div>
-              <Toggle on={sound} onToggle={() => setSound(!sound)} />
-            </div>
-
-            {/* Volume */}
-            <div style={{ borderTop: '0.5px solid var(--ios-sep)', padding: '14px 16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(94,92,230,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🎚️</div>
-                  <span style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Volume</span>
+        <section className="studio-inner-grid">
+          <div className="studio-inner-main">
+            {/* ── AUDIO ── */}
+            <motion.section className="studio-panel" {...fade(0.05)}>
+              <div className="studio-panel-heading"><div><span>AUDIO</span><h2>Sound & feedback</h2></div></div>
+              <div className="studio-row-list">
+                <div className="studio-control-row">
+                  <span className="studio-control-icon" style={{ background: 'color-mix(in srgb, var(--ios-blue) 12%, transparent)' }}>🔊</span>
+                  <div>
+                    <b>Sound Effects</b>
+                    <small>Game audio and tones</small>
+                  </div>
+                  <Toggle on={sound} onToggle={() => setSound(!sound)} label="Sound effects" />
                 </div>
-                <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--ios-label2)', fontVariantNumeric: 'tabular-nums' }}>{volume}%</span>
+                <div className="studio-control-row">
+                  <span className="studio-control-icon" style={{ background: 'color-mix(in srgb, var(--ios-purple) 12%, transparent)' }}>🎚️</span>
+                  <div>
+                    <b>Volume</b>
+                    <small>{volume}% — slider below</small>
+                  </div>
+                  <b style={{ color: 'var(--ios-blue)', font: '700 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace' }}>{volume}%</b>
+                </div>
+                <div style={{ padding: '2px 2px 12px 54px' }}>
+                  <input
+                    type="range" min="0" max="100" value={volume}
+                    onChange={(e) => setVolume(Number(e.target.value))}
+                    aria-label="Volume"
+                    className="studio-range"
+                    style={{ '--range-fill': `${volume}%` } as React.CSSProperties}
+                  />
+                </div>
+                <div className="studio-control-row">
+                  <span className="studio-control-icon" style={{ background: 'color-mix(in srgb, var(--ios-orange) 12%, transparent)' }}>📳</span>
+                  <div>
+                    <b>Haptic Feedback</b>
+                    <small>Vibration on answers</small>
+                  </div>
+                  <Toggle on={haptics} onToggle={() => setHaptics(!haptics)} label="Haptic feedback" />
+                </div>
               </div>
-              <input
-                type="range" min="0" max="100" value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
-                style={{ width: '100%', background: `linear-gradient(to right, var(--ios-blue) ${volume}%, var(--ios-bg4) ${volume}%)` }}
-              />
-            </div>
+            </motion.section>
 
-            {/* Haptics */}
-            <div style={{ ...rowStyle, borderTop: '0.5px solid var(--ios-sep)' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,159,10,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>📳</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Haptic Feedback</div>
-                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>Vibration on answers</div>
+            {/* ── SOUND TYPE ── */}
+            <motion.section className="studio-panel" {...fade(0.1)}>
+              <div className="studio-panel-heading"><div><span>WAVEFORM</span><h2>Sound type</h2></div></div>
+              <div className="studio-wave-grid">
+                {SOUND_TYPES.map((s) => {
+                  const active = soundType === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => setSoundType(s.id)}
+                      className={active ? 'is-active' : ''}
+                      aria-pressed={active}
+                    >
+                      <b>{s.label}</b>
+                      <small>{s.desc}</small>
+                    </button>
+                  );
+                })}
               </div>
-              <Toggle on={haptics} onToggle={() => setHaptics(!haptics)} />
-            </div>
+            </motion.section>
+
+            {/* ── DIFFICULTY ── */}
+            <motion.section className="studio-panel" {...fade(0.15)}>
+              <div className="studio-panel-heading"><div><span>DIFFICULTY</span><h2>Default per mode</h2></div></div>
+              <div className="studio-row-list">
+                {MODES.map((m) => (
+                  <div key={m.id} className="studio-control-row" style={{ gridTemplateColumns: '40px 1fr auto' }}>
+                    <span className="studio-control-icon" style={{ background: `color-mix(in srgb, ${m.color} 14%, transparent)` }}>{m.icon}</span>
+                    <div>
+                      <b>{m.label}</b>
+                      <small>Applies on new sessions</small>
+                    </div>
+                    <div className="studio-segment" role="group" aria-label={`${m.label} difficulty`}>
+                      {(['easy', 'medium', 'hard'] as Diff[]).map((d) => {
+                        const active = (difficulty[m.id] ?? 'medium') === d;
+                        return (
+                          <button
+                            key={d}
+                            onClick={() => handleDifficulty(m.id, d)}
+                            className={active ? 'is-active' : ''}
+                            aria-pressed={active}
+                          >
+                            {d.charAt(0).toUpperCase() + d.slice(1)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.section>
           </div>
 
-          {/* ── SOUND TYPE ── */}
-          <SectionHeader>Sound Type</SectionHeader>
-          <div className="ios-group pt-desktop-card">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-              {SOUND_TYPES.map((s, idx) => {
-                const active = soundType === s.id;
-                const borders: React.CSSProperties = {};
-                if (idx >= 2) borders.borderTop = '0.5px solid var(--ios-sep)';
-                if (idx % 2 === 1) borders.borderLeft = '0.5px solid var(--ios-sep)';
-                return (
-                  <button
-                    key={s.id}
-                    onClick={() => setSoundType(s.id)}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '16px 8px',
-                      background: active ? 'var(--ios-bg3)' : 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      ...borders,
-                    }}
-                  >
-                    <div style={{ fontSize: 14, fontWeight: 600, color: active ? 'var(--ios-blue)' : 'var(--ios-label)', letterSpacing: '-0.23px' }}>
-                      {s.label}
-                    </div>
-                    <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 3 }}>
-                      {s.desc}
-                    </div>
+          <aside className="studio-inner-side">
+            {/* ── PRESETS ── */}
+            <motion.section className="studio-panel" {...fade(0.1)}>
+              <div className="studio-panel-heading"><div><span>PRESETS</span><h2>Quick setup</h2></div></div>
+              <div className="studio-row-list">
+                {PRESETS.map((profile) => (
+                  <button key={profile.id} className="studio-preset-row" onClick={() => applyPreset(profile.id)}>
+                    <span>
+                      <b>{profile.label}</b>
+                      <small>{profile.sub}</small>
+                    </span>
+                    <span>APPLY →</span>
                   </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ── DIFFICULTY ── */}
-          <SectionHeader>Default Difficulty</SectionHeader>
-          <div className="ios-group pt-desktop-card">
-            {MODES.map((m, idx) => (
-              <div
-                key={m.id}
-                style={{
-                  ...rowStyle,
-                  borderTop: idx === 0 ? 'none' : '0.5px solid var(--ios-sep)',
-                  flexWrap: 'wrap',
-                  gap: 0,
-                }}
-              >
-                {/* Left: icon + label */}
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: `${m.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0, marginRight: 12 }}>
-                  {m.icon}
-                </div>
-                <div style={{ flex: 1, fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>
-                  {m.label}
-                </div>
-
-                {/* Right: segmented buttons */}
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {(['easy', 'medium', 'hard'] as Diff[]).map((d) => {
-                    const active = (difficulty[m.id] ?? 'medium') === d;
-                    return (
-                      <button
-                        key={d}
-                        onClick={() => handleDifficulty(m.id, d)}
-                        style={{
-                          height: 28,
-                          borderRadius: 14,
-                          padding: '0 11px',
-                          fontSize: 12,
-                          fontWeight: 600,
-                          border: 'none',
-                          cursor: 'pointer',
-                          background: active ? m.color : 'var(--ios-bg3)',
-                          color: active ? '#000' : 'var(--ios-label3)',
-                          transition: 'background 0.15s, color 0.15s',
-                          letterSpacing: '-0.08px',
-                        }}
-                      >
-                        {d.charAt(0).toUpperCase() + d.slice(1)}
-                      </button>
-                    );
-                  })}
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </motion.section>
 
-          </div>
-          <div className="pt-settings-side">
-          <SectionHeader>Quick Presets</SectionHeader>
-          <div className="ios-group pt-desktop-card">
-            {[
-              { id: 'focus', label: 'Focus Practice', sub: 'Balanced cues for longer sessions' },
-              { id: 'coach', label: 'Coach Mode', sub: 'Louder guidance + tactile feedback' },
-              { id: 'quiet', label: 'Quiet Session', sub: 'Low-volume, distraction-free setup' },
-            ].map((profile, idx) => (
-              <button
-                key={profile.id}
-                onClick={() => applyPreset(profile.id as 'focus' | 'coach' | 'quiet')}
-                style={{
-                  ...rowStyle,
-                  borderTop: idx === 0 ? 'none' : '0.5px solid var(--ios-sep)',
-                  width: '100%',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)' }}>{profile.label}</div>
-                  <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 2 }}>{profile.sub}</div>
+            {/* ── DATA ── */}
+            <motion.section className="studio-panel" {...fade(0.15)}>
+              <div className="studio-panel-heading"><div><span>DATA</span><h2>Your training data</h2></div></div>
+              <div className="studio-row-list">
+                <div className="studio-history-row" style={{ minHeight: 52 }}>
+                  <span>Games recorded</span>
+                  <strong style={{ color: 'var(--ios-label)', font: '700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace' }}>{loaded ? stats.results.length : '—'}</strong>
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--ios-label3)', padding: '4px 8px', borderRadius: 999, border: '1px solid var(--ios-sep)' }}>
-                  Apply
+                <div className="studio-history-row" style={{ minHeight: 52 }}>
+                  <span>Current streak</span>
+                  <strong style={{ color: 'var(--ios-label)', font: '700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace' }}>{loaded ? `${stats.streak} D · BEST ${stats.bestStreak}` : '—'}</strong>
                 </div>
-              </button>
-            ))}
-          </div>
-
-          {/* ── DATA ── */}
-          <SectionHeader>Data</SectionHeader>
-          <div className="ios-group pt-desktop-card">
-            <div style={rowStyle}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(10,132,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>📊</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Game History</div>
-                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>
-                  {loaded ? `${stats.results.length} games recorded` : 'Loading...'}
-                </div>
+                {showClearConfirm ? (
+                  <div style={{ display: 'grid', gap: 10, padding: '14px 2px' }}>
+                    <p style={{ color: 'var(--ios-red)', fontSize: 12.5, lineHeight: 1.5, margin: 0 }}>Delete all data? This cannot be undone.</p>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="studio-danger-btn is-solid" onClick={() => { clearStats(); setShowClearConfirm(false); }}>Delete everything</button>
+                      <button className="studio-quiet-btn" onClick={() => setShowClearConfirm(false)}>Cancel</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ padding: '12px 2px', minHeight: 52, display: 'flex', alignItems: 'center' }}>
+                    <button className="studio-danger-btn" onClick={() => setShowClearConfirm(true)}>Clear all training data</button>
+                  </div>
+                )}
               </div>
-            </div>
-            <div style={{ ...rowStyle, borderTop: '0.5px solid var(--ios-sep)' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,149,0,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🔥</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Current Streak</div>
-                <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>
-                  {loaded ? `${stats.streak} days (best: ${stats.bestStreak})` : 'Loading...'}
-                </div>
-              </div>
-            </div>
-            {showClearConfirm ? (
-              <div style={{ ...rowStyle, borderTop: '0.5px solid var(--ios-sep)', background: 'rgba(255,59,48,0.06)', gap: 8 }}>
-                <div style={{ flex: 1, fontSize: 14, color: '#FF453A', fontWeight: 500 }}>
-                  Delete all data? This cannot be undone.
-                </div>
-                <button
-                  onClick={() => { clearStats(); setShowClearConfirm(false); }}
-                  style={{ height: 32, borderRadius: 8, padding: '0 14px', background: '#FF453A', color: '#fff', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer' }}
-                >
-                  Delete
-                </button>
-                <button
-                  onClick={() => setShowClearConfirm(false)}
-                  style={{ height: 32, borderRadius: 8, padding: '0 14px', background: 'var(--ios-bg3)', color: 'var(--ios-label)', fontSize: 13, fontWeight: 500, border: 'none', cursor: 'pointer' }}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowClearConfirm(true)}
-                style={{ ...rowStyle, borderTop: '0.5px solid var(--ios-sep)', width: '100%', cursor: 'pointer', textAlign: 'left' }}
-              >
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,59,48,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🗑️</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 17, color: '#FF453A', letterSpacing: '-0.43px' }}>Clear All Data</div>
-                  <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 1 }}>Remove all game history</div>
-                </div>
-              </button>
-            )}
-          </div>
+            </motion.section>
 
-          {/* ── ABOUT ── */}
-          <SectionHeader>About</SectionHeader>
-          <div className="ios-group pt-desktop-card">
-            <div style={{ ...rowStyle }}>
-              <span style={{ flex: 1, fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Version</span>
-              <span style={{ fontSize: 17, color: 'var(--ios-label3)', letterSpacing: '-0.43px' }}>0.1.0</span>
-            </div>
-            <div style={{ ...rowStyle, borderTop: '0.5px solid var(--ios-sep)' }}>
-              <span style={{ flex: 1, fontSize: 17, color: 'var(--ios-label)', letterSpacing: '-0.43px' }}>Build</span>
-              <span style={{ fontFamily: '-apple-system, "SF Mono", monospace', fontSize: 15, color: 'var(--ios-label3)' }}>2025-q1</span>
-            </div>
-            <div style={{ borderTop: '0.5px solid var(--ios-sep)', padding: '20px 16px', textAlign: 'center' }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.23px' }}>Pitch Therapy</div>
-              <div style={{ fontSize: 13, color: 'var(--ios-label3)', marginTop: 4 }}>Train Your Ear. Every Day.</div>
-            </div>
-          </div>
-
-          </div>
-          </div>
-        </motion.div>
+            {/* ── ABOUT ── */}
+            <motion.section className="studio-panel studio-daily-panel" {...fade(0.2)}>
+              <div className="studio-panel-heading"><div><span>ABOUT</span><h2>Pitch Therapy</h2></div></div>
+              <p>Train your ear. Every day. Built as a listening studio — short, focused sessions for sharper hearing.</p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ padding: '5px 10px', border: '1px solid var(--pt-stroke)', borderRadius: 999, color: 'var(--ios-label2)', font: '600 9px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace' }}>V 0.1.0</span>
+                <span style={{ padding: '5px 10px', border: '1px solid var(--pt-stroke)', borderRadius: 999, color: 'var(--ios-label2)', font: '600 9px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace' }}>BUILD 2025-Q1</span>
+              </div>
+            </motion.section>
+          </aside>
+        </section>
       </div>
     </div>
   );

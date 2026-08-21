@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 
 export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
   const router = useRouter();
-  const [email,    setEmail]    = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error,    setError]    = useState('');
-  const [loading,  setLoading]  = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,92 +38,45 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
     }
   };
 
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    fontSize: 13,
-    fontWeight: 500,
-    color: 'var(--ios-label3)',
-    letterSpacing: '-0.08px',
-    marginBottom: 6,
-  };
-
   return (
-    <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-
-        {/* Email + Password grouped like iOS */}
-        <div className="ios-group">
-          <div style={{ padding: '0 16px' }}>
-            <label style={{ ...labelStyle, paddingTop: 12, display: 'block' }}>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                borderBottom: '0.5px solid var(--ios-sep)',
-                padding: '8px 0 12px',
-                width: '100%',
-                fontSize: 17,
-                letterSpacing: '-0.43px',
-                color: 'var(--ios-label)',
-                outline: 'none',
-                fontFamily: 'inherit',
-              }}
-            />
-          </div>
-          <div style={{ padding: '0 16px' }}>
-            <label style={{ ...labelStyle, paddingTop: 12, display: 'block' }}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              placeholder="••••••••"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                padding: '8px 0 12px',
-                width: '100%',
-                fontSize: 17,
-                letterSpacing: '-0.43px',
-                color: 'var(--ios-label)',
-                outline: 'none',
-                fontFamily: 'inherit',
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div
-            style={{
-              marginTop: 10,
-              padding: '12px 16px',
-              background: 'rgba(255, 69, 58, 0.12)',
-              borderRadius: 10,
-              border: '1px solid rgba(255, 69, 58, 0.25)',
-            }}
-          >
-            <p style={{ fontSize: 14, color: 'var(--ios-red)', letterSpacing: '-0.08px' }}>{error}</p>
-          </div>
-        )}
-
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="ios-btn-primary"
-          style={{ marginTop: 16, opacity: loading ? 0.6 : 1 }}
-        >
-          {loading ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account'}
-        </button>
+    <form onSubmit={handleSubmit} className="studio-gate-form">
+      <div className="studio-field">
+        <label htmlFor={`email-${mode}`}>EMAIL</label>
+        <input
+          id={`email-${mode}`}
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          placeholder="you@example.com"
+          autoComplete="email"
+        />
       </div>
+
+      <div className="studio-field">
+        <label htmlFor={`password-${mode}`}>PASSWORD</label>
+        <input
+          id={`password-${mode}`}
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={6}
+          placeholder="••••••••"
+          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+        />
+      </div>
+
+      {error && <div className="studio-gate-error" role="alert">{error}</div>}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="ios-btn-primary"
+        style={{ marginTop: 8, borderRadius: 999, opacity: loading ? 0.6 : 1, letterSpacing: '-.01em' }}
+      >
+        {loading ? 'Please wait…' : mode === 'login' ? 'Sign in to the studio' : 'Create account'}
+      </button>
     </form>
   );
 }

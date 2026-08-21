@@ -12,6 +12,10 @@
  *
  * The shell owns PRESENTATION only — scoring, round logic, and audio
  * detection remain in each mode page.
+ *
+ * Visual language: "Resonance Studio" — same design system as the landing
+ * page instrument panel (mono micro-labels, accent-tinted score pill,
+ * hairline meters, grid backdrop).
  */
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -61,24 +65,18 @@ const MIC_MESSAGES: Record<Exclude<MicStatus, "idle" | "active">, { label: strin
 export function MicStatusBanner({ status, error }: { status: MicStatus; error?: string | null }) {
   if (status === "idle" || status === "active") return null;
   const msg = error ? { label: error, hint: MIC_MESSAGES[status]?.hint ?? "" } : MIC_MESSAGES[status];
-  const tone = status === "requesting" || status === "silent" ? "warn" : "error";
+  const isError = status === "denied" || status === "unavailable";
   return (
     <div
       role="status"
       aria-live="polite"
-      style={{
-        marginTop: 12,
-        borderRadius: 12,
-        padding: "12px 16px",
-        background: tone === "error" ? "rgba(255,69,58,0.12)" : "rgba(255,159,10,0.12)",
-        border: `1px solid ${tone === "error" ? "var(--ios-red)" : "var(--ios-orange)"}`,
-        fontSize: 13,
-        color: tone === "error" ? "var(--ios-red)" : "var(--ios-orange)",
-        textAlign: "left",
-      }}
+      className={`studio-training-mic ${isError ? "is-error" : ""}`}
     >
-      ⚠️ {msg.label}
-      {msg.hint ? <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>{msg.hint}</div> : null}
+      <span aria-hidden="true">{isError ? "⚠" : "◉"}</span>
+      <span>
+        <b>{msg.label}</b>
+        {msg.hint ? <small>{msg.hint}</small> : null}
+      </span>
     </div>
   );
 }
@@ -88,7 +86,7 @@ export default function TrainingShell({
   round,
   totalRounds,
   scoreLabel,
-  accent = "#0A84FF",
+  accent = "#c7ff4a",
   micStatus = "idle",
   micError,
   confirmExit = false,
@@ -116,88 +114,47 @@ export default function TrainingShell({
   return (
     <div
       ref={shellRef}
-      className="pb-tab"
-      style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}
+      className="pb-tab studio-training"
+      style={{ "--mode-accent": accent } as React.CSSProperties}
       data-training-shell=""
     >
       <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 16,
-            minHeight: 44,
-          }}
-        >
+        <div className="studio-training-bar">
           <button
             aria-label={`Exit ${title}`}
             onClick={handleBack}
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              background: "var(--ios-bg2)",
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
+            className="studio-training-back"
           >
             <svg width="10" height="17" viewBox="0 0 10 17" fill="none" aria-hidden="true">
               <path
                 d="M8.5 1.5L1.5 8.5L8.5 15.5"
-                stroke="var(--ios-blue)"
+                stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
           </button>
-          <div
-            style={{
-              fontSize: 17,
-              fontWeight: 600,
-              color: "var(--ios-label)",
-              letterSpacing: "-0.43px",
-            }}
-          >
-            {title}
-          </div>
-          <div
-            aria-live="polite"
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: "var(--ios-label2)",
-              background: "var(--ios-bg2)",
-              borderRadius: 10,
-              padding: "4px 10px",
-              minWidth: 60,
-              textAlign: "center",
-            }}
-          >
+          <b>{title}</b>
+          <div className="studio-training-score" aria-live="polite">
             {scoreLabel ?? ""}
           </div>
         </div>
 
         {/* Progress */}
         <div
-          className="ios-progress-track mb-6"
+          className="studio-training-track"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={totalRounds}
           aria-valuenow={Math.min(round, totalRounds)}
           aria-label={`${title} progress`}
         >
-          <div
-            className="ios-progress-fill"
+          <i
             style={{
               width: `${Math.min((round / totalRounds) * 100, 100)}%`,
-              background: accent,
-              transition: reduced ? "none" : undefined,
+              transition: reduced ? "none" : "width 350ms cubic-bezier(0.22, 1, 0.36, 1)",
             }}
           />
         </div>
@@ -223,7 +180,7 @@ export default function TrainingShell({
             }}
           >
             <div
-              className="ios-card"
+              className="studio-panel"
               style={{ padding: 24, maxWidth: 320, width: "100%", textAlign: "center" }}
             >
               <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: "var(--ios-label)" }}>
@@ -235,7 +192,7 @@ export default function TrainingShell({
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <button
                   className="ios-btn-primary"
-                  style={{ background: "var(--ios-red)" }}
+                  style={{ background: "var(--ios-red)", color: "#fff" }}
                   onClick={() => router.push(exitHref)}
                 >
                   Leave

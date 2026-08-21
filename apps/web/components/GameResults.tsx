@@ -15,14 +15,16 @@ export interface ResultStat {
 /**
  * Standard results / game-complete screen.
  *
- * Shows a centred trophy, heading, a responsive stat-card grid (2 or 3
- * columns), then a "Play Again" button and a "Dashboard" button.
+ * Shows the mode icon in an accent frame, a studio-style headline, a
+ * responsive stat-card grid (2 or 3 columns), then a "Play Again" pill
+ * and a "Dashboard" secondary button.
  *
- * Extracted from the done-phase blocks across all game mode pages.
+ * Visual language: "Resonance Studio" — mono micro-labels, stroke-bordered
+ * stat tiles, accent pill CTA (same system as the landing page).
  */
 export default function GameResults({
   icon = "🏆",
-  heading = "Game Complete",
+  heading = "Session complete",
   score,
   stats,
   onPlayAgain,
@@ -31,7 +33,7 @@ export default function GameResults({
 }: {
   /** Trophy emoji (default 🏆). */
   icon?: string;
-  /** Headline text (default "Game Complete"). */
+  /** Headline text (default "Session complete"). */
   heading?: string;
   /** Final score — shown in an accent-coloured card as the first stat. */
   score: number;
@@ -51,66 +53,103 @@ export default function GameResults({
   const colCount = allStats.length === 2 ? 2 : allStats.length === 4 ? 2 : 3;
 
   return (
-    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-      <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
-        <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
-          <div style={{ fontSize: 60, marginBottom: 12 }}>{icon}</div>
+    <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
+      <div
+        aria-hidden="true"
+        style={{
+          width: 74,
+          height: 74,
+          display: "grid",
+          placeItems: "center",
+          margin: "0 auto 20px",
+          borderRadius: 21,
+          fontSize: 36,
+          background: `color-mix(in srgb, ${accentColor} 13%, transparent)`,
+          border: `1px solid color-mix(in srgb, ${accentColor} 24%, transparent)`,
+        }}
+      >
+        {icon}
+      </div>
+
+      <div
+        style={{
+          color: "var(--ios-label3)",
+          font: "700 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace",
+          letterSpacing: ".16em",
+          marginBottom: 10,
+        }}
+      >
+        SESSION REPORT
+      </div>
+      <h1
+        style={{
+          margin: "0 0 26px",
+          color: "var(--ios-label)",
+          fontSize: 34,
+          fontWeight: 450,
+          lineHeight: 1,
+          letterSpacing: "-.055em",
+        }}
+      >
+        {heading}
+      </h1>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${colCount}, 1fr)`,
+          gap: 10,
+          marginBottom: 26,
+          textAlign: "center",
+        }}
+      >
+        {allStats.map((stat, i) => (
           <div
+            key={i}
             style={{
-              fontSize: 28,
-              fontWeight: 700,
-              color: "var(--ios-label)",
-              letterSpacing: "-0.5px",
-              marginBottom: 24,
+              padding: "15px 10px",
+              borderRadius: 18,
+              border: "1px solid var(--pt-stroke)",
+              background: stat.accent
+                ? `color-mix(in srgb, ${accentColor} 8%, var(--pt-surface-1))`
+                : "var(--pt-surface-1)",
             }}
           >
-            {heading}
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${colCount}, 1fr)`,
-              gap: 10,
-              marginBottom: 24,
-            }}
-          >
-            {allStats.map((stat, i) => (
-              <div
-                key={i}
-                className="ios-card"
-                style={{ padding: "14px 12px", textAlign: "center" }}
-              >
-                <div
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 700,
-                    letterSpacing: "-0.5px",
-                    color: stat.accent ? accentColor : "var(--ios-label)",
-                  }}
-                >
-                  {stat.value}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <button
-              className="ios-btn-primary"
-              style={{ background: accentColor }}
-              onClick={onPlayAgain}
+            <div
+              style={{
+                fontSize: 26,
+                fontWeight: 600,
+                letterSpacing: "-.04em",
+                color: stat.accent ? accentColor : "var(--ios-label)",
+              }}
             >
-              Play Again
-            </button>
-            <button className="ios-btn-secondary" onClick={onBack}>
-              Dashboard
-            </button>
+              {stat.value}
+            </div>
+            <div
+              style={{
+                marginTop: 6,
+                color: "var(--ios-label3)",
+                font: "700 8px/1 ui-monospace, SFMono-Regular, Menlo, monospace",
+                letterSpacing: ".12em",
+              }}
+            >
+              {stat.label.toUpperCase()}
+            </div>
           </div>
-        </div>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <button
+          className="ios-btn-primary"
+          style={{ background: accentColor, borderRadius: 999, letterSpacing: "-.01em" }}
+          onClick={onPlayAgain}
+        >
+          Play again
+        </button>
+        <button className="ios-btn-secondary" style={{ borderRadius: 999 }} onClick={onBack}>
+          Back to exercises
+        </button>
       </div>
     </div>
   );

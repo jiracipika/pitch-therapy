@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   buildModeBreakdown,
   buildProgressInsights,
@@ -16,7 +16,6 @@ import {
 } from "@pitch-therapy/core";
 import { useStatsContext } from "@/components/StatsProvider";
 import Link from "next/link";
-import { AnimatedStatCard, PageHero, Reveal, StatusCard } from "@/components/PremiumMotion";
 import {
   buildCategoryMastery,
   calculateTotalXP,
@@ -34,8 +33,6 @@ const WEEKS = 12;
 const DAYS = 7;
 const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 
-// Per-mode trend display, driven by shared-core analytics (buildModeBreakdown).
-// Same source of truth as the mobile Progress screen.
 const TREND_DISPLAY: Record<ModeTrendLabel, { arrow: string; color: string; label: string }> = {
   improving: { arrow: "↗", color: "var(--ios-green)", label: "Improving" },
   steady: { arrow: "→", color: "var(--ios-label3)", label: "Steady" },
@@ -55,11 +52,8 @@ function formatMetricProgress(s: AchievementStatus): string {
     case "versatility":
       return `${Math.round(progress)} / ${tier.threshold} modes`;
     case "mastery":
-      // Mastery counts modes drilled to a sustained standard (4+ sessions at
-      // 80%+ average). Show mastered / target.
       return `${Math.round(progress)} / ${tier.threshold} mastered`;
     case "speed": {
-      // Speed is inverted: lower is better. Show current / target seconds.
       const targetSec = (tier.threshold / 1000).toFixed(0);
       const currentSec =
         Number.isFinite(progress) && progress > 0 ? (progress / 1000).toFixed(1) : "—";
@@ -72,16 +66,13 @@ function formatMetricProgress(s: AchievementStatus): string {
 
 export default function ProgressPage() {
   const { stats, loaded, getModeStats } = useStatsContext();
+  const reduce = useReducedMotion();
   const insights = useMemo(() => buildProgressInsights(stats.results), [stats.results]);
   const achievements = useMemo(() => evaluateAchievements(stats.results), [stats.results]);
   const nextGoals = useMemo(() => getNextGoals(stats.results), [stats.results]);
   const latestBadges = useMemo(() => getLatestBadges(stats.results), [stats.results]);
-
-  // Per-mode trend (improving / steady / slipping) from shared core analytics.
-  // Mirrors the mobile Progress screen so both surfaces agree.
   const modeBreakdown = useMemo(() => buildModeBreakdown(stats.results), [stats.results]);
 
-  // Gamification: XP, level, category mastery
   const totalXP = useMemo(() => calculateTotalXP(stats.results), [stats.results]);
   const levelInfo = useMemo(() => getLevelProgress(totalXP), [totalXP]);
   const categoryMastery = useMemo(
@@ -110,20 +101,13 @@ export default function ProgressPage() {
       const date = new Date(today);
       date.setDate(date.getDate() - (w * 7 + ((today.getDay() + 6) % 7) - d));
       const dateStr = date.toISOString().slice(0, 10);
-      gridDays.push({
-        date: dateStr,
-        count: activityMap[dateStr] || 0,
-        future: date > today,
-      });
+      gridDays.push({ date: dateStr, count: activityMap[dateStr] || 0, future: date > today });
     }
   }
 
-  // Find the most played mode
-  const modePlayCounts = MODES.map((m) => {
-    const ms = getModeStats(m.id);
-    return { ...m, ...ms };
-  }).sort((a, b) => b.gamesPlayed - a.gamesPlayed);
-
+  const modePlayCounts = MODES.map((m) => ({ ...m, ...getModeStats(m.id) })).sort(
+    (a, b) => b.gamesPlayed - a.gamesPlayed,
+  );
   const topMode = modePlayCounts[0];
   const totalGames = stats.results.length;
   const avgAccuracy =
@@ -139,906 +123,275 @@ export default function ProgressPage() {
         : stats.streak >= 3
           ? "Building momentum"
           : "Just getting started";
-  const statusTone = !loaded ? "loading" : totalGames > 0 ? "success" : "empty";
-  const statusTitle = !loaded
-    ? "Analyzing your training history"
-    : totalGames > 0
-      ? "Progress intelligence is live"
-      : "No sessions yet";
-  const statusBody = !loaded
-    ? "Pulling your mode-level trends and recent momentum."
-    : totalGames > 0
-      ? insights.focusTip
-      : "Complete your first session to unlock trend detection and weak-mode insights.";
+
+  const fade = (delay: number) => (reduce ? {} : { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay, duration: 0.42 } });
+  const hasData = loaded && totalGames > 0;
 
   return (
-    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-      <div className="pt-page-shell pt-page-progress px-4 pt-14">
-        <PageHero
-          variant="progress"
-          eyebrow="Your journey"
-          title="Progress"
-          subtitle="Track consistency, precision, and growth across every mode."
-        />
-        <Reveal delay={0.04} className="mb-3">
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-            <Link
-              href="/profile"
-              style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: "var(--ios-blue)",
-                textDecoration: "none",
-              }}
-            >
-              View Ear Profile →
-            </Link>
+    <div className="studio-page">
+      <div className="pt-page-shell studio-dashboard">
+        <motion.header className="studio-inner-header" {...fade(0)}>
+          <div>
+            <span className="studio-overline">INSIGHTS / LISTENING STUDIO</span>
+            <h1>Your growth,<br /><em>measured.</em></h1>
+            <p>Consistency, precision, and momentum across every exercise — all in one view.</p>
           </div>
-          <StatusCard
-            tone={statusTone}
-            title={statusTitle}
-            body={statusBody}
-            action={
-              loaded && totalGames === 0 ? (
-                <Link
-                  href="/dashboard"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: 36,
-                    borderRadius: 10,
-                    padding: "0 14px",
-                    background: "var(--ios-blue)",
-                    color: "#fff",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    textDecoration: "none",
-                  }}
-                >
-                  Start Training
-                </Link>
-              ) : undefined
-            }
-          />
-        </Reveal>
+          <div className="studio-header-chip">
+            <span>LEVEL</span>
+            <b>{loaded ? levelInfo.level : "—"}</b>
+            <small>{loaded ? levelTitle(levelInfo.level) : "LOADING"}</small>
+          </div>
+        </motion.header>
 
-        <div className="pt-progress-layout">
-          <div className="pt-progress-main">
+        <section className="studio-inner-grid">
+          <div className="studio-inner-main">
             {/* ── SUMMARY STATS ── */}
-            <div className="pt-desktop-card mb-1 grid grid-cols-4 gap-2">
-              <AnimatedStatCard
-                label="Games"
-                value={loaded ? totalGames : "—"}
-                color="var(--ios-blue)"
-                delay={0.04}
-              />
-              <AnimatedStatCard
-                label="Best Streak"
-                value={loaded ? stats.bestStreak : "—"}
-                color="var(--ios-orange)"
-                delay={0.08}
-              />
-              <AnimatedStatCard
-                label="Avg Acc"
-                value={loaded ? `${avgAccuracy}%` : "—"}
-                color="var(--ios-green)"
-                delay={0.12}
-              />
-              <AnimatedStatCard
-                label="Time"
-                value={loaded ? `${totalTimeMin}m` : "—"}
-                color="var(--ios-purple)"
-                delay={0.16}
-              />
+            <div className="studio-stat-strip">
+              <motion.article {...fade(0.05)}><span>SESSIONS</span><b>{loaded ? totalGames : "—"}</b><i>Short, focused repetitions.</i></motion.article>
+              <motion.article {...fade(0.08)}><span>BEST STREAK</span><b>{loaded ? stats.bestStreak : "—"}<small> days</small></b><i>Your personal record.</i></motion.article>
+              <motion.article {...fade(0.11)}><span>AVG ACCURACY</span><b>{loaded ? avgAccuracy : "—"}<small>%</small></b><i>Across every exercise.</i></motion.article>
+              <motion.article {...fade(0.14)}><span>TIME LISTENING</span><b>{loaded ? totalTimeMin : "—"}<small> min</small></b><i>{totalXP} XP earned.</i></motion.article>
             </div>
 
-            {/* ── XP / LEVEL BAR ── */}
-            {loaded && totalGames > 0 && (
-              <div className="pt-xp-header" style={{ marginTop: 12, marginBottom: 12 }}>
-                <div className="pt-xp-badge">{levelInfo.level}</div>
-                <div className="pt-xp-info">
-                  <div className="pt-xp-title-row">
-                    <span className="pt-xp-level">Level {levelInfo.level}</span>
-                    <span className="pt-xp-title">{levelTitle(levelInfo.level)}</span>
-                  </div>
-                  <div className="pt-xp-bar-track">
-                    <div className="pt-xp-bar-fill" style={{ width: `${levelInfo.pct}%` }} />
-                  </div>
-                  <div className="pt-xp-numbers">
-                    <span>{levelInfo.xpInLevel} XP earned</span>
-                    <span>{levelInfo.xpForNext - levelInfo.xpInLevel} XP to next</span>
-                  </div>
-                </div>
-              </div>
+            {/* ── EMPTY STATE ── */}
+            {!hasData && (
+              <motion.section className="studio-panel" {...fade(0.1)}>
+                <div className="studio-panel-heading"><div><span>GETTING STARTED</span><h2>Insights unlock with play</h2></div></div>
+                <p style={{ margin: '-6px 0 18px', color: 'var(--ios-label2)', fontSize: 12, lineHeight: 1.55 }}>
+                  Complete your first session to unlock trend detection, activity history, and weak-mode insights.
+                </p>
+                <Link href="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', gap: 28, width: '100%', minHeight: 48, padding: '0 20px', borderRadius: 999, background: 'var(--ios-blue)', color: 'var(--pt-on-accent)', fontSize: 13, fontWeight: 750, textDecoration: 'none', boxShadow: '0 12px 30px rgba(199,255,74,.15)' }}>
+                  Start your first session <span aria-hidden="true">→</span>
+                </Link>
+              </motion.section>
             )}
 
             {/* ── MASTERY OVERVIEW ── */}
-            {loaded && totalGames > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.12, duration: 0.4 }}
-                className="ios-card pt-desktop-card"
-                style={{ padding: 16, marginBottom: 12 }}
-              >
-                <div style={{
-                  fontSize: 13, fontWeight: 400, letterSpacing: "-0.08px",
-                  textTransform: "uppercase", color: "var(--ios-label3)", marginBottom: 12,
-                }}>
-                  Mastery by Course
+            {hasData && (
+              <motion.section className="studio-panel" {...fade(0.12)}>
+                <div className="studio-panel-heading">
+                  <div><span>COURSES</span><h2>Mastery by course</h2></div>
+                  <Link href="/play-modes">All exercises ↗</Link>
                 </div>
-                <div style={{ display: "grid", gap: 10 }}>
+                <div className="studio-row-list" style={{ gap: 4 }}>
                   {categoryMastery.map((cat) => {
                     const mc = MASTERY_CONFIG[cat.level];
                     return (
-                      <div key={cat.categoryId} style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        padding: "10px 12px",
-                        borderRadius: 12,
-                        background: cat.masteryPct > 0 ? mc.bg : "transparent",
-                        border: `1px solid ${cat.masteryPct > 0 ? cat.accentHex + "22" : "var(--pt-stroke)"}`,
-                      }}>
-                        <div style={{
-                          width: 36, height: 36, borderRadius: 10,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: 18, flexShrink: 0,
-                          background: `color-mix(in srgb, ${cat.accentHex} 14%, transparent)`,
-                        }}>
-                          {cat.icon}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{
-                            fontSize: 14, fontWeight: 700, letterSpacing: "-0.2px",
-                            color: "var(--ios-label)",
-                          }}>
-                            {cat.label}
-                          </div>
-                          <div className="pt-mastery-bar-track" style={{ marginTop: 6 }}>
-                            <div className="pt-mastery-bar-fill" style={{
-                              width: `${cat.masteryPct}%`,
-                              background: cat.accentHex,
-                            }} />
-                          </div>
-                        </div>
-                        <div style={{ textAlign: "right", flexShrink: 0 }}>
-                          <div style={{
-                            fontSize: 16, fontWeight: 800,
-                            color: cat.masteryPct > 0 ? mc.color : "var(--ios-label3)",
-                          }}>
-                            {cat.masteryPct}%
-                          </div>
-                          <div style={{ fontSize: 10, color: "var(--ios-label3)", marginTop: 1 }}>
-                            {cat.masteredModes}/{cat.totalModes} mastered
-                          </div>
-                        </div>
+                      <div key={cat.categoryId} style={{ display: 'grid', gridTemplateColumns: '42px 1fr auto', alignItems: 'center', gap: 12, padding: '10px 2px', minHeight: 58 }}>
+                        <span className="studio-plan-icon" style={{ background: `color-mix(in srgb, ${cat.accentHex} 14%, transparent)` }}>{cat.icon}</span>
+                        <span style={{ minWidth: 0 }}>
+                          <b style={{ display: 'block', fontSize: 13 }}>{cat.label}</b>
+                          <i className="studio-meter"><em style={{ display: 'block', height: '100%', width: `${cat.masteryPct}%`, background: cat.accentHex }} /></i>
+                        </span>
+                        <strong style={{ color: cat.masteryPct > 0 ? mc.color : 'var(--ios-label3)', font: '700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace' }}>{cat.masteryPct}%</strong>
                       </div>
                     );
                   })}
                 </div>
-              </motion.div>
+              </motion.section>
             )}
 
-            {loaded && totalGames > 0 && (
-              <>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "var(--ios-label3)",
-                    textTransform: "uppercase",
-                    letterSpacing: "-0.08px",
-                    padding: "20px 4px 8px",
-                  }}
-                >
-                  Activity (Last 12 Weeks)
+            {/* ── ACTIVITY HEATMAP ── */}
+            {hasData && (
+              <motion.section className="studio-panel" {...fade(0.16)}>
+                <div className="studio-panel-heading">
+                  <div><span>ACTIVITY</span><h2>Last 12 weeks</h2></div>
+                  <span className="studio-time-chip">{totalGames} SESSIONS</span>
                 </div>
-
-                <motion.div
-                  className="ios-card pt-desktop-card"
-                  style={{ padding: "16px", overflowX: "auto" }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.14, duration: 0.4 }}
-                >
-                  {/* Day labels */}
-                  <div style={{ display: "flex", gap: 3, marginBottom: 4 }}>
+                <div style={{ overflowX: 'auto', paddingBottom: 4 }}>
+                  <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
                     {DAY_LABELS.map((d, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          width: 14,
-                          textAlign: "center",
-                          fontSize: 9,
-                          fontWeight: 600,
-                          color: "var(--ios-label3)",
-                          letterSpacing: 0.3,
-                        }}
-                      >
-                        {d}
-                      </div>
+                      <div key={i} style={{ width: 13, textAlign: 'center', fontSize: 8, fontWeight: 700, color: 'var(--ios-label4)', letterSpacing: '.04em' }}>{d}</div>
                     ))}
                   </div>
-
-                  {/* Grid — columns = weeks */}
-                  <div style={{ display: "flex", gap: 3 }}>
+                  <div className="studio-heatmap">
                     {Array.from({ length: WEEKS }).map((_, w) => (
-                      <div key={w} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                      <div key={w}>
                         {Array.from({ length: DAYS }).map((_, d) => {
                           const cell = gridDays[w * DAYS + d];
-                          const intensity = cell?.future
-                            ? 0
+                          const heat = cell?.future
+                            ? 'is-future'
                             : cell?.count
-                              ? Math.max(0.15, cell.count / maxActivity)
-                              : 0;
+                              ? cell.count / maxActivity > 0.75 ? 'is-hot-4' : cell.count / maxActivity > 0.5 ? 'is-hot-3' : cell.count / maxActivity > 0.25 ? 'is-hot-2' : 'is-hot-1'
+                              : '';
                           return (
-                            <div
-                              key={d}
-                              title={cell ? `${cell.date}: ${cell.count} games` : ""}
-                              style={{
-                                width: 14,
-                                height: 14,
-                                borderRadius: 3,
-                                background:
-                                  intensity === 0
-                                    ? "rgba(255,255,255,0.04)"
-                                    : `rgba(10, 132, 255, ${intensity})`,
-                                transition: "background 0.3s ease",
-                              }}
-                            />
+                            <i key={d} className={heat} title={cell ? `${cell.date}: ${cell.count} session${cell.count !== 1 ? 's' : ''}` : ''} />
                           );
                         })}
                       </div>
                     ))}
                   </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-end",
-                      gap: 4,
-                      marginTop: 10,
-                    }}
-                  >
-                    <span style={{ fontSize: 10, color: "var(--ios-label3)" }}>Less</span>
-                    {[0, 0.15, 0.35, 0.6, 0.85].map((i) => (
-                      <div
-                        key={i}
-                        style={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: 2,
-                          background: `rgba(10,132,255,${i || 0.04})`,
-                        }}
-                      />
-                    ))}
-                    <span style={{ fontSize: 10, color: "var(--ios-label3)" }}>More</span>
-                  </div>
-                </motion.div>
-              </>
-            )}
-
-            {/* ── FAVORITE MODE ── */}
-            {loaded && totalGames > 0 && topMode && topMode.gamesPlayed > 0 && (
-              <motion.div
-                className="ios-card pt-desktop-card"
-                style={{
-                  padding: 20,
-                  marginTop: 12,
-                  background: `linear-gradient(135deg, ${topMode.color}12 0%, ${topMode.color}06 100%)`,
-                  border: `0.5px solid ${topMode.color}20`,
-                }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.18, duration: 0.4 }}
-              >
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                    color: "var(--ios-label3)",
-                    marginBottom: 8,
-                  }}
-                >
-                  Most Played
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ fontSize: 32 }}>{topMode.icon}</div>
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 600,
-                        color: "var(--ios-label)",
-                        letterSpacing: "-0.4px",
-                      }}
-                    >
-                      {topMode.label}
-                    </div>
-                    <div style={{ fontSize: 13, color: "var(--ios-label2)", marginTop: 2 }}>
-                      {topMode.gamesPlayed} games · {Math.round(topMode.avgAccuracy * 100)}% avg
-                      accuracy
-                    </div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: 20, fontWeight: 700, color: topMode.color }}>
-                      {topMode.bestScore}
-                    </div>
-                    <div style={{ fontSize: 11, color: "var(--ios-label3)" }}>Best</div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 5, marginTop: 10, color: 'var(--ios-label4)', font: '700 8px/1 ui-monospace, SFMono-Regular, Menlo, monospace', letterSpacing: '.08em' }}>
+                    <span>LESS</span>
+                    <i className="studio-heatmap" style={{ display: 'flex', gap: 3 }} aria-hidden="true">
+                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(255,255,255,.045)', display: 'block' }} />
+                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(199,255,74,.22)', display: 'block' }} />
+                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(199,255,74,.45)', display: 'block' }} />
+                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(199,255,74,.7)', display: 'block' }} />
+                      <span style={{ width: 10, height: 10, borderRadius: 2, background: '#c7ff4a', display: 'block' }} />
+                    </i>
+                    <span>MORE</span>
                   </div>
                 </div>
-              </motion.div>
+              </motion.section>
             )}
 
             {/* ── ACHIEVEMENTS ── */}
-            {loaded && totalGames > 0 && (
-              <>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "var(--ios-label3)",
-                    textTransform: "uppercase",
-                    letterSpacing: "-0.08px",
-                    padding: "24px 4px 8px",
-                  }}
-                >
-                  Achievements
+            {hasData && (
+              <motion.section className="studio-panel" {...fade(0.2)}>
+                <div className="studio-panel-heading">
+                  <div><span>BADGES</span><h2>Achievements</h2></div>
+                  <span className="studio-time-chip">{achievements.unlockedCount}/{achievements.totalCount}</span>
                 </div>
-                <motion.div
-                  className="ios-card pt-desktop-card"
-                  style={{ padding: 16, marginTop: 0 }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.4 }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginBottom: 12,
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 15,
-                        fontWeight: 650,
-                        color: "var(--ios-label)",
-                        letterSpacing: "-0.2px",
-                      }}
-                    >
-                      {achievements.unlockedCount} of {achievements.totalCount} unlocked
-                    </div>
-                    {achievements.latestUnlock && (
-                      <div style={{ fontSize: 11, color: "var(--ios-green)", fontWeight: 600 }}>
-                        {achievements.latestUnlock.icon} {achievements.latestUnlock.label}
-                      </div>
-                    )}
+                <i className="studio-meter" aria-hidden="true" style={{ margin: '0 0 14px' }}>
+                  <em style={{ display: 'block', height: '100%', width: `${(achievements.unlockedCount / achievements.totalCount) * 100}%`, background: 'linear-gradient(90deg, var(--ios-green), var(--ios-blue))' }} />
+                </i>
+                {latestBadges.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+                    {latestBadges.map((b) => (
+                      <span key={b.tier.id} title={`${b.tier.label} — your current best in ${b.tier.category}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 11px', borderRadius: 999, border: '1px solid color-mix(in srgb, var(--ios-green) 30%, var(--pt-stroke))', background: 'color-mix(in srgb, var(--ios-green) 8%, transparent)', fontSize: 11, fontWeight: 650, color: 'var(--ios-label)' }}>
+                        <span style={{ fontSize: 12 }}>{b.tier.icon}</span> {b.tier.label}
+                      </span>
+                    ))}
                   </div>
-
-                  {/* Progress bar across all tiers */}
-                  <div className="ios-progress-track" style={{ marginBottom: 16 }}>
-                    <div
-                      className="ios-progress-fill"
-                      style={{
-                        width: `${(achievements.unlockedCount / achievements.totalCount) * 100}%`,
-                        background: "linear-gradient(90deg, var(--ios-green), var(--ios-blue))",
-                        transition: "width 0.6s ease-out",
-                      }}
-                    />
-                  </div>
-
-                  {/* Current badges — strongest unlocked tier per category */}
-                  {latestBadges.length > 0 && (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 6,
-                        marginBottom: 16,
-                      }}
-                    >
-                      {latestBadges.map((b: AchievementStatus) => (
-                        <div
-                          key={b.tier.id}
-                          title={`${b.tier.label} — your current best in ${b.tier.category}`}
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 4,
-                            padding: "4px 10px",
-                            borderRadius: 999,
-                            background:
-                              "linear-gradient(135deg, rgba(48,209,88,0.18), rgba(10,132,255,0.10))",
-                            border: "0.5px solid rgba(48,209,88,0.35)",
-                            fontSize: 11,
-                            fontWeight: 600,
-                            color: "var(--ios-label)",
-                            letterSpacing: "-0.08px",
-                          }}
-                        >
-                          <span style={{ fontSize: 12 }}>{b.tier.icon}</span>
-                          <span>{b.tier.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Tier grid */}
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-                      gap: 8,
-                    }}
-                  >
-                    {achievements.statuses.map((s: AchievementStatus) => {
-                      const goal = nextGoals.find(
-                        (g) => g.tier.category === s.tier.category && !g.unlocked,
-                      );
-                      const isNext = goal?.tier.id === s.tier.id;
-                      return (
-                        <div
-                          key={s.tier.id}
-                          style={{
-                            padding: 10,
-                            borderRadius: 10,
-                            background: s.unlocked
-                              ? "linear-gradient(135deg, rgba(48,209,88,0.12), rgba(10,132,255,0.06))"
-                              : "rgba(255,255,255,0.03)",
-                            border: isNext
-                              ? "0.5px solid var(--ios-blue)"
-                              : s.unlocked
-                                ? "0.5px solid rgba(48,209,88,0.2)"
-                                : "0.5px solid var(--ios-sep)",
-                            opacity: s.unlocked ? 1 : 0.65,
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 6,
-                              marginBottom: 4,
-                            }}
-                          >
-                            <span
-                              style={{
-                                fontSize: 16,
-                                filter: s.unlocked ? "none" : "grayscale(0.7)",
-                              }}
-                            >
-                              {s.tier.icon}
-                            </span>
-                            <span
-                              style={{
-                                fontSize: 12,
-                                fontWeight: 600,
-                                color: "var(--ios-label)",
-                                letterSpacing: "-0.1px",
-                              }}
-                            >
-                              {s.tier.label}
-                            </span>
-                          </div>
-                          <div
-                            style={{
-                              fontSize: 10,
-                              color: "var(--ios-label3)",
-                              lineHeight: 1.4,
-                              marginBottom: 6,
-                            }}
-                          >
-                            {s.tier.description}
-                          </div>
-                          {s.unlocked ? (
-                            <div
-                              style={{ fontSize: 10, color: "var(--ios-green)", fontWeight: 600 }}
-                            >
-                              Unlocked
-                            </div>
-                          ) : (
-                            <>
-                              <div
-                                className="ios-progress-track"
-                                style={{ height: 4, marginBottom: 3 }}
-                              >
-                                <div
-                                  className="ios-progress-fill"
-                                  style={{
-                                    width: `${Math.round(s.progressFraction * 100)}%`,
-                                    background: isNext ? "var(--ios-blue)" : "var(--ios-label3)",
-                                    transition: "width 0.5s ease-out",
-                                  }}
-                                />
-                              </div>
-                              <div style={{ fontSize: 9, color: "var(--ios-label3)" }}>
-                                {formatMetricProgress(s)}
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              </>
-            )}
-          </div>
-
-          <div className="pt-progress-side">
-            <motion.div
-              className="ios-card pt-desktop-card"
-              style={{
-                padding: 14,
-                marginBottom: 12,
-                background: "linear-gradient(160deg, rgba(48,209,88,0.12), rgba(10,132,255,0.08))",
-                border: "0.5px solid rgba(48,209,88,0.22)",
-              }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.16, duration: 0.35 }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  color: "var(--ios-label3)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                  marginBottom: 8,
-                }}
-              >
-                Consistency
-              </div>
-              <div
-                style={{
-                  fontSize: 17,
-                  fontWeight: 650,
-                  color: "var(--ios-label)",
-                  letterSpacing: "-0.2px",
-                }}
-              >
-                {consistencyTier}
-              </div>
-              <div style={{ fontSize: 12, color: "var(--ios-label3)", marginTop: 4 }}>
-                Current streak:{" "}
-                <span style={{ color: "var(--ios-label2)", fontWeight: 600 }}>
-                  {stats.streak} days
-                </span>
-              </div>
-            </motion.div>
-
-            {loaded && totalGames > 0 ? (
-              <motion.div
-                className="ios-card pt-desktop-card"
-                style={{
-                  padding: 14,
-                  marginBottom: 12,
-                  background:
-                    "linear-gradient(160deg, rgba(191,90,242,0.12), rgba(10,132,255,0.09))",
-                  border: "0.5px solid rgba(191,90,242,0.24)",
-                }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.18, duration: 0.35 }}
-              >
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: "var(--ios-label3)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em",
-                    marginBottom: 8,
-                  }}
-                >
-                  Focus Next
-                </div>
-                <div
-                  style={{
-                    fontSize: 15,
-                    fontWeight: 600,
-                    color: "var(--ios-label)",
-                    letterSpacing: "-0.2px",
-                  }}
-                >
-                  {insights.weakModes[0]?.label ?? "Balanced training"}
-                </div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: "var(--ios-label3)",
-                    marginTop: 4,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {insights.focusTip}
-                </div>
-                <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "var(--ios-label2)",
-                      border: "1px solid var(--ios-sep)",
-                      borderRadius: 999,
-                      padding: "3px 8px",
-                    }}
-                  >
-                    Sessions 7d: {insights.momentum.sessionsLast7}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "var(--ios-label2)",
-                      border: "1px solid var(--ios-sep)",
-                      borderRadius: 999,
-                      padding: "3px 8px",
-                    }}
-                  >
-                    Accuracy delta: {Math.round(insights.momentum.accuracyDeltaPct)}%
-                  </div>
-                </div>
-              </motion.div>
-            ) : null}
-
-            {loaded && totalGames > 0 && (
-              <>
-                {/* ── PER MODE ── */}
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "var(--ios-label3)",
-                    textTransform: "uppercase",
-                    letterSpacing: "-0.08px",
-                    padding: "24px 4px 8px",
-                  }}
-                >
-                  Per Mode
-                </div>
-
-                <motion.div
-                  className="ios-group pt-desktop-card"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.4 }}
-                >
-                  {MODES.map((m, idx) => {
-                    const ms = getModeStats(m.id);
-                    const progressPct =
-                      ms.gamesPlayed > 0 ? Math.min(100, Math.round(ms.avgAccuracy * 100)) : 0;
-
+                )}
+                <div className="studio-badge-grid">
+                  {achievements.statuses.map((s) => {
+                    const goal = nextGoals.find((g) => g.tier.category === s.tier.category && !g.unlocked);
+                    const isNext = goal?.tier.id === s.tier.id;
+                    const cls = s.unlocked ? 'is-unlocked' : isNext ? 'is-next' : 'is-locked';
                     return (
-                      <div
-                        key={m.id}
-                        className="ios-row"
-                        style={{
-                          padding: "14px 16px",
-                          borderTop: idx === 0 ? "none" : "0.5px solid var(--ios-sep)",
-                          flexDirection: "column",
-                          alignItems: "stretch",
-                          gap: 0,
-                        }}
-                      >
-                        {/* Top row */}
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            marginBottom: ms.gamesPlayed > 0 ? 10 : 0,
-                          }}
-                        >
-                          <Link
-                            href={`/play/${m.id}`}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              flex: 1,
-                              textDecoration: "none",
-                            }}
-                          >
-                            <div
-                              style={{
-                                width: 36,
-                                height: 36,
-                                borderRadius: 9,
-                                background: `${m.color}18`,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: 18,
-                                marginRight: 12,
-                                flexShrink: 0,
-                              }}
-                            >
-                              {m.icon}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <div
-                                style={{
-                                  fontSize: 16,
-                                  fontWeight: 500,
-                                  color: "var(--ios-label)",
-                                  letterSpacing: "-0.32px",
-                                }}
-                              >
-                                {m.label}
-                              </div>
-                              <div
-                                style={{ fontSize: 12, color: "var(--ios-label3)", marginTop: 1 }}
-                              >
-                                {ms.gamesPlayed > 0
-                                  ? `${ms.gamesPlayed} game${ms.gamesPlayed !== 1 ? "s" : ""} · ${Math.round(ms.avgAccuracy * 100)}% accuracy`
-                                  : "Not played yet"}
-                              </div>
-                            </div>
-                          </Link>
-                          {ms.gamesPlayed > 0 && (
-                            <div
-                              style={{
-                                textAlign: "right",
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "flex-end",
-                                gap: 2,
-                              }}
-                            >
-                              {(() => {
-                                const breakdown = breakdownByMode.get(m.id);
-                                const trend = breakdown
-                                  ? TREND_DISPLAY[breakdown.trendLabel]
-                                  : null;
-                                if (!trend) return null;
-                                // Trend requires >=4 sessions in shared core; otherwise "steady".
-                                const isSteady = breakdown?.trendLabel === "steady";
-                                return (
-                                  <div
-                                    title={`Trend: ${trend.label}${breakdown && !isSteady ? ` (${breakdown.trendDelta >= 0 ? "+" : ""}${Math.round(breakdown.trendDelta * 100)}%)` : ""}`}
-                                    style={{
-                                      display: "inline-flex",
-                                      alignItems: "center",
-                                      gap: 3,
-                                      fontSize: 11,
-                                      fontWeight: 500,
-                                      color: trend.color,
-                                      background: "var(--ios-bg3)",
-                                      border: "0.5px solid var(--ios-sep)",
-                                      borderRadius: 999,
-                                      padding: "1px 7px",
-                                      marginBottom: 2,
-                                    }}
-                                  >
-                                    <span style={{ fontSize: 12, lineHeight: 1 }}>
-                                      {trend.arrow}
-                                    </span>
-                                    {trend.label}
-                                  </div>
-                                );
-                              })()}
-                              <div
-                                style={{
-                                  fontSize: 15,
-                                  fontWeight: 600,
-                                  color: "var(--ios-label2)",
-                                }}
-                              >
-                                {ms.bestScore}
-                              </div>
-                              <div style={{ fontSize: 11, color: "var(--ios-label3)" }}>Best</div>
-                            </div>
-                          )}
+                      <div key={s.tier.id} className={`studio-badge ${cls}`}>
+                        <div className="studio-badge-top">
+                          <span>{s.tier.icon}</span>
+                          <b>{s.tier.label}</b>
                         </div>
-
-                        {/* Progress bar */}
-                        {ms.gamesPlayed > 0 && (
-                          <div className="ios-progress-track">
-                            <div
-                              className="ios-progress-fill"
-                              style={{
-                                width: `${progressPct}%`,
-                                background: m.color,
-                                transition: "width 0.6s ease-out",
-                              }}
-                            />
-                          </div>
+                        <p>{s.tier.description}</p>
+                        {s.unlocked ? (
+                          <span className="studio-badge-status">✓ UNLOCKED</span>
+                        ) : (
+                          <>
+                            <i className="studio-meter" aria-hidden="true" style={{ height: 4, margin: '0 0 5px' }}>
+                              <em style={{ display: 'block', height: '100%', width: `${Math.round(s.progressFraction * 100)}%`, background: isNext ? 'var(--ios-blue)' : 'rgba(255,255,255,.22)' }} />
+                            </i>
+                            <span className="studio-badge-metric">{formatMetricProgress(s)}</span>
+                          </>
                         )}
                       </div>
                     );
                   })}
-                </motion.div>
-              </>
+                </div>
+              </motion.section>
+            )}
+          </div>
+
+          <aside className="studio-inner-side">
+            {/* ── CONSISTENCY ── */}
+            <motion.section className="studio-panel" {...fade(0.12)}>
+              <div className="studio-panel-heading"><div><span>CONSISTENCY</span><h2>Streak status</h2></div></div>
+              <div style={{ color: 'var(--ios-label)', fontSize: 21, fontWeight: 600, letterSpacing: '-.035em' }}>{consistencyTier}</div>
+              <p style={{ margin: '6px 0 0', color: 'var(--ios-label3)', fontSize: 11 }}>
+                Current streak: <b style={{ color: 'var(--ios-label2)' }}>{loaded ? stats.streak : 0} days</b> · Best: {loaded ? stats.bestStreak : 0}
+              </p>
+            </motion.section>
+
+            {/* ── FOCUS NEXT ── */}
+            {hasData && (
+              <motion.section className="studio-panel" {...fade(0.15)}>
+                <div className="studio-panel-heading"><div><span>FOCUS NEXT</span><h2>Sharpen here</h2></div></div>
+                <div style={{ color: 'var(--ios-label)', fontSize: 18, fontWeight: 600, letterSpacing: '-.03em' }}>
+                  {insights.weakModes[0]?.label ?? "Balanced training"}
+                </div>
+                <p style={{ margin: '6px 0 12px', color: 'var(--ios-label3)', fontSize: 11, lineHeight: 1.55 }}>{insights.focusTip}</p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ padding: '5px 10px', border: '1px solid var(--pt-stroke)', borderRadius: 999, color: 'var(--ios-label2)', font: '600 9px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace' }}>SESSIONS 7D: {insights.momentum.sessionsLast7}</span>
+                  <span style={{ padding: '5px 10px', border: '1px solid var(--pt-stroke)', borderRadius: 999, color: 'var(--ios-label2)', font: '600 9px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace' }}>Δ ACCURACY: {Math.round(insights.momentum.accuracyDeltaPct)}%</span>
+                </div>
+              </motion.section>
+            )}
+
+            {/* ── MOST PLAYED ── */}
+            {hasData && topMode && topMode.gamesPlayed > 0 && (
+              <motion.section className="studio-panel" {...fade(0.18)}>
+                <div className="studio-panel-heading"><div><span>FAVORITE</span><h2>Most played</h2></div></div>
+                <div style={{ display: 'grid', gridTemplateColumns: '46px 1fr auto', alignItems: 'center', gap: 12 }}>
+                  <span className="studio-plan-icon" style={{ width: 46, height: 46, background: `color-mix(in srgb, ${topMode.color} 14%, transparent)` }}>{topMode.icon}</span>
+                  <div>
+                    <b style={{ display: 'block', fontSize: 14 }}>{topMode.label}</b>
+                    <small style={{ display: 'block', marginTop: 3, color: 'var(--ios-label3)', fontSize: 10 }}>{topMode.gamesPlayed} games · {Math.round(topMode.avgAccuracy * 100)}% avg</small>
+                  </div>
+                  <strong style={{ color: topMode.color, fontSize: 22, letterSpacing: '-.03em' }}>{topMode.bestScore}</strong>
+                </div>
+              </motion.section>
+            )}
+
+            {/* ── PER MODE ── */}
+            {hasData && (
+              <motion.section className="studio-panel" {...fade(0.22)}>
+                <div className="studio-panel-heading">
+                  <div><span>ALL 18</span><h2>Per mode</h2></div>
+                  <Link href="/play-modes">Browse ↗</Link>
+                </div>
+                <div className="studio-row-list">
+                  {MODES.map((m) => {
+                    const ms = getModeStats(m.id);
+                    const breakdown = breakdownByMode.get(m.id);
+                    const trend = breakdown ? TREND_DISPLAY[breakdown.trendLabel] : null;
+                    return (
+                      <Link key={m.id} href={`/play/${m.id}`} style={{ display: 'grid', gridTemplateColumns: '38px 1fr auto', alignItems: 'center', gap: 10, minHeight: 58, padding: '8px 2px', color: 'var(--ios-label)', textDecoration: 'none' }}>
+                        <span className="studio-mastery-icon" style={{ background: `color-mix(in srgb, ${m.color} 14%, transparent)` }}>{m.icon}</span>
+                        <span style={{ minWidth: 0 }}>
+                          <b style={{ display: 'block', fontSize: 13 }}>{m.label}</b>
+                          {ms.gamesPlayed > 0 ? (
+                            <>
+                              <small style={{ display: 'block', marginTop: 2, color: 'var(--ios-label3)', fontSize: 10 }}>{ms.gamesPlayed} game{ms.gamesPlayed !== 1 ? 's' : ''} · {Math.round(ms.avgAccuracy * 100)}% accuracy</small>
+                              <i className="studio-meter" aria-hidden="true"><em style={{ display: 'block', height: '100%', width: `${Math.min(100, Math.round(ms.avgAccuracy * 100))}%`, background: m.color }} /></i>
+                            </>
+                          ) : (
+                            <small style={{ display: 'block', marginTop: 2, color: 'var(--ios-label4)', fontSize: 10 }}>Not played yet</small>
+                          )}
+                        </span>
+                        {ms.gamesPlayed > 0 && trend && (
+                          <strong title={`Trend: ${trend.label}`} style={{ color: trend.color, font: '700 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace' }}>{trend.arrow}</strong>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </motion.section>
             )}
 
             {/* ── RECENT RESULTS ── */}
             {loaded && stats.results.length > 0 && (
-              <>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "var(--ios-label3)",
-                    textTransform: "uppercase",
-                    letterSpacing: "-0.08px",
-                    padding: "24px 4px 8px",
-                  }}
-                >
-                  Recent Games
+              <motion.section className="studio-panel" {...fade(0.26)}>
+                <div className="studio-panel-heading">
+                  <div><span>LATEST</span><h2>Recent sessions</h2></div>
+                  <span className="studio-time-chip">LAST 10</span>
                 </div>
-                <div className="ios-group pt-desktop-card">
-                  {stats.results
-                    .slice(-10)
-                    .reverse()
-                    .map((r, idx) => {
-                      const mode = MODES.find((m) => m.id === r.mode);
-                      return (
-                        <div
-                          key={idx}
-                          className="ios-row"
-                          style={{
-                            padding: "12px 16px",
-                            borderTop: idx === 0 ? "none" : "0.5px solid var(--ios-sep)",
-                            alignItems: "center",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: 32,
-                              height: 32,
-                              borderRadius: 8,
-                              background: `${mode?.color || "#888"}18`,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: 16,
-                              marginRight: 10,
-                              flexShrink: 0,
-                            }}
-                          >
-                            {mode?.icon || "🎵"}
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <div
-                              style={{ fontSize: 14, fontWeight: 500, color: "var(--ios-label)" }}
-                            >
-                              {mode?.label || r.mode}
-                            </div>
-                            <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 1 }}>
-                              {new Date(r.date).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                hour: "numeric",
-                                minute: "2-digit",
-                              })}
-                              {" · "}
-                              {r.rounds} rounds
-                            </div>
-                          </div>
-                          <div style={{ textAlign: "right" }}>
-                            <div
-                              style={{ fontSize: 15, fontWeight: 600, color: "var(--ios-label)" }}
-                            >
-                              {r.score}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: 11,
-                                color:
-                                  Math.round(r.accuracy * 100) >= 70
-                                    ? "var(--ios-green)"
-                                    : "var(--ios-orange)",
-                              }}
-                            >
-                              {Math.round(r.accuracy * 100)}%
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                <div className="studio-row-list">
+                  {stats.results.slice(-10).reverse().map((r, idx) => {
+                    const mode = MODES.find((m) => m.id === r.mode);
+                    return (
+                      <div key={idx} style={{ display: 'grid', gridTemplateColumns: '34px 1fr auto', alignItems: 'center', gap: 10, minHeight: 52, padding: '8px 2px' }}>
+                        <span className="studio-mastery-icon" style={{ width: 34, height: 34, fontSize: 15, background: `color-mix(in srgb, ${mode?.color || '#888'} 14%, transparent)` }}>{mode?.icon || '🎵'}</span>
+                        <span style={{ minWidth: 0 }}>
+                          <b style={{ display: 'block', fontSize: 12.5 }}>{mode?.label || r.mode}</b>
+                          <small style={{ display: 'block', marginTop: 2, color: 'var(--ios-label3)', fontSize: 9.5 }}>
+                            {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · {r.rounds} rounds
+                          </small>
+                        </span>
+                        <span style={{ textAlign: 'right' }}>
+                          <b style={{ display: 'block', fontSize: 14, color: 'var(--ios-label)' }}>{r.score}</b>
+                          <small style={{ display: 'block', color: Math.round(r.accuracy * 100) >= 70 ? 'var(--ios-green)' : 'var(--ios-orange)', font: '700 9px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace' }}>{Math.round(r.accuracy * 100)}%</small>
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
-              </>
+              </motion.section>
             )}
-          </div>
-        </div>
-        <div style={{ height: 20 }} />
+          </aside>
+        </section>
       </div>
     </div>
   );

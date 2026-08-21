@@ -2,54 +2,40 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useStatsContext } from '@/components/StatsProvider';
 import {
   DAILY_CHALLENGE_MODES,
   formatClockCountdown,
   getDailyChallengeCompletion,
   getSecondsUntilLocalMidnight,
+  GAME_MODE_META,
 } from '@pitch-therapy/core';
 
 function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState('');
   useEffect(() => {
-    const calc = () => {
-      setTimeLeft(formatClockCountdown(getSecondsUntilLocalMidnight()));
-    };
+    const calc = () => setTimeLeft(formatClockCountdown(getSecondsUntilLocalMidnight()));
     calc();
     const id = setInterval(calc, 1000);
     return () => clearInterval(id);
   }, []);
   return (
-    <span style={{ fontFamily: '-apple-system, "SF Mono", monospace', fontSize: 22, fontWeight: 700, letterSpacing: '-0.3px', color: 'var(--ios-label)', fontVariantNumeric: 'tabular-nums' }}>
+    <b style={{ font: '400 26px/1 ui-monospace, SFMono-Regular, Menlo, monospace', letterSpacing: '-.04em', color: 'var(--ios-label)', fontVariantNumeric: 'tabular-nums' }}>
       {timeLeft}
-    </span>
+    </b>
   );
 }
 
-const CHALLENGES = [
-  {
-    id: 'note-wordle',
-    label: 'Note Wordle',
-    icon: '🟩',
-    color: '#30D158',
-    desc: '6 attempts to identify today\'s mystery note',
-    href: '/play/note-wordle',
-  },
-  {
-    id: 'frequency-wordle',
-    label: 'Frequency Wordle',
-    icon: '🔊',
-    color: '#5AC8FA',
-    desc: '6 attempts to guess today\'s target frequency',
-    href: '/play/frequency-wordle',
-  },
-];
+// Daily challenges derive from the shared-core metadata (single source of truth).
+const CHALLENGES = DAILY_CHALLENGE_MODES.map((id) => {
+  const mode = GAME_MODE_META[id];
+  return { id: mode.id, label: mode.label, icon: mode.icon, color: mode.accentHex, desc: mode.description, href: `/play/${id}` };
+});
 
 export default function DailyPage() {
   const { stats, loaded } = useStatsContext();
+  const reduce = useReducedMotion();
   const completion = getDailyChallengeCompletion(stats.results);
   const played: Record<string, boolean> = Object.fromEntries(
     DAILY_CHALLENGE_MODES.map((mode) => [mode, completion.completedModes.includes(mode)]),
@@ -57,270 +43,100 @@ export default function DailyPage() {
   const completedCount = completion.completedCount;
   const completionPct = Math.round((completedCount / CHALLENGES.length) * 100);
 
-  const today = new Date().toLocaleDateString('en-US', {
-    weekday: 'long', month: 'long', day: 'numeric',
-  });
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
+  const fade = (delay: number) => (reduce ? {} : { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay, duration: 0.42 } });
 
   return (
-    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="pt-page-shell pt-page-daily px-4 pt-14">
+    <div className="studio-page">
+      <div className="pt-page-shell studio-dashboard">
+        <motion.header className="studio-inner-header" {...fade(0)}>
+          <div>
+            <span className="studio-overline">DAILY CHALLENGE / {today}</span>
+            <h1>Two drills.<br /><em>Every day.</em></h1>
+            <p>Fresh wordle-style drills each day. Complete both before midnight to keep your streak locked in.</p>
+          </div>
+          <div className="studio-header-chip">
+            <span>RESETS IN</span>
+            <CountdownTimer />
+            <small>{completion.isComplete ? 'TOMORROW’S SET' : 'BEFORE RESET'}</small>
+          </div>
+        </motion.header>
 
-        <PageHero
-          variant="daily"
-          eyebrow={today}
-          title="Daily Challenge"
-          subtitle="Two fresh drills each day to keep momentum and consistency strong."
-        />
-        <Reveal delay={0.04}>
-          <StatusCard
-            tone={!loaded ? 'loading' : completion.isComplete ? 'success' : 'empty'}
-            title={!loaded ? 'Preparing your daily run' : completion.isComplete ? 'Daily complete' : 'Daily challenge active'}
-            body={
-              !loaded
-                ? 'Syncing today’s drills and countdown.'
-                : completion.isComplete
-                  ? 'Great work. Your streak-safe sessions for today are done.'
-                  : 'Complete both drills before reset to keep consistency strong.'
-            }
-          />
-        </Reveal>
-
-        <div className="pt-daily-layout">
-          <div className="pt-daily-main">
-            <motion.div
-              className="ios-card pt-desktop-card"
-              style={{ padding: 14, marginBottom: 12 }}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.06, duration: 0.35 }}
-            >
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-                <div style={{ fontSize: 13, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Completion</div>
-                <div style={{ fontSize: 12, color: 'var(--ios-label2)', fontWeight: 600 }}>{completedCount}/{CHALLENGES.length}</div>
+        <section className="studio-inner-grid">
+          <div className="studio-inner-main">
+            <motion.section className="studio-panel" {...fade(0.05)}>
+              <div className="studio-panel-heading">
+                <div><span>TODAY</span><h2>{completion.isComplete ? 'Daily complete' : 'Today’s challenges'}</h2></div>
+                <span className="studio-time-chip">{completedCount}/{CHALLENGES.length} DONE</span>
               </div>
-              <div className="ios-progress-track">
-                <motion.div
-                  className="ios-progress-fill"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${completionPct}%` }}
-                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ background: 'linear-gradient(90deg, var(--ios-green), var(--ios-blue))' }}
-                />
+              <p style={{ margin: '-6px 0 14px', color: 'var(--ios-label2)', fontSize: 12, lineHeight: 1.55 }}>
+                {completion.isComplete ? 'Great work. Your streak-safe sessions for today are done.' : 'Complete both drills before reset to keep consistency strong.'}
+              </p>
+              <div className="studio-row-list">
+                {CHALLENGES.map((c) => {
+                  const done = !!played[c.id];
+                  return (
+                    <div key={c.id} className="studio-challenge-row">
+                      <span className="studio-challenge-icon" style={{ background: `color-mix(in srgb, ${c.color} 13%, transparent)` }}>{c.icon}</span>
+                      <span>
+                        <b>{c.label}</b>
+                        <small>{c.desc}</small>
+                      </span>
+                      {done ? (
+                        <span className="studio-challenge-done" role="img" aria-label={`${c.label} completed`}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+                        </span>
+                      ) : (
+                        <Link href={c.href} className="studio-challenge-cta">Play <span aria-hidden="true">→</span></Link>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-              <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ios-label3)' }}>
-                {completedCount === CHALLENGES.length ? 'Daily challenge complete. Great consistency.' : 'Finish both drills to secure today’s streak.'}
-              </div>
-            </motion.div>
+              <i className="studio-meter" aria-hidden="true" style={{ marginTop: 14 }}>
+                <motion.i animate={{ width: `${completionPct}%` }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} style={{ background: 'linear-gradient(90deg, var(--ios-green), var(--ios-blue))', display: 'block', height: '100%' }} />
+              </i>
+            </motion.section>
 
-            {/* ── STREAK + COUNTDOWN ROW ── */}
-            <motion.div
-              className="ios-card p-0 mb-1 overflow-hidden pt-desktop-card"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08, duration: 0.4 }}
-            >
-              <div className="grid grid-cols-2">
-                {/* Countdown */}
-                <div style={{ padding: '16px 20px', borderRight: '0.5px solid var(--ios-sep)' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 6 }}>
-                    Resets in
-                  </div>
-                  <CountdownTimer />
-                </div>
-
-                {/* Streak */}
-                <div style={{ padding: '16px 20px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--ios-label3)', marginBottom: 6 }}>
-                    Streak
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--ios-label)' }}>
-                      {loaded ? stats.streak : 0}
-                    </span>
-                    <span style={{ fontSize: 18 }}>🔥</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* ── TODAY'S CHALLENGES ── */}
-            <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', textTransform: 'uppercase', padding: '20px 4px 8px' }}>
-              Today
+            <div className="studio-stat-strip">
+              <motion.article {...fade(0.08)}><span>STREAK</span><b>{loaded ? stats.streak : '—'}<small> days</small></b><i>{stats.streak ? 'Momentum is building.' : 'Begin today’s streak.'}</i></motion.article>
+              <motion.article {...fade(0.11)}><span>BEST STREAK</span><b>{loaded ? stats.bestStreak : '—'}<small> days</small></b><i>Your personal record.</i></motion.article>
+              <motion.article {...fade(0.14)}><span>SESSIONS</span><b>{loaded ? stats.results.length : '—'}</b><i>Short, focused repetitions.</i></motion.article>
+              <motion.article {...fade(0.17)}><span>COMPLETED</span><b>{completedCount}<small>/{CHALLENGES.length}</small></b><i>{completionPct}% of today done.</i></motion.article>
             </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.4 }}
-              className="ios-group pt-desktop-card"
-            >
-              {CHALLENGES.map((c, i) => {
-                const done = !!played[c.id];
-                return (
-                  <div
-                    key={c.id}
-                    className="ios-row"
-                    style={{
-                      padding: '14px 16px',
-                      borderTop: i === 0 ? 'none' : '0.5px solid var(--ios-sep)',
-                      alignItems: 'center',
-                      gap: 0,
-                    }}
-                  >
-                    {/* App icon */}
-                    <div
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 10,
-                        background: `${c.color}18`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 22,
-                        marginRight: 12,
-                        flexShrink: 0,
-                      }}
-                    >
-                      {c.icon}
-                    </div>
-
-                    {/* Text */}
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--ios-label)', letterSpacing: '-0.32px' }}>
-                        {c.label}
-                      </div>
-                      <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 2 }}>
-                        {c.desc}
-                      </div>
-                    </div>
-
-                    {/* Action */}
-                    {done ? (
-                      <div
-                        style={{
-                          width: 28,
-                          height: 28,
-                          borderRadius: 14,
-                          background: 'rgba(48, 209, 88, 0.2)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
-                        }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ios-green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                      </div>
-                    ) : (
-                      <Link
-                        href={c.href}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          height: 32,
-                          borderRadius: 16,
-                          background: c.color,
-                          color: '#000',
-                          fontSize: 14,
-                          fontWeight: 600,
-                          letterSpacing: '-0.08px',
-                          padding: '0 14px',
-                          textDecoration: 'none',
-                          flexShrink: 0,
-                        }}
-                      >
-                        Play
-                      </Link>
-                    )}
-                  </div>
-                );
-              })}
-            </motion.div>
           </div>
 
-          <div className="pt-daily-side">
-            {/* ── PREVIOUS DAYS ── */}
-            <div style={{ fontSize: 13, color: 'var(--ios-label3)', letterSpacing: '-0.08px', textTransform: 'uppercase', padding: '24px 4px 8px' }}>
-              Previous Days
-            </div>
-
-            <motion.div
-              className="ios-group pt-desktop-card"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.22, duration: 0.4 }}
-            >
-              {[...Array(5)].map((_, i) => {
-                const date = new Date();
-                date.setDate(date.getDate() - (i + 1));
-                const dayCompletion = getDailyChallengeCompletion(stats.results, date);
-                const label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                return (
-                  <div
-                    key={i}
-                    className="ios-row"
-                    style={{
-                      padding: '12px 16px',
-                      borderTop: i === 0 ? 'none' : '0.5px solid var(--ios-sep)',
-                    }}
-                  >
-                    <span style={{ flex: 1, fontSize: 16, color: 'var(--ios-label)', letterSpacing: '-0.32px' }}>
-                      {label}
-                    </span>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      {CHALLENGES.map((c) => {
-                        const done = dayCompletion.completedModes.some((mode) => mode === c.id);
-                        return (
-                          <div
-                            key={c.id}
-                            aria-label={`${c.label}: ${done ? 'completed' : 'not completed'}`}
-                            style={{
-                              width: 22,
-                              height: 22,
-                              borderRadius: 11,
-                              background: done ? 'color-mix(in srgb, var(--ios-green) 20%, transparent)' : 'var(--ios-bg3)',
-                              border: `1.5px solid ${done ? 'var(--ios-green)' : 'var(--ios-sep)'}`,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            <div style={{ width: 6, height: 6, borderRadius: 3, background: done ? 'var(--ios-green)' : 'var(--ios-bg4)' }} />
-                          </div>
-                        );
-                      })}
+          <aside className="studio-inner-side">
+            <motion.section className="studio-panel" {...fade(0.1)}>
+              <div className="studio-panel-heading"><div><span>HISTORY</span><h2>Previous days</h2></div><span className="studio-time-chip">LAST 5</span></div>
+              <div className="studio-row-list">
+                {[...Array(5)].map((_, i) => {
+                  const date = new Date();
+                  date.setDate(date.getDate() - (i + 1));
+                  const dayCompletion = getDailyChallengeCompletion(stats.results, date);
+                  const label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                  return (
+                    <div key={i} className="studio-history-row">
+                      <span>{label}</span>
+                      <div className="studio-history-dots">
+                        {CHALLENGES.map((c) => {
+                          const done = dayCompletion.completedModes.some((mode) => mode === c.id);
+                          return <i key={c.id} className={done ? 'is-done' : ''} aria-label={`${c.label}: ${done ? 'completed' : 'not completed'}`}><b /></i>;
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </motion.div>
-
-            <Reveal delay={0.24}>
-              <StatusCard
-                tone={Object.values(played).length > 0 ? 'success' : 'empty'}
-                title={Object.values(played).length > 0 ? 'Daily progress saved' : 'No daily drills completed yet'}
-                body={Object.values(played).length > 0 ? 'Great pace. Finish the second challenge to secure today’s streak.' : 'Complete both drills to lock your day and strengthen long-term recall.'}
-              />
-            </Reveal>
-
-            <motion.div
-              className="ios-card pt-desktop-card"
-              style={{ padding: 16, marginTop: 12, background: 'rgba(10,132,255,0.06)', border: '0.5px solid rgba(10,132,255,0.12)' }}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.35 }}
-            >
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-blue)', marginBottom: 6 }}>
-                Daily Strategy
+                  );
+                })}
               </div>
-              <div style={{ fontSize: 14, color: 'var(--ios-label2)', lineHeight: 1.45 }}>
-                Start with Note Wordle for pitch recall, then finish with Frequency Wordle while your ear is warmed up.
-              </div>
-            </motion.div>
-          </div>
-        </div>
+            </motion.section>
+
+            <motion.section className="studio-panel studio-daily-panel" {...fade(0.16)}>
+              <div className="studio-panel-heading"><div><span>STRATEGY</span><h2>Daily strategy</h2></div></div>
+              <p>Start with {CHALLENGES[0]?.label ?? 'the first drill'} for pitch recall, then finish with {CHALLENGES[1]?.label ?? 'the second drill'} while your ear is warmed up.</p>
+              <Link href="/play-modes">Browse all exercises <span aria-hidden="true">→</span></Link>
+            </motion.section>
+          </aside>
+        </section>
       </div>
     </div>
   );

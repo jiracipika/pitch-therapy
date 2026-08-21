@@ -1,44 +1,25 @@
 'use client';
 
 import { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
-import { PageHero, Reveal, StatusCard } from '@/components/PremiumMotion';
 import { useStatsContext } from '@/components/StatsProvider';
 import {
   evaluateAchievements,
   getNextGoals,
   getLatestBadges,
+  GAME_MODE_META,
+  GAME_MODES,
+  MODE_CATEGORIES,
   type AchievementStatus,
 } from '@pitch-therapy/core';
 
-const MODES = [
-  { id: 'pitch-match',      label: 'Pitch Match',      icon: '🎤', color: '#0A84FF', category: 'Voice' },
-  { id: 'note-id',          label: 'Note ID',           icon: '🎵', color: '#BF5AF2', category: 'Pitch' },
-  { id: 'frequency-guess',  label: 'Freq Guess',        icon: '📡', color: '#FF9F0A', category: 'Frequency' },
-  { id: 'note-wordle',      label: 'Note Wordle',       icon: '🟩', color: '#30D158', category: 'Pitch' },
-  { id: 'frequency-wordle', label: 'Freq Wordle',       icon: '🔊', color: '#5AC8FA', category: 'Frequency' },
-  { id: 'pitch-memory',     label: 'Pitch Memory',      icon: '🧠', color: '#FF375F', category: 'Pitch' },
-  { id: 'name-that-note',   label: 'Name That Note',    icon: '🎼', color: '#32ADE6', category: 'Pitch' },
-  { id: 'frequency-hunt',   label: 'Freq Hunt',         icon: '🔍', color: '#FF9F0A', category: 'Frequency' },
-  { id: 'drone-lock',       label: 'Drone Lock',        icon: '🔒', color: '#63E6E2', category: 'Voice' },
-  { id: 'speed-round',      label: 'Speed Round',       icon: '⚡', color: '#FF9F0A', category: 'Pitch' },
-  { id: 'chord-detective',  label: 'Chord Detective',   icon: '🕵️', color: '#FF375F', category: 'Advanced' },
-  { id: 'waveform-match',   label: 'Waveform Match',    icon: '〰️', color: '#5E5CE6', category: 'Advanced' },
-  { id: 'tuning-battle',    label: 'Tuning Battle',     icon: '⚔️', color: '#FF453A', category: 'Advanced' },
-  { id: 'tune-in',          label: 'Tune In',           icon: '📻', color: '#FF375F', category: 'Voice' },
-  { id: 'piano-tap',        label: 'Piano Tap',         icon: '🎹', color: '#5E5CE6', category: 'Pitch' },
-  { id: 'frequency-slider', label: 'Freq Slider',       icon: '🎚️', color: '#5AC8FA', category: 'Frequency' },
-  { id: 'cents-deviation',  label: 'Cents Deviation',   icon: '📐', color: '#30D158', category: 'Advanced' },
-  { id: 'interval-archer',  label: 'Interval Archer',   icon: '🏹', color: '#BF5AF2', category: 'Advanced' },
-];
-
-const CATEGORIES = [
-  { label: 'Voice', color: '#0A84FF', desc: 'Voice control & intonation' },
-  { label: 'Pitch', color: '#BF5AF2', desc: 'Note identification' },
-  { label: 'Frequency', color: '#FF9F0A', desc: 'Precise frequency perception' },
-  { label: 'Advanced', color: '#FF375F', desc: 'Complex musical skills' },
-];
+// Derive modes + categories from shared-core metadata (single source of truth).
+const MODES = GAME_MODES.map((id) => {
+  const mode = GAME_MODE_META[id];
+  return { id: mode.id, label: mode.label, icon: mode.icon, color: mode.accentHex, category: mode.category };
+});
+const CATEGORIES = MODE_CATEGORIES.map((cat) => ({ id: cat.id, label: cat.label, color: cat.accentHex, icon: cat.icon, desc: cat.description }));
 
 /** Format the progress metric for a locked tier as "current / target". */
 function formatMetricProgress(s: AchievementStatus): string {
@@ -67,6 +48,7 @@ function formatMetricProgress(s: AchievementStatus): string {
 
 export default function ProfilePage() {
   const { stats, loaded } = useStatsContext();
+  const reduce = useReducedMotion();
 
   const totalGames = stats.results.length;
   const totalTimeMin = Math.round(stats.results.reduce((s, r) => s + r.timeMs, 0) / 60000);
@@ -75,17 +57,16 @@ export default function ProfilePage() {
     : 0;
 
   const modesPlayed = new Set(stats.results.map((r) => r.mode)).size;
-  const varietyScore = Math.min(100, Math.round((modesPlayed / 18) * 50));
+  const varietyScore = Math.min(100, Math.round((modesPlayed / MODES.length) * 50));
   const accuracyScore = Math.min(100, avgAccuracy);
   const earProfileScore = Math.round((varietyScore * 0.4) + (accuracyScore * 0.4) + (Math.min(stats.bestStreak, 7) / 7 * 20));
 
-  // Achievements derived from the same stats context as the rest of the page.
   const achievements = useMemo(() => evaluateAchievements(stats.results), [stats.results]);
   const nextGoals = useMemo(() => getNextGoals(stats.results), [stats.results]);
   const latestBadges = useMemo(() => getLatestBadges(stats.results), [stats.results]);
 
   const categoryScores = CATEGORIES.map((cat) => {
-    const catModes = MODES.filter((m) => m.category === cat.label);
+    const catModes = MODES.filter((m) => m.category === cat.id);
     const catResults = stats.results.filter((r) => catModes.some((m) => m.id === r.mode));
     const games = catResults.length;
     const accuracy = games > 0
@@ -95,402 +76,188 @@ export default function ProfilePage() {
   });
 
   const getProfileTitle = (score: number) => {
-    if (score >= 90) return { title: 'Perfect Pitch Prodigy', emoji: '🎯', color: '#FFD60A' };
-    if (score >= 75) return { title: 'Sharp Ear', emoji: '🎵', color: '#30D158' };
-    if (score >= 55) return { title: 'Tuned Listener', emoji: '📻', color: '#0A84FF' };
-    if (score >= 35) return { title: 'Rising Musician', emoji: '🎶', color: '#BF5AF2' };
-    if (score >= 15) return { title: 'Eager Ear', emoji: '👂', color: '#FF9F0A' };
-    return { title: 'New Listener', emoji: '🌱', color: 'var(--ios-label3)' };
+    if (score >= 90) return { title: 'Perfect Pitch Prodigy', emoji: '🎯', color: '#ffd65c' };
+    if (score >= 75) return { title: 'Sharp Ear', emoji: '🎵', color: '#62e6a7' };
+    if (score >= 55) return { title: 'Tuned Listener', emoji: '📻', color: '#c7ff4a' };
+    if (score >= 35) return { title: 'Rising Musician', emoji: '🎶', color: '#9b8cff' };
+    if (score >= 15) return { title: 'Eager Ear', emoji: '👂', color: '#ff7a59' };
+    return { title: 'New Listener', emoji: '🌱', color: '#8e8e93' };
   };
 
   const profile = getProfileTitle(earProfileScore);
   const scorePct = loaded ? earProfileScore / 100 : 0;
   const circ = 2 * Math.PI * 52;
 
+  const fade = (delay: number) => (reduce ? {} : { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay, duration: 0.42 } });
+  const hasData = loaded && totalGames > 0;
+
   return (
-    <div className="pb-tab" style={{ background: 'var(--ios-bg)', minHeight: '100dvh' }}>
-      <div className="pt-page-shell pt-page-profile px-4 pt-14">
+    <div className="studio-page">
+      <div className="pt-page-shell studio-dashboard">
+        <motion.header className="studio-inner-header" {...fade(0)}>
+          <div>
+            <span className="studio-overline">EAR PROFILE / {modesPlayed} OF 18 MODES</span>
+            <h1>{loaded ? profile.title : 'Your ear,'}<br /><em>{loaded ? 'on record.' : 'undiscovered.'}</em></h1>
+            <p>A dynamic snapshot of where your hearing strengths are evolving across every listening skill.</p>
+          </div>
+          <div className="studio-header-chip">
+            <span>EAR SCORE</span>
+            <b>{loaded ? earProfileScore : '—'}</b>
+            <small>OUT OF 100</small>
+          </div>
+        </motion.header>
 
-        <PageHero
-          variant="profile"
-          eyebrow="Your ear profile"
-          title="Ear Profile"
-          subtitle="A dynamic snapshot of where your hearing strengths are evolving."
-        />
-
-        <div className="pt-profile-layout">
-          <div className="pt-profile-main">
-
+        <section className="studio-inner-grid">
+          <div className="studio-inner-main">
             {/* ── PROFILE SCORE CARD ── */}
-            <motion.div
-              className="ios-card pt-desktop-card"
-              style={{
-                padding: 28,
-                textAlign: 'center',
-                background: `linear-gradient(145deg, ${profile.color}12 0%, ${profile.color}06 50%, transparent 100%)`,
-                border: `1px solid ${profile.color}18`,
-                marginBottom: 12,
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-              initial={{ opacity: 0, y: 12, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            <motion.section
+              className="studio-panel"
+              {...fade(0.05)}
+              style={{ background: `radial-gradient(circle at 78% 22%, color-mix(in srgb, ${profile.color} 10%, transparent), transparent 35rem), var(--pt-surface-1)` }}
             >
-              {/* Ambient glow */}
-              <div style={{
-                position: 'absolute',
-                top: '-40%',
-                left: '-20%',
-                width: '140%',
-                height: '80%',
-                background: `radial-gradient(ellipse, ${profile.color}0D, transparent 70%)`,
-                pointerEvents: 'none',
-              }} />
-
-              <motion.div
-                style={{ fontSize: 56, marginBottom: 8, lineHeight: 1 }}
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                {profile.emoji}
-              </motion.div>
-
-              <div style={{ fontSize: 26, fontWeight: 700, color: profile.color, letterSpacing: '-0.5px', marginBottom: 4, position: 'relative' }}>
-                {loaded ? profile.title : '...'}
-              </div>
-              <div style={{ fontSize: 15, color: 'var(--ios-label2)', marginBottom: 20, position: 'relative' }}>
-                {loaded ? `Ear Profile Score: ${earProfileScore}/100` : 'Play games to discover your profile'}
-              </div>
-
-              {/* Animated score ring */}
-              <div style={{ position: 'relative', width: 130, height: 130, margin: '0 auto 20px' }}>
-                <svg width={130} height={130} viewBox="0 0 130 130" style={{ transform: 'rotate(-90deg)' }}>
-                  <circle cx={65} cy={65} r={52} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={8} />
-                  <defs>
-                    <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor={typeof profile.color === 'string' && profile.color.startsWith('#') ? profile.color : '#BF5AF2'} />
-                      <stop offset="100%" stopColor="#0A84FF" />
-                    </linearGradient>
-                  </defs>
-                  <motion.circle
-                    cx={65} cy={65} r={52}
-                    fill="none"
-                    stroke="url(#scoreGrad)"
-                    strokeWidth={8}
-                    strokeLinecap="round"
-                    strokeDasharray={circ}
-                    initial={{ strokeDashoffset: circ }}
-                    animate={{ strokeDashoffset: circ * (1 - scorePct) }}
-                    transition={{ duration: 1.4, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  />
-                </svg>
-                <div style={{
-                  position: 'absolute', inset: 0,
-                  display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <span style={{ fontSize: 34, fontWeight: 700, color: 'var(--ios-label)', letterSpacing: '-1px' }}>
-                    {loaded ? earProfileScore : '—'}
-                  </span>
-                  <span style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>Score</span>
+              <div className="studio-panel-heading">
+                <div><span>EAR PROFILE</span><h2>{loaded ? profile.title : 'Discover your profile'}</h2></div>
+                <div className="studio-score-ring">
+                  <svg viewBox="0 0 100 100" aria-hidden="true">
+                    <circle cx="50" cy="50" r="42" />
+                    <motion.circle
+                      cx="50" cy="50" r="42"
+                      initial={reduce ? false : { strokeDashoffset: circ }}
+                      animate={{ strokeDashoffset: circ * (1 - scorePct) }}
+                      style={{ strokeDasharray: circ, stroke: profile.color }}
+                      transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                    />
+                  </svg>
+                  <span><b>{loaded ? earProfileScore : '—'}</b><small>EAR SCORE</small></span>
                 </div>
               </div>
+              <p style={{ margin: '-6px 0 18px', color: 'var(--ios-label2)', fontSize: 12, lineHeight: 1.55 }}>
+                {loaded && totalGames > 0
+                  ? `Variety ${varietyScore}/50 · Accuracy ${accuracyScore}/40 · Streak up to 20 — built from ${totalGames} session${totalGames !== 1 ? 's' : ''}.`
+                  : 'Play a few sessions to generate your personalized score, skill breakdown, and next-step guidance.'}
+              </p>
+              {!hasData && (
+                <Link href="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', gap: 28, width: '100%', minHeight: 48, padding: '0 20px', borderRadius: 999, background: 'var(--ios-blue)', color: 'var(--pt-on-accent)', fontSize: 13, fontWeight: 750, textDecoration: 'none', boxShadow: '0 12px 30px rgba(199,255,74,.15)' }}>
+                  Start training <span aria-hidden="true">→</span>
+                </Link>
+              )}
+            </motion.section>
 
-              {/* Quick stats grid */}
-              <div className="pt-profile-stats" style={{ marginTop: 8, position: 'relative' }}>
-                {[
-                  { label: 'Games', value: loaded ? String(totalGames) : '—', color: 'var(--ios-blue)' },
-                  { label: 'Streak', value: loaded ? String(stats.streak) : '—', color: 'var(--ios-orange)' },
-                  { label: 'Accuracy', value: loaded ? `${avgAccuracy}%` : '—', color: 'var(--ios-green)' },
-                  { label: 'Time', value: loaded ? `${totalTimeMin}m` : '—', color: 'var(--ios-purple)' },
-                ].map((s) => (
-                  <div key={s.label}>
-                    <div style={{ fontSize: 20, fontWeight: 700, color: s.color, letterSpacing: '-0.5px' }}>
-                      {s.value}
+            {/* ── ACHIEVEMENTS / BADGES ── */}
+            {hasData && (
+              <motion.section className="studio-panel" {...fade(0.12)}>
+                <div className="studio-panel-heading">
+                  <div><span>BADGES</span><h2>Achievements</h2></div>
+                  <span className="studio-time-chip">{achievements.unlockedCount}/{achievements.totalCount}</span>
+                </div>
+                <i className="studio-meter" aria-hidden="true" style={{ margin: '0 0 14px' }}>
+                  <em style={{ display: 'block', height: '100%', width: `${(achievements.unlockedCount / achievements.totalCount) * 100}%`, background: 'linear-gradient(90deg, var(--ios-green), var(--ios-blue))' }} />
+                </i>
+                {achievements.latestUnlock && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <span style={{ color: 'var(--ios-label2)', fontSize: 11 }}>Latest unlock</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 11px', borderRadius: 999, border: '1px solid color-mix(in srgb, var(--ios-green) 30%, var(--pt-stroke))', background: 'color-mix(in srgb, var(--ios-green) 8%, transparent)', fontSize: 11, fontWeight: 650, color: 'var(--ios-label)' }}>
+                      <span style={{ fontSize: 12 }}>{achievements.latestUnlock.icon}</span> {achievements.latestUnlock.label}
+                    </span>
+                  </div>
+                )}
+                {latestBadges.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+                    {latestBadges.map((b) => (
+                      <span key={b.tier.id} title={`${b.tier.label} — your current best in ${b.tier.category}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 11px', borderRadius: 999, border: '1px solid color-mix(in srgb, var(--ios-green) 30%, var(--pt-stroke))', background: 'color-mix(in srgb, var(--ios-green) 8%, transparent)', fontSize: 11, fontWeight: 650, color: 'var(--ios-label)' }}>
+                        <span style={{ fontSize: 12 }}>{b.tier.icon}</span> {b.tier.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="studio-badge-grid">
+                  {achievements.statuses.map((s) => {
+                    const goal = nextGoals.find((g) => g.tier.category === s.tier.category && !g.unlocked);
+                    const isNext = goal?.tier.id === s.tier.id;
+                    const cls = s.unlocked ? 'is-unlocked' : isNext ? 'is-next' : 'is-locked';
+                    return (
+                      <div key={s.tier.id} className={`studio-badge ${cls}`}>
+                        <div className="studio-badge-top">
+                          <span>{s.tier.icon}</span>
+                          <b>{s.tier.label}</b>
+                        </div>
+                        <p>{s.tier.description}</p>
+                        {s.unlocked ? (
+                          <span className="studio-badge-status">✓ UNLOCKED</span>
+                        ) : (
+                          <>
+                            <i className="studio-meter" aria-hidden="true" style={{ height: 4, margin: '0 0 5px' }}>
+                              <em style={{ display: 'block', height: '100%', width: `${Math.round(s.progressFraction * 100)}%`, background: isNext ? 'var(--ios-blue)' : 'rgba(255,255,255,.22)' }} />
+                            </i>
+                            <span className="studio-badge-metric">{formatMetricProgress(s)}</span>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.section>
+            )}
+          </div>
+
+          <aside className="studio-inner-side">
+            {/* ── SKILLS BREAKDOWN ── */}
+            <motion.section className="studio-panel" {...fade(0.1)}>
+              <div className="studio-panel-heading"><div><span>SKILLS</span><h2>Skills breakdown</h2></div></div>
+              <div className="studio-row-list" style={{ gap: 6 }}>
+                {categoryScores.map((cat) => (
+                  <div key={cat.id} style={{ padding: '8px 2px', minHeight: 58 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                        <span className="studio-plan-icon" style={{ background: `color-mix(in srgb, ${cat.color} 14%, transparent)` }}>{cat.icon}</span>
+                        <span>
+                          <b style={{ display: 'block', fontSize: 13 }}>{cat.label}</b>
+                          <small style={{ display: 'block', marginTop: 2, color: 'var(--ios-label3)', fontSize: 9.5 }}>{cat.desc} · {cat.games} game{cat.games !== 1 ? 's' : ''}</small>
+                        </span>
+                      </span>
+                      <strong style={{ color: cat.games > 0 ? cat.color : 'var(--ios-label3)', fontSize: 17, letterSpacing: '-.03em' }}>
+                        {cat.games > 0 ? `${cat.accuracy}%` : '—'}
+                      </strong>
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--ios-label3)', marginTop: 2 }}>{s.label}</div>
+                    <i className="studio-meter" aria-hidden="true">
+                      <motion.em
+                        initial={reduce ? false : { width: 0 }}
+                        animate={{ width: `${cat.accuracy}%` }}
+                        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                        style={{ display: 'block', height: '100%', background: cat.color }}
+                      />
+                    </i>
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </motion.section>
 
-            {/* Tips card */}
-            {loaded && totalGames > 0 && (
-              <motion.div
-                className="ios-card pt-desktop-card"
-                style={{
-                  padding: 16,
-                  marginTop: 12,
-                  marginBottom: 8,
-                  background: 'linear-gradient(135deg, rgba(10,132,255,0.06) 0%, rgba(94,92,230,0.04) 100%)',
-                  border: '0.5px solid rgba(10,132,255,0.12)',
-                }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.4 }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                  <span style={{ fontSize: 14 }}>🎯</span>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-blue)' }}>Next Steps</div>
-                </div>
-                <div style={{ fontSize: 14, color: 'var(--ios-label2)', lineHeight: 1.5 }}>
+            {/* ── NEXT STEPS ── */}
+            {hasData && (
+              <motion.section className="studio-panel studio-daily-panel" {...fade(0.16)}>
+                <div className="studio-panel-heading"><div><span>NEXT STEPS</span><h2>Keep improving</h2></div></div>
+                <p>
                   {modesPlayed < 5
-                    ? 'Try more game modes to discover your strengths! Head to the dashboard and explore.'
+                    ? 'Try more game modes to discover your strengths. Head to the exercise catalog and explore.'
                     : avgAccuracy < 60
-                    ? 'Focus on accuracy over speed. Try Practice mode to build precision.'
-                    : stats.streak < 3
-                    ? 'Build your daily streak! Consistency is key to ear training.'
-                    : 'Great progress! Challenge yourself with Advanced modes like Chord Detective and Waveform Match.'}
-                </div>
-              </motion.div>
+                      ? 'Focus on accuracy over speed. Try practice mode to build precision.'
+                      : stats.streak < 3
+                        ? 'Build your daily streak. Consistency is key to ear training.'
+                        : 'Great progress. Challenge yourself with Advanced modes like Chord Detective and Waveform Match.'}
+                </p>
+                <Link href="/play-modes">Open exercise catalog <span aria-hidden="true">→</span></Link>
+              </motion.section>
             )}
 
-            {/* Empty state */}
-            {loaded && totalGames === 0 && (
-              <Reveal delay={0.24}>
-                <StatusCard
-                  tone="empty"
-                  title="Discover your ear profile"
-                  body="Play a few sessions to generate your personalized score, skill breakdown, and next-step guidance."
-                  action={(
-                    <Link
-                      href="/dashboard"
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                        height: 36, borderRadius: 10, padding: '0 14px',
-                        background: 'linear-gradient(135deg, #0A84FF 0%, #5E5CE6 100%)',
-                        color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none',
-                        boxShadow: '0 2px 12px rgba(10,132,255,0.3)',
-                      }}
-                    >
-                      Start Training
-                    </Link>
-                  )}
-                />
-              </Reveal>
-            )}
-          </div>
-
-          <div className="pt-profile-side">
-            {/* ── SKILLS BREAKDOWN ── */}
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '-0.08px', padding: '20px 4px 8px' }}>
-              Skills Breakdown
+            {/* ── QUICK STATS ── */}
+            <div className="studio-stat-strip" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+              <motion.article {...fade(0.12)}><span>SESSIONS</span><b>{loaded ? totalGames : '—'}</b><i>Short, focused repetitions.</i></motion.article>
+              <motion.article {...fade(0.15)}><span>STREAK</span><b>{loaded ? stats.streak : '—'}<small> days</small></b><i>{stats.streak ? 'Momentum is building.' : 'Begin today’s streak.'}</i></motion.article>
+              <motion.article {...fade(0.18)}><span>ACCURACY</span><b>{loaded ? avgAccuracy : '—'}<small>%</small></b><i>Across every exercise.</i></motion.article>
+              <motion.article {...fade(0.21)}><span>TIME</span><b>{loaded ? totalTimeMin : '—'}<small> min</small></b><i>Total listening time.</i></motion.article>
             </div>
-
-            <motion.div
-              className="ios-group pt-desktop-card"
-              style={{ overflow: 'hidden', borderRadius: 12 }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.14, duration: 0.4 }}
-            >
-              {categoryScores.map((cat, idx) => (
-                <div
-                  key={cat.label}
-                  style={{
-                    padding: '14px 16px',
-                    borderTop: idx === 0 ? 'none' : '0.5px solid var(--ios-sep)',
-                    background: idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <div>
-                      <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.32px' }}>
-                        {cat.label}
-                      </div>
-                      <div style={{ fontSize: 12, color: 'var(--ios-label3)', marginTop: 2 }}>
-                        {cat.desc} · {cat.games} game{cat.games !== 1 ? 's' : ''}
-                      </div>
-                    </div>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: cat.games > 0 ? cat.color : 'var(--ios-label3)' }}>
-                      {cat.games > 0 ? `${cat.accuracy}%` : '—'}
-                    </div>
-                  </div>
-                  {/* Animated progress bar */}
-                  <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${cat.accuracy}%` }}
-                      transition={{ duration: 1, delay: 0.3 + idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                      style={{
-                        height: '100%',
-                        borderRadius: 3,
-                        background: `linear-gradient(90deg, ${cat.color}, ${cat.color}AA)`,
-                        boxShadow: `0 0 8px ${cat.color}33`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-
-        {/* ── ACHIEVEMENTS / BADGES ── */}
-        {loaded && totalGames > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.22, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            style={{ marginTop: 16 }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 4px 10px' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ios-label3)', textTransform: 'uppercase', letterSpacing: '-0.08px' }}>
-                Achievements
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ios-label2)' }}>
-                {achievements.unlockedCount}<span style={{ color: 'var(--ios-label3)' }}> / {achievements.totalCount}</span>
-              </div>
-            </div>
-
-            <div className="ios-card pt-desktop-card" style={{ padding: 18, marginBottom: 12 }}>
-              {/* Summary bar */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ios-label)', marginBottom: 6 }}>
-                    {achievements.unlockedCount === 0
-                      ? 'Start unlocking badges'
-                      : `${achievements.unlockedCount} badge${achievements.unlockedCount !== 1 ? 's' : ''} unlocked`}
-                  </div>
-                  <div style={{ height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(achievements.unlockedCount / achievements.totalCount) * 100}%` }}
-                      transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                      style={{
-                        height: '100%',
-                        borderRadius: 3,
-                        background: 'linear-gradient(90deg, var(--ios-green), var(--ios-blue))',
-                        boxShadow: '0 0 8px rgba(48,209,88,0.3)',
-                      }}
-                    />
-                  </div>
-                </div>
-                {achievements.latestUnlock && (
-                  <div
-                    title={`Latest: ${achievements.latestUnlock.label}`}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '4px 10px', borderRadius: 999, flexShrink: 0,
-                      background: 'linear-gradient(135deg, rgba(48,209,88,0.18), rgba(10,132,255,0.10))',
-                      border: '0.5px solid rgba(48,209,88,0.35)',
-                      fontSize: 11, fontWeight: 600, color: 'var(--ios-label)',
-                    }}
-                  >
-                    <span style={{ fontSize: 12 }}>{achievements.latestUnlock.icon}</span>
-                    <span>{achievements.latestUnlock.label}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Current badges — strongest unlocked tier per category */}
-              {latestBadges.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
-                  {latestBadges.map((b) => (
-                    <div
-                      key={b.tier.id}
-                      title={`${b.tier.label} — your current best in ${b.tier.category}`}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 4,
-                        padding: '4px 10px', borderRadius: 999,
-                        background: 'linear-gradient(135deg, rgba(48,209,88,0.18), rgba(10,132,255,0.10))',
-                        border: '0.5px solid rgba(48,209,88,0.35)',
-                        fontSize: 11, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.08px',
-                      }}
-                    >
-                      <span style={{ fontSize: 12 }}>{b.tier.icon}</span>
-                      <span>{b.tier.label}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Tier grid with staggered entrance */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-                  gap: 8,
-                }}
-              >
-                {achievements.statuses.map((s, i) => {
-                  const goal = nextGoals.find(
-                    (g) => g.tier.category === s.tier.category && !g.unlocked,
-                  );
-                  const isNext = goal?.tier.id === s.tier.id;
-                  return (
-                    <motion.div
-                      key={s.tier.id}
-                      initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{
-                        delay: 0.3 + i * 0.04,
-                        duration: 0.35,
-                        ease: [0.22, 1, 0.36, 1],
-                      }}
-                      style={{
-                        padding: 12,
-                        borderRadius: 12,
-                        background: s.unlocked
-                          ? 'linear-gradient(135deg, rgba(48,209,88,0.12), rgba(10,132,255,0.06))'
-                          : 'rgba(255,255,255,0.03)',
-                        border: isNext
-                          ? '0.5px solid var(--ios-blue)'
-                          : s.unlocked
-                            ? '0.5px solid rgba(48,209,88,0.2)'
-                            : '0.5px solid var(--ios-sep)',
-                        opacity: s.unlocked ? 1 : 0.7,
-                      }}
-                    >
-                      {/* Icon + title */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                        <span style={{ fontSize: 18, filter: s.unlocked ? 'none' : 'grayscale(0.7)' }}>
-                          {s.tier.icon}
-                        </span>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ios-label)', letterSpacing: '-0.1px' }}>
-                          {s.tier.label}
-                        </span>
-                      </div>
-
-                      {/* Description */}
-                      <div style={{ fontSize: 10, color: 'var(--ios-label3)', lineHeight: 1.4, marginBottom: 8 }}>
-                        {s.tier.description}
-                      </div>
-
-                      {/* Status / progress */}
-                      {s.unlocked ? (
-                        <div style={{ fontSize: 10, color: 'var(--ios-green)', fontWeight: 600 }}>
-                          ✓ Unlocked
-                        </div>
-                      ) : (
-                        <>
-                          <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.06)', overflow: 'hidden', marginBottom: 3 }}>
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${Math.round(s.progressFraction * 100)}%` }}
-                              transition={{ duration: 0.8, delay: 0.5 + i * 0.04, ease: [0.22, 1, 0.36, 1] }}
-                              style={{
-                                height: '100%',
-                                borderRadius: 2,
-                                background: isNext ? 'var(--ios-blue)' : 'var(--ios-label3)',
-                              }}
-                            />
-                          </div>
-                          <div style={{ fontSize: 9, color: 'var(--ios-label3)' }}>
-                            {formatMetricProgress(s)}
-                          </div>
-                        </>
-                      )}
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        <div style={{ height: 20 }} />
+          </aside>
+        </section>
       </div>
     </div>
   );

@@ -3,68 +3,18 @@ import AuthForm from './AuthForm';
 
 export default function LoginPage() {
   return (
-    <div
-      style={{
-        minHeight: '100dvh',
-        background: 'var(--ios-bg)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '32px 24px',
-        paddingBottom: 'calc(32px + env(safe-area-inset-bottom, 0px))',
-      }}
-    >
-      <div style={{ width: '100%', maxWidth: 360 }}>
-        {/* App icon */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div
-            style={{
-              width: 72,
-              height: 72,
-              borderRadius: '16.2px',
-              background: 'linear-gradient(145deg, #1a1a2e 0%, #0f3460 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 34,
-              margin: '0 auto 16px',
-              boxShadow: '0 16px 48px rgba(10,132,255,0.3), 0 4px 12px rgba(10,132,255,0.15)',
-            }}
-          >
-            🎵
-          </div>
-          <h1
-            style={{
-              fontSize: 28,
-              fontWeight: 700,
-              letterSpacing: '-0.5px',
-              color: 'var(--ios-label)',
-              marginBottom: 6,
-            }}
-          >
-            Welcome back
-          </h1>
-          <p style={{ fontSize: 15, color: 'var(--ios-label3)', letterSpacing: '-0.23px' }}>
-            Sign in to track your progress
-          </p>
-        </div>
+    <div className="studio-gate">
+      <div className="studio-gate-inner">
+        <div className="studio-gate-mark" aria-hidden="true">🎵</div>
+        <span className="studio-gate-overline">WELCOME BACK / LISTENING STUDIO</span>
+        <h1>Pick up<br /><em>where you left off.</em></h1>
+        <p className="studio-gate-sub">Sign in to keep your streaks, stats, and progress in tune.</p>
 
         <AuthForm mode="login" />
 
-        <p
-          style={{
-            textAlign: 'center',
-            marginTop: 20,
-            fontSize: 15,
-            color: 'var(--ios-label3)',
-            letterSpacing: '-0.23px',
-          }}
-        >
+        <p className="studio-gate-link" style={{ marginTop: 22 }}>
           Don&apos;t have an account?{' '}
-          <Link href="/auth/signup" style={{ color: 'var(--ios-blue)', textDecoration: 'none', fontWeight: 500 }}>
-            Sign up
-          </Link>
+          <Link href="/auth/signup">Sign up</Link>
         </p>
       </div>
     </div>
