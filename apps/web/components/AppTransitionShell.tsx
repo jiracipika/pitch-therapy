@@ -1,18 +1,23 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { useSwipeNav } from '@/lib/useSwipeNav';
 
-const SWIPE_ROUTES = [
-  '/dashboard',
-  '/play-modes',
-  '/daily',
-  '/progress',
-  '/profile',
-  '/settings',
-];
+/**
+ * Tab route order — must match the Nav TABS order so swipe direction,
+ * transition direction, and the nav rail all agree.
+ */
+const SWIPE_ROUTES = ['/dashboard', '/play-modes', '/daily', '/progress', '/profile', '/settings'];
+const ROUTE_LABELS: Record<string, string> = {
+  '/dashboard': 'Studio',
+  '/play-modes': 'Exercises',
+  '/daily': 'Daily',
+  '/progress': 'Insights',
+  '/profile': 'Profile',
+  '/settings': 'Settings',
+};
 
 export default function AppTransitionShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,10 +26,24 @@ export default function AppTransitionShell({ children }: { children: React.React
   const [isLowResourceProfile, setIsLowResourceProfile] = useState(false);
   const motionLite = reducedMotion || isSafari || isLowResourceProfile;
 
-  // Swipe navigation: live drag feedback + keyboard arrows
-  const { dragOffset, dragOpacity, canSwipe } = useSwipeNav({
+  // Direction memory: +1 = moving forward through tabs, -1 = back.
+  // Updated on every pathname change by comparing tab indexes; falls back
+  // to +1 when entering the tab area from outside (e.g. a game page).
+  const lastDirection = useRef(1);
+  const prevIndex = useRef<number | null>(null);
+  const routeIndex = SWIPE_ROUTES.indexOf(pathname);
+
+  useEffect(() => {
+    if (routeIndex >= 0 && prevIndex.current !== null && routeIndex !== prevIndex.current) {
+      lastDirection.current = routeIndex > prevIndex.current ? 1 : -1;
+    }
+    prevIndex.current = routeIndex >= 0 ? routeIndex : null;
+  }, [routeIndex]);
+
+  // Swipe navigation: live drag feedback + trackpad flicks + keyboard arrows
+  const { drag, canSwipe } = useSwipeNav({
     routes: SWIPE_ROUTES,
-    enabled: !SWIPE_ROUTES.every((r) => pathname === r || !pathname.startsWith('/')),
+    enabled: routeIndex >= 0,
   });
 
   useEffect(() => {
@@ -43,18 +62,35 @@ export default function AppTransitionShell({ children }: { children: React.React
     return () => document.body.classList.remove('pt-motion-lite');
   }, [motionLite]);
 
-  const ambientDurations = useMemo(
-    () => ({
-      a: motionLite ? 26 : 18,
-      b: motionLite ? 30 : 22,
-      grid: motionLite ? 0 : 8,
-    }),
-    [motionLite],
-  );
+  const ambientDurations = { a: motionLite ? 26 : 18, b: motionLite ? 30 : 22, grid: motionLite ? 0 : 8 };
 
-  // Determine direction for enter animation based on route order
-  const routeIndex = SWIPE_ROUTES.indexOf(pathname);
-  const enterDirection = routeIndex >= 0 ? 1 : 0;
+  // ── Live drag feedback ──────────────────────────────────────────
+  // Applied to a PLAIN wrapper div (not the motion.div) so framer-motion's
+  // transform management never fights the finger-follow transform.
+  // While dragging: no transition (instant follow). On release: CSS spring
+  // back to center while the route transition takes over.
+  const dragging = canSwipe && drag.offset !== 0;
+  const dragTransform = dragging ? `translateX(${drag.offset}px)` : undefined;
+  const dragOpacity = dragging ? 1 - (Math.abs(drag.offset) / 160) * 0.3 : undefined;
+  const dragLayerStyle: React.CSSProperties = {
+    transform: dragTransform,
+    opacity: dragOpacity,
+    transition: dragging ? 'none' : 'transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1)',
+  };
+
+  // Swipe hints: fade in the label of the tab a committed drag lands on.
+  const hintIntensity = Math.min(1, Math.abs(drag.offset) / 110);
+  const prevLabel = drag.direction === -1 && drag.targetIndex !== null ? ROUTE_LABELS[SWIPE_ROUTES[drag.targetIndex]!] : null;
+  const nextLabel = drag.direction === 1 && drag.targetIndex !== null ? ROUTE_LABELS[SWIPE_ROUTES[drag.targetIndex]!] : null;
+
+  // ── Route transitions ───────────────────────────────────────────
+  // Direction-aware: forward (dir +1) → new page enters from right, old
+  // exits left; back (dir −1) → mirrored. What you see always matches the
+  // swipe/click direction. popLayout lets enter+exit run simultaneously
+  // (no dead "wait" gap between pages).
+  const dir = lastDirection.current;
+  const enterFrom = motionLite ? 0 : dir * 26;
+  const exitTo = motionLite ? 0 : -dir * 16;
 
   return (
     <div className="pt-route-root">
@@ -76,23 +112,35 @@ export default function AppTransitionShell({ children }: { children: React.React
         />
       </div>
 
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={pathname}
-          className="pt-route-page"
-          initial={motionLite ? { opacity: 1 } : { opacity: 0, x: enterDirection * 20 }}
-          animate={motionLite ? { opacity: 1 } : { opacity: 1, x: 0 }}
-          exit={motionLite ? { opacity: 0 } : { opacity: 0, x: -enterDirection * 12 }}
-          transition={{ duration: motionLite ? 0.22 : 0.38, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            // Live drag feedback during touch swipe
-            transform: canSwipe && dragOffset !== 0 ? `translateX(${dragOffset}px)` : undefined,
-            opacity: canSwipe && dragOpacity < 1 ? dragOpacity : undefined,
-          }}
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
+      {/* Swipe target hints — preview where the drag lands */}
+      <div className="pt-swipe-hints" aria-hidden>
+        <span className="pt-swipe-hint is-prev" style={{ opacity: prevLabel ? hintIntensity : 0 }}>
+          {prevLabel ? <><i>←</i> {prevLabel}</> : null}
+        </span>
+        <span className="pt-swipe-hint is-next" style={{ opacity: nextLabel ? hintIntensity : 0 }}>
+          {nextLabel ? <>{nextLabel} <i>→</i></> : null}
+        </span>
+      </div>
+
+      {/* Drag layer — plain div carrying the finger-follow transform */}
+      <div className="pt-route-drag-layer" style={dragLayerStyle}>
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div
+            key={pathname}
+            className="pt-route-page"
+            initial={{ opacity: motionLite ? 1 : 0, x: enterFrom }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: exitTo }}
+            transition={
+              motionLite
+                ? { duration: 0.22, ease: 'easeOut' }
+                : { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
+            }
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

@@ -1602,6 +1602,61 @@ body.pt-has-nav .pt-main-shell {
   z-index: 2;
 }
 
+/* ── Swipe drag layer + tab hints ─────────────────────────────
+   The drag layer is a plain wrapper: during a touch swipe the page
+   follows the finger; on release it springs back via CSS while the
+   route transition (if committed) takes over. */
+.pt-route-drag-layer {
+  position: relative;
+  z-index: 2;
+  will-change: transform;
+}
+
+.pt-swipe-hints {
+  position: fixed;
+  inset: 0;
+  z-index: 55; /* below nav (60) — hints sit under the bars, over content */
+  pointer-events: none;
+}
+
+.pt-swipe-hint {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid var(--pt-stroke-strong);
+  border-radius: 999px;
+  background: rgba(13, 13, 18, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--ios-label);
+  font: 700 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  transition: opacity 160ms ease-out;
+}
+
+.pt-swipe-hint i {
+  color: var(--ios-blue);
+  font-style: normal;
+  font-size: 13px;
+}
+
+.pt-swipe-hint.is-prev { left: 18px; }
+.pt-swipe-hint.is-next { right: 18px; }
+
+@media (min-width: 768px) {
+  .pt-swipe-hint.is-prev { left: calc(232px + 24px); } /* clear the desktop rail */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-route-drag-layer { will-change: auto; }
+  .pt-swipe-hint { transition: none; }
+}
+
 body.pt-motion-lite .pt-ambient-glow {
   filter: blur(18px);
   opacity: 0.24;
