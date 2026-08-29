@@ -13,8 +13,9 @@ import {
   type FrequencyWordleFeedback,
 } from "@pitch-therapy/core";
 import WaveVisualizer from "@/components/WaveVisualizer";
+import TrainingShell from "@/components/training/TrainingShell";
 import { useStatsContext } from "@/components/StatsProvider";
-import { playTone } from "@/lib/audio";
+import { playTone, stopAllTones } from "@/lib/audio";
 
 interface GuessRow {
   frequency: number;
@@ -50,8 +51,10 @@ export default function FrequencyWordlePage() {
   const sessionStartRef = useRef(Date.now());
   const playbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Canonical game-page unmount cleanup: tracked timeouts + stop all tones.
   useEffect(() => () => {
     if (playbackTimerRef.current) clearTimeout(playbackTimerRef.current);
+    stopAllTones();
   }, []);
 
   useEffect(() => {
@@ -143,106 +146,118 @@ export default function FrequencyWordlePage() {
   };
 
   return (
-    <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-      <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
-        <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, minHeight: 44 }}>
-          <button
-            aria-label="Back to dashboard"
-            onClick={() => router.push("/dashboard")}
-            style={{ width: 44, height: 44, borderRadius: 18, background: "var(--ios-bg2)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-          >
-            <svg aria-hidden="true" width="10" height="17" viewBox="0 0 10 17" fill="none">
-              <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="var(--ios-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <h1 style={{ fontSize: 17, fontWeight: 600, color: "var(--ios-label)", letterSpacing: "-0.43px", margin: 0 }}>
-            Frequency Wordle
-          </h1>
-          <button aria-label="New puzzle" onClick={initGame} style={{ fontSize: 13, fontWeight: 600, color: "var(--ios-blue)", background: "none", border: "none", cursor: "pointer", minWidth: 44, minHeight: 44 }}>
-            New
-          </button>
-        </header>
+    <TrainingShell
+      title="📶 Frequency Wordle"
+      round={guesses.length}
+      totalRounds={FREQUENCY_WORDLE_MAX_GUESSES}
+      scoreLabel={`${FREQUENCY_WORDLE_MAX_GUESSES - guesses.length} LEFT`}
+      accent={ACCENT}
+      confirmExit={phase === "playing" && guesses.length > 0}
+      exitHref="/dashboard"
+    >
+      <section aria-labelledby="frequency-instructions" style={{ textAlign: "center", marginBottom: 16 }}>
+        <h2 id="frequency-instructions" style={{ color: "var(--ios-label)", fontSize: 22, margin: "0 0 6px" }}>
+          Find the mystery frequency
+        </h2>
+        <p style={{ color: "var(--ios-label2)", fontSize: 15, lineHeight: 1.5, margin: "0 0 12px" }}>
+          Listen, estimate in hertz, and follow the higher or lower hint. You have six attempts.
+        </p>
+        <button className="ios-btn-secondary" onClick={playTarget} style={{ color: ACCENT, minHeight: 48 }}>
+          ▶ Play target tone
+        </button>
+      </section>
 
-        <section aria-labelledby="frequency-instructions" style={{ textAlign: "center", marginBottom: 16 }}>
-          <h2 id="frequency-instructions" style={{ color: "var(--ios-label)", fontSize: 22, margin: "0 0 6px" }}>
-            Find the mystery frequency
-          </h2>
-          <p style={{ color: "var(--ios-label2)", fontSize: 15, lineHeight: 1.5, margin: "0 0 12px" }}>
-            Listen, estimate in hertz, and follow the higher or lower hint. You have six attempts.
-          </p>
-          <button className="ios-btn-secondary" onClick={playTarget} style={{ color: ACCENT, minHeight: 48 }}>
-            ▶ Play target tone
-          </button>
-        </section>
-
-        <div aria-hidden="true" style={{ marginBottom: 12 }}>
+      <div aria-hidden="true" style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ flex: 1 }}>
           <WaveVisualizer active={isPlaying} color={ACCENT} height={35} />
         </div>
-
-        <div role="list" aria-label="Frequency Wordle guesses" style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
-          {Array.from({ length: FREQUENCY_WORDLE_MAX_GUESSES }).map((_, index) => {
-            const guess = guesses[index];
-            const isCurrent = phase === "playing" && index === guesses.length;
-            const statusColor = guess?.feedback === "correct" ? "var(--ios-green)" : guess?.feedback === "close" ? "var(--ios-orange)" : guess ? "var(--ios-red)" : "var(--ios-label3)";
-            const background = guess?.feedback === "correct" ? "rgba(48,209,88,0.15)" : guess?.feedback === "close" ? "rgba(255,159,10,0.15)" : guess ? "rgba(255,69,58,0.12)" : "var(--ios-bg2)";
-            const directionText = guess?.direction === "higher" ? "Try higher" : guess?.direction === "lower" ? "Try lower" : "Correct";
-            return (
-              <div
-                key={index}
-                role="listitem"
-                aria-label={guess ? `Guess ${index + 1}: ${formatFrequency(guess.frequency)}. ${FEEDBACK_LABELS[guess.feedback]}. ${directionText}.` : `Guess ${index + 1}: ${isCurrent ? "current guess" : "empty"}`}
-                style={{ minHeight: 52, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, fontSize: 16, fontWeight: 700, background, border: `${guess || isCurrent ? 2 : 1}px solid ${guess ? statusColor : "var(--ios-sep)"}`, color: statusColor, transition: "transform 0.2s ease, opacity 0.2s ease" }}
-              >
-                {guess ? <><span>{formatFrequency(guess.frequency)}</span><span style={{ fontSize: 12 }}>{directionText}</span></> : isCurrent && inputValue ? `${inputValue} Hz` : ""}
-              </div>
-            );
-          })}
-        </div>
-
-        {phase === "playing" ? (
-          <form onSubmit={submitGuess} noValidate>
-            <label htmlFor="frequency-guess" style={{ display: "block", color: "var(--ios-label)", fontSize: 15, fontWeight: 700, marginBottom: 8 }}>
-              Your estimate (Hz)
-            </label>
-            <div style={{ display: "flex", gap: 8 }}>
-              <input
-                id="frequency-guess"
-                type="text"
-                inputMode="decimal"
-                autoComplete="off"
-                value={inputValue}
-                onChange={(event) => { setInputValue(event.target.value); if (inputError) setInputError(""); }}
-                aria-describedby="frequency-hint frequency-error"
-                aria-invalid={Boolean(inputError)}
-                placeholder="e.g. 440"
-                style={{ flex: 1, minWidth: 0, minHeight: 48, borderRadius: 12, padding: "12px 16px", background: "var(--ios-bg2)", border: `1px solid ${inputError ? "var(--ios-red)" : "var(--ios-sep)"}`, color: "var(--ios-label)", fontSize: 16 }}
-              />
-              <button type="submit" style={{ minWidth: 88, minHeight: 48, borderRadius: 12, padding: "0 20px", background: ACCENT, color: "#fff", fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer" }}>
-                Submit
-              </button>
-            </div>
-            <p id="frequency-hint" style={{ color: "var(--ios-label2)", fontSize: 12, margin: "7px 0 0" }}>Accepted range: 20–20,000 Hz.</p>
-            <p id="frequency-error" role={inputError ? "alert" : undefined} style={{ color: "var(--ios-red)", fontSize: 13, minHeight: 20, margin: "4px 0 0" }}>{inputError}</p>
-          </form>
-        ) : (
-          <section className="ios-card" style={{ textAlign: "center", padding: 20 }}>
-            <div aria-hidden="true" style={{ fontSize: 40, marginBottom: 8 }}>{phase === "won" ? "🎉" : "🎧"}</div>
-            <h2 style={{ fontSize: 22, color: "var(--ios-label)", margin: "0 0 6px" }}>{phase === "won" ? `Solved in ${guesses.length}!` : "Keep calibrating"}</h2>
-            <p style={{ color: "var(--ios-label2)", margin: "0 0 16px" }}>The target was {formatFrequency(targetFrequency)}.</p>
-            <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-              <button onClick={handleShare} className="ios-btn-secondary" style={{ flex: 1 }}>{shareStatus === "Shared" ? "Shared" : shareStatus === "Copied" ? "Copied" : "Share result"}</button>
-              <button onClick={initGame} className="ios-btn-primary" style={{ flex: 1, background: ACCENT }}>Play again</button>
-            </div>
-            <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>Dashboard</button>
-            <p aria-live="polite" style={{ minHeight: 20, margin: "8px 0 0", color: "var(--ios-red)", fontSize: 13 }}>{shareStatus.startsWith("Could not") ? shareStatus : ""}</p>
-          </section>
+        {phase === "playing" && (
+          <button
+            aria-label="New puzzle"
+            onClick={initGame}
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--ios-label2)",
+              background: "var(--pt-surface-1)",
+              border: "1px solid var(--pt-stroke)",
+              borderRadius: 999,
+              padding: "9px 14px",
+              cursor: "pointer",
+              minHeight: 36,
+            }}
+          >
+            New
+          </button>
         )}
-
-        <div className="ios-card" style={{ padding: 16, textAlign: "center", marginTop: 16 }}>
-          <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ios-label2)", margin: 0 }}>✓ Within 2% · ≈ Within 10% · ↑↓ Direction to the target</p>
-        </div>
-        <div role="status" aria-live="polite" className="sr-only">{announcement}</div>
       </div>
-    </div>
+
+      <div role="list" aria-label="Frequency Wordle guesses" style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+        {Array.from({ length: FREQUENCY_WORDLE_MAX_GUESSES }).map((_, index) => {
+          const guess = guesses[index];
+          const isCurrent = phase === "playing" && index === guesses.length;
+          const statusColor = guess?.feedback === "correct" ? "var(--ios-green)" : guess?.feedback === "close" ? "var(--ios-orange)" : guess ? "var(--ios-red)" : "var(--ios-label3)";
+          const background = guess?.feedback === "correct" ? "rgba(48,209,88,0.15)" : guess?.feedback === "close" ? "rgba(255,159,10,0.15)" : guess ? "rgba(255,69,58,0.12)" : "var(--ios-bg2)";
+          const directionText = guess?.direction === "higher" ? "Try higher" : guess?.direction === "lower" ? "Try lower" : "Correct";
+          return (
+            <div
+              key={index}
+              role="listitem"
+              aria-label={guess ? `Guess ${index + 1}: ${formatFrequency(guess.frequency)}. ${FEEDBACK_LABELS[guess.feedback]}. ${directionText}.` : `Guess ${index + 1}: ${isCurrent ? "current guess" : "empty"}`}
+              style={{ minHeight: 52, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, fontSize: 16, fontWeight: 700, background, border: `${guess || isCurrent ? 2 : 1}px solid ${guess ? statusColor : "var(--ios-sep)"}`, color: statusColor, transition: "transform 0.2s ease, opacity 0.2s ease" }}
+            >
+              {guess ? <><span>{formatFrequency(guess.frequency)}</span><span style={{ fontSize: 12 }}>{directionText}</span></> : isCurrent && inputValue ? `${inputValue} Hz` : ""}
+            </div>
+          );
+        })}
+      </div>
+
+      {phase === "playing" ? (
+        <form onSubmit={submitGuess} noValidate>
+          <label htmlFor="frequency-guess" style={{ display: "block", color: "var(--ios-label)", fontSize: 15, fontWeight: 700, marginBottom: 8 }}>
+            Your estimate (Hz)
+          </label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              id="frequency-guess"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              value={inputValue}
+              onChange={(event) => { setInputValue(event.target.value); if (inputError) setInputError(""); }}
+              aria-describedby="frequency-hint frequency-error"
+              aria-invalid={Boolean(inputError)}
+              placeholder="e.g. 440"
+              style={{ flex: 1, minWidth: 0, minHeight: 48, borderRadius: 12, padding: "12px 16px", background: "var(--ios-bg2)", border: `1px solid ${inputError ? "var(--ios-red)" : "var(--ios-sep)"}`, color: "var(--ios-label)", fontSize: 16 }}
+            />
+            <button type="submit" style={{ minWidth: 88, minHeight: 48, borderRadius: 12, padding: "0 20px", background: ACCENT, color: "#fff", fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer" }}>
+              Submit
+            </button>
+          </div>
+          <p id="frequency-hint" style={{ color: "var(--ios-label2)", fontSize: 12, margin: "7px 0 0" }}>Accepted range: 20–20,000 Hz.</p>
+          <p id="frequency-error" role={inputError ? "alert" : undefined} style={{ color: "var(--ios-red)", fontSize: 13, minHeight: 20, margin: "4px 0 0" }}>{inputError}</p>
+        </form>
+      ) : (
+        <section className="ios-card" style={{ textAlign: "center", padding: 20 }}>
+          <div aria-hidden="true" style={{ fontSize: 40, marginBottom: 8 }}>{phase === "won" ? "🎉" : "🎧"}</div>
+          <h2 style={{ fontSize: 22, color: "var(--ios-label)", margin: "0 0 6px" }}>{phase === "won" ? `Solved in ${guesses.length}!` : "Keep calibrating"}</h2>
+          <p style={{ color: "var(--ios-label2)", margin: "0 0 16px" }}>The target was {formatFrequency(targetFrequency)}.</p>
+          <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+            <button onClick={handleShare} className="ios-btn-secondary" style={{ flex: 1 }}>{shareStatus === "Shared" ? "Shared" : shareStatus === "Copied" ? "Copied" : "Share result"}</button>
+            <button onClick={initGame} className="ios-btn-primary" style={{ flex: 1, background: ACCENT }}>Play again</button>
+          </div>
+          <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>Dashboard</button>
+          <p aria-live="polite" style={{ minHeight: 20, margin: "8px 0 0", color: "var(--ios-red)", fontSize: 13 }}>{shareStatus.startsWith("Could not") ? shareStatus : ""}</p>
+        </section>
+      )}
+
+      <div className="ios-card" style={{ padding: 16, textAlign: "center", marginTop: 16 }}>
+        <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ios-label2)", margin: 0 }}>✓ Within 2% · ≈ Within 10% · ↑↓ Direction to the target</p>
+      </div>
+      <div role="status" aria-live="polite" className="sr-only">{announcement}</div>
+    </TrainingShell>
   );
 }
