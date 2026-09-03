@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { calculateCentsDeviation } from "@pitch-therapy/core";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import WaveVisualizer from "@/components/WaveVisualizer";
 import { useStatsContext } from "@/components/StatsProvider";
@@ -26,7 +27,9 @@ export default function PitchMatchPage() {
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [targetNote, setTargetNote] = useState(0);
+  const targetNoteRef = useRef(0);
   const [cents, setCents] = useState(0);
+  const [hasDetectedPitch, setHasDetectedPitch] = useState(false);
   const [results, setResults] = useState<
     {
       round: number;
@@ -46,7 +49,12 @@ export default function PitchMatchPage() {
 
   const startRound = () => {
     const noteIdx = Math.floor(Math.random() * 12);
+    // Ref updates synchronously so a mic loop started in this same event sees
+    // the new target; React state alone would leave round 1 comparing to C.
+    targetNoteRef.current = noteIdx;
     setTargetNote(noteIdx);
+    setCents(0);
+    setHasDetectedPitch(false);
     setPhase("playing");
     setRound((r) => r + 1);
     roundStart.current = Date.now();
@@ -79,9 +87,12 @@ export default function PitchMatchPage() {
       if (rms > 0.01) {
         const detectedFreq = autoCorrelate(data, ctx.sampleRate);
         if (detectedFreq > 0) {
-          const targetFreq = freq(targetNote);
-          const measuredCents = Math.round(1200 * Math.log2(detectedFreq / targetFreq));
+          const targetFreq = freq(targetNoteRef.current);
+          const measuredCents = Math.round(
+            calculateCentsDeviation(detectedFreq, targetFreq),
+          );
           setCents(measuredCents);
+          setHasDetectedPitch(true);
         }
       }
       rafRef.current = requestAnimationFrame(detect);
@@ -105,6 +116,7 @@ export default function PitchMatchPage() {
   };
 
   const submit = () => {
+    if (!hasDetectedPitch) return;
     const correct = Math.abs(cents) < 50;
     const points = correct ? Math.max(100 - Math.abs(cents) * 2, 10) : 0;
     const targetName = NOTE_NAMES[targetNote] ?? "A";
@@ -330,8 +342,11 @@ export default function PitchMatchPage() {
                 marginBottom: 12,
               }}
             >
-              {NOTE_NAMES[targetNote] ?? "A"}4
+              {NOTE_NAMES[targetNote] ?? "A"}
             </motion.div>
+            <div style={{ fontSize: 13, color: "var(--ios-label3)", marginBottom: 12 }}>
+              Any octave accepted · reference {freq(targetNote).toFixed(1)} Hz
+            </div>
 
             <div style={{ marginBottom: 12 }}>
               <WaveVisualizer active={isPlaying} color={ACCENT} height={40} />
@@ -429,8 +444,14 @@ export default function PitchMatchPage() {
                         : "var(--ios-red)",
                 }}
               >
-                {cents > 0 ? "+" : ""}
-                {cents}¢
+                {hasDetectedPitch ? (
+                  <>
+                    {cents > 0 ? "+" : ""}
+                    {cents}¢
+                  </>
+                ) : (
+                  "Listening…"
+                )}
               </div>
             </div>
 
@@ -455,10 +476,17 @@ export default function PitchMatchPage() {
             <div style={{ marginTop: 20, display: "flex", gap: 10, justifyContent: "center" }}>
               <button
                 onClick={submit}
+                disabled={!hasDetectedPitch}
+                aria-label={hasDetectedPitch ? "Submit pitch" : "Hum a steady note before submitting"}
                 className="ios-btn-tonal"
-                style={{ background: ACCENT, color: "#fff" }}
+                style={{
+                  background: ACCENT,
+                  color: "#fff",
+                  opacity: hasDetectedPitch ? 1 : 0.5,
+                  cursor: hasDetectedPitch ? "pointer" : "not-allowed",
+                }}
               >
-                Submit
+                {hasDetectedPitch ? "Submit" : "Hum a note first"}
               </button>
               <button
                 onClick={handleStop}

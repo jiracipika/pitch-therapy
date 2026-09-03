@@ -140,7 +140,7 @@ export default function PitchMatchScreen() {
           <View style={styles.howToBox}>
             <Text style={[styles.howToTitle, { color: ACCENT }]}>HOW TO PLAY</Text>
             <Text style={styles.howToLine}>1. A target note appears — tap 🔊 to hear it</Text>
-            <Text style={styles.howToLine}>2. Sing or play that exact note</Text>
+            <Text style={styles.howToLine}>2. Sing or play the same note name — any octave counts</Text>
             <Text style={styles.howToLine}>3. Self-assess how accurate you were</Text>
             <Text style={styles.howToLine}>4. Score 100 pts for perfect, 40 for good</Text>
           </View>
@@ -187,10 +187,10 @@ export default function PitchMatchScreen() {
             Match this note
           </Text>
           <Text style={{ fontSize: 56, fontWeight: '800', color: ACCENT, letterSpacing: 0 }}>
-            {NOTE_NAMES[targetNote]}4
+            {NOTE_NAMES[targetNote]}
           </Text>
           <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 4 }}>
-            {freq(targetNote).toFixed(1)} Hz
+            Any octave accepted · reference {freq(targetNote).toFixed(1)} Hz
           </Text>
         </View>
 

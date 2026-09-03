@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { intervalsInPool } from "@pitch-therapy/core";
+import { calculateCentsDeviation, intervalsInPool } from "@pitch-therapy/core";
 
 const ACCENT = "#30D158";
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
@@ -28,6 +28,7 @@ export default function DroneLockPage() {
   const [score, setScore] = useState(0);
   const [droneNote, setDroneNote] = useState(0);
   const [targetInterval, setTargetInterval] = useState(INTERVALS[0]);
+  const targetHzRef = useRef(NOTE_FREQS[0]);
   const [cents, setCents] = useState(0);
   const [, setDetectedFreq] = useState(0);
   const [results, setResults] = useState<
@@ -100,8 +101,8 @@ export default function DroneLockPage() {
         const freq = autoCorrelate(data, ctx.sampleRate);
         if (freq > 0) {
           setDetectedFreq(freq);
-          const targetHz = NOTE_FREQS[droneNote] * Math.pow(2, targetInterval.semitones / 12);
-          const measuredCents = Math.round(1200 * Math.log2(freq / targetHz));
+          const targetHz = targetHzRef.current;
+          const measuredCents = Math.round(calculateCentsDeviation(freq, targetHz));
           setCents(measuredCents);
         }
       }
@@ -127,6 +128,10 @@ export default function DroneLockPage() {
     const noteIdx = Math.floor(Math.random() * 7) + 3;
     const intervalIdx = Math.floor(Math.random() * INTERVALS.length);
     const interval = INTERVALS[intervalIdx];
+    const targetHz = NOTE_FREQS[noteIdx] * Math.pow(2, interval.semitones / 12);
+    // Update synchronously before the mic loop runs; React state updates from
+    // this event are asynchronous and previously left round 1 on stale C.
+    targetHzRef.current = targetHz;
     setDroneNote(noteIdx);
     setTargetInterval(interval);
     setCents(0);

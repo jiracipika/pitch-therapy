@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { calculateCentsDeviation } from "@pitch-therapy/core";
 import { playTone, NOTE_FREQUENCIES } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
@@ -87,8 +88,7 @@ export default function TuneInPage() {
       analyserRef.current.getFloatTimeDomainData(buf);
       const freq = autoCorrelate(buf, audioContextRef.current?.sampleRate || 44100);
       if (freq && freq > 60 && freq < 1200) {
-        const semitones = 12 * Math.log2(freq / targetFreq);
-        const cents = Math.round(semitones * 100);
+        const cents = Math.round(calculateCentsDeviation(freq, targetFreq));
         setCentsOff(cents);
 
         if (Math.abs(cents) <= 10) {
@@ -506,10 +506,10 @@ export default function TuneInPage() {
               lineHeight: 1,
             }}
           >
-            {targetNote}
+            {targetNote.replace(/\d+$/, "")}
           </motion.div>
           <div style={{ marginTop: 6, fontSize: 13, color: "var(--ios-label3)" }}>
-            {targetFreq.toFixed(1)} Hz
+            Any octave accepted · reference {targetFreq.toFixed(1)} Hz
           </div>
           <motion.button
             onClick={() => playTone(targetFreq, 0.8)}

@@ -52,9 +52,20 @@ export class MicrophoneManager {
   }
 }
 
+/** Native-safe mirror of the pitch-class cents calculation. */
 export function calculateCentsDeviation(detectedHz: number, targetHz: number): number {
-  if (detectedHz <= 0 || targetHz <= 0) return 0;
-  return 1200 * Math.log2(detectedHz / targetHz);
+  if (
+    !Number.isFinite(detectedHz) ||
+    !Number.isFinite(targetHz) ||
+    detectedHz <= 0 ||
+    targetHz <= 0
+  ) {
+    return 0;
+  }
+
+  const rawCents = 1200 * Math.log2(detectedHz / targetHz);
+  const wrapped = ((rawCents + 600) % 1200 + 1200) % 1200 - 600;
+  return Math.abs(wrapped) < 1e-9 ? 0 : wrapped;
 }
 
 export function centsToTunerRange(cents: number): number {

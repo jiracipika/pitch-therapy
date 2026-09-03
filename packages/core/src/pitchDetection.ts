@@ -261,15 +261,32 @@ export class MicrophoneManager {
 // ─── Cents Deviation ─────────────────────────────────────────────────────────
 
 /**
- * Calculate cents deviation from a detected frequency to a target frequency.
+ * Calculate the nearest signed cents deviation between pitch classes.
+ *
+ * Octave-equivalent notes intentionally collapse to the same pitch class:
+ * C2, C4, and C6 are all 0¢ from a C target. Adjacent chromatic notes are
+ * ±100¢ apart. The result is wrapped to [-600, 600), so tuning meters never
+ * report whole-octave errors such as ±1200¢ or ±4800¢.
+ *
  * Positive = sharp, negative = flat.
  */
 export function calculateCentsDeviation(
   detectedHz: number,
   targetHz: number,
 ): number {
-  if (detectedHz <= 0 || targetHz <= 0) return 0;
-  return 1200 * Math.log2(detectedHz / targetHz);
+  if (
+    !Number.isFinite(detectedHz) ||
+    !Number.isFinite(targetHz) ||
+    detectedHz <= 0 ||
+    targetHz <= 0
+  ) {
+    return 0;
+  }
+
+  const rawCents = 1200 * Math.log2(detectedHz / targetHz);
+  const wrapped = ((rawCents + 600) % 1200 + 1200) % 1200 - 600;
+  // Exact octave ratios can pick up tiny floating-point residue.
+  return Math.abs(wrapped) < 1e-9 ? 0 : wrapped;
 }
 
 /**
