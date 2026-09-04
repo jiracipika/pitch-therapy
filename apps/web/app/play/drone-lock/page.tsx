@@ -338,6 +338,12 @@ export default function DroneLockPage() {
         confirmExit={phase === "listening"}
         exitHref="/dashboard"
       >
+      {/* Screen-reader announcement for round results */}
+      <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {results.length > 0
+          ? `Round ${round} locked in ${Math.abs(cents)} cents off, ${results[results.length - 1].points} points.`
+          : ""}
+      </span>
         <div className="ios-progress-track mb-6">
           <div
             className="ios-progress-fill"

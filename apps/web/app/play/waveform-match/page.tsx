@@ -328,6 +328,12 @@ export default function WaveformMatchPage() {
         confirmExit={phase === "playing"}
         exitHref="/dashboard"
       >
+    {/* Screen-reader announcement for round results */}
+    <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {showResult
+        ? `Round ${round}: you were ${Math.abs(sliderCents - detuneCents)} cents off, ${lastRoundScore} points.`
+        : ""}
+    </span>
         <div className="ios-progress-track mb-6">
           <motion.div
             className="ios-progress-fill"

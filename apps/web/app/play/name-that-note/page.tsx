@@ -262,6 +262,14 @@ export default function NameThatNotePage() {
         confirmExit={phase === "playing"}
         exitHref="/dashboard"
       >
+        {/* Screen-reader announcement for round results */}
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {feedback !== "none"
+            ? feedback === "correct"
+              ? `Correct. It was ${targetNote.name}. ${streak} streak.`
+              : `Not quite. It was ${targetNote.name}.`
+            : ""}
+        </span>
         <div className="ios-progress-track mb-6">
           <div
             className="ios-progress-fill"

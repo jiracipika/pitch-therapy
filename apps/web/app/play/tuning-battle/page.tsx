@@ -188,6 +188,10 @@ export default function TuningBattlePage() {
         confirmExit={false}
         exitHref="/dashboard"
       >
+      {/* Screen-reader announcement for round results */}
+      <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {roundWinner ? `${roundWinner} wins the round!` : ""}
+      </span>
         {/* Setup */}
         {phase === "setup" && (
           <div style={{ textAlign: "center", paddingTop: 40 }}>

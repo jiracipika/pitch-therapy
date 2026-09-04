@@ -226,6 +226,10 @@ export default function PitchMemoryPage() {
         confirmExit={phase === "input"}
         exitHref="/dashboard"
       >
+        {/* Screen-reader announcement for round results */}
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {phase === "feedback" ? (feedback === "correct" ? "Correct." : "Not quite. Replaying the sequence.") : ""}
+        </span>
 
         {/* Level progress */}
         <div className="ios-progress-track mb-4">

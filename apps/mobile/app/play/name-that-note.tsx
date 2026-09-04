@@ -322,7 +322,16 @@ export default function NameThatNoteScreen() {
 
         {/* Staff comparison after answer */}
         {feedback !== "none" && guessedLabel && (
-          <View style={{ marginBottom: 16 }}>
+          <View
+            style={{ marginBottom: 16 }}
+            accessible={true}
+            accessibilityLiveRegion="polite"
+            accessibilityLabel={
+              feedback === "correct"
+                ? `Correct. It was ${targetNote.label}.`
+                : `Not quite. It was ${targetNote.label}.`
+            }
+          >
             <NoteComparisonStaff
               guessedNote={guessedLabel}
               correctNote={targetNote.label}

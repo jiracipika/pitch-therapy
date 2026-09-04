@@ -332,6 +332,14 @@ export default function PitchMatchPage() {
       confirmExit={phase === "playing"}
       exitHref="/dashboard"
     >
+      {/* Screen-reader announcement for round results */}
+      <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {results.length > 0 && phase === "playing"
+          ? results[results.length - 1].correct
+            ? `Correct. You matched the note within ${Math.abs(cents)} cents.`
+            : `Not quite. You were ${Math.abs(cents)} cents off.`
+          : ""}
+      </span>
       {/* ── IDLE STATE ── */}
         {phase === "idle" && (
           <div style={{ textAlign: "center", paddingTop: 40 }}>
