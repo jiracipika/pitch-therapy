@@ -1,8 +1,30 @@
 # GLM Next Slice — Pitch Therapy
 
-Status: implementation-ready handoff
+Status: previous slice DONE (see evidence below). Next slice defined at bottom.
 Owner: GLM 5.2/5.3 polish lane
 Priority: P1 shared training UX
+
+## DONE — Training-slice hardening (2026-09-03, commits 7e2c59a..f55b84a)
+
+Scope: timer/audio leak cleanup on all 18 web game pages + aria-live round feedback.
+
+Evidence (all verified on `main`):
+- `npm run ci:verify` passes — lint 0 errors, typecheck:ci clean, core tests 738/738.
+- `npm run build` passes — 32 routes.
+- `npm run typecheck:mobile` passes.
+- Shared hook `apps/web/lib/useTrackedTimeouts.ts` (trackTimeout/trackInterval/clearAllTimeouts).
+- All 18 play pages: no bare setTimeout/setInterval; canonical unmount cleanup (`clearAllTimeouts()` + `stopAllTones()`) present; interval-based games keep ref-stored intervals cleared on unmount.
+- pitch-memory migrated from a local tracker copy to the shared hook.
+- aria-live round-result announcements: 9 pages via FeedbackOverlay's built-in sr-only region; 7 pages (drone-lock, frequency-hunt, name-that-note, pitch-match, pitch-memory, tuning-battle, waveform-match) got dedicated sr-only `role="status" aria-live="polite"` regions; mobile name-that-note got `accessibilityLiveRegion="polite"`; note-wordle/frequency-wordle/speed-round already had coverage.
+- Known gap: interactive browser smoke (round-play + back-nav audio check) was NOT completed — the browser-harness daemon was down. Static SSR/build/type evidence only. Re-run the smoke when browser tooling is back.
+
+## Next slice: narrow-layout responsive audit of the four shell routes
+
+Target routes: `pitch-match`, `note-id`, `frequency-guess`, plus one daily challenge route.
+- Audit at 360px and 768px: stacked CTA groups, meter/slider hit targets ≥44px, TrainingShell header wrapping.
+- Use GAME_MODE_META for any card/copy reuse; no local arrays.
+- Gate: ci:verify + build + browser DOM evidence (desktop + 375px).
+
 
 ## Baseline evidence
 
