@@ -1,9 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { calculateCentsDeviation } from "@pitch-therapy/core";
+import {
+  calculateCentsDeviation,
+  estimatePitch,
+  stabilizePitch,
+  type PitchEstimate,
+} from "@pitch-therapy/core";
 import { playTone, NOTE_FREQUENCIES } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
@@ -46,80 +51,93 @@ export default function TuneInPage() {
   const [useMidi, setUseMidi] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const sampleBufferRef = useRef<Float32Array | null>(null);
   const micStreamRef = useRef<MediaStream | null>(null);
+  const pitchHistoryRef = useRef<PitchEstimate[]>([]);
+  const targetFreqRef = useRef(440);
+  const ignoreMicUntilRef = useRef(0);
+  const holdCompletedRef = useRef(false);
   const handleSuccessRef = useRef<() => void>(() => {});
   const roundStartRef = useRef(0);
   const holdStartRef = useRef<number | null>(null);
   const totalRounds = 5;
 
-  const autoCorrelate = useCallback((buf: Float32Array, sampleRate: number): number | null => {
-    const SIZE = buf.length;
-    let rms = 0;
-    for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
-    rms = Math.sqrt(rms / SIZE);
-    if (rms < 0.01) return null;
-
-    const halfSize = Math.floor(SIZE / 2);
-    let bestCorrelation = 0;
-    let bestOffset = 0;
-
-    const correlations = new Float32Array(halfSize);
-    for (let offset = 1; offset < halfSize; offset++) {
-      let correlation = 0;
-      for (let i = 0; i < halfSize; i++) {
-        correlation += Math.abs(buf[i] - buf[i + offset]);
-      }
-      correlations[offset] = correlation;
-      if (correlation < bestCorrelation || offset === 1) {
-        bestCorrelation = correlation;
-        bestOffset = offset;
-      }
-    }
-
-    if (bestCorrelation > rms * 1.5) return null;
-    return sampleRate / bestOffset;
-  }, []);
-
   useEffect(() => {
     if (!isListening) return;
+    // Reuse one buffer across ticks instead of allocating a Float32Array
+    // every 50 ms (this loop runs 20×/second).
+    if (!sampleBufferRef.current) {
+      sampleBufferRef.current = new Float32Array(analyserRef.current?.fftSize ?? 4096);
+    }
     const interval = setInterval(() => {
       if (!analyserRef.current) return;
-      const buf = new Float32Array(analyserRef.current.fftSize);
-      analyserRef.current.getFloatTimeDomainData(buf);
-      const freq = autoCorrelate(buf, audioContextRef.current?.sampleRate || 44100);
-      if (freq && freq > 60 && freq < 1200) {
-        const cents = Math.round(calculateCentsDeviation(freq, targetFreq));
-        setCentsOff(cents);
+      const buf = sampleBufferRef.current!;
+      if (buf.length !== analyserRef.current.fftSize) {
+        sampleBufferRef.current = new Float32Array(analyserRef.current.fftSize);
+        return;
+      }
+      analyserRef.current.getFloatTimeDomainData(buf as Float32Array<ArrayBuffer>);
+      if (performance.now() < ignoreMicUntilRef.current) {
+        pitchHistoryRef.current = [];
+        return;
+      }
+      const estimate = estimatePitch(buf, audioContextRef.current?.sampleRate || 44100);
+      if (!estimate) {
+        pitchHistoryRef.current = [];
+        return;
+      }
+      pitchHistoryRef.current = [...pitchHistoryRef.current.slice(-4), estimate];
+      const stable = stabilizePitch(pitchHistoryRef.current);
+      if (!stable) return;
+      const cents = Math.round(
+        calculateCentsDeviation(stable.frequency, targetFreqRef.current),
+      );
+      setCentsOff(cents);
 
-        if (Math.abs(cents) <= 10) {
-          if (!holdStartRef.current) holdStartRef.current = Date.now();
-          const held = Date.now() - holdStartRef.current;
-          const needed = 1500;
-          setHoldProgress(Math.min(held / needed, 1));
-          if (held >= needed) {
-            handleSuccessRef.current();
-          }
-        } else {
-          holdStartRef.current = null;
-          setHoldProgress(0);
+      // Reset the hold clock if the needle drifts; ignore blips ≥50¢ as
+      // detection outliers rather than real user error.
+      if (Math.abs(cents) <= 10) {
+        if (!holdStartRef.current) holdStartRef.current = Date.now();
+        const held = Date.now() - holdStartRef.current;
+        const needed = 1500;
+        setHoldProgress(Math.min(held / needed, 1));
+        if (held >= needed && !holdCompletedRef.current) {
+          holdCompletedRef.current = true;
+          handleSuccessRef.current();
         }
+      } else {
+        if (Math.abs(cents) >= 50) {
+          pitchHistoryRef.current = [];
+        }
+        holdStartRef.current = null;
+        setHoldProgress(0);
       }
     }, 50);
     return () => clearInterval(interval);
-  }, [isListening, autoCorrelate, targetFreq]);
+  }, [isListening]);
 
   const startMic = async () => {
     try {
       setMicError(null);
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: false,
+          autoGainControl: false,
+        },
+      });
       micStreamRef.current = stream;
       const ctx = new AudioContext();
       audioContextRef.current = ctx;
       const source = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
+      analyser.fftSize = 4096;
+      analyser.smoothingTimeConstant = 0;
       source.connect(analyser);
       analyserRef.current = analyser;
+      sampleBufferRef.current = new Float32Array(analyser.fftSize);
+      pitchHistoryRef.current = [];
       setIsListening(true);
     } catch {
       setMicError("Microphone access denied. Switch to Listen Only mode or grant permission.");
@@ -129,7 +147,11 @@ export default function TuneInPage() {
 
   const stopMic = () => {
     micStreamRef.current?.getTracks().forEach((t) => t.stop());
-    audioContextRef.current?.close();
+    void audioContextRef.current?.close();
+    audioContextRef.current = null;
+    analyserRef.current = null;
+    sampleBufferRef.current = null;
+    pitchHistoryRef.current = [];
     setIsListening(false);
     holdStartRef.current = null;
   };
@@ -137,6 +159,12 @@ export default function TuneInPage() {
   const pickTarget = () => {
     const note = TARGET_NOTES[Math.floor(Math.random() * TARGET_NOTES.length)];
     const freq = NOTE_FREQUENCIES[note] || 440;
+    // Update synchronously before the mic loop ticks; React state updates
+    // from this event are asynchronous (stale-target bug in round 1).
+    targetFreqRef.current = freq;
+    ignoreMicUntilRef.current = performance.now() + 1000;
+    holdCompletedRef.current = false;
+    pitchHistoryRef.current = [];
     setTargetNote(note);
     setTargetFreq(freq);
     setCentsOff(0);

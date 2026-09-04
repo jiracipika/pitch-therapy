@@ -6,7 +6,13 @@ import { motion } from "framer-motion";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { calculateCentsDeviation, intervalsInPool } from "@pitch-therapy/core";
+import {
+  calculateCentsDeviation,
+  estimatePitch,
+  intervalsInPool,
+  stabilizePitch,
+  type PitchEstimate,
+} from "@pitch-therapy/core";
 
 const ACCENT = "#30D158";
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
@@ -78,42 +84,62 @@ export default function DroneLockPage() {
   );
 
   const [micError, setMicError] = useState<string | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const pitchHistoryRef = useRef<PitchEstimate[]>([]);
+  const ignoreMicUntilRef = useRef(0);
 
   const startMic = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Echo cancellation ON: the drone itself would otherwise pollute the
+      // detected fundamental. AGC OFF so quiet hums aren't inflated.
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: false,
+          autoGainControl: false,
+        },
+      });
       streamRef.current = stream;
-    const ctx = new AudioContext();
-    const source = ctx.createMediaStreamSource(stream);
-    const analyser = ctx.createAnalyser();
-    source.connect(analyser);
-    analyser.fftSize = 2048;
-    const data = new Float32Array(analyser.fftSize);
-    const detect = () => {
-      analyser.getFloatTimeDomainData(data);
-      let sum = 0;
-      for (let i = 0; i < data.length; i++) {
-        const v = data[i] ?? 0;
-        sum += v * v;
-      }
-      const rms = Math.sqrt(sum / data.length);
-      if (rms > 0.01) {
-        const freq = autoCorrelate(data, ctx.sampleRate);
-        if (freq > 0) {
-          setDetectedFreq(freq);
-          const targetHz = targetHzRef.current;
-          const measuredCents = Math.round(calculateCentsDeviation(freq, targetHz));
-          setCents(measuredCents);
+      const ctx = new AudioContext();
+      audioContextRef.current = ctx;
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      source.connect(analyser);
+      analyser.fftSize = 4096;
+      analyser.smoothingTimeConstant = 0;
+      const data = new Float32Array(analyser.fftSize);
+      const detect = () => {
+        analyser.getFloatTimeDomainData(data);
+        if (performance.now() < ignoreMicUntilRef.current) {
+          pitchHistoryRef.current = [];
+        } else {
+          const estimate = estimatePitch(data, ctx.sampleRate);
+          if (estimate) {
+            pitchHistoryRef.current = [
+              ...pitchHistoryRef.current.slice(-4),
+              estimate,
+            ];
+            const stable = stabilizePitch(pitchHistoryRef.current);
+            if (stable) {
+              setDetectedFreq(stable.frequency);
+              const measuredCents = Math.round(
+                calculateCentsDeviation(stable.frequency, targetHzRef.current),
+              );
+              setCents(measuredCents);
+            }
+          } else {
+            pitchHistoryRef.current = [];
+          }
         }
-      }
-      rafRef.current = requestAnimationFrame(detect);
-    };
-    detect();
+        rafRef.current = requestAnimationFrame(detect);
+      };
+      detect();
     } catch (err) {
       setMicError(
-        err instanceof Error && err.name === 'NotAllowedError'
-          ? 'Microphone access denied. Please allow mic access in your browser settings.'
-          : 'Could not access microphone. Please check your device.'
+        err instanceof Error && err.name === "NotAllowedError"
+          ? "Microphone access denied. Please allow mic access in your browser settings."
+          : "Could not access microphone. Please check your device."
       );
     }
   };
@@ -121,7 +147,10 @@ export default function DroneLockPage() {
   const stopMic = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
     streamRef.current?.getTracks().forEach((t) => t.stop());
+    void audioContextRef.current?.close();
     streamRef.current = null;
+    audioContextRef.current = null;
+    pitchHistoryRef.current = [];
   }, []);
 
   const startRound = () => {
@@ -132,6 +161,8 @@ export default function DroneLockPage() {
     // Update synchronously before the mic loop runs; React state updates from
     // this event are asynchronous and previously left round 1 on stale C.
     targetHzRef.current = targetHz;
+    ignoreMicUntilRef.current = performance.now() + 1200; // drone + example tone sound first
+    pitchHistoryRef.current = [];
     setDroneNote(noteIdx);
     setTargetInterval(interval);
     setCents(0);
@@ -537,32 +568,4 @@ export default function DroneLockPage() {
         )}
     </TrainingShell>
   );
-}
-
-function autoCorrelate(buf: Float32Array, sampleRate: number): number {
-  const SIZE = buf.length;
-  let rms = 0;
-  for (let i = 0; i < SIZE; i++) {
-    const v = buf[i] ?? 0;
-    rms += v * v;
-  }
-  rms = Math.sqrt(rms / SIZE);
-  if (rms < 0.01) return -1;
-  const HALF = Math.floor(SIZE / 2);
-  let bestOffset = -1,
-    bestCorrelation = 0,
-    foundGoodCorrelation = false;
-  for (let offset = 20; offset < HALF; offset++) {
-    let correlation = 0;
-    for (let i = 0; i < HALF; i++) correlation += Math.abs((buf[i] ?? 0) - (buf[i + offset] ?? 0));
-    correlation = 1 - correlation / HALF;
-    if (correlation > 0.9 && !foundGoodCorrelation) foundGoodCorrelation = true;
-    if (foundGoodCorrelation) {
-      if (correlation > bestCorrelation) {
-        bestCorrelation = correlation;
-        bestOffset = offset;
-      } else if (correlation < bestCorrelation - 0.01) break;
-    }
-  }
-  return bestCorrelation > 0.01 && bestOffset > 0 ? sampleRate / bestOffset : -1;
 }

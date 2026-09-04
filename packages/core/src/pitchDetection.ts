@@ -1,6 +1,9 @@
-// ─── Pitch Detection via Autocorrelation ─────────────────────────────────────
+// ─── Pitch Detection via McLeod Pitch Method ─────────────────────────────────
 
 import { frequencyToNote } from "./audio";
+import { estimatePitch } from "./pitchEstimator";
+export { estimatePitch, stabilizePitch } from "./pitchEstimator";
+export type { PitchEstimate, PitchEstimateOptions } from "./pitchEstimator";
 
 export interface PitchDetectionResult {
   frequency: number | null;
@@ -15,7 +18,7 @@ export class PitchDetector {
   private buffer: Float32Array;
   private _isListening = false;
 
-  constructor(audioContext: AudioContext, fftSize = 2048) {
+  constructor(audioContext: AudioContext, fftSize = 4096) {
     this.audioContext = audioContext;
     this.analyser = audioContext.createAnalyser();
     this.analyser.fftSize = fftSize;
@@ -47,99 +50,24 @@ export class PitchDetector {
     this._isListening = false;
   }
 
-  /**
-   * Detect pitch using autocorrelation (YIN-inspired).
-   * Returns frequency in Hz or null if no clear pitch detected.
-   */
+  /** Detect a confidence-gated fundamental via the shared MPM estimator. */
   detect(): PitchDetectionResult {
     this.analyser.getFloatTimeDomainData(this.buffer as Float32Array<ArrayBuffer>);
 
-    // RMS check — skip silence
     let rms = 0;
     for (let i = 0; i < this.buffer.length; i++) {
       rms += this.buffer[i] * this.buffer[i];
     }
     rms = Math.sqrt(rms / this.buffer.length);
 
-    const isVoice = rms > 0.01;
-
-    if (!isVoice) {
-      return { frequency: null, note: null, rms, isVoice: false };
-    }
-
-    const frequency = this.autocorrelate();
-    const note = frequency ? frequencyToNote(frequency) : null;
-
-    return { frequency, note, rms, isVoice: !!frequency };
-  }
-
-  private autocorrelate(): number | null {
-    const buf = this.buffer;
-    const size = buf.length;
-    const sampleRate = this.audioContext.sampleRate;
-
-    // Normalize
-    let rms = 0;
-    for (let i = 0; i < size; i++) {
-      rms += buf[i] * buf[i];
-    }
-    rms = Math.sqrt(rms / size);
-    if (rms < 0.01) return null;
-
-    // Autocorrelation
-    const halfSize = Math.floor(size / 2);
-
-    // Find the first dip (zero crossing region)
-    let foundDip = false;
-    let maxCorr = 0;
-    let bestOffset = -1;
-
-    for (let offset = 1; offset < halfSize; offset++) {
-      let corr = 0;
-      for (let i = 0; i < halfSize; i++) {
-        corr += buf[i] * buf[i + offset];
-      }
-
-      if (!foundDip && corr < 0) {
-        foundDip = true;
-      }
-
-      if (foundDip && corr > maxCorr) {
-        maxCorr = corr;
-        bestOffset = offset;
-      }
-    }
-
-    if (bestOffset === -1 || maxCorr < 0.01) return null;
-
-    // Parabolic interpolation for sub-sample accuracy
-    const y1 = this.correlationAt(bestOffset - 1);
-    const y2 = maxCorr;
-    const y3 = this.correlationAt(bestOffset + 1);
-    const a = (y1 + y3 - 2 * y2) / 2;
-    const b = (y3 - y1) / 2;
-
-    let refinedOffset = bestOffset;
-    if (Math.abs(a) > 1e-10) {
-      refinedOffset = bestOffset - b / (2 * a);
-    }
-
-    const frequency = sampleRate / refinedOffset;
-
-    // Valid vocal/instrument range: 50 Hz – 2000 Hz
-    if (frequency < 50 || frequency > 2000) return null;
-
-    return frequency;
-  }
-
-  private correlationAt(offset: number): number {
-    const buf = this.buffer;
-    const halfSize = Math.floor(buf.length / 2);
-    let corr = 0;
-    for (let i = 0; i < halfSize; i++) {
-      corr += buf[i] * buf[i + offset];
-    }
-    return corr;
+    const estimate = estimatePitch(this.buffer, this.audioContext.sampleRate);
+    const frequency = estimate?.frequency ?? null;
+    return {
+      frequency,
+      note: frequency ? frequencyToNote(frequency) : null,
+      rms,
+      isVoice: frequency !== null,
+    };
   }
 
   destroy(): void {

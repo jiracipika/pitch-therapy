@@ -3,6 +3,8 @@
 // The mobile app uses expo-av for audio instead.
 
 import { FrequencyToNoteResult } from './audio';
+export { estimatePitch, stabilizePitch } from './pitchEstimator';
+export type { PitchEstimate, PitchEstimateOptions } from './pitchEstimator';
 
 export interface PitchDetectionResult {
   frequency: number | null;

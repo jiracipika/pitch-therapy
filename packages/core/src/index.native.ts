@@ -99,10 +99,17 @@ export type { BaseGameState, ScoreBreakdown, Grade } from "./gameFramework";
 export {
   PitchDetector,
   MicrophoneManager,
+  estimatePitch,
+  stabilizePitch,
   calculateCentsDeviation,
   centsToTunerRange,
 } from "./pitchDetection.native";
-export type { PitchDetectionResult, MicPermissionState } from "./pitchDetection.native";
+export type {
+  PitchDetectionResult,
+  MicPermissionState,
+  PitchEstimate,
+  PitchEstimateOptions,
+} from "./pitchDetection.native";
 
 // ─── MIDI (native stub) ─────────────────────────────────────────────────────
 

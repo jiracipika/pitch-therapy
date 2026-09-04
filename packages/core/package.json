@@ -16,6 +16,7 @@
     "vitest": "^4.1.9"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.101.1"
+    "@supabase/supabase-js": "^2.101.1",
+    "pitchy": "^4.1.0"
   }
 }

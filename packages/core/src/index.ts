@@ -90,10 +90,17 @@ export type { BaseGameState, ScoreBreakdown, Grade } from "./gameFramework";
 export {
   PitchDetector,
   MicrophoneManager,
+  estimatePitch,
+  stabilizePitch,
   calculateCentsDeviation,
   centsToTunerRange,
 } from "./pitchDetection";
-export type { PitchDetectionResult, MicPermissionState } from "./pitchDetection";
+export type {
+  PitchDetectionResult,
+  MicPermissionState,
+  PitchEstimate,
+  PitchEstimateOptions,
+} from "./pitchDetection";
 
 // ─── MIDI ────────────────────────────────────────────────────────────────────
 

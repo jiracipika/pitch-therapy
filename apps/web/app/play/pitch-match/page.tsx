@@ -3,7 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { calculateCentsDeviation } from "@pitch-therapy/core";
+import {
+  calculateCentsDeviation,
+  estimatePitch,
+  stabilizePitch,
+  type PitchEstimate,
+} from "@pitch-therapy/core";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import WaveVisualizer from "@/components/WaveVisualizer";
 import { useStatsContext } from "@/components/StatsProvider";
@@ -44,8 +49,20 @@ export default function PitchMatchPage() {
   const [micError, setMicError] = useState<string | null>(null);
   const [micStatus, setMicStatus] = useState<MicStatus>("idle");
   const streamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const rafRef = useRef<number>(0);
+  const pitchHistoryRef = useRef<PitchEstimate[]>([]);
+  const ignoreMicUntilRef = useRef(0);
   const roundStart = useRef(0);
+
+  const playTargetNote = (noteIdx: number) => {
+    ignoreMicUntilRef.current = performance.now() + 950;
+    pitchHistoryRef.current = [];
+    setHasDetectedPitch(false);
+    setIsPlaying(true);
+    playTone(freq(noteIdx), 0.8);
+    setTimeout(() => setIsPlaying(false), 800);
+  };
 
   const startRound = () => {
     const noteIdx = Math.floor(Math.random() * 12);
@@ -58,53 +75,66 @@ export default function PitchMatchPage() {
     setPhase("playing");
     setRound((r) => r + 1);
     roundStart.current = Date.now();
-    setIsPlaying(true);
-    playTone(freq(noteIdx), 0.8);
-    setTimeout(() => setIsPlaying(false), 800);
+    playTargetNote(noteIdx);
   };
 
   const startMic = async () => {
     try {
       setMicError(null);
       setMicStatus("requesting");
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: false,
+          autoGainControl: false,
+        },
+      });
       streamRef.current = stream;
       setMicStatus("active");
-    const ctx = new AudioContext();
-    const source = ctx.createMediaStreamSource(stream);
-    const analyser = ctx.createAnalyser();
-    source.connect(analyser);
-    analyser.fftSize = 2048;
-    const data = new Float32Array(analyser.fftSize);
-    const detect = () => {
-      analyser.getFloatTimeDomainData(data);
-      let sum = 0;
-      for (let i = 0; i < data.length; i++) {
-        const v = data[i] ?? 0;
-        sum += v * v;
-      }
-      const rms = Math.sqrt(sum / data.length);
-      if (rms > 0.01) {
-        const detectedFreq = autoCorrelate(data, ctx.sampleRate);
-        if (detectedFreq > 0) {
-          const targetFreq = freq(targetNoteRef.current);
-          const measuredCents = Math.round(
-            calculateCentsDeviation(detectedFreq, targetFreq),
-          );
-          setCents(measuredCents);
-          setHasDetectedPitch(true);
+      const ctx = new AudioContext();
+      audioContextRef.current = ctx;
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      source.connect(analyser);
+      analyser.fftSize = 4096;
+      analyser.smoothingTimeConstant = 0;
+      const data = new Float32Array(analyser.fftSize);
+      const detect = () => {
+        analyser.getFloatTimeDomainData(data);
+        if (performance.now() < ignoreMicUntilRef.current) {
+          pitchHistoryRef.current = [];
+          setHasDetectedPitch(false);
+        } else {
+          const estimate = estimatePitch(data, ctx.sampleRate);
+          if (estimate) {
+            pitchHistoryRef.current = [
+              ...pitchHistoryRef.current.slice(-4),
+              estimate,
+            ];
+            const stable = stabilizePitch(pitchHistoryRef.current);
+            if (stable) {
+              const targetFreq = freq(targetNoteRef.current);
+              setCents(
+                Math.round(calculateCentsDeviation(stable.frequency, targetFreq)),
+              );
+              setHasDetectedPitch(true);
+            }
+          } else {
+            pitchHistoryRef.current = [];
+            setHasDetectedPitch(false);
+          }
         }
-      }
-      rafRef.current = requestAnimationFrame(detect);
-    };
-    detect();
+        rafRef.current = requestAnimationFrame(detect);
+      };
+      detect();
     } catch (err) {
-      const denied = err instanceof Error && err.name === 'NotAllowedError';
+      const denied = err instanceof Error && err.name === "NotAllowedError";
       setMicStatus(denied ? "denied" : "unavailable");
       setMicError(
         denied
-          ? 'Microphone access denied. Please allow mic access in your browser settings.'
-          : 'Could not access microphone. Please check your device.',
+          ? "Microphone access denied. Please allow mic access in your browser settings."
+          : "Could not access microphone. Please check your device.",
       );
     }
   };
@@ -112,7 +142,10 @@ export default function PitchMatchPage() {
   const stopMic = () => {
     cancelAnimationFrame(rafRef.current);
     streamRef.current?.getTracks().forEach((t) => t.stop());
+    void audioContextRef.current?.close();
     streamRef.current = null;
+    audioContextRef.current = null;
+    pitchHistoryRef.current = [];
   };
 
   const submit = () => {
@@ -353,11 +386,7 @@ export default function PitchMatchPage() {
             </div>
 
             <motion.button
-              onClick={() => {
-                setIsPlaying(true);
-                playTone(freq(targetNote), 0.8);
-                setTimeout(() => setIsPlaying(false), 800);
-              }}
+              onClick={() => playTargetNote(targetNote)}
               whileTap={{ scale: 0.92 }}
               style={{
                 display: "inline-flex",
@@ -509,32 +538,4 @@ export default function PitchMatchPage() {
         )}
     </TrainingShell>
   );
-}
-
-function autoCorrelate(buf: Float32Array, sampleRate: number): number {
-  const SIZE = buf.length;
-  let rms = 0;
-  for (let i = 0; i < SIZE; i++) {
-    const v = buf[i] ?? 0;
-    rms += v * v;
-  }
-  rms = Math.sqrt(rms / SIZE);
-  if (rms < 0.01) return -1;
-  const HALF = Math.floor(SIZE / 2);
-  let bestOffset = -1,
-    bestCorrelation = 0,
-    foundGoodCorrelation = false;
-  for (let offset = 20; offset < HALF; offset++) {
-    let correlation = 0;
-    for (let i = 0; i < HALF; i++) correlation += Math.abs((buf[i] ?? 0) - (buf[i + offset] ?? 0));
-    correlation = 1 - correlation / HALF;
-    if (correlation > 0.9 && !foundGoodCorrelation) foundGoodCorrelation = true;
-    if (foundGoodCorrelation) {
-      if (correlation > bestCorrelation) {
-        bestCorrelation = correlation;
-        bestOffset = offset;
-      } else if (correlation < bestCorrelation - 0.01) break;
-    }
-  }
-  return bestCorrelation > 0.01 && bestOffset > 0 ? sampleRate / bestOffset : -1;
 }
