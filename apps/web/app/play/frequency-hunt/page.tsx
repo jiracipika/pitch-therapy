@@ -3,9 +3,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { playTone } from "@/lib/audio";
+import { playTone, stopAllTones } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#FF9F0A";
 const MIN_FREQ = 100;
@@ -20,6 +21,7 @@ export default function FrequencyHuntPage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
 
   const [phase, setPhase] = useState<"idle" | "hunting" | "result" | "done">("idle");
   const [round, setRound] = useState(0);
@@ -62,7 +64,7 @@ export default function FrequencyHuntPage() {
         0.001,
         (ctxRef.current?.currentTime ?? 0) + 0.1,
       );
-      setTimeout(() => {
+      trackTimeout(() => {
         oscRef.current?.stop();
         oscRef.current = null;
         gainRef.current = null;
@@ -71,7 +73,7 @@ export default function FrequencyHuntPage() {
         setPreviewing(false);
       }, 150);
     }
-  }, []);
+  }, [trackTimeout]);
 
   const startRound = () => {
     const freq = Math.round(MIN_FREQ + Math.random() * (MAX_FREQ - MIN_FREQ));
@@ -100,7 +102,7 @@ export default function FrequencyHuntPage() {
     setResults((r) => [...r, { round, target: targetFreq, guess, diff, points }]);
     playTone(targetFreq, 0.5);
     setPhase("result");
-    setTimeout(() => {
+    trackTimeout(() => {
       if (round >= totalRounds) setPhase("done");
       else startRound();
     }, 2000);
@@ -140,6 +142,14 @@ export default function FrequencyHuntPage() {
       });
     }
   }, [phase, recordResult, results, score, totalRounds]);
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     const avgDiff = Math.round(results.reduce((s, r) => s + r.diff, 0) / results.length);

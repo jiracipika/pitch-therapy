@@ -9,10 +9,11 @@ import {
   stabilizePitch,
   type PitchEstimate,
 } from "@pitch-therapy/core";
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import WaveVisualizer from "@/components/WaveVisualizer";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell, { type MicStatus } from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
 const freq = (i: number) => NOTE_FREQS[i] ?? 261.63;
@@ -24,6 +25,7 @@ export default function PitchMatchPage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
   const [phase, setPhase] = useState<"idle" | "playing" | "done">("idle");
@@ -61,7 +63,7 @@ export default function PitchMatchPage() {
     setHasDetectedPitch(false);
     setIsPlaying(true);
     playTone(freq(noteIdx), 0.8);
-    setTimeout(() => setIsPlaying(false), 800);
+    trackTimeout(() => setIsPlaying(false), 800);
   };
 
   const startRound = () => {
@@ -169,7 +171,7 @@ export default function PitchMatchPage() {
     ]);
     stopMic();
     if (!isPractice && round >= totalRounds) setPhase("done");
-    else setTimeout(async () => {
+    else trackTimeout(async () => {
       startRound();
       await startMic();
     }, 1500);
@@ -220,6 +222,14 @@ export default function PitchMatchPage() {
       });
     }
   }, [phase, recordResult, results, score, totalRounds]);
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     const correct = results.filter((r) => r.correct).length;

@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import {
   calculateCentsDeviation,
   estimatePitch,
@@ -28,6 +29,7 @@ export default function DroneLockPage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const [phase, setPhase] = useState<Phase>("idle");
   const [round, setRound] = useState(0);
   const [totalRounds] = useState(8);
@@ -54,7 +56,7 @@ export default function DroneLockPage() {
         0.001,
         (droneCtxRef.current?.currentTime ?? 0) + 0.3,
       );
-      setTimeout(() => {
+      trackTimeout(() => {
         droneOscRef.current?.stop();
         droneOscRef.current = null;
         droneGainRef.current = null;
@@ -62,7 +64,7 @@ export default function DroneLockPage() {
         droneCtxRef.current = null;
       }, 400);
     }
-  }, []);
+  }, [trackTimeout]);
 
   const startDrone = useCallback(
     (noteIdx: number) => {
@@ -191,7 +193,7 @@ export default function DroneLockPage() {
       absCents < 10 ? 200 : absCents < 25 ? 150 : absCents < 50 ? 100 : absCents < 100 ? 50 : 20;
     setScore((s) => s + points);
     setResults((r) => [...r, { round, interval: targetInterval.name, cents, points }]);
-    setTimeout(() => {
+    trackTimeout(() => {
       if (round >= totalRounds) {
         stopMic();
         stopDrone();
@@ -228,6 +230,14 @@ export default function DroneLockPage() {
       });
     }
   }, [phase, recordResult, results, score, totalRounds]);
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     const avgCents = Math.round(

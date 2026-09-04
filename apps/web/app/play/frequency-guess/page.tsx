@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { playTone } from "@/lib/audio";
+import { playTone, stopAllTones } from "@/lib/audio";
 import WaveVisualizer from "@/components/WaveVisualizer";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -24,6 +25,7 @@ export default function FrequencyGuessPage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
@@ -61,7 +63,7 @@ export default function FrequencyGuessPage() {
     setRound((r) => r + 1);
     setIsPlaying(true);
     playTone(freq, 0.8);
-    setTimeout(() => setIsPlaying(false), 800);
+    trackTimeout(() => setIsPlaying(false), 800);
   };
 
   const submitGuess = () => {
@@ -76,7 +78,7 @@ export default function FrequencyGuessPage() {
     ]);
     setShowFeedback(true);
     if (!isPractice) setShowFeedbackOverlay(correct);
-    setTimeout(() => {
+    trackTimeout(() => {
       if (isPractice) nextRound();
       else if (round >= config.rounds) setPhase("done");
       else nextRound();
@@ -100,6 +102,14 @@ export default function FrequencyGuessPage() {
       });
     }
   }, [phase, recordResult, results, score, config.rounds]);
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     return (
@@ -278,7 +288,7 @@ export default function FrequencyGuessPage() {
               onClick={() => {
                 setIsPlaying(true);
                 playTone(targetFreq, 0.8);
-                setTimeout(() => setIsPlaying(false), 800);
+                trackTimeout(() => setIsPlaying(false), 800);
               }}
               whileTap={{ scale: 0.92 }}
               style={{

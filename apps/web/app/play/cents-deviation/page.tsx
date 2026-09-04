@@ -3,10 +3,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#30D158";
 
@@ -52,17 +53,18 @@ export default function CentsDeviationPage() {
   >([]);
   const meterRef = useRef<HTMLDivElement>(null);
   const roundRef = useRef(0);
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
 
   const config = DIFF_CONFIG[difficulty];
   const totalRounds = config.rounds;
 
   const playRefAndDeviation = useCallback((freq: number, cents: number) => {
     playTone(freq, 0.8);
-    setTimeout(() => {
+    trackTimeout(() => {
       const deviatedFreq = freq * Math.pow(2, cents / 1200);
       playTone(deviatedFreq, 1.2);
     }, 1000);
-  }, []);
+  }, [trackTimeout]);
 
   const pickRound = () => {
     const noteIdx = Math.floor(Math.random() * 12);
@@ -157,6 +159,14 @@ export default function CentsDeviationPage() {
       });
     }
   }, [phase, recordResult, results, score, totalRounds]);
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     return (
@@ -424,7 +434,7 @@ export default function CentsDeviationPage() {
             onClick={() => {
               const guessFreq = baseFreq * Math.pow(2, needlePos / 1200);
               playTone(baseFreq, 0.6);
-              setTimeout(() => playTone(guessFreq, 0.8), 800);
+              trackTimeout(() => playTone(guessFreq, 0.8), 800);
             }}
             whileTap={{ scale: 0.92 }}
             disabled={submitted}

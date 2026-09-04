@@ -3,10 +3,11 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import { CHORD_TYPES, CHORD_INTERVALS, chordTypeById } from "@pitch-therapy/core";
 
 const ACCENT = "#FF2D55";
@@ -18,7 +19,11 @@ function midiToFreq(midi: number) {
   return 440 * Math.pow(2, (midi - 69) / 12);
 }
 
-function playChord(root: string, chordType: string) {
+function playChord(
+  root: string,
+  chordType: string,
+  schedule: (fn: () => void, delay: number) => void,
+) {
   const rootIdx = ALL_NOTES.indexOf(root as (typeof ALL_NOTES)[number]);
   if (rootIdx < 0) return;
   const lookup = CHORD_INTERVALS as Record<string, number[]>;
@@ -27,7 +32,7 @@ function playChord(root: string, chordType: string) {
     const noteIdx = (rootIdx + semi) % 12;
     const note = ALL_NOTES[noteIdx];
     const freq = NOTE_FREQUENCIES[`${note}4`] || midiToFreq(60 + noteIdx);
-    setTimeout(() => playTone(freq, 1.2), i * 30);
+    schedule(() => playTone(freq, 1.2), i * 30);
   });
 }
 
@@ -36,6 +41,7 @@ export default function ChordDetectivePage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
   const [advanced, setAdvanced] = useState(false);
@@ -66,8 +72,8 @@ export default function ChordDetectivePage() {
     setSelectedType("");
     setSelectedRoot("");
     setFeedback(null);
-    playChord(r, ct);
-  }, []);
+    playChord(r, ct, trackTimeout);
+  }, [trackTimeout]);
 
   const startGame = () => {
     setRound(0);
@@ -111,7 +117,7 @@ export default function ChordDetectivePage() {
     ]);
     setPhase("feedback");
 
-    setTimeout(
+    trackTimeout(
       () => {
         if (isPractice) {
           nextChord();
@@ -146,6 +152,14 @@ export default function ChordDetectivePage() {
       });
     }
   }, [phase, recordResult, results, score, ROUNDS]);
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     const correct = results.filter((r) => r.correct).length;
@@ -373,7 +387,7 @@ export default function ChordDetectivePage() {
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
           <motion.button
             whileTap={{ scale: 0.92 }}
-            onClick={() => playChord(root, chordType)}
+            onClick={() => playChord(root, chordType, trackTimeout)}
             style={{
               width: 100,
               height: 100,

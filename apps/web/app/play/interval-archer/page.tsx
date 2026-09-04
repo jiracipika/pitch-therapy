@@ -3,10 +3,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { playTone, getAudioContext, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, getAudioContext, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import { INTERVALS as CORE_INTERVALS } from "@pitch-therapy/core";
 
 const ACCENT = "#D946EF";
@@ -32,6 +33,7 @@ export default function IntervalArcherPage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
   const [phase, setPhase] = useState<"setup" | "playing" | "feedback" | "done">("setup");
@@ -81,10 +83,10 @@ export default function IntervalArcherPage() {
     const secondFreq = freq * Math.pow(2, semitones / 12);
     if (mode === "ascending") {
       playTone(freq, 0.5);
-      setTimeout(() => playTone(secondFreq, 0.8), 550);
+      trackTimeout(() => playTone(secondFreq, 0.8), 550);
     } else if (mode === "descending") {
       playTone(secondFreq, 0.5);
-      setTimeout(() => playTone(freq, 0.8), 550);
+      trackTimeout(() => playTone(freq, 0.8), 550);
     } else {
       // harmonic: play both at once using shared context (no leak)
       const ctx = getAudioContext();
@@ -166,7 +168,7 @@ export default function IntervalArcherPage() {
       },
     ]);
 
-    setTimeout(() => {
+    trackTimeout(() => {
       if (roundRef.current >= TOTAL_ROUNDS) {
         setPhase("done");
       } else {
@@ -192,6 +194,14 @@ export default function IntervalArcherPage() {
       });
     }
   }, [phase, recordResult, results, score, TOTAL_ROUNDS]);
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     return (

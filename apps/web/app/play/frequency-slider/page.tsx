@@ -7,6 +7,7 @@ import { playTone, stopAllTones } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#0A84FF";
 const MIN_FREQ = 80;
@@ -43,6 +44,7 @@ export default function FrequencySliderPage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { clearAllTimeouts } = useTrackedTimeouts();
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
   const [phase, setPhase] = useState<"setup" | "playing" | "reveal" | "done">("setup");
@@ -175,6 +177,14 @@ export default function FrequencySliderPage() {
       stopAllTones();
     };
   }, []);
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     const avgCents =

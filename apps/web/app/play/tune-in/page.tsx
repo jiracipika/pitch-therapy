@@ -9,10 +9,11 @@ import {
   stabilizePitch,
   type PitchEstimate,
 } from "@pitch-therapy/core";
-import { playTone, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#FF2D55";
 
@@ -23,6 +24,7 @@ export default function TuneInPage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, trackInterval, clearAllTimeouts } = useTrackedTimeouts();
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
   const [phase, setPhase] = useState<"setup" | "playing" | "feedback" | "done">("setup");
@@ -69,7 +71,7 @@ export default function TuneInPage() {
     if (!sampleBufferRef.current) {
       sampleBufferRef.current = new Float32Array(analyserRef.current?.fftSize ?? 4096);
     }
-    const interval = setInterval(() => {
+    const interval = trackInterval(() => {
       if (!analyserRef.current) return;
       const buf = sampleBufferRef.current!;
       if (buf.length !== analyserRef.current.fftSize) {
@@ -114,7 +116,7 @@ export default function TuneInPage() {
       }
     }, 50);
     return () => clearInterval(interval);
-  }, [isListening]);
+  }, [isListening, trackInterval]);
 
   const startMic = async () => {
     try {
@@ -209,7 +211,7 @@ export default function TuneInPage() {
       { round, correct: true, points, target: targetNote, accuracy, timeMs: elapsed },
     ]);
 
-    setTimeout(
+    trackTimeout(
       () => {
         if (round >= totalRounds) {
           setPhase("done");
@@ -241,7 +243,7 @@ export default function TuneInPage() {
       },
     ]);
 
-    setTimeout(() => {
+    trackTimeout(() => {
       if (round >= totalRounds) {
         setPhase("done");
       } else {
@@ -272,6 +274,14 @@ export default function TuneInPage() {
       });
     }
   }, [phase, recordResult, results, score, totalRounds]);
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     return (

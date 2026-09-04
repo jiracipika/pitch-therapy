@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { playTone } from "@/lib/audio";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
+import { playTone, stopAllTones } from "@/lib/audio";
 
 const ACCENT = "#5E5CE6";
 const ROUNDS = 8;
@@ -61,6 +62,7 @@ export default function WaveformMatchPage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const [phase, setPhase] = useState<"setup" | "playing" | "done">("setup");
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
@@ -86,8 +88,8 @@ export default function WaveformMatchPage() {
     setRound((r) => r + 1);
     setPhase("playing");
     playTone(f);
-    setTimeout(() => playTone(centsToFreq(f, cents)), 600);
-  }, []);
+    trackTimeout(() => playTone(centsToFreq(f, cents)), 600);
+  }, [trackTimeout]);
 
   const startGame = useCallback(() => {
     setRound(0);
@@ -132,7 +134,7 @@ export default function WaveformMatchPage() {
     setResults(newResults);
     setShowResult(true);
 
-    setTimeout(() => {
+    trackTimeout(() => {
       setShowResult(false);
       if (newResults.length >= ROUNDS) {
         setPhase("done");
@@ -162,6 +164,14 @@ export default function WaveformMatchPage() {
       });
     }
   }, [phase, recordResult, results, score, ROUNDS]);
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     const avg =

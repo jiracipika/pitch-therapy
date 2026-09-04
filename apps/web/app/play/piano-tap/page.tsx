@@ -3,10 +3,11 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { playTone, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#5E5CE6";
 
@@ -25,6 +26,7 @@ export default function PianoTapPage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
   const [phase, setPhase] = useState<"setup" | "playing" | "feedback" | "done">("setup");
@@ -94,9 +96,9 @@ export default function PianoTapPage() {
     if (!isPractice) setScore((s) => s + points);
     setResults((r) => [...r, { round, correct, points, target: targetNote, answer: key }]);
 
-    setTimeout(() => setFlashKey(null), 400);
+    trackTimeout(() => setFlashKey(null), 400);
 
-    setTimeout(
+    trackTimeout(
       () => {
         if (isPractice) {
           nextRound();
@@ -134,6 +136,14 @@ export default function PianoTapPage() {
       });
     }
   }, [phase, recordResult, results, score, totalRounds]);
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     return (
