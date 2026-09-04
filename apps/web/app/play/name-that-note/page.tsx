@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const NOTE_FREQS: Record<string, number> = {};
 (NOTE_NAMES as unknown as string[]).forEach((n) => {
@@ -39,6 +40,7 @@ export default function NameThatNotePage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
   const isTimed = searchParams.get("timed") !== "false";
@@ -117,15 +119,17 @@ export default function NameThatNotePage() {
     ]);
     playTone(NOTE_FREQS[targetNote.name], 0.5);
 
-    if (roundRef.current >= totalRounds) setTimeout(() => setPhase("done"), 1000);
-    else setTimeout(startRound, 1200);
+    if (roundRef.current >= totalRounds) trackTimeout(() => setPhase("done"), 1000);
+    else trackTimeout(startRound, 1200);
   };
 
   useEffect(
     () => () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      clearAllTimeouts();
+      stopAllTones();
     },
-    [],
+    [clearAllTimeouts],
   );
 
   useEffect(() => {

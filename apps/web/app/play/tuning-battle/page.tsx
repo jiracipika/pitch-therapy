@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#FF453A";
 const NOTE_FREQS: Record<string, number> = Object.fromEntries(
@@ -30,6 +31,7 @@ export default function TuningBattlePage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const [phase, setPhase] = useState<"setup" | "ready" | "playing" | "roundResult" | "done">(
     "setup",
   );
@@ -124,7 +126,7 @@ export default function TuningBattlePage() {
         if (winner === next[0].name) next[0] = { ...next[0], score: next[0].score + 1 };
         if (winner === next[1].name) next[1] = { ...next[1], score: next[1].score + 1 };
 
-        setTimeout(() => {
+        trackTimeout(() => {
           setRoundWinner(winner);
           setPhase("roundResult");
         }, 0);
@@ -167,6 +169,14 @@ export default function TuningBattlePage() {
 
   const p1Notes = NOTE_NAMES;
   const p2Notes = NOTE_NAMES;
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   return (
     <TrainingShell

@@ -7,6 +7,7 @@ import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audi
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#FF9F0A";
 const DURATION_OPTIONS = [30, 60];
@@ -22,6 +23,7 @@ export default function SpeedRoundPage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const [phase, setPhase] = useState<"setup" | "playing" | "done">("setup");
   const [duration, setDuration] = useState(30);
   const [currentNote, setCurrentNote] = useState("");
@@ -90,7 +92,7 @@ export default function SpeedRoundPage() {
     playTone(NOTE_FREQUENCIES[`${newNote}4`] || 261.63, 0.3);
 
     if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    feedbackTimeoutRef.current = setTimeout(() => setFeedback(null), 300);
+    feedbackTimeoutRef.current = trackTimeout(() => setFeedback(null), 300);
   };
 
   useEffect(() => {

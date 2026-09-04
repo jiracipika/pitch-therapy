@@ -14,6 +14,7 @@ import {
   noteForSpeech,
   type NoteWordleFeedback,
 } from "@pitch-therapy/core";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 interface GuessRow {
   note: string;
@@ -30,6 +31,7 @@ export default function NoteWordlePage() {
   const playbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const [targetIdx, setTargetIdx] = useState(0);
   const [guesses, setGuesses] = useState<GuessRow[]>([]);
   const [currentGuess, setCurrentGuess] = useState<string | null>(null);
@@ -73,7 +75,7 @@ export default function NoteWordlePage() {
     if (playbackTimerRef.current) clearTimeout(playbackTimerRef.current);
     playTone(NOTE_FREQUENCIES[`${note}4`] || 261.63, durationMs / 1000);
     setIsPlaying(true);
-    playbackTimerRef.current = setTimeout(() => setIsPlaying(false), durationMs);
+    playbackTimerRef.current = trackTimeout(() => setIsPlaying(false), durationMs);
   };
 
   const submitGuess = () => {
@@ -113,6 +115,14 @@ export default function NoteWordlePage() {
   };
 
   const targetNote = NOTE_NAMES[targetIdx];
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   return (
     <TrainingShell

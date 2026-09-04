@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
 const ACCENT = "#FF453A";
@@ -27,25 +28,7 @@ export default function PitchMemoryPage() {
   const [feedback, setFeedback] = useState<"correct" | "wrong">("correct");
   const [lives, setLives] = useState(3);
 
-  // Track all pending timeouts so we can cancel them on unmount / back nav.
-  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-
-  const trackTimeout = useCallback(
-    (fn: () => void, delay: number): ReturnType<typeof setTimeout> => {
-      const id = setTimeout(() => {
-        timeoutsRef.current = timeoutsRef.current.filter((t) => t !== id);
-        fn();
-      }, delay);
-      timeoutsRef.current.push(id);
-      return id;
-    },
-    [],
-  );
-
-  const clearTimeouts = useCallback(() => {
-    timeoutsRef.current.forEach((t) => clearTimeout(t));
-    timeoutsRef.current = [];
-  }, []);
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
 
   const generateSequence = useCallback((len: number) => {
     const seq: number[] = [];
@@ -75,7 +58,7 @@ export default function PitchMemoryPage() {
   );
 
   const startGame = () => {
-    clearTimeouts();
+    clearAllTimeouts();
     const seq = generateSequence(2);
     setSequence(seq);
     setPlayerInput([]);
@@ -152,11 +135,10 @@ export default function PitchMemoryPage() {
   // Clean up all pending timeouts and audio on unmount (back navigation).
   useEffect(() => {
     return () => {
-      timeoutsRef.current.forEach((t) => clearTimeout(t));
-      timeoutsRef.current = [];
+      clearAllTimeouts();
       stopAllTones();
     };
-  }, []);
+  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     return (

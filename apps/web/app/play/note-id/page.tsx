@@ -3,12 +3,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { playTone, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import WaveVisualizer from "@/components/WaveVisualizer";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -25,6 +26,7 @@ export default function NoteIdPage() {
   const recordedRef = useRef(false);
 
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
@@ -101,7 +103,7 @@ export default function NoteIdPage() {
   const playToneWithVisual = (freq: number, dur: number) => {
     setIsPlaying(true);
     playTone(freq, dur);
-    setTimeout(() => setIsPlaying(false), dur * 1000);
+    trackTimeout(() => setIsPlaying(false), dur * 1000);
   };
 
   const handleAnswer = (noteIdx: number, timeout = false) => {
@@ -140,7 +142,7 @@ export default function NoteIdPage() {
     }
 
     const nextDelay = isPractice ? 2000 : 1200;
-    setTimeout(() => {
+    trackTimeout(() => {
       if (isPractice) {
         startRound();
       } else if (roundRef.current >= config.rounds) {
@@ -154,8 +156,10 @@ export default function NoteIdPage() {
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      clearAllTimeouts();
+      stopAllTones();
     };
-  }, []);
+  }, [clearAllTimeouts]);
 
   useEffect(() => {
     if (timedOutRef.current && timeLeft === 0 && phase === "playing") {
@@ -175,7 +179,7 @@ export default function NoteIdPage() {
         },
       ]);
       setPhase("feedback");
-      setTimeout(() => {
+      trackTimeout(() => {
         if (roundRef.current >= config.rounds) {
           setPhase("done");
         } else {

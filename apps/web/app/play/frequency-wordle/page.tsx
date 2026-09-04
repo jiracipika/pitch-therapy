@@ -14,6 +14,7 @@ import {
 } from "@pitch-therapy/core";
 import WaveVisualizer from "@/components/WaveVisualizer";
 import TrainingShell from "@/components/training/TrainingShell";
+import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import { useStatsContext } from "@/components/StatsProvider";
 import { playTone, stopAllTones } from "@/lib/audio";
 
@@ -36,6 +37,7 @@ function randomTarget(): number {
 
 export default function FrequencyWordlePage() {
   const router = useRouter();
+  const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const { recordResult } = useStatsContext();
   // Keep the server and first client render deterministic; replace this seed
   // after hydration so React never reconciles two different random targets.
@@ -65,7 +67,7 @@ export default function FrequencyWordlePage() {
   const startPlaybackIndicator = (durationMs: number) => {
     if (playbackTimerRef.current) clearTimeout(playbackTimerRef.current);
     setIsPlaying(true);
-    playbackTimerRef.current = setTimeout(() => setIsPlaying(false), durationMs);
+    playbackTimerRef.current = trackTimeout(() => setIsPlaying(false), durationMs);
   };
 
   const playTarget = () => {
@@ -144,6 +146,14 @@ export default function FrequencyWordlePage() {
     }
     window.setTimeout(() => setShareStatus(""), 2500);
   };
+
+  // Clear pending timers and audio on unmount (back navigation).
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   return (
     <TrainingShell
