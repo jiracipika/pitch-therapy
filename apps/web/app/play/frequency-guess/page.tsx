@@ -8,6 +8,7 @@ import WaveVisualizer from "@/components/WaveVisualizer";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { StudioResults } from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 type Difficulty = "easy" | "medium" | "hard";
@@ -113,95 +114,18 @@ export default function FrequencyGuessPage() {
 
   if (phase === "done") {
     return (
-      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-        <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
-          <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
-            <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 24,
-              }}
-            >
-              Game Complete
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 10,
-                marginBottom: 24,
-              }}
-            >
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", color: ACCENT }}
-                >
-                  {score}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>Score</div>
-              </div>
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 700,
-                    letterSpacing: "-0.5px",
-                    color: "var(--ios-label)",
-                  }}
-                >
-                  {results.filter((r) => r.correct).length}/{config.rounds}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
-                  Within 5%
-                </div>
-              </div>
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 700,
-                    letterSpacing: "-0.5px",
-                    color: "var(--ios-label)",
-                  }}
-                >
-                  {results.length
-                    ? Math.round(
-                        results.reduce(
-                          (a, r) =>
-                            a +
-                            (Math.abs(parseFloat(r.answer) - parseFloat(r.target)) /
-                              parseFloat(r.target)) *
-                            100,
-                          0,
-                        ) / results.length,
-                      )
-                    : 0}
-                  %
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
-                  Avg Error
-                </div>
-              </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button
-                className="ios-btn-primary"
-                style={{ background: ACCENT }}
-                onClick={startGame}
-              >
-                Play Again
-              </button>
-              <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>
-                Dashboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StudioResults
+        eyebrow="SESSION COMPLETE"
+        headline="Frequency found."
+        accent={ACCENT}
+        stats={[
+          { value: score, label: "SCORE", accentValue: true },
+          { value: `${results.filter((r) => r.correct).length}/${results.length}`, label: "WITHIN 5%" },
+          { value: Math.round(score / Math.max(results.length, 1)), label: "AVG / ROUND" },
+        ]}
+        primaryAction={{ label: "Play Again", onClick: startGame }}
+        secondaryAction={{ label: "Dashboard", onClick: () => router.push("/dashboard") }}
+      />
     );
   }
 

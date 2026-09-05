@@ -14,6 +14,7 @@ import WaveVisualizer from "@/components/WaveVisualizer";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell, { type MicStatus } from "@/components/training/TrainingShell";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
+import { StudioResults } from "@/components/training/StudioScreen";
 
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
 const freq = (i: number) => NOTE_FREQS[i] ?? 261.63;
@@ -232,91 +233,19 @@ export default function PitchMatchPage() {
   }, [clearAllTimeouts]);
 
   if (phase === "done") {
-    const correct = results.filter((r) => r.correct).length;
     return (
-      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-        <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
-          <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
-            <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 24,
-              }}
-            >
-              Game Complete
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 10,
-                marginBottom: 24,
-              }}
-            >
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", color: ACCENT }}
-                >
-                  {score}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>Score</div>
-              </div>
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 700,
-                    letterSpacing: "-0.5px",
-                    color: "var(--ios-label)",
-                  }}
-                >
-                  {correct}/{totalRounds}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
-                  Correct
-                </div>
-              </div>
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 700,
-                    letterSpacing: "-0.5px",
-                    color: "var(--ios-label)",
-                  }}
-                >
-                  {streak}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
-                  Best Streak
-                </div>
-              </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button
-                className="ios-btn-primary"
-                style={{ background: ACCENT }}
-                onClick={() => {
-                  setPhase("idle");
-                  setRound(0);
-                  setScore(0);
-                  setStreak(0);
-                  setResults([]);
-                }}
-              >
-                Play Again
-              </button>
-              <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>
-                Dashboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StudioResults
+        eyebrow="SESSION COMPLETE"
+        headline="Matched."
+        accent={ACCENT}
+        stats={[
+          { value: score, label: "SCORE", accentValue: true },
+          { value: `${results.filter((r) => r.correct).length}/${results.length}`, label: "CORRECT" },
+          { value: results.filter((r) => r.correct).length, label: "CORRECT RUN" },
+        ]}
+        primaryAction={{ label: "Play Again", onClick: () => { setPhase("idle"); setRound(0); setScore(0); setStreak(0); setResults([]); } }}
+        secondaryAction={{ label: "Dashboard", onClick: () => router.push("/dashboard") }}
+      />
     );
   }
 

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { playTone, stopAllTones } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { StudioResults } from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#FF9F0A";
@@ -152,76 +153,19 @@ export default function FrequencyHuntPage() {
   }, [clearAllTimeouts]);
 
   if (phase === "done") {
-    const avgDiff = Math.round(results.reduce((s, r) => s + r.diff, 0) / results.length);
     return (
-      <TrainingShell
-          title="Frequency Hunt"
-          round={0}
-          totalRounds={totalRounds}
-          scoreLabel={null}
-          accent={ACCENT}
-          confirmExit={false}
-          exitHref="/dashboard"
-        >
-          <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
-            <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 24,
-              }}
-            >
-              Hunt Complete
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: 10,
-                marginBottom: 24,
-              }}
-            >
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", color: ACCENT }}
-                >
-                  {score}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>Score</div>
-              </div>
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 700,
-                    letterSpacing: "-0.5px",
-                    color: "var(--ios-label)",
-                  }}
-                >
-                  {avgDiff} Hz
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
-                  Avg Error
-                </div>
-              </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button
-                className="ios-btn-primary"
-                style={{ background: ACCENT }}
-                onClick={handleStart}
-              >
-                Play Again
-              </button>
-              <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>
-                Dashboard
-              </button>
-            </div>
-          </div>
-      </TrainingShell>
+      <StudioResults
+        eyebrow="SESSION COMPLETE"
+        headline="Hunt complete."
+        accent={ACCENT}
+        stats={[
+          { value: score, label: "SCORE", accentValue: true },
+          { value: `${Math.round(results.reduce((s, r) => s + r.diff, 0) / results.length)}%`, label: "AVG ERROR" },
+          { value: results.length, label: "ROUNDS" },
+        ]}
+        primaryAction={{ label: "Play Again", onClick: handleStart }}
+        secondaryAction={{ label: "Dashboard", onClick: () => router.push("/dashboard") }}
+      />
     );
   }
 

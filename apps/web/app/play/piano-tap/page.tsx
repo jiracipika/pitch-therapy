@@ -7,6 +7,7 @@ import { playTone, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import { StudioResults } from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#5E5CE6";
@@ -147,87 +148,18 @@ export default function PianoTapPage() {
 
   if (phase === "done") {
     return (
-      <TrainingShell
-          title="Piano Tap"
-          round={0}
-          totalRounds={totalRounds}
-          scoreLabel={null}
-          accent={ACCENT}
-          confirmExit={false}
-          exitHref="/dashboard"
-        >
-          <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
-            <div style={{ fontSize: 60, marginBottom: 12 }}>🎹</div>
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 24,
-              }}
-            >
-              Piano Tap Complete!
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 10,
-                marginBottom: 24,
-              }}
-            >
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", color: ACCENT }}
-                >
-                  {score}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>Score</div>
-              </div>
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 700,
-                    letterSpacing: "-0.5px",
-                    color: "var(--ios-label)",
-                  }}
-                >
-                  {results.filter((r) => r.correct).length}/{totalRounds}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>Hit</div>
-              </div>
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 700,
-                    letterSpacing: "-0.5px",
-                    color: "var(--ios-label)",
-                  }}
-                >
-                  🔥 {bestStreak}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
-                  Best Streak
-                </div>
-              </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button
-                className="ios-btn-primary"
-                style={{ background: ACCENT }}
-                onClick={startGame}
-              >
-                Play Again
-              </button>
-              <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>
-                Dashboard
-              </button>
-            </div>
-          </div>
-      </TrainingShell>
+      <StudioResults
+        eyebrow="SESSION COMPLETE"
+        headline="Keys mastered."
+        accent={ACCENT}
+        stats={[
+          { value: score, label: "SCORE", accentValue: true },
+          { value: `${results.filter((r) => r.correct).length}/${totalRounds}`, label: "CORRECT" },
+          { value: bestStreak, label: "BEST STREAK" },
+        ]}
+        primaryAction={{ label: "Play Again", onClick: startGame }}
+        secondaryAction={{ label: "Dashboard", onClick: () => router.push("/dashboard") }}
+      />
     );
   }
 

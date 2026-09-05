@@ -9,6 +9,14 @@ import FeedbackOverlay from "@/components/FeedbackOverlay";
 import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import {
+  StudioSetup,
+  StudioDifficulty,
+  StudioStartButton,
+  StudioListenPad,
+  StudioChoice,
+  StudioResults,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 type Difficulty = "easy" | "medium" | "hard";
@@ -210,86 +218,20 @@ export default function NoteIdPage() {
 
   if (phase === "done") {
     return (
-      <div className="pb-tab" style={{ background: "var(--ios-bg)", minHeight: "100dvh" }}>
-        <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
-          <div style={{ textAlign: "center", paddingTop: 40, paddingBottom: 40 }}>
-            <div style={{ fontSize: 60, marginBottom: 12 }}>🏆</div>
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 24,
-              }}
-            >
-              Game Complete
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 10,
-                marginBottom: 24,
-              }}
-            >
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.5px", color: ACCENT }}
-                >
-                  {score}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>Score</div>
-              </div>
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 700,
-                    letterSpacing: "-0.5px",
-                    color: "var(--ios-label)",
-                  }}
-                >
-                  {results.filter((r) => r.correct).length}/{config.rounds}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
-                  Correct
-                </div>
-              </div>
-              <div className="ios-card" style={{ padding: "14px 12px", textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 700,
-                    letterSpacing: "-0.5px",
-                    color: "var(--ios-label)",
-                  }}
-                >
-                  🔥 {bestStreak}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--ios-label3)", marginTop: 4 }}>
-                  Best Streak
-                </div>
-              </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button
-                className="ios-btn-primary"
-                style={{ background: ACCENT }}
-                onClick={startGame}
-              >
-                Play Again
-              </button>
-              <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>
-                Dashboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StudioResults
+        eyebrow="SESSION COMPLETE"
+        headline="Ear sharpened."
+        accent={ACCENT}
+        stats={[
+          { value: score, label: "SCORE", accentValue: true },
+          { value: `${results.filter((r) => r.correct).length}/${config.rounds}`, label: "CORRECT" },
+          { value: bestStreak, label: "BEST STREAK" },
+        ]}
+        primaryAction={{ label: "Play Again", onClick: startGame }}
+        secondaryAction={{ label: "Dashboard", onClick: () => router.push("/dashboard") }}
+      />
     );
   }
-
   if (phase === "setup") {
     return (
       <TrainingShell
@@ -300,8 +242,13 @@ export default function NoteIdPage() {
         accent={ACCENT}
         exitHref="/dashboard"
       >
-        <div style={{ textAlign: "center", paddingTop: 40 }}>
-          <div style={{ fontSize: 64, marginBottom: 20 }}>🎵</div>
+        <StudioSetup
+          icon="🎵"
+          eyebrow="DRILL 01 / FOUNDATIONAL"
+          title="Note ID"
+          description="Identify notes by ear"
+          accent={ACCENT}
+        >
           <div
             style={{
               fontSize: 24,
@@ -317,53 +264,22 @@ export default function NoteIdPage() {
             Identify notes by ear
           </div>
 
-          <div style={{ marginBottom: 24 }}>
-            <div
-              style={{
-                fontSize: 13,
-                color: "var(--ios-label3)",
-                letterSpacing: "-0.08px",
-                marginBottom: 10,
-              }}
-            >
-              Select Difficulty
-            </div>
-            <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-              {(["easy", "medium", "hard"] as const).map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setDifficulty(d)}
-                  style={{
-                    height: 34,
-                    borderRadius: 17,
-                    padding: "0 16px",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    border: "none",
-                    cursor: "pointer",
-                    background: difficulty === d ? ACCENT : "var(--ios-bg2)",
-                    color: difficulty === d ? "#000" : "var(--ios-label3)",
-                    transition: "background 0.15s, color 0.15s",
-                  }}
-                >
-                  {d.charAt(0).toUpperCase() + d.slice(1)}
-                </button>
-              ))}
-            </div>
-            <div style={{ fontSize: 12, color: "var(--ios-label3)", marginTop: 8 }}>
-              {config.options} notes • {config.rounds} rounds
-              {config.timeLimit ? ` • ${config.timeLimit}s timer` : ""}
-            </div>
-          </div>
-          <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+          <StudioDifficulty
+            options={["easy", "medium", "hard"]}
+            value={difficulty}
+            onChange={(d) => setDifficulty(d as Difficulty)}
+            accent={ACCENT}
+            hint={`${config.options} notes · ${config.rounds} rounds${config.timeLimit ? ` · ${config.timeLimit}s timer` : ""}`}
+          />
+          <StudioStartButton onClick={startGame} accent={ACCENT}>
             {isPractice ? "🎓 Start Practicing" : "Start Game"}
-          </button>
+          </StudioStartButton>
           {isPractice && (
             <div style={{ marginTop: 10, fontSize: 12, color: "var(--ios-label3)" }}>
               Practice mode — no scores, just learn
             </div>
           )}
-        </div>
+        </StudioSetup>
       </TrainingShell>
     );
   }
@@ -403,31 +319,17 @@ export default function NoteIdPage() {
           <WaveVisualizer active={isPlaying} color={ACCENT} height={50} />
         </div>
 
-        <div style={{ textAlign: "center", marginBottom: 16 }}>
-          <motion.button
+        <div style={{ marginBottom: 16 }}>
+          <StudioListenPad
             onClick={() =>
               playToneWithVisual(NOTE_FREQUENCIES[`${NOTE_NAMES[targetNote]}4`] || 261.63, 0.6)
             }
-            whileTap={{ scale: 0.92 }}
-            style={{
-              width: 80,
-              height: 80,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto",
-              borderRadius: 20,
-              background: "var(--ios-bg2)",
-              border: "1px solid var(--ios-sep)",
-              fontSize: 36,
-              cursor: "pointer",
-            }}
+            label="TAP TO REPLAY"
+            accent={ACCENT}
+            ariaLabel="Replay target note"
           >
             🔊
-          </motion.button>
-          <div style={{ marginTop: 8, fontSize: 13, color: "var(--ios-label3)" }}>
-            Tap to replay
-          </div>
+          </StudioListenPad>
         </div>
 
         <AnimatePresence mode="popLayout">
@@ -437,46 +339,20 @@ export default function NoteIdPage() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.25 }}
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}
           >
-            {options.map((idx) => {
-              const name = NOTE_NAMES[idx];
-              const isTarget = idx === targetNote;
-              let bg = "var(--ios-bg2)";
-              let border = "1.5px solid transparent";
-              let color = "var(--ios-label)";
-              if (feedback) {
-                if (isTarget) {
-                  bg = "rgba(48,209,88,0.15)";
-                  border = "1.5px solid var(--ios-green)";
-                  color = "var(--ios-green)";
-                } else if (!isTarget && feedback === "wrong") {
-                  bg = "var(--ios-bg2)";
-                  color = "var(--ios-label3)";
-                }
-              }
-              return (
-                <motion.button
-                  key={idx}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => phase === "playing" && handleAnswer(idx)}
-                  style={{
-                    padding: "16px 8px",
-                    borderRadius: 12,
-                    background: bg,
-                    border,
-                    color,
-                    fontSize: 17,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.15s ease",
-                  }}
-                  disabled={phase === "feedback"}
-                >
-                  {name}
-                </motion.button>
-              );
-            })}
+            <StudioChoice
+              options={options}
+              onPick={(value) => phase === "playing" && handleAnswer(value as number)}
+              disabled={phase === "feedback"}
+              accent={ACCENT}
+              resolveState={(value) => {
+                if (!feedback) return null;
+                if (value === targetNote) return "correct";
+                return feedback === "wrong" ? "wrong" : null;
+              }}
+              renderLabel={(value) => NOTE_NAMES[value as number]}
+            />
+            <div style={{ height: 16 }} />
           </motion.div>
         </AnimatePresence>
 
