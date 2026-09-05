@@ -7,7 +7,13 @@ import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audi
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioDifficulty,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#FF9F0A";
@@ -150,60 +156,25 @@ export default function SpeedRoundPage() {
           confirmExit={false}
           exitHref="/dashboard"
         >
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>⚡</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Speed Round
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 32 }}>
-              Identify notes as fast as you can
-            </div>
-            <div style={{ marginBottom: 28 }}>
-              <div
-                style={{
-                  fontSize: 13,
-                  color: "var(--ios-label3)",
-                  letterSpacing: "-0.08px",
-                  marginBottom: 10,
-                }}
-              >
-                Duration
-              </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-                {DURATION_OPTIONS.map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setDuration(d)}
-                    style={{
-                      height: 34,
-                      borderRadius: 17,
-                      padding: "0 20px",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      border: "none",
-                      cursor: "pointer",
-                      background: duration === d ? ACCENT : "var(--ios-bg2)",
-                      color: duration === d ? "#000" : "var(--ios-label3)",
-                      transition: "background 0.15s, color 0.15s",
-                    }}
-                  >
-                    {d}s
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+          <StudioSetup
+            icon="⚡"
+            eyebrow={studioModeMeta("speed-round").eyebrow}
+            title="Speed Round"
+            description="Identify notes as fast as you can"
+            accent={ACCENT}
+          >
+            <StudioDifficulty
+              options={DURATION_OPTIONS.map(String)}
+              value={String(duration)}
+              onChange={(d) => setDuration(Number(d))}
+              accent={ACCENT}
+              label="SELECT DURATION"
+              renderOption={(d) => `${d}s`}
+            />
+            <StudioStartButton onClick={startGame} accent={ACCENT}>
               Start Sprint
-            </button>
-          </div>
+            </StudioStartButton>
+          </StudioSetup>
       </TrainingShell>
     );
   }

@@ -7,7 +7,14 @@ import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audi
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioHowTo,
+  StudioDifficulty,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#30D158";
@@ -189,98 +196,41 @@ export default function CentsDeviationPage() {
   if (phase === "setup") {
     return (
       <TrainingShell
+        title="Cents Deviation"
+        round={0}
+        totalRounds={totalRounds}
+        scoreLabel={null}
+        accent={ACCENT}
+        confirmExit={false}
+        exitHref="/dashboard"
+      >
+        <StudioSetup
+          icon="📐"
+          eyebrow={studioModeMeta("cents-deviation").eyebrow}
           title="Cents Deviation"
-          round={0}
-          totalRounds={totalRounds}
-          scoreLabel={null}
+          description="Detect microtonal sharp/flat deviations"
           accent={ACCENT}
-          confirmExit={false}
-          exitHref="/dashboard"
         >
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>📐</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Cents Deviation
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 24 }}>
-              Detect microtonal sharp/flat deviations
-            </div>
-
-            <div className="ios-card" style={{ padding: 16, textAlign: "left", marginBottom: 24 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: ACCENT,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  marginBottom: 12,
-                }}
-              >
-                How to Play
-              </div>
-              <ol
-                style={{
-                  fontSize: 14,
-                  color: "var(--ios-label3)",
-                  listStyle: "none",
-                  padding: 0,
-                  margin: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                }}
-              >
-                <li>1. Hear a reference note, then a slightly detuned version</li>
-                <li>2. Drag the needle to match the deviation in cents</li>
-                <li>3. Within ±5¢ = correct; wider = partial credit</li>
-                <li>4. Tap &quot;Play Both&quot; to replay anytime</li>
-              </ol>
-            </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 13, color: "var(--ios-label3)", marginBottom: 10 }}>
-                Difficulty
-              </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-                {(Object.keys(DIFF_CONFIG) as Difficulty[]).map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setDifficulty(d)}
-                    style={{
-                      height: 34,
-                      borderRadius: 17,
-                      padding: "0 16px",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      border: "none",
-                      cursor: "pointer",
-                      background: difficulty === d ? ACCENT : "var(--ios-bg2)",
-                      color: difficulty === d ? "#000" : "var(--ios-label3)",
-                      transition: "background 0.15s, color 0.15s",
-                    }}
-                  >
-                    {DIFF_CONFIG[d].label}
-                  </button>
-                ))}
-              </div>
-              <div style={{ fontSize: 12, color: "var(--ios-label3)", marginTop: 8 }}>
-                ±{config.centsRange} cents · {config.rounds} rounds
-              </div>
-            </div>
-
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
-              {isPractice ? "🎓 Start Practicing" : "Start Game"}
-            </button>
-          </div>
+          <StudioHowTo
+            steps={[
+              "1. Hear a reference note, then a slightly detuned version",
+              "2. Drag the needle to match the deviation in cents",
+              "3. Within ±5¢ = correct; wider = partial credit",
+              '4. Tap "Play Both" to replay anytime',
+            ]}
+          />
+          <StudioDifficulty
+            options={Object.keys(DIFF_CONFIG)}
+            value={difficulty}
+            onChange={(d) => setDifficulty(d as Difficulty)}
+            accent={ACCENT}
+            renderOption={(d) => DIFF_CONFIG[d as Difficulty].label}
+            hint={`±${config.centsRange} cents · ${config.rounds} rounds`}
+          />
+          <StudioStartButton onClick={startGame} accent={ACCENT}>
+            {isPractice ? "🎓 Start Practicing" : "Start Game"}
+          </StudioStartButton>
+        </StudioSetup>
       </TrainingShell>
     );
   }

@@ -14,7 +14,12 @@ import WaveVisualizer from "@/components/WaveVisualizer";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell, { type MicStatus } from "@/components/training/TrainingShell";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
 const freq = (i: number) => NOTE_FREQS[i] ?? 261.63;
@@ -271,30 +276,23 @@ export default function PitchMatchPage() {
       </span>
       {/* ── IDLE STATE ── */}
         {phase === "idle" && (
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🎤</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Ready to train?
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 32 }}>
-              Sing or hum to match the target pitch
-            </div>
-            <button
-              onClick={handleStart}
-              className="ios-btn-primary"
-              style={{ background: ACCENT }}
-            >
+          <StudioSetup
+            icon="🎤"
+            eyebrow={studioModeMeta("pitch-match").eyebrow}
+            title="Ready to train?"
+            description="Sing or hum to match the target pitch"
+            accent={ACCENT}
+          >
+            <StudioStartButton onClick={handleStart} accent={ACCENT}>
               Start Training
-            </button>
-          </div>
+            </StudioStartButton>
+            {micError && (
+              <div className="studio-setup-error">
+                <strong>Microphone unavailable</strong>
+                <span>{micError}</span>
+              </div>
+            )}
+          </StudioSetup>
         )}
 
         {/* ── PLAYING STATE ── */}

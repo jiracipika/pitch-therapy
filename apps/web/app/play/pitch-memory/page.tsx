@@ -6,7 +6,12 @@ import { motion } from "framer-motion";
 import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
@@ -196,26 +201,17 @@ export default function PitchMemoryPage() {
 
         {/* IDLE */}
         {phase === "idle" && (
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🎵</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Pitch Memory
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 32 }}>
-              Listen to the sequence, then reproduce it on the piano
-            </div>
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+          <StudioSetup
+            icon="🧠"
+            eyebrow={studioModeMeta("pitch-memory").eyebrow}
+            title="Pitch Memory"
+            description="Listen to the sequence, then reproduce it on the piano"
+            accent={ACCENT}
+          >
+            <StudioStartButton onClick={startGame} accent={ACCENT}>
               Start Game
-            </button>
-          </div>
+            </StudioStartButton>
+          </StudioSetup>
         )}
 
         {/* PLAYING / INPUT / FEEDBACK */}

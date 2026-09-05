@@ -9,6 +9,28 @@
 
 import { type CSSProperties, type ReactNode } from "react";
 import { motion } from "framer-motion";
+import {
+  GAME_MODES,
+  GAME_MODE_META,
+  MODE_CATEGORIES,
+  type GameMode,
+} from "@pitch-therapy/core";
+
+/**
+ * Derives the setup-screen presentation fields (eyebrow, icon, title,
+ * description) from the shared core metadata — never from local copies.
+ */
+export function studioModeMeta(mode: GameMode) {
+  const meta = GAME_MODE_META[mode];
+  const index = GAME_MODES.indexOf(mode) + 1;
+  const category = MODE_CATEGORIES.find((c) => c.id === meta.category);
+  return {
+    eyebrow: `DRILL ${String(index).padStart(2, "0")} / ${category?.label.toUpperCase() ?? "TRAINING"}`,
+    icon: meta.icon,
+    title: meta.label,
+    description: meta.description,
+  };
+}
 
 export function StudioStack({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
@@ -62,17 +84,21 @@ export function StudioDifficulty({
   onChange,
   accent,
   hint,
+  label = "SELECT DIFFICULTY",
+  renderOption,
 }: {
   options: readonly string[];
   value: string;
   onChange: (next: string) => void;
   accent: string;
   hint?: string;
+  label?: string;
+  renderOption?: (option: string) => ReactNode;
 }) {
   return (
     <div className="studio-difficulty">
-      <StudioLabel>SELECT DIFFICULTY</StudioLabel>
-      <div className="studio-difficulty-row" role="group" aria-label="Difficulty">
+      <StudioLabel>{label}</StudioLabel>
+      <div className="studio-difficulty-row" role="group" aria-label={label}>
         {options.map((option) => {
           const isActive = option === value;
           return (
@@ -88,7 +114,7 @@ export function StudioDifficulty({
                   : undefined
               }
             >
-              {option.charAt(0).toUpperCase() + option.slice(1)}
+              {renderOption ? renderOption(option) : option.charAt(0).toUpperCase() + option.slice(1)}
             </button>
           );
         })}
@@ -97,6 +123,53 @@ export function StudioDifficulty({
     </div>
   );
 }
+
+/** iOS-style switch used on setup screens (advanced mode, input mode). */
+export function StudioToggle({
+  checked,
+  onCheckedChange,
+  children,
+  label,
+}: {
+  checked: boolean;
+  onCheckedChange: (next: boolean) => void;
+  children: ReactNode;
+  label: string;
+}) {
+  return (
+    <label className="studio-toggle-row" aria-label={label}>
+      <input
+        type="checkbox"
+        className="sr-only"
+        checked={checked}
+        onChange={(e) => onCheckedChange(e.target.checked)}
+      />
+      <span className="studio-toggle-text">{children}</span>
+      <span className="studio-toggle" aria-hidden="true">
+        <motion.span
+          className="studio-toggle-knob"
+          animate={{ left: checked ? 22 : 2 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        />
+      </span>
+    </label>
+  );
+}
+
+/** "How to Play" panel in the studio language (replaces inline ios-card lists). */
+export function StudioHowTo({ steps }: { steps: readonly string[] }) {
+  return (
+    <div className="studio-howto">
+      <StudioLabel>HOW TO PLAY</StudioLabel>
+      <ol>
+        {steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 
 export function StudioStartButton({
   onClick,

@@ -7,7 +7,14 @@ import { playTone, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioHowTo,
+  StudioDifficulty,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#5E5CE6";
@@ -166,95 +173,41 @@ export default function PianoTapPage() {
   if (phase === "setup") {
     return (
       <TrainingShell
+        title="Piano Tap"
+        round={0}
+        totalRounds={totalRounds}
+        scoreLabel={null}
+        accent={ACCENT}
+        confirmExit={false}
+        exitHref="/dashboard"
+      >
+        <StudioSetup
+          icon="🎹"
+          eyebrow={studioModeMeta("piano-tap").eyebrow}
           title="Piano Tap"
-          round={0}
-          totalRounds={totalRounds}
-          scoreLabel={null}
+          description="Tap the correct key after hearing the note"
           accent={ACCENT}
-          confirmExit={false}
-          exitHref="/dashboard"
         >
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🎹</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Piano Tap
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 24 }}>
-              Tap the correct key after hearing the note
-            </div>
-
-            <div className="ios-card" style={{ padding: 16, textAlign: "left", marginBottom: 24 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: ACCENT,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  marginBottom: 12,
-                }}
-              >
-                How to Play
-              </div>
-              <ol
-                style={{
-                  fontSize: 14,
-                  color: "var(--ios-label3)",
-                  listStyle: "none",
-                  padding: 0,
-                  margin: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                }}
-              >
-                <li>1. A note plays — identify it by ear</li>
-                <li>2. Tap 🔊 to replay if needed</li>
-                <li>3. Tap the matching key on the piano</li>
-                <li>4. Score more by answering quickly</li>
-              </ol>
-            </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 13, color: "var(--ios-label3)", marginBottom: 10 }}>
-                Keyboard Mode
-              </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
-                {(Object.keys(MODE_CONFIG) as Mode[]).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setMode(m)}
-                    style={{
-                      height: 34,
-                      borderRadius: 17,
-                      padding: "0 16px",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      border: "none",
-                      cursor: "pointer",
-                      background: mode === m ? ACCENT : "var(--ios-bg2)",
-                      color: mode === m ? "#fff" : "var(--ios-label3)",
-                      transition: "background 0.15s, color 0.15s",
-                    }}
-                  >
-                    {MODE_CONFIG[m].label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
-              {isPractice ? "🎓 Start Practicing" : "Start Game"}
-            </button>
-          </div>
+          <StudioHowTo
+            steps={[
+              "1. A note plays — identify it by ear",
+              "2. Tap 🔊 to replay if needed",
+              "3. Tap the matching key on the piano",
+              "4. Score more by answering quickly",
+            ]}
+          />
+          <StudioDifficulty
+            options={Object.keys(MODE_CONFIG)}
+            value={mode}
+            onChange={(m) => setMode(m as Mode)}
+            accent={ACCENT}
+            label="KEYBOARD MODE"
+            renderOption={(m) => MODE_CONFIG[m as Mode].label}
+          />
+          <StudioStartButton onClick={startGame} accent={ACCENT}>
+            {isPractice ? "🎓 Start Practicing" : "Start Game"}
+          </StudioStartButton>
+        </StudioSetup>
       </TrainingShell>
     );
   }

@@ -7,7 +7,14 @@ import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audi
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioHowTo,
+  StudioToggle,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import { CHORD_TYPES, CHORD_INTERVALS, chordTypeById } from "@pitch-therapy/core";
 
@@ -182,107 +189,40 @@ export default function ChordDetectivePage() {
   if (phase === "setup") {
     return (
       <TrainingShell
+        title="Chord Detective"
+        round={0}
+        totalRounds={ROUNDS}
+        scoreLabel={null}
+        accent={ACCENT}
+        confirmExit={false}
+        exitHref="/dashboard"
+      >
+        <StudioSetup
+          icon="🕵️"
+          eyebrow={studioModeMeta("chord-detective").eyebrow}
           title="Chord Detective"
-          round={0}
-          totalRounds={ROUNDS}
-          scoreLabel={null}
+          description="Identify chord quality by ear"
           accent={ACCENT}
-          confirmExit={false}
-          exitHref="/dashboard"
         >
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🕵️</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Chord Detective
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 24 }}>
-              Identify chord quality by ear
-            </div>
-
-            <div className="ios-card" style={{ padding: 16, textAlign: "left", marginBottom: 24 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: ACCENT,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  marginBottom: 12,
-                }}
-              >
-                How to Play
-              </div>
-              <ol
-                style={{
-                  fontSize: 14,
-                  color: "var(--ios-label3)",
-                  listStyle: "none",
-                  padding: 0,
-                  margin: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                }}
-              >
-                <li>1. A chord plays — tap 🔊 to replay it</li>
-                <li>2. Select the chord quality (Major, Minor, Dim…)</li>
-                <li>3. Advanced mode: also identify the root note</li>
-                <li>4. Hit Submit to lock in your answer</li>
-              </ol>
-            </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 12,
-                  cursor: "pointer",
-                }}
-              >
-                <span style={{ fontSize: 14, color: "var(--ios-label2)" }}>
-                  Advanced: Identify root note too
-                </span>
-                <div
-                  style={{
-                    width: 48,
-                    height: 28,
-                    borderRadius: 14,
-                    position: "relative",
-                    background: advanced ? ACCENT : "var(--ios-bg3)",
-                    transition: "background 0.2s",
-                  }}
-                  onClick={() => setAdvanced(!advanced)}
-                >
-                  <motion.div
-                    style={{
-                      position: "absolute",
-                      top: 2,
-                      width: 24,
-                      height: 24,
-                      borderRadius: 12,
-                      background: "#fff",
-                      boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-                    }}
-                    animate={{ left: advanced ? 22 : 2 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
-                </div>
-              </label>
-            </div>
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
-              {isPractice ? "🎓 Start Practicing" : "Start Investigation"}
-            </button>
-          </div>
+          <StudioHowTo
+            steps={[
+              "1. A chord plays — tap 🔊 to replay it",
+              "2. Select the chord quality (Major, Minor, Dim…)",
+              "3. Advanced mode: also identify the root note",
+              "4. Hit Submit to lock in your answer",
+            ]}
+          />
+          <StudioToggle
+            checked={advanced}
+            onCheckedChange={setAdvanced}
+            label="Advanced: identify the root note too"
+          >
+            Advanced: Identify root note too
+          </StudioToggle>
+          <StudioStartButton onClick={startGame} accent={ACCENT}>
+            {isPractice ? "🎓 Start Practicing" : "Start Investigation"}
+          </StudioStartButton>
+        </StudioSetup>
       </TrainingShell>
     );
   }

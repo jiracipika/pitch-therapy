@@ -1,8 +1,24 @@
 # GLM Next Slice — Pitch Therapy
 
-Status: previous slice DONE (see evidence below). Next slice defined at bottom.
+Status: setup-screen migration DONE (2026-09-05). Next slice defined at bottom.
 Owner: GLM 5.2/5.3 polish lane
 Priority: P1 shared training UX
+
+## DONE — Resonance Studio setup screens on all 16 non-wordle modes (2026-09-05)
+
+Scope: all 15 remaining setup/idle screens migrated to StudioSetup primitives; tuning-battle done screen (previously still inline) migrated to StudioResults.
+
+New primitives in `StudioScreen.tsx`:
+- `studioModeMeta(mode)` — eyebrow (`DRILL NN / CATEGORY`), icon, title, description derived from shared `GAME_MODE_META` + `MODE_CATEGORIES`. No local copies.
+- `StudioHowTo` — replaces per-page inline "How to Play" ios-cards.
+- `StudioToggle` — accessible switch (sr-only checkbox + focus ring) for chord-detective advanced mode.
+- `StudioDifficulty` gained `label` + `renderOption` (mode pills, duration pills, Best-of).
+- `.studio-setup-error` chip for mic errors (drone-lock, tune-in, pitch-match).
+
+Evidence (verified against `next start` production build, port 3457):
+- `npm run ci:verify` passes (738/738 core tests, lint 0, typecheck clean).
+- `npm run build` passes — 32 static routes.
+- Live CDP: note-id full round → StudioResults ("Ear sharpened.", 0/5 CORRECT etc.); cents-deviation HowTo(4 steps)+hint; chord-detective toggle present; tuning-battle Best-of pills; speed-round 30s/60s pills; frequency-guess in-game StudioListenPad ("TAP TO REPLAY"); all 15 screens render with correct DRILL NN eyebrows; 375px narrow check — no horizontal overflow, 50px start button.
 
 ## DONE — Training-slice hardening (2026-09-03, commits 7e2c59a..f55b84a)
 

@@ -6,7 +6,12 @@ import { motion } from "framer-motion";
 import { playTone, stopAllTones } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#FF9F0A";
@@ -193,30 +198,17 @@ export default function FrequencyHuntPage() {
         </div>
 
         {phase === "idle" && (
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🔍</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Frequency Hunt
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 32 }}>
-              Find the exact frequency by ear
-            </div>
-            <button
-              className="ios-btn-primary"
-              style={{ background: ACCENT }}
-              onClick={handleStart}
-            >
+          <StudioSetup
+            icon="🔍"
+            eyebrow={studioModeMeta("frequency-hunt").eyebrow}
+            title="Frequency Hunt"
+            description="Find the exact frequency by ear"
+            accent={ACCENT}
+          >
+            <StudioStartButton onClick={handleStart} accent={ACCENT}>
               Start Hunting
-            </button>
-          </div>
+            </StudioStartButton>
+          </StudioSetup>
         )}
 
         {(phase === "hunting" || phase === "result") && (

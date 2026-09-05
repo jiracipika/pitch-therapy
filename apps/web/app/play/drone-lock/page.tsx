@@ -6,7 +6,12 @@ import { motion } from "framer-motion";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import {
   calculateCentsDeviation,
@@ -281,46 +286,23 @@ export default function DroneLockPage() {
         </div>
 
         {phase === "idle" && (
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🎤</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Drone Lock
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 32 }}>
-              Sing to match intervals relative to a drone
-            </div>
-            <button
-              className="ios-btn-primary"
-              style={{ background: ACCENT }}
-              onClick={handleStart}
-            >
+          <StudioSetup
+            icon="🔒"
+            eyebrow={studioModeMeta("drone-lock").eyebrow}
+            title="Drone Lock"
+            description="Sing to match intervals relative to a drone"
+            accent={ACCENT}
+          >
+            <StudioStartButton onClick={handleStart} accent={ACCENT}>
               Start Session
-            </button>
+            </StudioStartButton>
             {micError && (
-              <div
-                style={{
-                  marginTop: 12,
-                  borderRadius: 12,
-                  padding: "12px 16px",
-                  background: "rgba(255,69,58,0.12)",
-                  border: "1px solid var(--ios-red)",
-                  fontSize: 13,
-                  color: "var(--ios-red)",
-                  textAlign: "left",
-                }}
-              >
-                ⚠️ {micError}
+              <div className="studio-setup-error">
+                <strong>Microphone unavailable</strong>
+                <span>{micError}</span>
               </div>
             )}
-          </div>
+          </StudioSetup>
         )}
 
         {(phase === "listening" || phase === "locking" || phase === "scored") && (

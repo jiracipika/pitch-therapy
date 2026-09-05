@@ -13,7 +13,14 @@ import { playTone, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioHowTo,
+  StudioDifficulty,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#FF2D55";
@@ -312,121 +319,44 @@ export default function TuneInPage() {
           confirmExit={false}
           exitHref="/dashboard"
         >
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🎤</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Tune In
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 24 }}>
-              Hit the target note with your voice or instrument
-            </div>
-
-            <div className="ios-card" style={{ padding: 16, textAlign: "left", marginBottom: 24 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: ACCENT,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  marginBottom: 12,
-                }}
-              >
-                How to Play
-              </div>
-              <ol
-                style={{
-                  fontSize: 14,
-                  color: "var(--ios-label3)",
-                  listStyle: "none",
-                  padding: 0,
-                  margin: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                }}
-              >
-                <li>1. A target note appears — tap 🔊 to hear it</li>
-                <li>2. Sing or play that note into your microphone</li>
-                <li>3. The tuning meter shows how close you are (±50¢)</li>
-                <li>4. Hold within ±10¢ for 1.5 seconds to score</li>
-              </ol>
-            </div>
-
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 13, color: "var(--ios-label3)", marginBottom: 10 }}>
-                Input Mode
-              </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-                <button
-                  onClick={() => setUseMidi(false)}
-                  style={{
-                    height: 34,
-                    borderRadius: 17,
-                    padding: "0 16px",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    border: "none",
-                    cursor: "pointer",
-                    background: !useMidi ? ACCENT : "var(--ios-bg2)",
-                    color: !useMidi ? "#fff" : "var(--ios-label3)",
-                    transition: "background 0.15s",
-                  }}
-                >
-                  🎤 Microphone
-                </button>
-                <button
-                  onClick={() => setUseMidi(true)}
-                  style={{
-                    height: 34,
-                    borderRadius: 17,
-                    padding: "0 16px",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    border: "none",
-                    cursor: "pointer",
-                    background: useMidi ? ACCENT : "var(--ios-bg2)",
-                    color: useMidi ? "#fff" : "var(--ios-label3)",
-                    transition: "background 0.15s",
-                  }}
-                >
-                  👁️ Listen Only
-                </button>
-              </div>
-              <div style={{ marginTop: 8, fontSize: 12, color: "var(--ios-label3)" }}>
-                {useMidi
+          <StudioSetup
+            icon="📻"
+            eyebrow={studioModeMeta("tune-in").eyebrow}
+            title="Tune In"
+            description="Hit the target note with your voice or instrument"
+            accent={ACCENT}
+          >
+            <StudioHowTo
+              steps={[
+                "1. A target note appears — tap 🔊 to hear it",
+                "2. Sing or play that note into your microphone",
+                "3. The tuning meter shows how close you are (±50¢)",
+                "4. Hold within ±10¢ for 1.5 seconds to score",
+              ]}
+            />
+            <StudioDifficulty
+              options={["mic", "listen"]}
+              value={useMidi ? "listen" : "mic"}
+              onChange={(v) => setUseMidi(v === "listen")}
+              accent={ACCENT}
+              label="SELECT INPUT MODE"
+              renderOption={(v) => (v === "mic" ? "🎤 Microphone" : "Listen Only")}
+              hint={
+                useMidi
                   ? "Practice without mic — mark rounds yourself"
-                  : "Real-time pitch detection via microphone"}
-              </div>
-            </div>
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+                  : "Real-time pitch detection via microphone"
+              }
+            />
+            <StudioStartButton onClick={startGame} accent={ACCENT}>
               Start Game
-            </button>
+            </StudioStartButton>
             {micError && (
-              <div
-                style={{
-                  marginTop: 12,
-                  borderRadius: 12,
-                  padding: "12px 16px",
-                  background: "rgba(255,69,58,0.12)",
-                  border: "1px solid var(--ios-red)",
-                  fontSize: 13,
-                  color: "var(--ios-red)",
-                  textAlign: "left",
-                }}
-              >
-                ⚠️ {micError}
+              <div className="studio-setup-error">
+                <strong>Microphone unavailable</strong>
+                <span>{micError}</span>
               </div>
             )}
-          </div>
+          </StudioSetup>
       </TrainingShell>
     );
   }

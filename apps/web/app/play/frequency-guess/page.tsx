@@ -8,7 +8,14 @@ import WaveVisualizer from "@/components/WaveVisualizer";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioDifficulty,
+  StudioStartButton,
+  StudioListenPad,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 type Difficulty = "easy" | "medium" | "hard";
@@ -139,51 +146,24 @@ export default function FrequencyGuessPage() {
         accent={ACCENT}
         exitHref="/dashboard"
       >
-        <div style={{ textAlign: "center", paddingTop: 40 }}>
-          <div style={{ fontSize: 64, marginBottom: 20 }}>🎯</div>
-          <div
-            style={{
-              fontSize: 24,
-              fontWeight: 700,
-              color: "var(--ios-label)",
-              letterSpacing: "-0.5px",
-              marginBottom: 8,
-            }}
-          >
-            Frequency Guess
-          </div>
-          <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 32 }}>
-            Guess the frequency of a tone
-          </div>
-          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 10 }}>
-            {(["easy", "medium", "hard"] as const).map((d) => (
-              <button
-                key={d}
-                onClick={() => setDifficulty(d)}
-                style={{
-                  height: 34,
-                  borderRadius: 17,
-                  padding: "0 16px",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  border: "none",
-                  cursor: "pointer",
-                  background: difficulty === d ? ACCENT : "var(--ios-bg2)",
-                  color: difficulty === d ? "#000" : "var(--ios-label3)",
-                  transition: "background 0.15s, color 0.15s",
-                }}
-              >
-                {d.charAt(0).toUpperCase() + d.slice(1)}
-              </button>
-            ))}
-          </div>
-          <div style={{ fontSize: 12, color: "var(--ios-label3)", marginBottom: 28 }}>
-            {config.min}–{config.max} Hz • {config.rounds} rounds
-          </div>
-          <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+        <StudioSetup
+          icon="📡"
+          eyebrow={studioModeMeta("frequency-guess").eyebrow}
+          title="Frequency Guess"
+          description="Guess the frequency of a tone"
+          accent={ACCENT}
+        >
+          <StudioDifficulty
+            options={["easy", "medium", "hard"]}
+            value={difficulty}
+            onChange={(d) => setDifficulty(d as Difficulty)}
+            accent={ACCENT}
+            hint={`${config.min}–${config.max} Hz · ${config.rounds} rounds`}
+          />
+          <StudioStartButton onClick={startGame} accent={ACCENT}>
             Start Game
-          </button>
-        </div>
+          </StudioStartButton>
+        </StudioSetup>
       </TrainingShell>
     );
   }
@@ -207,33 +187,19 @@ export default function FrequencyGuessPage() {
 
         <div style={{ marginBottom: 16 }}>
           <WaveVisualizer active={isPlaying} color={ACCENT} height={40} />
-          <div style={{ textAlign: "center", marginTop: 16 }}>
-            <motion.button
+          <div style={{ marginTop: 16 }}>
+            <StudioListenPad
               onClick={() => {
                 setIsPlaying(true);
                 playTone(targetFreq, 0.8);
                 trackTimeout(() => setIsPlaying(false), 800);
               }}
-              whileTap={{ scale: 0.92 }}
-              style={{
-                width: 72,
-                height: 72,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto",
-                borderRadius: 18,
-                background: "var(--ios-bg2)",
-                border: "1px solid var(--ios-sep)",
-                fontSize: 32,
-                cursor: "pointer",
-              }}
+              label="TAP TO REPLAY"
+              accent={ACCENT}
+              ariaLabel="Replay target tone"
             >
               🔊
-            </motion.button>
-            <div style={{ marginTop: 8, fontSize: 13, color: "var(--ios-label3)" }}>
-              Tap to replay
-            </div>
+            </StudioListenPad>
           </div>
         </div>
 

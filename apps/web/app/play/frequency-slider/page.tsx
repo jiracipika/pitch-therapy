@@ -7,7 +7,13 @@ import { playTone, stopAllTones } from "@/lib/audio";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioHowTo,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const ACCENT = "#0A84FF";
@@ -207,70 +213,36 @@ export default function FrequencySliderPage() {
   if (phase === "setup") {
     return (
       <TrainingShell
+        title="Frequency Slider"
+        round={0}
+        totalRounds={TOTAL_ROUNDS}
+        scoreLabel={null}
+        accent={ACCENT}
+        confirmExit={false}
+        exitHref="/dashboard"
+      >
+        <StudioSetup
+          icon="🎚️"
+          eyebrow={studioModeMeta("frequency-slider").eyebrow}
           title="Frequency Slider"
-          round={0}
-          totalRounds={TOTAL_ROUNDS}
-          scoreLabel={null}
+          description="Drag the slider to match a hidden frequency"
           accent={ACCENT}
-          confirmExit={false}
-          exitHref="/dashboard"
         >
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>↔️</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Frequency Slider
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 8 }}>
-              Drag the slider to match a hidden frequency
-            </div>
-            <div style={{ fontSize: 12, color: "var(--ios-label3)", marginBottom: 24 }}>
-              80 Hz — 1,200 Hz · Logarithmic scale
-            </div>
-
-            <div className="ios-card" style={{ padding: 16, textAlign: "left", marginBottom: 24 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: ACCENT,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  marginBottom: 12,
-                }}
-              >
-                How to Play
-              </div>
-              <ol
-                style={{
-                  fontSize: 14,
-                  color: "var(--ios-label3)",
-                  listStyle: "none",
-                  padding: 0,
-                  margin: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                }}
-              >
-                <li>1. A tone plays — tap 🔊 to replay it</li>
-                <li>2. Drag the slider to guess its frequency</li>
-                <li>3. Reference lines show note positions on the scale</li>
-                <li>4. Lock in to see how close you were (±15¢ = correct)</li>
-              </ol>
-            </div>
-
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
-              {isPractice ? "🎓 Start Practicing" : "Start Game"}
-            </button>
+          <div style={{ marginTop: 12, fontSize: 12, color: "var(--ios-label3)" }}>
+            80 Hz — 1,200 Hz · Logarithmic scale
           </div>
+          <StudioHowTo
+            steps={[
+              "1. A tone plays — tap 🔊 to replay it",
+              "2. Drag the slider to guess its frequency",
+              "3. Reference lines show note positions on the scale",
+              "4. Lock in to see how close you were (±15¢ = correct)",
+            ]}
+          />
+          <StudioStartButton onClick={startGame} accent={ACCENT}>
+            {isPractice ? "🎓 Start Practicing" : "Start Game"}
+          </StudioStartButton>
+        </StudioSetup>
       </TrainingShell>
     );
   }

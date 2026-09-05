@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
+import {
+  StudioSetup,
+  StudioHowTo,
+  StudioDifficulty,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
@@ -194,86 +202,32 @@ export default function TuningBattlePage() {
       </span>
         {/* Setup */}
         {phase === "setup" && (
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>⚔️</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Tuning Battle
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 24 }}>
-              Two players, one target note. First to lock in wins!
-            </div>
-
-            <div className="ios-card" style={{ padding: 16, textAlign: "left", marginBottom: 24 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: ACCENT,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  marginBottom: 12,
-                }}
-              >
-                How to Play
-              </div>
-              <ol
-                style={{
-                  fontSize: 14,
-                  color: "var(--ios-label3)",
-                  listStyle: "none",
-                  padding: 0,
-                  margin: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                }}
-              >
-                <li>1. A target note plays on countdown — listen carefully</li>
-                <li>2. Each player selects the correct note from their half</li>
-                <li>3. Tap 🔒 Lock In once you&apos;re confident</li>
-                <li>4. Closest correct answer wins the round</li>
-              </ol>
-            </div>
-
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 13, color: "var(--ios-label3)", marginBottom: 10 }}>
-                Best of
-              </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-                {[5, 10].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => setTotalRounds(n)}
-                    style={{
-                      height: 34,
-                      borderRadius: 17,
-                      padding: "0 20px",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      border: "none",
-                      cursor: "pointer",
-                      background: totalRounds === n ? ACCENT : "var(--ios-bg2)",
-                      color: totalRounds === n ? "#fff" : "var(--ios-label3)",
-                      transition: "background 0.15s",
-                    }}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+          <StudioSetup
+            icon="⚔️"
+            eyebrow={studioModeMeta("tuning-battle").eyebrow}
+            title="Tuning Battle"
+            description="Two players, one target note. First to lock in wins!"
+            accent={ACCENT}
+          >
+            <StudioHowTo
+              steps={[
+                "1. A target note plays on countdown — listen carefully",
+                "2. Each player selects the correct note from their half",
+                "3. Tap 🔒 Lock In once you're confident",
+                "4. Closest correct answer wins the round",
+              ]}
+            />
+            <StudioDifficulty
+              options={["5", "10"]}
+              value={String(totalRounds)}
+              onChange={(v) => setTotalRounds(Number(v))}
+              accent={ACCENT}
+              label="BEST OF"
+            />
+            <StudioStartButton onClick={startGame} accent={ACCENT}>
               Start Battle
-            </button>
-          </div>
+            </StudioStartButton>
+          </StudioSetup>
         )}
 
         {/* Ready / Countdown */}
@@ -547,64 +501,24 @@ export default function TuningBattlePage() {
 
         {/* Final results */}
         {phase === "done" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{ textAlign: "center", paddingTop: 40 }}
-          >
-            <div style={{ fontSize: 60, marginBottom: 12 }}>
-              {players[0].score > players[1].score
-                ? "👑"
+          <StudioResults
+            eyebrow="BATTLE COMPLETE"
+            headline={
+              players[0].score > players[1].score
+                ? "Player 1 wins."
                 : players[1].score > players[0].score
-                  ? "👑"
-                  : "🤝"}
-            </div>
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 24,
-              }}
-            >
-              {players[0].score > players[1].score
-                ? "Player 1 Wins!"
-                : players[1].score > players[0].score
-                  ? "Player 2 Wins!"
-                  : "It's a Tie!"}
-            </div>
-            <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 24 }}>
-              <div className="ios-card" style={{ padding: "20px 32px", textAlign: "center" }}>
-                <div style={{ fontSize: 32, fontWeight: 700, color: "var(--ios-label)" }}>
-                  {players[0].score}
-                </div>
-                <div style={{ fontSize: 13, color: "var(--ios-label3)", marginTop: 4 }}>
-                  Player 1
-                </div>
-              </div>
-              <div className="ios-card" style={{ padding: "20px 32px", textAlign: "center" }}>
-                <div style={{ fontSize: 32, fontWeight: 700, color: "var(--ios-label)" }}>
-                  {players[1].score}
-                </div>
-                <div style={{ fontSize: 13, color: "var(--ios-label3)", marginTop: 4 }}>
-                  Player 2
-                </div>
-              </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button
-                className="ios-btn-primary"
-                style={{ background: ACCENT }}
-                onClick={startGame}
-              >
-                Rematch
-              </button>
-              <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>
-                Dashboard
-              </button>
-            </div>
-          </motion.div>
+                  ? "Player 2 wins."
+                  : "Dead even."
+            }
+            accent={ACCENT}
+            stats={[
+              { value: players[0].score, label: "PLAYER 1" },
+              { value: players[1].score, label: "PLAYER 2", accentValue: true },
+              { value: totalRounds, label: "ROUNDS" },
+            ]}
+            primaryAction={{ label: "Rematch", onClick: startGame }}
+            secondaryAction={{ label: "Dashboard", onClick: () => router.push("/dashboard") }}
+          />
         )}
     </TrainingShell>
   );

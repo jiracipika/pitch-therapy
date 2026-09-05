@@ -3134,3 +3134,23 @@ picture, img, video, svg {
   .studio-choice { min-height: 52px; font-size: 15px; }
   .studio-results-grid b { font-size: 23px; }
 }
+
+.studio-howto { display: grid; gap: 10px; justify-items: center; margin-top: 26px; width: 100%; }
+.studio-howto ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; width: min(34ch, 100%); }
+.studio-howto li { color: var(--ios-label3); font-size: 12.5px; line-height: 1.55; text-align: left; }
+
+.studio-toggle-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 26px; cursor: pointer; }
+.studio-toggle-text { color: var(--ios-label2); font-size: 14px; }
+.studio-toggle { position: relative; width: 48px; height: 28px; border-radius: 14px; background: var(--ios-bg3); transition: background 200ms ease; flex: none; }
+.studio-toggle-row input:checked + .studio-toggle-text + .studio-toggle,
+.studio-toggle-row input:checked ~ .studio-toggle { background: var(--mode-accent, #c7ff4a); }
+.studio-toggle-knob { position: absolute; top: 2px; width: 24px; height: 24px; border-radius: 12px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+.studio-toggle-row input:focus-visible ~ .studio-toggle { box-shadow: var(--pt-focus-ring); }
+
+.studio-setup-error { display: grid; gap: 6px; justify-items: center; margin-top: 22px; max-width: 40ch; }
+.studio-setup-error strong { color: var(--ios-red); font-size: 13px; font-weight: 650; }
+.studio-setup-error span { color: var(--ios-label3); font-size: 12px; line-height: 1.5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-toggle-knob { transition: none !important; }
+}

@@ -7,7 +7,14 @@ import { playTone, getAudioContext, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones }
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioHowTo,
+  StudioDifficulty,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import { INTERVALS as CORE_INTERVALS } from "@pitch-therapy/core";
 
@@ -224,93 +231,41 @@ export default function IntervalArcherPage() {
   if (phase === "setup") {
     return (
       <TrainingShell
+        title="Interval Archer"
+        round={0}
+        totalRounds={TOTAL_ROUNDS}
+        scoreLabel={null}
+        accent={ACCENT}
+        confirmExit={false}
+        exitHref="/dashboard"
+      >
+        <StudioSetup
+          icon="🏹"
+          eyebrow={studioModeMeta("interval-archer").eyebrow}
           title="Interval Archer"
-          round={0}
-          totalRounds={TOTAL_ROUNDS}
-          scoreLabel={null}
+          description="Identify intervals — closer to bullseye = more points"
           accent={ACCENT}
-          confirmExit={false}
-          exitHref="/dashboard"
         >
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🏹</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Interval Archer
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 24 }}>
-              Identify intervals — closer to bullseye = more points
-            </div>
-
-            <div className="ios-card" style={{ padding: 16, textAlign: "left", marginBottom: 24 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: ACCENT,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  marginBottom: 12,
-                }}
-              >
-                How to Play
-              </div>
-              <ol
-                style={{
-                  fontSize: 14,
-                  color: "var(--ios-label3)",
-                  listStyle: "none",
-                  padding: 0,
-                  margin: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                }}
-              >
-                <li>1. Hear two notes played in sequence (or together)</li>
-                <li>2. Identify the musical interval between them</li>
-                <li>3. Exact hit = bullseye (max pts), 1 semitone off = partial credit</li>
-                <li>4. Tap 🔊 to replay the interval anytime</li>
-              </ol>
-            </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 13, color: "var(--ios-label3)", marginBottom: 10 }}>Mode</div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-                {(Object.keys(MODE_CONFIG) as IntervalMode[]).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setIntervalMode(m)}
-                    style={{
-                      height: 34,
-                      borderRadius: 17,
-                      padding: "0 16px",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      border: "none",
-                      cursor: "pointer",
-                      background: intervalMode === m ? ACCENT : "var(--ios-bg2)",
-                      color: intervalMode === m ? "#fff" : "var(--ios-label3)",
-                      transition: "background 0.15s, color 0.15s",
-                    }}
-                  >
-                    {MODE_CONFIG[m].label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
-              {isPractice ? "🎓 Start Practicing" : "Start Game"}
-            </button>
-          </div>
+          <StudioHowTo
+            steps={[
+              "1. Hear two notes played in sequence (or together)",
+              "2. Identify the musical interval between them",
+              "3. Exact hit = bullseye (max pts), 1 semitone off = partial credit",
+              "4. Tap 🔊 to replay the interval anytime",
+            ]}
+          />
+          <StudioDifficulty
+            options={Object.keys(MODE_CONFIG)}
+            value={intervalMode}
+            onChange={(m) => setIntervalMode(m as IntervalMode)}
+            accent={ACCENT}
+            label="SELECT MODE"
+            renderOption={(m) => MODE_CONFIG[m as IntervalMode].label}
+          />
+          <StudioStartButton onClick={startGame} accent={ACCENT}>
+            {isPractice ? "🎓 Start Practicing" : "Start Game"}
+          </StudioStartButton>
+        </StudioSetup>
       </TrainingShell>
     );
   }

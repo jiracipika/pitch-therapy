@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import { playTone, stopAllTones } from "@/lib/audio";
 
@@ -202,29 +207,20 @@ export default function WaveformMatchPage() {
           confirmExit={false}
           exitHref="/dashboard"
         >
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🌊</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
-              }}
-            >
-              Waveform Match
+          <StudioSetup
+            icon="〰️"
+            eyebrow={studioModeMeta("waveform-match").eyebrow}
+            title="Waveform Match"
+            description="Align waveforms by ear — identify sharp/flat and correct"
+            accent={ACCENT}
+          >
+            <div style={{ marginTop: 14, fontSize: 12, color: "var(--ios-label3)" }}>
+              {ROUNDS} rounds · Drag slider to detune and match the target
             </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 8 }}>
-              Align waveforms by ear — identify sharp/flat and correct
-            </div>
-            <div style={{ fontSize: 12, color: "var(--ios-label3)", marginBottom: 32 }}>
-              {ROUNDS} rounds • Drag slider to detune and match the target
-            </div>
-            <button className="ios-btn-primary" style={{ background: ACCENT }} onClick={startGame}>
+            <StudioStartButton onClick={startGame} accent={ACCENT}>
               Start Matching
-            </button>
-          </div>
+            </StudioStartButton>
+          </StudioSetup>
       </TrainingShell>
     );
   }

@@ -7,7 +7,12 @@ import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audi
 import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
-import { StudioResults } from "@/components/training/StudioScreen";
+import {
+  StudioSetup,
+  StudioStartButton,
+  StudioResults,
+  studioModeMeta,
+} from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const NOTE_FREQS: Record<string, number> = {};
@@ -207,57 +212,27 @@ export default function NameThatNotePage() {
         </div>
 
         {phase === "idle" && (
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <div style={{ fontSize: 64, marginBottom: 20 }}>🎼</div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--ios-label)",
-                letterSpacing: "-0.5px",
-                marginBottom: 8,
+          <StudioSetup
+            icon="🎼"
+            eyebrow={studioModeMeta("name-that-note").eyebrow}
+            title="Name That Note"
+            description="Identify notes on the musical staff"
+            accent={ACCENT}
+          >
+            <StudioStartButton onClick={handleStart} accent={ACCENT}>
+              Timed Mode
+            </StudioStartButton>
+            <button
+              type="button"
+              className="studio-results-secondary"
+              style={{ width: "auto", padding: "0 30px", marginTop: 2 }}
+              onClick={() => {
+                router.push("/play/name-that-note?timed=false&practice=true");
               }}
             >
-              Name That Note
-            </div>
-            <div style={{ fontSize: 15, color: "var(--ios-label3)", marginBottom: 32 }}>
-              Identify notes on the musical staff
-            </div>
-            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-              <button
-                onClick={handleStart}
-                style={{
-                  borderRadius: 14,
-                  padding: "12px 20px",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  border: "none",
-                  cursor: "pointer",
-                  background: ACCENT,
-                  color: "#fff",
-                }}
-              >
-                Timed Mode
-              </button>
-              <button
-                onClick={() => {
-                  router.push("/play/name-that-note?timed=false&practice=true");
-                }}
-                style={{
-                  borderRadius: 14,
-                  padding: "12px 20px",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  border: "none",
-                  cursor: "pointer",
-                  background: "var(--ios-bg2)",
-                  color: "var(--ios-label2)",
-                }}
-              >
-                Practice
-              </button>
-            </div>
-          </div>
+              Practice
+            </button>
+          </StudioSetup>
         )}
 
         {(phase === "playing" || phase === "timed-out") && (
