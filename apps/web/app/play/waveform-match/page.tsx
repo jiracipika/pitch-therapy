@@ -183,7 +183,7 @@ export default function WaveformMatchPage() {
         stats={[
           { value: `${results.length ? Math.round(results.reduce((a, r) => a + r.score, 0) / results.length) : 0}%`, label: "AVG SCORE", accentValue: true },
           { value: ROUNDS, label: "ROUNDS" },
-          { value: ROUNDS, label: "ROUNDS" },
+          { value: score, label: "TOTAL" },
         ]}
         primaryAction={{ label: "Play Again", onClick: startGame }}
         secondaryAction={{ label: "Dashboard", onClick: () => router.push("/dashboard") }}
