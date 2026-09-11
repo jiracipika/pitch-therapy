@@ -243,15 +243,6 @@ export default function ChordDetectivePage() {
           streak={streak}
           onDone={() => setShowOverlay(false)}
         />
-        <div className="ios-progress-track mb-6">
-          <motion.div
-            className="ios-progress-fill"
-            style={{ background: ACCENT }}
-            animate={{ width: `${Math.min((round / ROUNDS) * 100, 100)}%` }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-
         {/* Play chord button */}
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
           <motion.button
@@ -315,7 +306,7 @@ export default function ChordDetectivePage() {
                   transition: "all 0.15s",
                 }}
               >
-                {ct.label}
+        {ct.label}
               </motion.button>
             ))}
           </div>

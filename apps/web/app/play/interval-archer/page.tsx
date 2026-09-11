@@ -288,15 +288,6 @@ export default function IntervalArcherPage() {
           streak={streak}
           onDone={() => setShowFeedbackOverlay(false)}
         />
-        <div className="ios-progress-track mb-6">
-          <motion.div
-            className="ios-progress-fill"
-            style={{ background: ACCENT }}
-            animate={{ width: `${(round / TOTAL_ROUNDS) * 100}%` }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-
         {/* Replay */}
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
           <div style={{ textAlign: "center" }}>

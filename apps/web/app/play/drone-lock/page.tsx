@@ -278,13 +278,6 @@ export default function DroneLockPage() {
           ? `Round ${round} locked in ${Math.abs(cents)} cents off, ${results[results.length - 1].points} points.`
           : ""}
       </span>
-        <div className="ios-progress-track mb-6">
-          <div
-            className="ios-progress-fill"
-            style={{ width: `${(round / totalRounds) * 100}%`, background: ACCENT }}
-          />
-        </div>
-
         {phase === "idle" && (
           <StudioSetup
             icon="🔒"
@@ -338,7 +331,7 @@ export default function DroneLockPage() {
               <div
                 style={{ fontSize: 32, fontWeight: 700, color: ACCENT, letterSpacing: "-0.03em" }}
               >
-                {targetInterval.name}
+        {targetInterval.name}
               </div>
             </motion.div>
 

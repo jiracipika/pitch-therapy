@@ -204,23 +204,17 @@ export default function NameThatNotePage() {
               : `Not quite. It was ${targetNote.name}.`
             : ""}
         </span>
-        <div className="ios-progress-track mb-6">
-          <div
-            className="ios-progress-fill"
-            style={{ width: `${(round / totalRounds) * 100}%`, background: ACCENT }}
-          />
-        </div>
 
         {phase === "idle" && (
           <StudioSetup
-            icon="🎼"
+            icon={studioModeMeta("name-that-note").icon}
             eyebrow={studioModeMeta("name-that-note").eyebrow}
             title="Name That Note"
             description="Identify notes on the musical staff"
             accent={ACCENT}
           >
             <StudioStartButton onClick={handleStart} accent={ACCENT}>
-              Timed Mode
+              Start Timed Mode
             </StudioStartButton>
             <button
               type="button"

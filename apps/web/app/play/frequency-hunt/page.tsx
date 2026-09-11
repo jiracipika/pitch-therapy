@@ -190,13 +190,6 @@ export default function FrequencyHuntPage() {
           ? `Round ${round}: within ${Math.round(results[results.length - 1].diff)} Hz, ${results[results.length - 1].points} points.`
           : ""}
       </span>
-        <div className="ios-progress-track mb-6">
-          <div
-            className="ios-progress-fill"
-            style={{ width: `${(round / totalRounds) * 100}%`, background: ACCENT }}
-          />
-        </div>
-
         {phase === "idle" && (
           <StudioSetup
             icon="🔍"
@@ -215,7 +208,7 @@ export default function FrequencyHuntPage() {
           <div>
             <div style={{ textAlign: "center", marginBottom: 28 }}>
               <div style={{ fontSize: 13, color: "var(--ios-label3)", marginBottom: 10 }}>
-                {phase === "result" ? "Result" : "Find this frequency"}
+        {phase === "result" ? "Result" : "Find this frequency"}
               </div>
               {phase === "result" ? (
                 <div>

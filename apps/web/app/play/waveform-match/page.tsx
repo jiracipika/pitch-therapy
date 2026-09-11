@@ -241,15 +241,6 @@ export default function WaveformMatchPage() {
         ? `Round ${round}: you were ${Math.abs(sliderCents - detuneCents)} cents off, ${lastRoundScore} points.`
         : ""}
     </span>
-        <div className="ios-progress-track mb-6">
-          <motion.div
-            className="ios-progress-fill"
-            style={{ background: ACCENT }}
-            animate={{ width: `${(round / ROUNDS) * 100}%` }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-
         {/* Waveforms */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
           <div className="ios-card" style={{ padding: 16 }}>

@@ -196,15 +196,6 @@ export default function SpeedRoundPage() {
           onDone={() => setShowOverlay(false)}
         />
         {/* Timer bar */}
-        <div className="ios-progress-track mb-6">
-          <motion.div
-            className="ios-progress-fill"
-            style={{ background: timeLeft < 5 ? "var(--ios-red)" : ACCENT }}
-            animate={{ width: `${(timeLeft / duration) * 100}%` }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-
         {/* Flashcard */}
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
           <AnimatePresence mode="wait">

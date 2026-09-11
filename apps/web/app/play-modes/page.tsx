@@ -53,7 +53,7 @@ export default function PlayModesPage() {
                       <div className="studio-mode-card-icon">{meta.icon}</div>
                       <h3>{meta.label}</h3>
                       <p>{mode.gamesPlayed ? `${mode.gamesPlayed} sessions · ${Math.round(mode.avgAccuracy * 100)}% average accuracy` : meta.description}</p>
-                      <div className="studio-mode-card-footer"><span>{mode.gamesPlayed ? `${mode.masteryPct}% mastered` : cue.sessionGoal}</span><i aria-hidden="true">↗</i></div>
+                      <div className="studio-mode-card-footer"><span>{mode.gamesPlayed ? `${mode.masteryPct}% mastered` : "Not practiced yet"}</span><i aria-hidden="true">↗</i></div>
                     </Link>
                   </motion.article>
                 );
@@ -63,6 +63,7 @@ export default function PlayModesPage() {
         ) : null}
 
         <footer className="studio-catalog-footer"><span>THE PRACTICE PRINCIPLE</span><p>Five focused repetitions beat one long, distracted session.</p><Link href="/dashboard">Build today&apos;s session →</Link></footer>
+        <div style={{ minHeight: "clamp(24px, 4vh, 56px)" }} aria-hidden="true" />
       </div>
     </div>
   );

@@ -92,8 +92,8 @@ export default function Dashboard() {
               </div>
             </section>
 
-            <section className="studio-xp-panel">
-              <div><span>LEVEL {level.level}</span><b>{levelTitle(level.level)}</b></div><strong>{totalXP}<small> XP</small></strong>
+            <section className="studio-xp-panel" aria-label="Level progress">
+              <div><span>LEVEL {loaded ? level.level : "—"}</span><b>{loaded ? levelTitle(level.level) : "Loading"}</b></div><strong>{totalXP}<small> XP</small></strong>
               <i><em style={{ width: `${level.pct}%` }} /></i>
               <p>{level.xpForNext - level.xpInLevel} XP until your next level.</p>
             </section>

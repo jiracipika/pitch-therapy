@@ -384,15 +384,6 @@ export default function TuneInPage() {
           streak={streak}
           onDone={() => setShowFeedbackOverlay(false)}
         />
-        <div className="ios-progress-track mb-6">
-          <motion.div
-            className="ios-progress-fill"
-            style={{ background: ACCENT }}
-            animate={{ width: `${(round / totalRounds) * 100}%` }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          />
-        </div>
-
         {/* Target note */}
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <motion.div

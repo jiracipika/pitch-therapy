@@ -254,15 +254,6 @@ export default function CentsDeviationPage() {
           streak={streak}
           onDone={() => setShowFeedbackOverlay(false)}
         />
-        <div className="ios-progress-track mb-6">
-          <motion.div
-            className="ios-progress-fill"
-            style={{ background: ACCENT }}
-            animate={{ width: `${(round / totalRounds) * 100}%` }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-
         {/* Info */}
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <div style={{ fontSize: 13, color: "var(--ios-label3)" }}>
@@ -495,7 +486,7 @@ export default function CentsDeviationPage() {
                       : "var(--ios-orange)",
                 }}
               >
-                {Math.abs(needlePos - actualCents) <= 5
+        {Math.abs(needlePos - actualCents) <= 5
                   ? "✓ Excellent ear!"
                   : Math.abs(needlePos - actualCents) <= 15
                     ? "~ Close"

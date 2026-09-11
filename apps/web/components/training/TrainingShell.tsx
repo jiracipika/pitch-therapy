@@ -138,7 +138,9 @@ export default function TrainingShell({
           </button>
           <b>{title}</b>
           <div className="studio-training-score" aria-live="polite">
-            {scoreLabel ?? ""}
+            {scoreLabel ?? (
+              <span aria-hidden="true" style={{ opacity: 0.45 }}>PRACTICE</span>
+            )}
           </div>
         </div>
 
