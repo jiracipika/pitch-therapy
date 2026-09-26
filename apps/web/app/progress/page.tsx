@@ -10,6 +10,7 @@ import {
   GAME_MODES,
   getLatestBadges,
   getNextGoals,
+  todayDateString,
   type AchievementStatus,
   type ModeBreakdownEntry,
   type ModeTrendLabel,
@@ -85,22 +86,25 @@ export default function ProgressPage() {
     return map;
   }, [modeBreakdown]);
 
-  // Build activity map: date -> count
+  // Build activity map: LOCAL calendar date -> count. Slicing raw ISO put
+  // evening sessions on the next UTC day, coloring the wrong heatmap cell.
   const activityMap: Record<string, number> = {};
   stats.results.forEach((r) => {
-    const day = r.date.slice(0, 10);
+    const played = new Date(r.date);
+    const day = Number.isFinite(played.getTime()) ? todayDateString(played) : r.date.slice(0, 10);
     activityMap[day] = (activityMap[day] || 0) + 1;
   });
   const maxActivity = Math.max(1, ...Object.values(activityMap));
 
-  // Build grid data (last 12 weeks)
+  // Build grid data (last 12 weeks). Cell keys are local day strings too —
+  // toISOString() shifted them a day for users west of UTC.
   const today = new Date();
   const gridDays: { date: string; count: number; future: boolean }[] = [];
   for (let w = WEEKS - 1; w >= 0; w--) {
     for (let d = 0; d < DAYS; d++) {
       const date = new Date(today);
       date.setDate(date.getDate() - (w * 7 + ((today.getDay() + 6) % 7) - d));
-      const dateStr = date.toISOString().slice(0, 10);
+      const dateStr = todayDateString(date);
       gridDays.push({ date: dateStr, count: activityMap[dateStr] || 0, future: date > today });
     }
   }

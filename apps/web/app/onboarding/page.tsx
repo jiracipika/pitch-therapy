@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
+import { GAME_MODES } from '@pitch-therapy/core';
 
 const STEPS = [
   {
     emoji: '🎵',
     color: '#c7ff4a',
     title: 'Train your ear',
-    desc: '18 focused drills that sharpen pitch, frequency recognition, and musical intervals. From beginner to expert.',
+    desc: `${GAME_MODES.length} focused drills that sharpen pitch, frequency recognition, and musical intervals. From beginner to expert.`,
   },
   {
     emoji: '🔥',
@@ -65,8 +66,8 @@ export default function OnboardingPage() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Step dots */}
-        <div className="studio-onboard-steps" role="tablist" aria-label="Onboarding progress">
+        {/* Step dots — purely decorative progress; the overline announces the step */}
+        <div className="studio-onboard-steps" aria-hidden="true">
           {STEPS.map((s, i) => (
             <i key={i} className={i === step ? 'is-active' : ''} style={i === step ? { background: cur.color } : undefined} />
           ))}
@@ -76,6 +77,15 @@ export default function OnboardingPage() {
         <div className="studio-gate-actions">
           {step < STEPS.length - 1 ? (
             <>
+              {step > 0 && (
+                <button
+                  onClick={() => setStep(s => s - 1)}
+                  className="studio-gate-link"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', minHeight: 44 }}
+                >
+                  ← Back
+                </button>
+              )}
               <button
                 onClick={() => setStep(s => s + 1)}
                 className="ios-btn-primary"

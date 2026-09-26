@@ -167,7 +167,7 @@ export default function PitchMatchScreen() {
             <Text style={{ fontSize: 32 }}>🎤</Text>
           </View>
           <Text style={styles.title}>Ready to train?</Text>
-          <Text style={styles.subtitle}>Sing or hum to match the target pitch</Text>
+          <Text style={styles.subtitle}>Hear the note, match it with your voice, then rate your accuracy</Text>
 
           <View style={styles.howToBox}>
             <Text style={[styles.howToTitle, { color: ACCENT }]}>HOW TO PLAY</Text>

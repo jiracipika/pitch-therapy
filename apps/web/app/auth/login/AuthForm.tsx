@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
   const router = useRouter();
@@ -9,6 +10,8 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const supabaseConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +40,25 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
       setLoading(false);
     }
   };
+
+  // The rest of the app treats unconfigured Supabase as a valid anonymous
+  // session — say so plainly instead of surfacing "supabaseUrl is required."
+  if (!supabaseConfigured) {
+    return (
+      <div className="studio-gate-form">
+        <p style={{ color: 'var(--ios-label2)', fontSize: 14, lineHeight: 1.5, margin: '0 0 18px' }}>
+          Sign-in isn&apos;t configured on this deployment. Your progress is saved on this device — no account needed.
+        </p>
+        <Link
+          href="/dashboard"
+          className="ios-btn-primary"
+          style={{ borderRadius: 999, textDecoration: 'none', letterSpacing: '-.01em', display: 'inline-block' }}
+        >
+          Continue to the studio
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="studio-gate-form">
