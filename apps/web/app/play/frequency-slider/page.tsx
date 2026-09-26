@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { playTone, stopAllTones } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
@@ -70,6 +71,9 @@ export default function FrequencySliderPage() {
   >([]);
   const barRef = useRef<HTMLDivElement>(null);
   const roundRef = useRef(0);
+  // Synchronous submission latch — state alone is stale for multiple clicks
+  // inside one React batch, which would score a round twice.
+  const roundLockedRef = useRef(false);
 
   const pickTarget = () => {
     const min = Math.log(MIN_FREQ);
@@ -89,10 +93,12 @@ export default function FrequencySliderPage() {
     setBestStreak(0);
     setResults([]);
     roundRef.current = 0;
+    roundLockedRef.current = false;
     nextRound();
   };
 
   const nextRound = () => {
+    roundLockedRef.current = false;
     const freq = pickTarget();
     playTone(freq, 1.0);
     setPhase("playing");
@@ -101,7 +107,8 @@ export default function FrequencySliderPage() {
   };
 
   const handleSubmit = () => {
-    if (submitted) return;
+    if (submitted || roundLockedRef.current) return;
+    roundLockedRef.current = true;
     setSubmitted(true);
     const answerFreq = posToFreq(sliderPos);
     const centsOff = Math.round(1200 * Math.log2(answerFreq / targetFreq));
@@ -121,6 +128,7 @@ export default function FrequencySliderPage() {
     } else {
       setStreak(0);
       setLastCorrect(false);
+      answerHaptic(false);
     }
     setResults((r) => [
       ...r,
@@ -260,6 +268,12 @@ export default function FrequencySliderPage() {
         confirmExit={phase === "playing"}
         exitHref="/dashboard"
       >
+        {/* Wrong answers get no FeedbackOverlay — announce them for screen readers */}
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {submitted && !lastCorrect
+            ? `Not quite. You were ${Math.abs(Math.round(1200 * Math.log2(posToFreq(sliderPos) / targetFreq)))} cents off.`
+            : ""}
+        </span>
         <FeedbackOverlay
           correct={lastCorrect}
           show={showFeedbackOverlay}
@@ -335,6 +349,7 @@ export default function FrequencySliderPage() {
                 borderRadius: 24,
                 background: "var(--ios-bg3)",
                 cursor: "pointer",
+                touchAction: "none",
               }}
               role="slider"
               tabIndex={0}
@@ -358,6 +373,7 @@ export default function FrequencySliderPage() {
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
               onPointerLeave={handlePointerUp}
             />
             {/* Reference lines */}

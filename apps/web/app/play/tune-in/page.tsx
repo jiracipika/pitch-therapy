@@ -10,6 +10,7 @@ import {
   type PitchEstimate,
 } from "@pitch-therapy/core";
 import { playTone, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
@@ -67,6 +68,10 @@ export default function TuneInPage() {
   const targetFreqRef = useRef(440);
   const ignoreMicUntilRef = useRef(0);
   const holdCompletedRef = useRef(false);
+  // Set once the current round has been scored (success or skip). Phase stays
+  // "playing" through the inter-round window, so buttons need this to ignore
+  // a second tap that would double-score or skip a round.
+  const roundDoneRef = useRef(false);
   const handleSuccessRef = useRef<() => void>(() => {});
   const roundStartRef = useRef(0);
   const holdStartRef = useRef<number | null>(null);
@@ -193,6 +198,7 @@ export default function TuneInPage() {
   };
 
   const nextRound = () => {
+    roundDoneRef.current = false;
     const note = pickTarget();
     playTone(NOTE_FREQUENCIES[note] || 440, 0.8);
     setFeedback(null);
@@ -202,6 +208,8 @@ export default function TuneInPage() {
   };
 
   const handleSuccess = () => {
+    if (roundDoneRef.current) return;
+    roundDoneRef.current = true;
     stopMic();
     const elapsed = Date.now() - roundStartRef.current;
     const accuracy = 1 - Math.abs(centsOff) / 50;
@@ -235,9 +243,12 @@ export default function TuneInPage() {
   handleSuccessRef.current = handleSuccess;
 
   const handleGiveUp = () => {
+    if (roundDoneRef.current) return;
+    roundDoneRef.current = true;
     stopMic();
     setFeedback("wrong");
     setShowFeedbackOverlay(false);
+    answerHaptic(false);
     setStreak(0);
     setResults((r) => [
       ...r,

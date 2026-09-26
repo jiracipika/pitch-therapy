@@ -4,9 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { playTone, stopAllTones } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import WaveVisualizer from "@/components/WaveVisualizer";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
+import { useStoredDifficulty } from "@/components/SettingsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
 import {
   StudioSetup,
@@ -36,7 +38,7 @@ export default function FrequencyGuessPage() {
   const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
-  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const [difficulty, setDifficulty] = useStoredDifficulty("frequency-guess", "easy");
   const [phase, setPhase] = useState<"setup" | "playing" | "done">("setup");
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
@@ -49,6 +51,9 @@ export default function FrequencyGuessPage() {
   const [results, setResults] = useState<
     { correct: boolean; points: number; target: string; answer: string }[]
   >([]);
+  // Synchronous submission latch — state alone is stale for multiple clicks
+  // inside one React batch, which would score a round twice.
+  const roundLockedRef = useRef(false);
   const config = CONFIGS[difficulty];
 
   const generateFreq = () =>
@@ -59,10 +64,12 @@ export default function FrequencyGuessPage() {
     setRound(0);
     setScore(0);
     setResults([]);
+    roundLockedRef.current = false;
     nextRound();
   };
 
   const nextRound = () => {
+    roundLockedRef.current = false;
     const freq = generateFreq();
     setTargetFreq(freq);
     setGuess(Math.round((config.min + config.max) / 2));
@@ -75,6 +82,8 @@ export default function FrequencyGuessPage() {
   };
 
   const submitGuess = () => {
+    if (showFeedback || roundLockedRef.current) return;
+    roundLockedRef.current = true;
     const err = (Math.abs(guess - targetFreq) / targetFreq) * 100;
     setErrorPct(err);
     const correct = err < 5;
@@ -85,7 +94,10 @@ export default function FrequencyGuessPage() {
       { correct, points, target: `${targetFreq} Hz`, answer: `${guess} Hz` },
     ]);
     setShowFeedback(true);
-    if (!isPractice) setShowFeedbackOverlay(correct);
+    if (!isPractice) {
+      setShowFeedbackOverlay(correct);
+      if (!correct) answerHaptic(false);
+    }
     trackTimeout(() => {
       if (isPractice) nextRound();
       else if (round >= config.rounds) setPhase("done");
@@ -179,6 +191,12 @@ export default function FrequencyGuessPage() {
       exitHref="/dashboard"
     >
       <div>
+        {/* Wrong answers get no FeedbackOverlay — announce them for screen readers */}
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {showFeedback && errorPct >= 5
+            ? `Not quite. The target was ${targetFreq} hertz, your error was ${errorPct.toFixed(1)} percent.`
+            : ""}
+        </span>
         <FeedbackOverlay
           correct={showFeedback && errorPct < 5}
           show={showFeedbackOverlay}

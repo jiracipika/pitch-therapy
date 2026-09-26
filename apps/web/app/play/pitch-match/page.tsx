@@ -10,6 +10,7 @@ import {
   type PitchEstimate,
 } from "@pitch-therapy/core";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import WaveVisualizer from "@/components/WaveVisualizer";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell, { type MicStatus } from "@/components/training/TrainingShell";
@@ -160,6 +161,7 @@ export default function PitchMatchPage() {
     if (!hasDetectedPitch) return;
     const correct = Math.abs(cents) < 50;
     const points = correct ? Math.max(100 - Math.abs(cents) * 2, 10) : 0;
+    answerHaptic(correct);
     const targetName = NOTE_NAMES[targetNote] ?? "A";
     setScore((s) => s + points);
     if (correct) setStreak((s) => s + 1);
@@ -194,6 +196,10 @@ export default function PitchMatchPage() {
   };
 
   const handleStop = () => {
+    // Cancel the pending next-round timer first — otherwise a Stop pressed
+    // during the feedback window lets the timeout restart the session the
+    // user just ended.
+    clearAllTimeouts();
     stopMic();
     setPhase("idle");
     setRound(0);

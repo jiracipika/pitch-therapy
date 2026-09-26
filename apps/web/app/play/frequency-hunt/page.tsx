@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { playTone, stopAllTones } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
 import {
@@ -104,6 +105,7 @@ export default function FrequencyHuntPage() {
     const guess = sliderToFreq(sliderPos);
     const diff = Math.abs(guess - targetFreq);
     const points = Math.max(0, Math.round(1000 * Math.exp(-diff / 30)));
+    answerHaptic(diff <= 25);
     setScore((s) => s + points);
     setResults((r) => [...r, { round, target: targetFreq, guess, diff, points }]);
     playTone(targetFreq, 0.5);
@@ -149,9 +151,17 @@ export default function FrequencyHuntPage() {
     }
   }, [phase, recordResult, results, score, totalRounds]);
 
-  // Clear pending timers and audio on unmount (back navigation).
+  // Clear pending timers and audio on unmount (back navigation). The preview
+  // oscillator runs on its own AudioContext which stopAllTones() doesn't know
+  // about, so stop and close it synchronously — otherwise the tone keeps
+  // droning after leaving the page.
   useEffect(() => {
     return () => {
+      oscRef.current?.stop();
+      oscRef.current = null;
+      gainRef.current = null;
+      void ctxRef.current?.close();
+      ctxRef.current = null;
       clearAllTimeouts();
       stopAllTones();
     };
@@ -165,7 +175,7 @@ export default function FrequencyHuntPage() {
         accent={ACCENT}
         stats={[
           { value: score, label: "SCORE", accentValue: true },
-          { value: `${Math.round(results.reduce((s, r) => s + r.diff, 0) / results.length)}%`, label: "AVG ERROR" },
+          { value: `${results.length ? Math.round(results.reduce((s, r) => s + r.diff, 0) / results.length) : 0} Hz`, label: "AVG ERROR" },
           { value: results.length, label: "ROUNDS" },
         ]}
         primaryAction={{ label: "Play Again", onClick: handleStart }}

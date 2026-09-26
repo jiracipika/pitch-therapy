@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
 import {
@@ -44,6 +45,7 @@ export default function DroneLockPage() {
   const [targetInterval, setTargetInterval] = useState(INTERVALS[0]);
   const targetHzRef = useRef(NOTE_FREQS[0]);
   const [cents, setCents] = useState(0);
+  const [hasDetectedPitch, setHasDetectedPitch] = useState(false);
   const [, setDetectedFreq] = useState(0);
   const [results, setResults] = useState<
     { round: number; interval: string; cents: number; points: number }[]
@@ -121,6 +123,7 @@ export default function DroneLockPage() {
         analyser.getFloatTimeDomainData(data);
         if (performance.now() < ignoreMicUntilRef.current) {
           pitchHistoryRef.current = [];
+          setHasDetectedPitch(false);
         } else {
           const estimate = estimatePitch(data, ctx.sampleRate);
           if (estimate) {
@@ -135,9 +138,11 @@ export default function DroneLockPage() {
                 calculateCentsDeviation(stable.frequency, targetHzRef.current),
               );
               setCents(measuredCents);
+              setHasDetectedPitch(true);
             }
           } else {
             pitchHistoryRef.current = [];
+            setHasDetectedPitch(false);
           }
         }
         rafRef.current = requestAnimationFrame(detect);
@@ -174,6 +179,7 @@ export default function DroneLockPage() {
     setDroneNote(noteIdx);
     setTargetInterval(interval);
     setCents(0);
+    setHasDetectedPitch(false);
     setDetectedFreq(0);
     setLocked(false);
     setPhase("listening");
@@ -192,11 +198,13 @@ export default function DroneLockPage() {
   };
 
   const handleLock = () => {
+    if (!hasDetectedPitch) return;
     setLocked(true);
     setPhase("scored");
     const absCents = Math.abs(cents);
     const points =
       absCents < 10 ? 200 : absCents < 25 ? 150 : absCents < 50 ? 100 : absCents < 100 ? 50 : 20;
+    answerHaptic(absCents < 25);
     setScore((s) => s + points);
     setResults((r) => [...r, { round, interval: targetInterval.name, cents, points }]);
     trackTimeout(() => {
@@ -215,6 +223,21 @@ export default function DroneLockPage() {
     },
     [stopMic, stopDrone],
   );
+
+  // Runs after the effect above on unmount: clearAllTimeouts would otherwise
+  // cancel the ramped stopDrone timer and leave the oscillator running with
+  // its AudioContext open, so close the drone out synchronously here.
+  useEffect(() => {
+    return () => {
+      droneOscRef.current?.stop();
+      droneOscRef.current = null;
+      droneGainRef.current = null;
+      void droneCtxRef.current?.close();
+      droneCtxRef.current = null;
+      clearAllTimeouts();
+      stopAllTones();
+    };
+  }, [clearAllTimeouts]);
 
   useEffect(() => {
     if (!(phase === "done")) {
@@ -236,14 +259,6 @@ export default function DroneLockPage() {
       });
     }
   }, [phase, recordResult, results, score, totalRounds]);
-
-  // Clear pending timers and audio on unmount (back navigation).
-  useEffect(() => {
-    return () => {
-      clearAllTimeouts();
-      stopAllTones();
-    };
-  }, [clearAllTimeouts]);
 
   if (phase === "done") {
     return (
@@ -425,8 +440,9 @@ export default function DroneLockPage() {
                   fontSize: 28,
                   fontWeight: 700,
                   letterSpacing: "-0.03em",
-                  color:
-                    Math.abs(cents) < 10
+                  color: !hasDetectedPitch
+                    ? "var(--ios-label3)"
+                    : Math.abs(cents) < 10
                       ? "var(--ios-green)"
                       : Math.abs(cents) < 25
                         ? "var(--ios-orange)"
@@ -435,8 +451,14 @@ export default function DroneLockPage() {
                           : "var(--ios-red)",
                 }}
               >
-                {cents > 0 ? "+" : ""}
-                {cents}¢
+                {hasDetectedPitch ? (
+                  <>
+                    {cents > 0 ? "+" : ""}
+                    {cents}¢
+                  </>
+                ) : (
+                  "Listening…"
+                )}
               </div>
               {phase === "scored" && (
                 <div
@@ -466,10 +488,12 @@ export default function DroneLockPage() {
             {phase === "listening" && (
               <button
                 onClick={handleLock}
+                disabled={!hasDetectedPitch}
+                aria-label={hasDetectedPitch ? "Lock in" : "Hum a steady note before locking in"}
                 className="ios-btn-primary"
-                style={{ background: ACCENT }}
+                style={{ background: ACCENT, opacity: hasDetectedPitch ? 1 : 0.5 }}
               >
-                Lock In
+                {hasDetectedPitch ? "Lock In" : "Hum a note first"}
               </button>
             )}
 

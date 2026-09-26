@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
@@ -65,8 +66,12 @@ export default function NameThatNotePage() {
   const [timeLeft, setTimeLeft] = useState(10);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const roundRef = useRef(0);
+  // Synchronous answer latch — state alone is stale for multiple taps inside
+  // one React batch, which would score a round twice.
+  const roundLockedRef = useRef(false);
 
   const startRound = () => {
+    roundLockedRef.current = false;
     const note = QUIZ_NOTES[Math.floor(Math.random() * QUIZ_NOTES.length)];
     setTargetNote(note);
     roundRef.current += 1;
@@ -80,6 +85,13 @@ export default function NameThatNotePage() {
         setTimeLeft((t) => {
           if (t <= 1) {
             if (timerRef.current) clearInterval(timerRef.current);
+            // Record the timed-out round so results match totalRounds and
+            // "CORRECT x/10" doesn't compare against rounds never answered.
+            setResults((r) => [
+              ...r,
+              { round: roundRef.current, correct: false, points: 0, target: note.name, answer: "timeout" },
+            ]);
+            setFeedback("wrong");
             setPhase("timed-out");
             return 0;
           }
@@ -95,11 +107,13 @@ export default function NameThatNotePage() {
     setScore(0);
     setStreak(0);
     setResults([]);
+    roundLockedRef.current = false;
     startRound();
   };
 
   const handleAnswer = (noteName: string) => {
-    if (phase !== "playing") return;
+    if (phase !== "playing" || roundLockedRef.current) return;
+    roundLockedRef.current = true;
     if (timerRef.current) clearInterval(timerRef.current);
     const correct = noteName === targetNote.name;
     const points = correct
@@ -108,6 +122,7 @@ export default function NameThatNotePage() {
         : 100
       : 0;
     setScore((s) => s + points);
+    answerHaptic(correct);
     if (correct) {
       setStreak((s) => {
         const ns = s + 1;

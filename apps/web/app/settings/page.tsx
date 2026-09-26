@@ -5,22 +5,13 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useStatsContext } from '@/components/StatsProvider';
 import { useSettingsContext } from '@/components/SettingsProvider';
 import { GAME_MODE_META } from '@pitch-therapy/core';
-import type { Difficulty } from '@/lib/useSettings';
+import { SETTINGS_MODE_IDS, type Difficulty } from '@/lib/useSettings';
 
 type Diff = 'easy' | 'medium' | 'hard';
 
-// Mode ids that support per-mode difficulty in the settings panel.
-// Kept as a local constant (not GAME_MODES) because not every play mode
-// has a difficulty selector — only the core five.
-const DIFFICULTY_MODE_IDS = [
-  'pitch-match',
-  'note-id',
-  'frequency-guess',
-  'note-wordle',
-  'frequency-wordle',
-] as const;
-
-const MODES = DIFFICULTY_MODE_IDS.map((id) => {
+// Modes shown in the difficulty panel — the games that actually read the
+// stored per-mode difficulty as their next-session default.
+const MODES = SETTINGS_MODE_IDS.map((id) => {
   const meta = GAME_MODE_META[id];
   return { id: meta.id, label: meta.label, icon: meta.icon, color: meta.accentHex };
 });
@@ -234,10 +225,6 @@ export default function SettingsPage() {
             <motion.section className="studio-panel studio-daily-panel" {...fade(0.2)}>
               <div className="studio-panel-heading"><div><span>ABOUT</span><h2>Pitch Therapy</h2></div></div>
               <p>Train your ear. Every day. Built as a listening studio — short, focused sessions for sharper hearing.</p>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ padding: '5px 10px', border: '1px solid var(--pt-stroke)', borderRadius: 999, color: 'var(--ios-label2)', font: '600 9px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace' }}>V 0.1.0</span>
-                <span style={{ padding: '5px 10px', border: '1px solid var(--pt-stroke)', borderRadius: 999, color: 'var(--ios-label2)', font: '600 9px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace' }}>BUILD 2025-Q1</span>
-              </div>
             </motion.section>
           </aside>
         </section>

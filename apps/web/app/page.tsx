@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { GAME_MODE_META, GAME_MODES, MODE_CATEGORIES } from "@pitch-therapy/core";
+import { playTone, stopAllTones } from "@/lib/audio";
 
 const bars = [22, 42, 68, 34, 82, 52, 94, 61, 38, 72, 88, 46, 76, 31, 64, 91, 56, 27, 70, 43, 84, 58, 35, 74, 49, 90, 62, 29, 67, 44, 80, 53];
 const featured = GAME_MODES.slice(0, 6).map((id) => GAME_MODE_META[id]);
+const MODE_COUNT = GAME_MODES.length;
 
 function Waveform({ compact = false }: { compact?: boolean }) {
   const reduce = useReducedMotion();
@@ -25,6 +28,14 @@ function Waveform({ compact = false }: { compact?: boolean }) {
 
 export default function Home() {
   const reduce = useReducedMotion();
+  const [tonePlaying, setTonePlaying] = useState(false);
+
+  const playReferenceTone = () => {
+    stopAllTones();
+    playTone(440, 1.6);
+    setTonePlaying(true);
+    window.setTimeout(() => setTonePlaying(false), 1600);
+  };
 
   return (
     <div className="studio-landing">
@@ -48,21 +59,21 @@ export default function Home() {
             <p>Build a sharper musical ear through beautifully focused drills for pitch, intervals, frequency, and memory.</p>
             <div className="studio-hero-actions">
               <Link href="/dashboard" className="studio-button-primary">Begin your session <span aria-hidden="true">→</span></Link>
-              <Link href="/play-modes" className="studio-button-ghost">Explore 18 exercises</Link>
+              <Link href="/play-modes" className="studio-button-ghost">Explore {MODE_COUNT} exercises</Link>
             </div>
             <div className="studio-hero-proof">
-              <span><b>18</b><small>precision drills</small></span>
+              <span><b>{MODE_COUNT}</b><small>precision drills</small></span>
               <span><b>3 min</b><small>average session</small></span>
               <span><b>∞</b><small>practice rounds</small></span>
             </div>
           </motion.div>
 
           <motion.div className="studio-instrument" initial={reduce ? false : { opacity: 0, x: 36, rotateY: -5 }} animate={{ opacity: 1, x: 0, rotateY: 0 }} transition={{ delay: 0.12, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}>
-            <div className="studio-instrument-top"><span>LIVE INPUT / A4</span><span className="is-live"><i /> LISTENING</span></div>
+            <div className="studio-instrument-top"><span>REFERENCE TONE / A4</span><button type="button" className="is-live" onClick={playReferenceTone} aria-label="Play reference tone A4, 440 hertz"><i /> {tonePlaying ? "PLAYING" : "PLAY A4"}</button></div>
             <div className="studio-note-readout"><span>A</span><div><b>440.0</b><small>HERTZ</small></div></div>
             <Waveform />
             <div className="studio-tuner"><span>−50</span><span>−25</span><strong>0</strong><span>+25</span><span>+50</span><i /></div>
-            <div className="studio-instrument-bottom"><span>PITCH LOCKED</span><b>+02¢</b></div>
+            <div className="studio-instrument-bottom"><span>CONCERT PITCH</span><b>A440</b></div>
           </motion.div>
         </section>
 

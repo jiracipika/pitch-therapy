@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { playTone, getAudioContext, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
@@ -161,6 +162,7 @@ export default function IntervalArcherPage() {
       });
     } else {
       setStreak(0);
+      answerHaptic(false);
     }
     setScore((s) => s + points);
     setResults((r) => [
@@ -282,6 +284,10 @@ export default function IntervalArcherPage() {
         confirmExit={phase === "playing"}
         exitHref="/dashboard"
       >
+        {/* Wrong answers get no FeedbackOverlay — announce them for screen readers */}
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {feedback === "wrong" ? `Not quite. It was a ${targetInterval.name}.` : ""}
+        </span>
         <FeedbackOverlay
           correct={feedback === "correct"}
           show={showFeedbackOverlay}

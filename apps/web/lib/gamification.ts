@@ -5,7 +5,14 @@
  */
 
 import type { GameResult, ModeStats } from "./useStats";
-import { GAME_MODES, GAME_MODE_META, MODE_CATEGORIES, type GameMode, type ModeCategoryId } from "@pitch-therapy/core";
+import {
+  GAME_MODES,
+  GAME_MODE_META,
+  MODE_CATEGORIES,
+  todayDateString,
+  type GameMode,
+  type ModeCategoryId,
+} from "@pitch-therapy/core";
 
 /* ── XP / Level System ── */
 
@@ -69,9 +76,14 @@ export function levelTitle(level: number): string {
 export const DAILY_GOAL_XP = 50;
 
 export function todayXP(results: GameResult[]): number {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayDateString();
   return results
-    .filter((r) => r.date.startsWith(today))
+    .filter((r) => {
+      const played = new Date(r.date);
+      // Local calendar day — the daily goal resets at local midnight, so an
+      // evening session must count toward that same local day (not UTC).
+      return Number.isFinite(played.getTime()) && todayDateString(played) === today;
+    })
     .reduce((sum, r) => sum + r.score + Math.round(r.accuracy * 50), 0);
 }
 
@@ -205,6 +217,11 @@ export const MASTERY_CONFIG: Record<MasteryLevel, { label: string; color: string
 /* ── Last played mode (for resume card) ── */
 
 export function getLastPlayedMode(results: GameResult[]): GameMode | null {
-  if (results.length === 0) return null;
-  return results[results.length - 1].mode as GameMode;
+  // Walk backwards and skip mode ids that no longer exist in the catalog —
+  // a stale/renamed id in stored history must not crash the resume card.
+  for (let i = results.length - 1; i >= 0; i--) {
+    const mode = results[i]?.mode;
+    if (mode && (GAME_MODES as readonly string[]).includes(mode)) return mode as GameMode;
+  }
+  return null;
 }

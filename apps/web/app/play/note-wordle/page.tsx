@@ -111,7 +111,7 @@ export default function NoteWordlePage() {
       if ((error as DOMException).name === "AbortError") return;
       setShareStatus("Could not share. Try again.");
     }
-    window.setTimeout(() => setShareStatus(""), 2500);
+    trackTimeout(() => setShareStatus(""), 2500);
   };
 
   const targetNote = NOTE_NAMES[targetIdx];

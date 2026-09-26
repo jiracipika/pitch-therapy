@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect } from "react";
+import { answerHaptic } from "@/lib/haptics";
 
 interface FeedbackOverlayProps {
   correct: boolean;
@@ -22,10 +23,11 @@ export default function FeedbackOverlay({ correct, show, onDone, streak }: Feedb
 
   useEffect(() => {
     if (show) {
+      answerHaptic(correct);
       const timer = setTimeout(() => onDone?.(), 1000);
       return () => clearTimeout(timer);
     }
-  }, [show, onDone]);
+  }, [show, correct, onDone]);
 
   return (
     <>

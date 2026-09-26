@@ -8,6 +8,7 @@ import WaveVisualizer from "@/components/WaveVisualizer";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { useStatsContext } from "@/components/StatsProvider";
+import { useStoredDifficulty } from "@/components/SettingsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
 import {
   StudioSetup,
@@ -37,7 +38,7 @@ export default function NoteIdPage() {
   const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
-  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const [difficulty, setDifficulty] = useStoredDifficulty("note-id", "easy");
   const [phase, setPhase] = useState<"setup" | "playing" | "feedback" | "done">("setup");
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
@@ -62,6 +63,9 @@ export default function NoteIdPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const roundRef = useRef(0);
   const timedOutRef = useRef(false);
+  // Synchronous answer latch — state alone is stale for multiple taps inside
+  // one React batch, which would score a round twice.
+  const roundLockedRef = useRef(false);
 
   const config = DIFFICULTIES[difficulty];
 
@@ -78,10 +82,12 @@ export default function NoteIdPage() {
     setStreak(0);
     setBestStreak(0);
     setResults([]);
+    roundLockedRef.current = false;
     startRound();
   };
 
   const startRound = () => {
+    roundLockedRef.current = false;
     const { picked, target } = pickNotes(config.options);
     setOptions(picked);
     setTargetNote(target);
@@ -115,6 +121,8 @@ export default function NoteIdPage() {
   };
 
   const handleAnswer = (noteIdx: number, timeout = false) => {
+    if (phase !== "playing" || roundLockedRef.current) return;
+    roundLockedRef.current = true;
     if (timerRef.current) clearInterval(timerRef.current);
     const correct = noteIdx === targetNote;
     const points = isPractice ? 0 : correct ? (config.timeLimit > 0 ? 100 + timeLeft * 5 : 100) : 0;

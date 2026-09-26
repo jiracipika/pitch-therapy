@@ -24,6 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const isPublic = PUBLIC_PATHS.includes(pathname);
 
   useEffect(() => {
     // For now, skip auth check if Supabase isn't configured
@@ -41,14 +42,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
       );
 
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          setUserId(session.user.id);
+      supabase.auth.getSession()
+        .then(({ data: { session } }) => {
+          if (session?.user) {
+            setUserId(session.user.id);
+            setState('authenticated');
+          } else {
+            setState('unauthenticated');
+          }
+        })
+        .catch(() => {
+          // Supabase unreachable — allow through rather than hanging the
+          // whole app on the loading spinner.
           setState('authenticated');
-        } else {
-          setState('unauthenticated');
-        }
-      });
+          setUserId('anonymous');
+        });
 
       supabase.auth.onAuthStateChange((_event, session) => {
         if (session?.user) {
@@ -67,12 +75,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Redirect unauthenticated users
   useEffect(() => {
-    if (state === 'unauthenticated' && !PUBLIC_PATHS.includes(pathname)) {
+    if (state === 'unauthenticated' && !isPublic) {
       router.replace('/auth/login');
     }
-  }, [state, pathname, router]);
+  }, [state, isPublic, pathname, router]);
 
-  if (state === 'loading') {
+  // Public pages (landing, auth) render immediately — an auth check must
+  // never blank them behind a spinner.
+  if (state === 'loading' && !isPublic) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-white" />

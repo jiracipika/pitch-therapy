@@ -4,8 +4,10 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
+import { useStoredDifficulty } from "@/components/SettingsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
 import {
   StudioSetup,
@@ -43,7 +45,7 @@ export default function CentsDeviationPage() {
   const searchParams = useSearchParams();
   const isPractice = searchParams.get("practice") === "true";
   const [phase, setPhase] = useState<"setup" | "playing" | "reveal" | "done">("setup");
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [difficulty, setDifficulty] = useStoredDifficulty("cents-deviation", "medium");
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -61,6 +63,9 @@ export default function CentsDeviationPage() {
   >([]);
   const meterRef = useRef<HTMLDivElement>(null);
   const roundRef = useRef(0);
+  // Synchronous submission latch — state alone is stale for multiple clicks
+  // inside one React batch, which would score a round twice.
+  const roundLockedRef = useRef(false);
   const { trackTimeout, clearAllTimeouts } = useTrackedTimeouts();
 
   const config = DIFF_CONFIG[difficulty];
@@ -98,10 +103,12 @@ export default function CentsDeviationPage() {
     setBestStreak(0);
     setResults([]);
     roundRef.current = 0;
+    roundLockedRef.current = false;
     nextRound();
   };
 
   const nextRound = () => {
+    roundLockedRef.current = false;
     pickRound();
     setPhase("playing");
     roundRef.current += 1;
@@ -109,7 +116,8 @@ export default function CentsDeviationPage() {
   };
 
   const handleSubmit = () => {
-    if (submitted) return;
+    if (submitted || roundLockedRef.current) return;
+    roundLockedRef.current = true;
     setSubmitted(true);
     const error = Math.abs(needlePos - actualCents);
     const points = Math.max(0, Math.round((1 - error / config.centsRange) * 100));
@@ -127,6 +135,7 @@ export default function CentsDeviationPage() {
     } else {
       setStreak(0);
       setLastCorrect(false);
+      answerHaptic(false);
     }
     setResults((r) => [
       ...r,
@@ -248,6 +257,12 @@ export default function CentsDeviationPage() {
         confirmExit={phase === "playing"}
         exitHref="/dashboard"
       >
+        {/* Wrong answers get no FeedbackOverlay — announce them for screen readers */}
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {submitted && !lastCorrect
+            ? `Not quite. The deviation was ${actualCents > 0 ? "+" : ""}${actualCents} cents, you were ${Math.abs(needlePos - actualCents)} cents off.`
+            : ""}
+        </span>
         <FeedbackOverlay
           correct={lastCorrect}
           show={showFeedbackOverlay}
@@ -351,6 +366,7 @@ export default function CentsDeviationPage() {
               background: "var(--ios-bg3)",
               cursor: "pointer",
               overflow: "hidden",
+              touchAction: "none",
             }}
             role="slider"
             tabIndex={0}
@@ -379,6 +395,7 @@ export default function CentsDeviationPage() {
               if (isDragging) handleDrag(e.clientX);
             }}
             onPointerUp={() => setIsDragging(false)}
+            onPointerCancel={() => setIsDragging(false)}
             onPointerLeave={() => setIsDragging(false)}
           >
             {/* Center line */}

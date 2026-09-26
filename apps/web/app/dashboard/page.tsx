@@ -17,7 +17,7 @@ function greeting() {
 function Ring({ value, label }: { value: number; label: string }) {
   const circumference = 2 * Math.PI * 42;
   return (
-    <div className="studio-ring" aria-label={`${label}: ${Math.round(value)} percent`}>
+    <div className="studio-ring" role="img" aria-label={`${label}: ${Math.round(value)} percent`}>
       <svg viewBox="0 0 100 100" aria-hidden="true">
         <circle cx="50" cy="50" r="42" />
         <motion.circle cx="50" cy="50" r="42" initial={{ strokeDashoffset: circumference }} animate={{ strokeDashoffset: circumference * (1 - value / 100) }} style={{ strokeDasharray: circumference }} transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }} />
@@ -93,9 +93,9 @@ export default function Dashboard() {
             </section>
 
             <section className="studio-xp-panel" aria-label="Level progress">
-              <div><span>LEVEL {loaded ? level.level : "—"}</span><b>{loaded ? levelTitle(level.level) : "Loading"}</b></div><strong>{totalXP}<small> XP</small></strong>
-              <i><em style={{ width: `${level.pct}%` }} /></i>
-              <p>{level.xpForNext - level.xpInLevel} XP until your next level.</p>
+              <div><span>LEVEL {loaded ? level.level : "—"}</span><b>{loaded ? levelTitle(level.level) : "Loading"}</b></div><strong>{loaded ? totalXP : "—"}<small> XP</small></strong>
+              <i><em style={{ width: `${loaded ? level.pct : 0}%` }} /></i>
+              <p>{loaded ? `${level.xpForNext - level.xpInLevel} XP until your next level.` : "—"}</p>
             </section>
           </aside>
         </section>

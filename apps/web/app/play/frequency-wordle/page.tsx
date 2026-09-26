@@ -144,7 +144,7 @@ export default function FrequencyWordlePage() {
       if ((error as DOMException).name === "AbortError") return;
       setShareStatus("Could not share. Try again.");
     }
-    window.setTimeout(() => setShareStatus(""), 2500);
+    trackTimeout(() => setShareStatus(""), 2500);
   };
 
   // Clear pending timers and audio on unmount (back navigation).

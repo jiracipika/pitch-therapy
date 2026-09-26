@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { calculateStreak, calculateLongestStreak, normalizeProgressResults } from "@pitch-therapy/core";
+import { calculateStreak, calculateLongestStreak, normalizeProgressResults, todayDateString } from "@pitch-therapy/core";
 
 /* ── Types ── */
 
@@ -29,7 +29,6 @@ export interface UserStats {
   bestStreak: number;
   /** YYYY-MM-DD of the most recent session, or null. */
   lastPlayDate: string | null;
-  dailyCompleted: string[]; // YYYY-MM-DD list of completed dailies
 }
 
 const STORAGE_KEY = "pitch-therapy-stats";
@@ -37,12 +36,10 @@ const MAX_STORED_RESULTS = 500;
 
 interface PersistedStats {
   results: GameResult[];
-  dailyCompleted: string[];
 }
 
 const DEFAULT_PERSISTED: PersistedStats = {
   results: [],
-  dailyCompleted: [],
 };
 
 function loadPersisted(): PersistedStats {
@@ -55,10 +52,10 @@ function loadPersisted(): PersistedStats {
       streak?: number;
       bestStreak?: number;
       lastPlayDate?: string | null;
+      dailyCompleted?: string[];
     };
     return {
       results: Array.isArray(parsed.results) ? normalizeProgressResults(parsed.results) : [],
-      dailyCompleted: Array.isArray(parsed.dailyCompleted) ? parsed.dailyCompleted : [],
     };
   } catch {
     return DEFAULT_PERSISTED;
@@ -78,26 +75,33 @@ function savePersisted(stats: PersistedStats) {
   }
 }
 
-/** Extract the YYYY-MM-DD day key from an ISO timestamp. */
+/**
+ * Extract the YYYY-MM-DD day key from an ISO timestamp, in LOCAL calendar
+ * time. Streaks are anchored to the user's local today/yesterday, so a
+ * session at 8pm in UTC-5 must count as that same local day — the previous
+ * UTC-slice implementation put evening sessions on the wrong day and
+ * permanently showed a zero streak for UTC-negative timezones.
+ */
 function dayKey(iso: string): string {
-  return iso.slice(0, 10);
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return iso.slice(0, 10);
+  return todayDateString(d);
 }
 
 /* ── Derived stats (pure) ── */
 
 /**
- * Build the full UserStats view from the persisted results + dailyCompleted.
+ * Build the full UserStats view from the persisted results.
  * streak / bestStreak / lastPlayDate are *derived* from session history using
  * the canonical, DST-safe @pitch-therapy/core functions, so they can never
  * drift out of sync with the results array.
  */
 function deriveStats(persisted: PersistedStats): UserStats {
-  const { results, dailyCompleted } = persisted;
+  const { results } = persisted;
 
   if (results.length === 0) {
     return {
       results,
-      dailyCompleted,
       streak: 0,
       bestStreak: 0,
       lastPlayDate: null,
@@ -109,7 +113,6 @@ function deriveStats(persisted: PersistedStats): UserStats {
 
   return {
     results,
-    dailyCompleted,
     streak: calculateStreak(dayKeys),
     bestStreak: calculateLongestStreak(dayKeys),
     lastPlayDate,
@@ -136,18 +139,7 @@ export function useStats() {
 
       const updated: PersistedStats = {
         results: [...prev.results, validatedResult].slice(-MAX_STORED_RESULTS),
-        dailyCompleted: prev.dailyCompleted,
       };
-      savePersisted(updated);
-      return updated;
-    });
-  }, []);
-
-  const markDailyCompleted = useCallback(() => {
-    setPersisted((prev) => {
-      const today = new Date().toISOString().slice(0, 10);
-      if (prev.dailyCompleted.includes(today)) return prev;
-      const updated: PersistedStats = { ...prev, dailyCompleted: [...prev.dailyCompleted, today] };
       savePersisted(updated);
       return updated;
     });
@@ -175,5 +167,5 @@ export function useStats() {
     savePersisted(DEFAULT_PERSISTED);
   }, []);
 
-  return { stats, loaded, recordResult, markDailyCompleted, getModeStats, clearStats };
+  return { stats, loaded, recordResult, getModeStats, clearStats };
 }

@@ -7,7 +7,6 @@ interface StatsContextValue {
   stats: UserStats;
   loaded: boolean;
   recordResult: (result: GameResult) => void;
-  markDailyCompleted: () => void;
   getModeStats: (mode: string) => ModeStats;
   clearStats: () => void;
 }

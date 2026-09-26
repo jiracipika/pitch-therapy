@@ -13,6 +13,7 @@ import {
 } from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import { playTone, stopAllTones } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 
 const ACCENT = "#5E5CE6";
 const ROUNDS = 8;
@@ -83,6 +84,9 @@ export default function WaveformMatchPage() {
   const canvasRef1 = useRef<HTMLCanvasElement>(null);
   const canvasRef2 = useRef<HTMLCanvasElement>(null);
   const sliderRef = useRef<HTMLInputElement>(null);
+  // Synchronous submission latch — state alone is stale for multiple clicks
+  // inside one React batch, which would score a round twice.
+  const roundLockedRef = useRef(false);
 
   const nextRound = useCallback(() => {
     const freqs = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25];
@@ -102,6 +106,7 @@ export default function WaveformMatchPage() {
     setScore(0);
     setResults([]);
     setShowResult(false);
+    roundLockedRef.current = false;
     nextRound();
   }, [nextRound]);
 
@@ -109,7 +114,7 @@ export default function WaveformMatchPage() {
     if (canvasRef1.current) drawWaveform(canvasRef1.current, baseFreq, ACCENT, "Target", 0);
     if (canvasRef2.current)
       drawWaveform(canvasRef2.current, baseFreq, "var(--ios-red)", "Detuned", detuneCents);
-  }, [baseFreq, detuneCents]);
+  }, [baseFreq, detuneCents, round]);
 
   useEffect(() => {
     if (phase === "playing") drawCanvases();
@@ -129,7 +134,10 @@ export default function WaveformMatchPage() {
   };
 
   const submit = () => {
+    if (showResult || roundLockedRef.current) return;
+    roundLockedRef.current = true;
     const diff = Math.abs(sliderCents - detuneCents);
+    answerHaptic(diff <= 10);
     const roundScore = Math.max(0, Math.round(100 - diff * 3));
     setLastRoundScore(roundScore);
     setScore((s) => s + roundScore);
@@ -141,6 +149,7 @@ export default function WaveformMatchPage() {
     setShowResult(true);
 
     trackTimeout(() => {
+      roundLockedRef.current = false;
       setShowResult(false);
       if (newResults.length >= ROUNDS) {
         setPhase("done");

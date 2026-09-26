@@ -17,14 +17,16 @@ export interface WebSettings {
 
 /* ── Constants ── */
 
-const STORAGE_KEY = "pitch-therapy-settings-v1";
+export const STORAGE_KEY = "pitch-therapy-settings-v1";
 
+/**
+ * Mode ids that actually read the stored per-mode difficulty as their default.
+ * Games not listed here have their own in-game difficulty selector only.
+ */
 export const SETTINGS_MODE_IDS = [
-  "pitch-match",
   "note-id",
   "frequency-guess",
-  "note-wordle",
-  "frequency-wordle",
+  "cents-deviation",
 ] as const;
 
 const DEFAULT_DIFFICULTY: Record<string, Difficulty> = Object.fromEntries(

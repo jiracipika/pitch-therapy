@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { playTone, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
@@ -53,6 +54,9 @@ export default function PianoTapPage() {
   const [flashKey, setFlashKey] = useState<string | null>(null);
   const totalRounds = 8;
   const roundStartRef = useRef(0);
+  // Synchronous answer latch — state alone is stale for multiple taps inside
+  // one React batch, which would score a round twice.
+  const roundLockedRef = useRef(false);
 
   const pickTarget = useCallback(() => {
     const keys = MODE_CONFIG[mode].keys;
@@ -65,10 +69,12 @@ export default function PianoTapPage() {
     setStreak(0);
     setBestStreak(0);
     setResults([]);
+    roundLockedRef.current = false;
     nextRound();
   };
 
   const nextRound = () => {
+    roundLockedRef.current = false;
     const note = pickTarget();
     setTargetNote(note);
     setSelectedKey(null);
@@ -80,7 +86,8 @@ export default function PianoTapPage() {
   };
 
   const handleKeyTap = (key: string) => {
-    if (phase !== "playing" || feedback) return;
+    if (phase !== "playing" || feedback || roundLockedRef.current) return;
+    roundLockedRef.current = true;
     const freq = NOTE_FREQUENCIES[`${key}4`] || 261.63;
     playTone(freq, 0.3);
 
@@ -100,6 +107,7 @@ export default function PianoTapPage() {
       });
     } else {
       setStreak(0);
+      answerHaptic(false);
     }
     if (!isPractice) setScore((s) => s + points);
     setResults((r) => [...r, { round, correct, points, target: targetNote, answer: key }]);
@@ -222,6 +230,10 @@ export default function PianoTapPage() {
         confirmExit={phase === "playing"}
         exitHref="/dashboard"
       >
+        {/* Wrong answers get no FeedbackOverlay — announce them for screen readers */}
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {feedback === "wrong" ? `Not quite. The note was ${targetNote}.` : ""}
+        </span>
         <FeedbackOverlay
           correct={feedback === "correct"}
           show={showFeedbackOverlay}
@@ -258,7 +270,10 @@ export default function PianoTapPage() {
         {/* Piano keyboard */}
         <div style={{ marginBottom: 20 }}>
           {isChromaticMode ? (
-            /* Proper piano layout: white keys with black keys overlaid */
+            /* Proper piano layout: white keys with black keys overlaid.
+               Black keys are positioned inside an inner container that hugs
+               the white keys — absolute offsets against the outer centered
+               flex box drift left on any viewport wider than the keyboard. */
             <div
               style={{
                 position: "relative",
@@ -267,6 +282,7 @@ export default function PianoTapPage() {
                 height: 128,
               }}
             >
+              <div style={{ position: "relative", display: "flex" }}>
               {/* White keys */}
               {ALL_WHITE.map((key) => {
                 const isTarget = feedback && key === targetNote;
@@ -370,6 +386,7 @@ export default function PianoTapPage() {
                   </motion.button>
                 );
               })}
+              </div>
             </div>
           ) : (
             /* Non-chromatic: simple grid of note buttons */

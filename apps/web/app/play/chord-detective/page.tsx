@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
@@ -69,6 +70,9 @@ export default function ChordDetectivePage() {
   >([]);
   const targetRootRef = useRef("");
   const targetTypeRef = useRef("");
+  // Synchronous submission latch — state alone is stale for multiple clicks
+  // inside one React batch, which would score a round twice.
+  const roundLockedRef = useRef(false);
 
   const nextChord = useCallback(() => {
     const r = ALL_NOTES[Math.floor(Math.random() * ALL_NOTES.length)];
@@ -89,12 +93,17 @@ export default function ChordDetectivePage() {
     setStreak(0);
     setBestStreak(0);
     setResults([]);
+    roundLockedRef.current = false;
     nextChord();
     setRound(1);
     setPhase("playing");
   };
 
   const submitAnswer = () => {
+    // Submit stays mounted during the feedback window — ignore extra clicks
+    // so a round can't be scored twice or skip ahead.
+    if (phase !== "playing" || roundLockedRef.current) return;
+    roundLockedRef.current = true;
     const correctType = selectedType === targetTypeRef.current;
     const correctRoot = !advanced || selectedRoot === targetRootRef.current;
     const allCorrect = correctType && correctRoot;
@@ -111,6 +120,7 @@ export default function ChordDetectivePage() {
     } else {
       setStreak(0);
       setFeedback("wrong");
+      answerHaptic(false);
     }
 
     setResults((r) => [
@@ -127,6 +137,7 @@ export default function ChordDetectivePage() {
 
     trackTimeout(
       () => {
+        roundLockedRef.current = false;
         if (isPractice) {
           nextChord();
           setRound((r) => r + 1);
@@ -237,6 +248,12 @@ export default function ChordDetectivePage() {
         confirmExit={phase === "playing"}
         exitHref="/dashboard"
       >
+        {/* Wrong answers get no FeedbackOverlay — announce them for screen readers */}
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {feedback === "wrong" && phase === "feedback"
+            ? `Not quite. It was ${root} ${chordTypeById(chordType)?.label}.`
+            : ""}
+        </span>
         <FeedbackOverlay
           correct={feedback === "correct"}
           show={showOverlay}

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { playTone, stopAllTones, NOTE_NAMES, NOTE_FREQUENCIES } from "@/lib/audio";
+import { answerHaptic } from "@/lib/haptics";
 import FeedbackOverlay from "@/components/FeedbackOverlay";
 import { useStatsContext } from "@/components/StatsProvider";
 import TrainingShell from "@/components/training/TrainingShell";
@@ -93,6 +94,7 @@ export default function SpeedRoundPage() {
     } else {
       setStreak(0);
       setFeedback("wrong");
+      answerHaptic(false);
     }
 
     const newNote = nextNote();
@@ -189,6 +191,10 @@ export default function SpeedRoundPage() {
         confirmExit={phase === "playing"}
         exitHref="/dashboard"
       >
+        {/* Wrong answers get no FeedbackOverlay — announce them for screen readers */}
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {feedback === "wrong" ? `Not quite. It was ${currentNote}.` : ""}
+        </span>
         <FeedbackOverlay
           correct={feedback === "correct"}
           show={showOverlay}

@@ -108,40 +108,39 @@ export default function TuningBattlePage() {
     const p = players[playerIdx];
     if (!p.selectedNote || p.lockedIn) return;
 
+    // Resolve outside the setPlayers updater: updater functions must be pure
+    // (StrictMode invokes them twice, which double-scheduled the transition).
+    const next = [...players] as [Player, Player];
     const isCorrect = p.selectedNote === targetNote;
     const cents = isCorrect ? 0 : 50; // simplified: correct = 0 cents off, wrong = far off
+    next[playerIdx] = { ...next[playerIdx], lockedIn: true, lastCents: cents };
+    setPlayers(next);
 
-    setPlayers((prev) => {
-      const next = [...prev] as [Player, Player];
-      next[playerIdx] = { ...next[playerIdx], lockedIn: true, lastCents: cents };
+    const other = next[1 - playerIdx];
+    if (!other.lockedIn && !!other.selectedNote) return; // wait for the other player
 
-      const other = next[1 - playerIdx];
-      if (other.lockedIn || !other.selectedNote) {
-        const myCorrect = next[playerIdx].selectedNote === targetNote;
-        const otherCorrect = other.lockedIn && other.selectedNote === targetNote;
+    const myCorrect = next[playerIdx].selectedNote === targetNote;
+    const otherCorrect = other.lockedIn && other.selectedNote === targetNote;
 
-        let winner: string | null = null;
-        if (myCorrect && !otherCorrect) {
-          winner = next[playerIdx].name;
-        } else if (otherCorrect && !myCorrect) {
-          winner = other.name;
-        } else if (myCorrect && otherCorrect) {
-          const myCents = playerIdx === 0 ? cents : other.lastCents;
-          const otherCents = playerIdx === 0 ? other.lastCents : cents;
-          winner = Math.abs(myCents) <= Math.abs(otherCents) ? next[playerIdx].name : other.name;
-        }
+    let winner: string | null = null;
+    if (myCorrect && !otherCorrect) {
+      winner = next[playerIdx].name;
+    } else if (otherCorrect && !myCorrect) {
+      winner = other.name;
+    } else if (myCorrect && otherCorrect) {
+      // Both correct: equal cents — this branch only runs on the second
+      // lock, so "other" is the earlier locker and wins the race.
+      winner = other.name;
+    }
 
-        if (winner === next[0].name) next[0] = { ...next[0], score: next[0].score + 1 };
-        if (winner === next[1].name) next[1] = { ...next[1], score: next[1].score + 1 };
+    if (winner === next[0].name) next[0] = { ...next[0], score: next[0].score + 1 };
+    if (winner === next[1].name) next[1] = { ...next[1], score: next[1].score + 1 };
+    setPlayers(next);
 
-        trackTimeout(() => {
-          setRoundWinner(winner);
-          setPhase("roundResult");
-        }, 0);
-      }
-
-      return next;
-    });
+    trackTimeout(() => {
+      setRoundWinner(winner);
+      setPhase("roundResult");
+    }, 0);
   };
 
   const nextRoundOrEnd = () => {
