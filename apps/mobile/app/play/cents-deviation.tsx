@@ -45,6 +45,18 @@ export default function CentsDeviationScreen() {
   const [results, setResults] = useState<RoundResult[]>([]);
   const sessionStartRef = useRef(0);
   const recordedRef = useRef(false);
+  // Synchronous submission latch — state alone is stale for multiple taps
+  // inside one JS batch, which would score the round twice.
+  const roundLockedRef = useRef(false);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  }, []);
+
+  // Pending tone timers must never outlive this screen.
+  useEffect(() => clearTimers, [clearTimers]);
 
   // Persist session result once when the game completes.
   useEffect(() => {
@@ -77,6 +89,8 @@ export default function CentsDeviationScreen() {
   };
 
   const startGame = (diff: Difficulty) => {
+    clearTimers();
+    roundLockedRef.current = false;
     setDifficulty(diff);
     setRound(0); setScore(0); setStreak(0); setBestStreak(0); setResults([]);
     recordedRef.current = false;
@@ -89,14 +103,15 @@ export default function CentsDeviationScreen() {
 
   const playDeviation = () => {
     playFrequency(baseFreq, 0.8);
-    setTimeout(() => {
+    timersRef.current.push(setTimeout(() => {
       const deviatedFreq = baseFreq * Math.pow(2, actualCents / 1200);
       playFrequency(deviatedFreq, 1.2);
-    }, 1000);
+    }, 1000));
   };
 
   const handleSubmit = () => {
-    if (submitted) return;
+    if (submitted || roundLockedRef.current) return;
+    roundLockedRef.current = true;
     setSubmitted(true);
     const error = Math.abs(needleCents - actualCents);
     const points = Math.max(0, Math.round((1 - error / config.centsRange) * 100));
@@ -112,6 +127,7 @@ export default function CentsDeviationScreen() {
   };
 
   const nextRound = () => {
+    roundLockedRef.current = false;
     const { freq } = pickRound();
     setRound(r => r + 1);
     setPhase('playing');
@@ -191,7 +207,7 @@ export default function CentsDeviationScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
-      <GameHeader score={score} round={round} totalRounds={totalRounds} streak={streak} accent={ACCENT} />
+      <GameHeader score={score} round={round} totalRounds={totalRounds} streak={streak} accent={ACCENT} onBack={() => router.back()} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
         <Text style={{ textAlign: 'center', color: pc.textTertiary, fontSize: 14, marginBottom: 4 }}>Reference: <Text style={{ color: pc.text, fontWeight: '700' }}>{baseNote}</Text></Text>
         <Text style={{ textAlign: 'center', color: pc.textTertiary, fontSize: 12, marginBottom: 16 }}>Listen then set the needle</Text>

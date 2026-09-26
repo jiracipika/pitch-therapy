@@ -1,5 +1,5 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { playTone, playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
@@ -53,6 +53,18 @@ export default function IntervalArcherScreen() {
   const [results, setResults] = useState<RoundResult[]>([]);
   const sessionStartRef = useRef(0);
   const recordedRef = useRef(false);
+  // Synchronous answer latch — state alone is stale for multiple taps inside
+  // one JS batch, which would score the round twice.
+  const answerLockedRef = useRef(false);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  }, []);
+
+  // Pending tone/transition timers must never outlive this screen.
+  useEffect(() => clearTimers, [clearTimers]);
 
   // Persist session result once when the game completes.
   useEffect(() => {
@@ -75,10 +87,10 @@ export default function IntervalArcherScreen() {
     const secondFreq = freq * Math.pow(2, semitones / 12);
     if (intervalMode === 'ascending') {
       playFrequency(freq, 0.5);
-      setTimeout(() => playFrequency(secondFreq, 0.8), 550);
+      timersRef.current.push(setTimeout(() => playFrequency(secondFreq, 0.8), 550));
     } else if (intervalMode === 'descending') {
       playFrequency(secondFreq, 0.5);
-      setTimeout(() => playFrequency(freq, 0.8), 550);
+      timersRef.current.push(setTimeout(() => playFrequency(freq, 0.8), 550));
     } else {
       // Harmonic: play both — approximate with two rapid tones
       playFrequency(freq, 0.6);
@@ -87,6 +99,8 @@ export default function IntervalArcherScreen() {
   };
 
   const startGame = (mode: IntervalMode) => {
+    clearTimers();
+    answerLockedRef.current = false;
     setIntervalMode(mode);
     setRound(0); setScore(0); setStreak(0); setBestStreak(0); setResults([]);
     recordedRef.current = false;
@@ -109,6 +123,7 @@ export default function IntervalArcherScreen() {
   };
 
   const nextRound = (mode?: IntervalMode) => {
+    answerLockedRef.current = false;
     const m = mode || intervalMode;
     pickAndPlay(m);
     setRound(r => r + 1);
@@ -116,7 +131,8 @@ export default function IntervalArcherScreen() {
   };
 
   const handleAnswer = (semitones: number, name: string) => {
-    if (feedback) return;
+    if (feedback || answerLockedRef.current) return;
+    answerLockedRef.current = true;
     const correct = semitones === targetInterval.semitones;
     const semitonesOff = Math.abs(semitones - targetInterval.semitones);
     let points = 0;
@@ -133,10 +149,12 @@ export default function IntervalArcherScreen() {
     setScore(s => s + points);
     setResults(r => [...r, { round, root: rootNote, interval: targetInterval.name, answer: name, correct, points }]);
 
-    setTimeout(() => {
-      if (round >= TOTAL_ROUNDS) { setPhase('results'); }
-      else { nextRound(); }
-    }, 1000);
+    timersRef.current.push(
+      setTimeout(() => {
+        if (round >= TOTAL_ROUNDS) { setPhase('results'); }
+        else { nextRound(); }
+      }, 1000),
+    );
   };
 
   if (phase === 'setup') {
@@ -168,6 +186,9 @@ export default function IntervalArcherScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ marginBottom: 12 }}>
+            <Text style={{ color: pc.textSecondary }}>← Back</Text>
+          </Pressable>
           <Text style={{ color: pc.text, fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Interval Archer Complete!</Text>
           <View style={{ backgroundColor: pc.cardSurface, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: pc.cardBorder, marginBottom: 20, alignItems: 'center' }}>
             <Text style={{ color: ACCENT, fontSize: 48, fontWeight: '700' }}>{score}</Text>
@@ -201,7 +222,7 @@ export default function IntervalArcherScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
-      <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} />
+      <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} onBack={() => router.back()} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
         <Pressable accessibilityRole="button" onPress={() => playIntervalSound(rootFreq, targetInterval.semitones)} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
           <Text style={{ fontSize: 28 }}>🔊</Text>

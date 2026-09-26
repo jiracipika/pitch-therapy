@@ -163,6 +163,9 @@ export default function TuningBattleScreen() {
   if (phase === 'setup') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen, paddingHorizontal: 20, justifyContent: 'center' }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: 56, left: 20 }}>
+          <Text style={{ color: pc.textSecondary }}>← Back</Text>
+        </Pressable>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>⚔️</Text>
         <Text style={{ color: ACCENT, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: 16 }}>Tuning Battle</Text>
         <Text style={{ color: pc.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 8 }}>Two players, one target note. First to lock in wins!</Text>
@@ -185,6 +188,9 @@ export default function TuningBattleScreen() {
   if (phase === 'countdown') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen, justifyContent: 'center', alignItems: 'center' }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: 56, left: 20 }}>
+          <Text style={{ color: pc.textSecondary }}>← Back</Text>
+        </Pressable>
         <Text style={{ color: pc.textSecondary, marginBottom: 8 }}>Listen for the target note</Text>
         <Text style={{ fontSize: 72, fontWeight: '800', color: pc.text }}>{countdown > 0 ? countdown : 'GO!'}</Text>
       </View>
@@ -194,6 +200,9 @@ export default function TuningBattleScreen() {
   if (phase === 'roundResult') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: 56, left: 20 }}>
+          <Text style={{ color: pc.textSecondary }}>← Back</Text>
+        </Pressable>
         <Text style={{ fontSize: 56 }}>{roundWinner ? '🏆' : '🤝'}</Text>
         <Text style={{ color: pc.text, fontSize: 24, fontWeight: '700', marginTop: 16 }}>{roundWinner ? `${roundWinner} wins!` : 'Tie!'}</Text>
         <Text style={{ color: pc.textSecondary, marginTop: 8 }}>Target was <Text style={{ color: pc.text, fontWeight: '600' }}>{targetNote}</Text></Text>

@@ -38,6 +38,20 @@ export default function PianoTapScreen() {
   const [results, setResults] = useState<RoundResult[]>([]);
   const sessionStartRef = useRef(0);
   const recordedRef = useRef(false);
+  // Synchronous answer latch — state alone is stale for multiple taps inside
+  // one JS batch, which would score the round twice.
+  const answerLockedRef = useRef(false);
+  const advanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearAdvance = useCallback(() => {
+    if (advanceRef.current) {
+      clearTimeout(advanceRef.current);
+      advanceRef.current = null;
+    }
+  }, []);
+
+  // Pending round-advance timers must never outlive this screen.
+  useEffect(() => clearAdvance, [clearAdvance]);
 
   // Persist session result once when the game completes.
   useEffect(() => {
@@ -58,6 +72,8 @@ export default function PianoTapScreen() {
   const pickTarget = () => activeKeys[Math.floor(Math.random() * activeKeys.length)];
 
   const startGame = (mode: KeyboardMode) => {
+    clearAdvance();
+    answerLockedRef.current = false;
     setKbMode(mode);
     const first = pickTarget();
     setTarget(first);
@@ -80,7 +96,8 @@ export default function PianoTapScreen() {
   };
 
   const handleKey = (key: string) => {
-    if (feedback) return;
+    if (feedback || answerLockedRef.current) return;
+    answerLockedRef.current = true;
     const freq = NOTE_FREQS_4[key];
     if (freq) playTone(key, freq, 0.3);
 
@@ -95,7 +112,8 @@ export default function PianoTapScreen() {
     setScore(s => s + points);
     setResults(r => [...r, { round, target, answer: key, correct, points }]);
 
-    setTimeout(() => {
+    advanceRef.current = setTimeout(() => {
+      advanceRef.current = null;
       if (round >= TOTAL_ROUNDS) { setPhase('results'); }
       else {
         const next = pickTarget();
@@ -103,6 +121,7 @@ export default function PianoTapScreen() {
         setRound(r => r + 1);
         setFeedback(null);
         setSelected(null);
+        answerLockedRef.current = false;
         const f = NOTE_FREQS_4[next];
         if (f) playTone(next, f);
       }
@@ -138,6 +157,9 @@ export default function PianoTapScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ marginBottom: 12 }}>
+            <Text style={{ color: pc.textSecondary }}>← Back</Text>
+          </Pressable>
           <Text style={{ color: pc.text, fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Piano Tap Complete!</Text>
           <View style={{ backgroundColor: pc.cardSurface, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: pc.cardBorder, marginBottom: 20, alignItems: 'center' }}>
             <Text style={{ color: ACCENT, fontSize: 48, fontWeight: '700' }}>{score}</Text>
@@ -161,7 +183,7 @@ export default function PianoTapScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
-      <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} />
+      <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} onBack={() => router.back()} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
         <Pressable accessibilityRole="button" onPress={handlePlay} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
           <Text style={{ fontSize: 28 }}>🔊</Text>

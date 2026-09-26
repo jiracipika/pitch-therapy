@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { GAME_MODE_META, MODE_CATEGORIES, getModeTrainingCue, type ModeCategoryId } from "@pitch-therapy/core";
+import { GAME_MODE_META, GAME_MODES, MODE_CATEGORIES, getModeTrainingCue, type ModeCategoryId } from "@pitch-therapy/core";
 import { useStatsContext } from "@/components/StatsProvider";
 import { buildCategoryMastery } from "@/lib/gamification";
 
@@ -18,7 +18,7 @@ export default function PlayModesPage() {
     <div className="studio-app-page">
       <div className="pt-page-shell studio-catalog-page">
         <motion.header className="studio-catalog-header" initial={reduce ? false : { opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
-          <span className="studio-overline">EXERCISE LIBRARY / 18 MODES</span>
+          <span className="studio-overline">EXERCISE LIBRARY / {GAME_MODES.length} MODES</span>
           <h1>Train one thing<br /><em>at a time.</em></h1>
           <p>Choose the listening skill you want to sharpen. Every drill is short, focused, and built for repetition.</p>
         </motion.header>

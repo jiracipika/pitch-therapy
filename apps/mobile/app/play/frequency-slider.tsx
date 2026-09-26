@@ -46,6 +46,9 @@ export default function FrequencySliderScreen() {
   const [trackWidth, setTrackWidth] = useState(1);
   const sessionStartRef = useRef(0);
   const recordedRef = useRef(false);
+  // Synchronous submission latch — state alone is stale for multiple taps
+  // inside one JS batch, which would score the round twice.
+  const roundLockedRef = useRef(false);
 
   // Persist session result once when the game completes.
   useEffect(() => {
@@ -72,6 +75,7 @@ export default function FrequencySliderScreen() {
   };
 
   const startGame = () => {
+    roundLockedRef.current = false;
     setRound(1);
     setScore(0);
     setStreak(0);
@@ -103,7 +107,8 @@ export default function FrequencySliderScreen() {
   };
 
   const handleSubmit = () => {
-    if (submitted) return;
+    if (submitted || roundLockedRef.current) return;
+    roundLockedRef.current = true;
     setSubmitted(true);
     const answerFreq = pctToFreq(sliderPct);
     const centsOff = Math.round(1200 * Math.log2(answerFreq / targetFreq));
@@ -118,6 +123,7 @@ export default function FrequencySliderScreen() {
   };
 
   const nextRound = () => {
+    roundLockedRef.current = false;
     const nextFreq = pickTarget();
     setRound(r => r + 1);
     setPhase('playing');
@@ -128,6 +134,11 @@ export default function FrequencySliderScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <ScrollView contentContainerStyle={{ paddingTop: insets.top + 48, paddingHorizontal: 20, paddingBottom: 40 }}>
+          {phase === 'results' && (
+            <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ marginBottom: 12 }}>
+              <Text style={{ color: colors.textSecondary }}>← Back</Text>
+            </Pressable>
+          )}
           {phase === 'results' ? (
             <>
               <Text style={{ color: colors.text, fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Slider Complete!</Text>
@@ -176,7 +187,7 @@ export default function FrequencySliderScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} />
+      <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} onBack={() => router.back()} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
         <Pressable accessibilityRole="button" accessibilityLabel="Replay target tone" onPress={() => playFrequency(targetFreq, 1.0)} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
           <Text style={{ fontSize: 28 }}>🔊</Text>

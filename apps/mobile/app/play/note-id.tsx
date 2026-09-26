@@ -54,6 +54,9 @@ export default function NoteIdScreen() {
   const feedbackLockRef = useRef(false);
   const sessionStartRef = useRef(0);
   const recordedRef = useRef(false);
+  // One-shot transition timers (feedback → next round), tracked so they can't
+  // fire after unmount or leak into a restarted session.
+  const transitionsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const totalRounds = DIFFICULTY_CONFIG[difficulty].rounds;
   const timeLimit = DIFFICULTY_CONFIG[difficulty].timeLimit;
@@ -67,8 +70,16 @@ export default function NoteIdScreen() {
     }
   }, []);
 
+  const clearTransitions = useCallback(() => {
+    transitionsRef.current.forEach(clearTimeout);
+    transitionsRef.current = [];
+  }, []);
+
   // Cleanup on unmount.
-  useEffect(() => clearTimer, [clearTimer]);
+  useEffect(() => {
+    clearTimer();
+    clearTransitions();
+  }, [clearTimer, clearTransitions]);
 
   // Persist session result once when the game completes.
   useEffect(() => {
@@ -104,6 +115,7 @@ export default function NoteIdScreen() {
   const startGame = useCallback(
     (diff: Difficulty) => {
       setDifficulty(diff);
+      clearTransitions();
       feedbackLockRef.current = false;
       recordedRef.current = false;
       sessionStartRef.current = Date.now();
@@ -141,7 +153,7 @@ export default function NoteIdScreen() {
         setTimeLeft(0);
       }
     },
-    [clearTimer],
+    [clearTimer, clearTransitions],
   );
 
   const handlePlay = useCallback(() => {
@@ -162,7 +174,8 @@ export default function NoteIdScreen() {
     setStreak(0);
     setResults((r) => [...r, { target, answer: "timeout", correct: false }]);
 
-    setTimeout(() => {
+    transitionsRef.current.push(
+      setTimeout(() => {
       if (round >= totalRounds) {
         setPhase("results");
       } else {
@@ -177,7 +190,8 @@ export default function NoteIdScreen() {
         if (freq) playTone(next, freq);
         beginCountdown();
       }
-    }, 1000);
+      }, 1000),
+    );
   }, [timeLeft, isTimed, phase, target, round, totalRounds, notePool, beginCountdown]);
 
   const handleAnswer = useCallback(
@@ -204,7 +218,8 @@ export default function NoteIdScreen() {
       setStreak(newStreak);
       setResults((r) => [...r, { target, answer: note, correct }]);
 
-      setTimeout(() => {
+      transitionsRef.current.push(
+        setTimeout(() => {
         if (round >= totalRounds) {
           setPhase("results");
         } else {
@@ -219,7 +234,8 @@ export default function NoteIdScreen() {
           if (freq) playTone(next, freq);
           beginCountdown();
         }
-      }, 900);
+        }, 900),
+      );
     },
     [
       feedback,

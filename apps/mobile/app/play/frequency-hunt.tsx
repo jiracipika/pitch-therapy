@@ -32,6 +32,20 @@ export default function FrequencyHuntScreen() {
   const isTracking = useRef(false);
   const sessionStartRef = useRef<number>(0);
   const recordedRef = useRef(false);
+  // Synchronous lock latch — state alone is stale for multiple taps inside
+  // one JS batch, which would score the round twice.
+  const lockLockedRef = useRef(false);
+  const advanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearAdvance = useCallback(() => {
+    if (advanceRef.current) {
+      clearTimeout(advanceRef.current);
+      advanceRef.current = null;
+    }
+  }, []);
+
+  // Pending round-advance timers must never outlive this screen.
+  useEffect(() => clearAdvance, [clearAdvance]);
 
   // Persist session result once when the game completes.
   useEffect(() => {
@@ -83,6 +97,7 @@ export default function FrequencyHuntScreen() {
   [phase]);
 
   const startRound = () => {
+    lockLockedRef.current = false;
     const freq = Math.round((MIN_FREQ + Math.random() * (MAX_FREQ - MIN_FREQ)) / 10) * 10;
     setTargetFreq(freq);
     const startPos = freqToSlider(freq) * 0.3 + Math.random() * 0.4;
@@ -95,6 +110,8 @@ export default function FrequencyHuntScreen() {
 
   const handleStart = () => {
     void triggerSelectionHaptic();
+    clearAdvance();
+    lockLockedRef.current = false;
     setRound(0); setScore(0); setResults([]);
     sessionStartRef.current = Date.now();
     recordedRef.current = false;
@@ -102,6 +119,8 @@ export default function FrequencyHuntScreen() {
   };
 
   const handleLock = () => {
+    if (lockLockedRef.current) return;
+    lockLockedRef.current = true;
     void triggerImpactMedium();
     clearTimeout(previewRef.current);
     const guess = sliderToFreq(sliderPos);
@@ -111,7 +130,8 @@ export default function FrequencyHuntScreen() {
     setResults((r) => [...r, { diff, points }]);
     playFrequency(targetFreq, 0.5);
     setPhase('result');
-    setTimeout(() => {
+    advanceRef.current = setTimeout(() => {
+      advanceRef.current = null;
       if (round >= totalRounds) setPhase('done');
       else startRound();
     }, 2000);

@@ -27,6 +27,17 @@ export default function PitchMemoryScreen() {
   const timerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const sessionStartRef = useRef<number>(0);
   const recordedRef = useRef(false);
+  // Synchronous input latch — state alone is stale for multiple taps inside
+  // one JS batch, which read stale lives twice and burned two lives for one
+  // mistake.
+  const inputLockedRef = useRef(false);
+
+  const clearTimers = useCallback(() => {
+    timerRef.current.forEach(clearTimeout);
+    timerRef.current = [];
+  }, []);
+
+  useEffect(() => clearTimers, [clearTimers]);
 
   // Persist session result once when the game ends.
   // Rounds = levels completed (level-1 because level increments before game over).
@@ -44,8 +55,6 @@ export default function PitchMemoryScreen() {
     });
   }, [phase, level, score, recordResult]);
 
-  useEffect(() => () => timerRef.current.forEach(clearTimeout), []);
-
   const freq = (i: number) => NOTE_FREQS_4[NOTE_NAMES[i]] ?? 261.63;
 
   const playSequence = useCallback((seq: number[]) => {
@@ -54,11 +63,16 @@ export default function PitchMemoryScreen() {
       setTimeout(() => playFrequency(freq(noteIdx), tempo), i * (tempo + 0.15) * 1000)
     );
     timerRef.current.push(
-      setTimeout(() => setPhase('input'), seq.length * (tempo + 0.15) * 1000 + 300)
+      setTimeout(() => {
+        inputLockedRef.current = false;
+        setPhase('input');
+      }, seq.length * (tempo + 0.15) * 1000 + 300)
     );
   }, []);
 
   const startGame = () => {
+    clearTimers();
+    inputLockedRef.current = true; // locked until the sequence finishes playing
     const seq = Array.from({ length: 2 }, () => Math.floor(Math.random() * 12));
     setSequence(seq);
     setPlayerInput([]);
@@ -69,20 +83,23 @@ export default function PitchMemoryScreen() {
     sessionStartRef.current = Date.now();
     recordedRef.current = false;
     setPhase('playing');
-    setTimeout(() => playSequence(seq), 500);
+    timerRef.current.push(setTimeout(() => playSequence(seq), 500));
   };
 
   const nextLevel = () => {
+    clearTimers();
+    inputLockedRef.current = true;
     const newSeq = [...sequence, Math.floor(Math.random() * 12)];
     setSequence(newSeq);
     setPlayerInput([]);
     setLevel((l) => l + 1);
     setPhase('playing');
-    setTimeout(() => playSequence(newSeq), 400);
+    timerRef.current.push(setTimeout(() => playSequence(newSeq), 400));
   };
 
   const handlePianoTap = (noteIdx: number) => {
-    if (phase !== 'input') return;
+    if (phase !== 'input' || inputLockedRef.current) return;
+    inputLockedRef.current = true;
     playFrequency(freq(noteIdx), 0.3);
     const newInput = [...playerInput, noteIdx];
     setPlayerInput(newInput);
@@ -94,12 +111,14 @@ export default function PitchMemoryScreen() {
       setPhase('feedback');
       const newLives = lives - 1;
       setLives(newLives);
-      setTimeout(() => {
-        if (newLives <= 0) { setPhase('done'); return; }
-        setPlayerInput([]);
-        setPhase('playing');
-        playSequence(sequence);
-      }, 1500);
+      timerRef.current.push(
+        setTimeout(() => {
+          if (newLives <= 0) { setPhase('done'); return; }
+          setPlayerInput([]);
+          setPhase('playing');
+          playSequence(sequence);
+        }, 1500),
+      );
       return;
     }
 
@@ -110,8 +129,12 @@ export default function PitchMemoryScreen() {
       setStreak((s) => s + 1);
       setFeedback('correct');
       setPhase('feedback');
-      setTimeout(nextLevel, 1200);
+      timerRef.current.push(setTimeout(nextLevel, 1200));
+      return;
     }
+
+    // Correct mid-sequence note — allow the next tap.
+    inputLockedRef.current = false;
   };
 
   if (phase === 'done') {

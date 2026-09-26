@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radii, shadows, typography } from '@/lib/theme';
@@ -9,9 +9,11 @@ interface GameHeaderProps {
   totalRounds: number;
   streak: number;
   accent?: string;
+  /** Renders a back chevron — for screens whose playing phase has no other exit. */
+  onBack?: () => void;
 }
 
-export function GameHeader({ score, round, totalRounds, streak, accent = colors.pitchMatch }: GameHeaderProps) {
+export function GameHeader({ score, round, totalRounds, streak, accent = colors.pitchMatch, onBack }: GameHeaderProps) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -22,8 +24,23 @@ export function GameHeader({ score, round, totalRounds, streak, accent = colors.
       style={[styles.container, { borderColor: accent + '40', marginTop: Math.max(14, insets.top + 8) }]}
     >
       <View style={styles.metric}>
-        <Text style={styles.label}>Round</Text>
-        <Text style={styles.metricValue}>{round}/{totalRounds}</Text>
+        <View style={styles.metricInner}>
+          {onBack ? (
+            <Pressable
+              onPress={onBack}
+              accessibilityRole="button"
+              accessibilityLabel="Back to dashboard"
+              hitSlop={10}
+              style={styles.backBtn}
+            >
+              <Text style={styles.backBtnText}>‹</Text>
+            </Pressable>
+          ) : null}
+          <View style={{ flex: 1 }}>
+            <Text style={styles.label}>Round</Text>
+            <Text style={styles.metricValue}>{totalRounds > 0 ? `${round}/${totalRounds}` : round}</Text>
+          </View>
+        </View>
       </View>
       <View style={styles.scorePill} accessibilityLabel={`Score ${score}`}>
         <Text style={[styles.scoreText, { color: accent }]}>{score}</Text>
@@ -51,6 +68,26 @@ const styles = StyleSheet.create({
   metric: {
     flex: 1,
     gap: 3,
+  },
+  metricInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  backBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backBtnText: {
+    color: colors.textSecondary,
+    fontSize: 22,
+    fontWeight: '600',
+    marginTop: -2,
   },
   metricRight: {
     alignItems: 'flex-end',

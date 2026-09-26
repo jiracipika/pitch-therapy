@@ -55,8 +55,12 @@ export default function NoteWordleScreen() {
   const [phase, setPhase] = useState<"playing" | "won" | "lost">("playing");
   const sessionStartRef = useRef(Date.now());
   const recordedRef = useRef(false);
+  // Synchronous submit latch — state alone is stale for multiple taps inside
+  // one JS batch, which would append the same guess twice and burn an attempt.
+  const submitLockedRef = useRef(false);
 
   const initGame = () => {
+    submitLockedRef.current = false;
     setTargetNote(randomTarget());
     setGuesses([]);
     setCurrentGuess(null);
@@ -82,7 +86,9 @@ export default function NoteWordleScreen() {
   };
 
   const submitGuess = () => {
+    if (submitLockedRef.current) return;
     if (!currentGuess || guesses.length >= MAX_GUESSES || phase !== "playing") return;
+    submitLockedRef.current = true;
 
     const feedback = getNoteWordleFeedback(currentGuess, targetNote);
     const frequency = NOTE_FREQS_4[currentGuess];
@@ -91,6 +97,7 @@ export default function NoteWordleScreen() {
     const nextGuesses = [...guesses, { note: currentGuess, feedback }];
     setGuesses(nextGuesses);
     setCurrentGuess(null);
+    submitLockedRef.current = false;
 
     if (feedback === "correct") {
       void triggerCorrectHaptic();

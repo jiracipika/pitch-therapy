@@ -57,8 +57,12 @@ export default function FrequencyWordleScreen() {
   const [phase, setPhase] = useState<"playing" | "won" | "lost">("playing");
   const sessionStartRef = useRef(Date.now());
   const recordedRef = useRef(false);
+  // Synchronous submit latch — state alone is stale for multiple taps inside
+  // one JS batch, which would append the same guess twice and burn an attempt.
+  const submitLockedRef = useRef(false);
 
   const initGame = () => {
+    submitLockedRef.current = false;
     setTargetFrequency(randomTarget());
     setGuesses([]);
     setInputValue("");
@@ -82,6 +86,7 @@ export default function FrequencyWordleScreen() {
   }, [guesses.length, phase, recordResult]);
 
   const submitGuess = () => {
+    if (submitLockedRef.current) return;
     if (phase !== "playing" || guesses.length >= FREQUENCY_WORDLE_MAX_GUESSES) return;
 
     const parsed = parseFrequencyGuess(inputValue);
@@ -91,6 +96,7 @@ export default function FrequencyWordleScreen() {
       AccessibilityInfo.announceForAccessibility(message);
       return;
     }
+    submitLockedRef.current = true;
 
     setInputError("");
     void playFrequency(parsed.value, 0.3);
@@ -98,6 +104,7 @@ export default function FrequencyWordleScreen() {
     const nextGuesses = [...guesses, { frequency: parsed.value, ...result }];
     setGuesses(nextGuesses);
     setInputValue("");
+    submitLockedRef.current = false;
 
     if (result.feedback === "correct") {
       void triggerCorrectHaptic();

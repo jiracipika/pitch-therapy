@@ -26,6 +26,18 @@ export default function WaveformMatchScreen() {
   const [results, setResults] = useState<{ round: number; detune: number; answer: number; pts: number }[]>([]);
   const sessionStartRef = useRef(0);
   const recordedRef = useRef(false);
+  // Synchronous submission latch — state alone is stale for multiple taps
+  // inside one JS batch, which would score the round twice.
+  const roundLockedRef = useRef(false);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  }, []);
+
+  // Pending tone timers must never outlive this screen.
+  useEffect(() => clearTimers, [clearTimers]);
 
   // Persist session result once when the game completes.
   useEffect(() => {
@@ -44,22 +56,27 @@ export default function WaveformMatchScreen() {
   const FREQS = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25];
 
   const nextRound = useCallback(() => {
+    roundLockedRef.current = false;
     const f = FREQS[Math.floor(Math.random() * FREQS.length)];
     const cents = (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 40) + 10);
     setBaseFreq(f); setDetuneCents(cents); setSliderCents(0); setRound(r => r + 1); setPhase('playing');
     playFrequency(f, 0.4);
-    setTimeout(() => playFrequency(centsToFreq(f, cents), 0.4), 600);
+    timersRef.current.push(setTimeout(() => playFrequency(centsToFreq(f, cents), 0.4), 600));
   }, []);
 
   const startGame = useCallback(() => {
     void triggerSelectionHaptic();
+    clearTimers();
+    roundLockedRef.current = false;
     setRound(0); setScore(0); setResults([]);
     recordedRef.current = false;
     sessionStartRef.current = Date.now();
     nextRound();
-  }, [nextRound]);
+  }, [clearTimers, nextRound]);
 
   const submit = useCallback(() => {
+    if (roundLockedRef.current) return;
+    roundLockedRef.current = true;
     const diff = Math.abs(sliderCents - detuneCents);
     const pts = Math.max(0, Math.round(100 - diff * 3));
     if (pts >= 70) void triggerCorrectHaptic();
@@ -82,6 +99,9 @@ export default function WaveformMatchScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
         <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40, alignItems: 'center' }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ alignSelf: 'flex-start' }}>
+            <Text style={{ color: pc.textSecondary }}>← Back</Text>
+          </Pressable>
           <Text style={{ fontSize: 48 }}>🌊</Text>
           <Text style={{ color: pc.text, fontSize: 28, fontWeight: '700', marginTop: 16 }}>Results</Text>
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
@@ -103,6 +123,9 @@ export default function WaveformMatchScreen() {
   if (phase === 'setup') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen, paddingHorizontal: 20, justifyContent: 'center' }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: 56, left: 20 }}>
+          <Text style={{ color: pc.textSecondary }}>← Back</Text>
+        </Pressable>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>🌊</Text>
         <Text style={{ color: ACCENT, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: 16 }}>Waveform Match</Text>
         <Text style={{ color: pc.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 8 }}>Align waveforms by detecting sharp/flat</Text>

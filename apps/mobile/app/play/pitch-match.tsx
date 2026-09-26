@@ -1,5 +1,5 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
@@ -42,6 +42,21 @@ export default function PitchMatchScreen() {
   const resultsRef = useRef<RoundRecord[]>([]);
   const sessionStartRef = useRef(0);
   const recordedRef = useRef(false);
+  // Pressable callbacks can run more than once before React commits a state
+  // update. Lock synchronously so rapid taps cannot record duplicate rounds.
+  const answerLockedRef = useRef(false);
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearTransition = useCallback(() => {
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+      transitionTimeoutRef.current = null;
+    }
+  }, []);
+
+  // A pending round transition must never outlive this screen. Without this,
+  // leaving or pressing Stop can restart/advance the abandoned session.
+  useEffect(() => clearTransition, [clearTransition]);
 
   // Persist session result once when the game completes.
   useEffect(() => {
@@ -64,10 +79,13 @@ export default function PitchMatchScreen() {
     setTargetNote(noteIdx);
     setPhase('playing');
     round.current = nextRound;
+    answerLockedRef.current = false;
     playFrequency(freq(noteIdx));
   };
 
   const handleStart = () => {
+    clearTransition();
+    answerLockedRef.current = false;
     setScore(0);
     setStreak(0);
     resultsRef.current = [];
@@ -76,7 +94,18 @@ export default function PitchMatchScreen() {
     startRound(1);
   };
 
+  const handleStop = () => {
+    // Cancel the pending next-round timer first — otherwise a Stop pressed
+    // during the feedback window lets the timeout restart the session the
+    // user just ended.
+    clearTransition();
+    answerLockedRef.current = false;
+    setPhase('idle');
+  };
+
   const handleAssess = (option: (typeof ACCURACY_OPTIONS)[number]) => {
+    if (answerLockedRef.current) return;
+    answerLockedRef.current = true;
     const targetName = NOTE_NAMES[targetNote];
     const nextScore = score + option.points;
     const nextStreak = option.correct ? streak + 1 : 0;
@@ -91,7 +120,10 @@ export default function PitchMatchScreen() {
     if (round.current >= totalRounds) {
       setPhase('done');
     } else {
-      setTimeout(() => startRound(round.current + 1), 800);
+      transitionTimeoutRef.current = setTimeout(() => {
+        transitionTimeoutRef.current = null;
+        startRound(round.current + 1);
+      }, 800);
     }
   };
 
@@ -245,7 +277,7 @@ export default function PitchMatchScreen() {
         </View>
 
         <Pressable
-          onPress={() => setPhase('idle')}
+          onPress={handleStop}
           style={styles.linkBtn}
           accessibilityRole="button"
           accessibilityLabel="Stop current game"

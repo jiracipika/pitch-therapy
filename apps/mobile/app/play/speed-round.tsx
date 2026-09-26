@@ -44,11 +44,19 @@ export default function SpeedRoundScreen() {
   const resultsRef = useRef<RoundRecord[]>([]);
   const sessionStartRef = useRef(0);
   const recordedRef = useRef(false);
+  // Synchronous answer latch — state alone is stale for multiple taps inside
+  // one JS batch, which would double-count a single tap.
+  const answerLockedRef = useRef(false);
+  const nextNoteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
+    }
+    if (nextNoteTimeoutRef.current) {
+      clearTimeout(nextNoteTimeoutRef.current);
+      nextNoteTimeoutRef.current = null;
     }
   }, []);
 
@@ -126,7 +134,8 @@ export default function SpeedRoundScreen() {
 
   const handleTap = useCallback(
     (note: string) => {
-      if (answerLocked || phase !== 'playing') return;
+      if (answerLocked || answerLockedRef.current || phase !== 'playing') return;
+      answerLockedRef.current = true;
       setAnswerLocked(true);
 
       const isCorrect = note === currentNote;
@@ -150,7 +159,11 @@ export default function SpeedRoundScreen() {
         { note: currentNote, answer: note, correct: isCorrect },
       ];
 
-      setTimeout(() => nextNote(), 350);
+      nextNoteTimeoutRef.current = setTimeout(() => {
+        nextNoteTimeoutRef.current = null;
+        answerLockedRef.current = false;
+        nextNote();
+      }, 350);
     },
     [answerLocked, currentNote, phase, nextNote, streak],
   );

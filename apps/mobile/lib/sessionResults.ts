@@ -15,6 +15,7 @@ import {
   createAsyncWriteQueue,
   normalizeProgressResults,
   reconcilePersistedProgressResults,
+  todayDateString,
   type ProgressResult,
 } from '@pitch-therapy/core';
 
@@ -69,7 +70,13 @@ function notify() {
 function deriveStats(results: SessionResult[]): SessionStats {
   if (results.length === 0) return { ...EMPTY_STATS, results: [], persistenceError };
 
-  const dayKeys = results.map((r) => r.date.slice(0, 10));
+  // Local calendar day keys — streaks anchor to the user's local
+  // today/yesterday, so slicing raw ISO (UTC) put evening sessions on the
+  // wrong day and showed a zero streak west of UTC.
+  const dayKeys = results.map((r) => {
+    const played = new Date(r.date);
+    return Number.isFinite(played.getTime()) ? todayDateString(played) : r.date.slice(0, 10);
+  });
   const lastPlayDate = dayKeys.reduce((latest, key) => (key > latest ? key : latest), dayKeys[0]!);
 
   const totalCorrect = Math.round(

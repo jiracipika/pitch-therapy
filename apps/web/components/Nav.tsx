@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
+import { GAME_MODES } from '@pitch-therapy/core';
 
 type IconName = 'home' | 'modes' | 'daily' | 'progress' | 'settings';
 
@@ -24,7 +25,7 @@ function Icon({ name, active }: { name: IconName; active: boolean }) {
 
 const TABS: { href: string; label: string; kicker: string; icon: IconName }[] = [
   { href: '/dashboard', label: 'Studio', kicker: 'Your session', icon: 'home' },
-  { href: '/play-modes', label: 'Exercises', kicker: '18 modes', icon: 'modes' },
+  { href: '/play-modes', label: 'Exercises', kicker: `${GAME_MODES.length} modes`, icon: 'modes' },
   { href: '/daily', label: 'Daily', kicker: 'Fresh drill', icon: 'daily' },
   { href: '/progress', label: 'Insights', kicker: 'Hear growth', icon: 'progress' },
   { href: '/settings', label: 'Settings', kicker: 'Tune the app', icon: 'settings' },

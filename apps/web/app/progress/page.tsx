@@ -329,7 +329,7 @@ export default function ProgressPage() {
             {hasData && (
               <motion.section className="studio-panel" {...fade(0.22)}>
                 <div className="studio-panel-heading">
-                  <div><span>ALL 18</span><h2>Per mode</h2></div>
+                  <div><span>ALL {MODES.length}</span><h2>Per mode</h2></div>
                   <Link href="/play-modes">Browse ↗</Link>
                 </div>
                 <div className="studio-row-list">

@@ -43,6 +43,18 @@ export default function DroneLockScreen() {
   const [results, setResults] = useState<{ interval: string; points: number }[]>([]);
   const sessionStartRef = useRef<number>(0);
   const recordedRef = useRef(false);
+  // Pressable callbacks can run more than once before React commits a state
+  // update. Lock synchronously so rapid taps cannot record duplicate rounds.
+  const answerLockedRef = useRef(false);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  }, []);
+
+  // Pending tone/transition timers must never outlive this screen.
+  useEffect(() => clearTimers, [clearTimers]);
 
   // Persist session result once when the game completes.
   useEffect(() => {
@@ -62,6 +74,7 @@ export default function DroneLockScreen() {
   const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQS_4[n] ?? 261.63);
 
   const startRound = useCallback(() => {
+    answerLockedRef.current = false;
     const noteIdx = Math.floor(Math.random() * 7) + 3; // D4–B4
     const interval = INTERVALS[Math.floor(Math.random() * INTERVALS.length)];
     setDroneNote(noteIdx);
@@ -73,19 +86,23 @@ export default function DroneLockScreen() {
     const targetHz = droneHz * Math.pow(2, interval.semitones / 12);
     // Play drone first, then target note 300ms later
     playFrequency(droneHz, 3.0);
-    setTimeout(() => playFrequency(targetHz, 1.0), 300);
+    timersRef.current.push(setTimeout(() => playFrequency(targetHz, 1.0), 300));
   }, [NOTE_FREQS]);
 
   const handleStart = useCallback(() => {
+    clearTimers();
+    answerLockedRef.current = false;
     setRound(0);
     setScore(0);
     setResults([]);
     sessionStartRef.current = Date.now();
     recordedRef.current = false;
     startRound();
-  }, [startRound]);
+  }, [clearTimers, startRound]);
 
   const handleAssess = useCallback((option: typeof ACCURACY_OPTIONS[number]) => {
+    if (answerLockedRef.current) return;
+    answerLockedRef.current = true;
     if (option.points >= 150) void triggerCorrectHaptic();
     else void triggerIncorrectHaptic();
     setLastPoints(option.points);
@@ -93,13 +110,15 @@ export default function DroneLockScreen() {
     setResults(r => [...r, { interval: targetInterval.name, points: option.points }]);
     setPhase('scored');
 
-    setTimeout(() => {
-      if (round >= totalRounds) {
-        setPhase('done');
-      } else {
-        startRound();
-      }
-    }, 1500);
+    timersRef.current.push(
+      setTimeout(() => {
+        if (round >= totalRounds) {
+          setPhase('done');
+        } else {
+          startRound();
+        }
+      }, 1500),
+    );
   }, [round, totalRounds, targetInterval, startRound]);
 
   if (phase === 'done') {

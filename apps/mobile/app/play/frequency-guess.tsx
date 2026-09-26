@@ -99,10 +99,25 @@ export default function FrequencyGuessScreen() {
 
   const sessionStartRef = useRef(0);
   const recordedRef = useRef(false);
+  // Synchronous submission latch — state alone is stale for multiple taps
+  // inside one JS batch, which would score the round twice.
+  const roundLockedRef = useRef(false);
+  const advanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearAdvance = useCallback(() => {
+    if (advanceRef.current) {
+      clearTimeout(advanceRef.current);
+      advanceRef.current = null;
+    }
+  }, []);
+
+  // Pending round-advance timers must never outlive this screen.
+  useEffect(() => clearAdvance, [clearAdvance]);
 
   const totalRounds = DIFFICULTY_CONFIG[difficulty].rounds;
 
   const startRound = useCallback(() => {
+    roundLockedRef.current = false;
     const pick = pickRandom(QUIZ_FREQS);
     setTargetNote(pick.note);
     setTargetHz(pick.hz);
@@ -113,6 +128,8 @@ export default function FrequencyGuessScreen() {
   }, []);
 
   const startGame = useCallback((diff: Difficulty) => {
+    clearAdvance();
+    roundLockedRef.current = false;
     setDifficulty(diff);
     setRound(1);
     setScore(0);
@@ -128,7 +145,7 @@ export default function FrequencyGuessScreen() {
     setSliderVal(440);
     setRoundStart(Date.now());
     playFrequency(pick.hz);
-  }, []);
+  }, [clearAdvance]);
 
   // Persist session result once when the game completes.
   useEffect(() => {
@@ -148,7 +165,8 @@ export default function FrequencyGuessScreen() {
   const handlePlayGuess = useCallback(() => { playFrequency(sliderVal); }, [sliderVal]);
 
   const handleSubmit = useCallback(() => {
-    if (feedback !== null) return;
+    if (feedback !== null || roundLockedRef.current) return;
+    roundLockedRef.current = true;
     const elapsed = Date.now() - roundStart;
     const err = pctError(sliderVal, targetHz);
     const correct = err < 0.05;
@@ -163,7 +181,8 @@ export default function FrequencyGuessScreen() {
     setStreak(newStreak);
     setResults((r) => [...r, { targetHz, targetNote, guessHz: sliderVal, errorPct: err, correct }]);
 
-    setTimeout(() => {
+    advanceRef.current = setTimeout(() => {
+      advanceRef.current = null;
       if (round >= totalRounds) {
         setPhase('results');
       } else {

@@ -149,11 +149,19 @@ export default function DroneLockPage() {
       };
       detect();
     } catch (err) {
+      // This mode is unplayable without a mic (Lock In requires a detected
+      // pitch) — abort the just-started session instead of leaving the user
+      // on a dead meter with a disabled button.
+      stopDrone();
       setMicError(
         err instanceof Error && err.name === "NotAllowedError"
           ? "Microphone access denied. Please allow mic access in your browser settings."
           : "Could not access microphone. Please check your device."
       );
+      setPhase("idle");
+      setRound(0);
+      setScore(0);
+      setResults([]);
     }
   };
 

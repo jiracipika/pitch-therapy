@@ -6,10 +6,11 @@ import { SettingsProvider } from "@/components/SettingsProvider";
 import { StatsProvider } from "@/components/StatsProvider";
 import AppTransitionShell from "@/components/AppTransitionShell";
 import DesktopTopBar from "@/components/DesktopTopBar";
+import { GAME_MODES } from "@pitch-therapy/core";
 
 export const metadata: Metadata = {
   title: "Pitch Therapy",
-  description: "Train your ear with 18 game modes. Daily challenges, streaks, and stats.",
+  description: `Train your ear with ${GAME_MODES.length} game modes. Daily challenges, streaks, and stats.`,
 };
 
 export const viewport = {

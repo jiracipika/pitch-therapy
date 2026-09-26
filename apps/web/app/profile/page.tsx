@@ -96,7 +96,7 @@ export default function ProfilePage() {
       <div className="pt-page-shell studio-dashboard">
         <motion.header className="studio-inner-header" {...fade(0)}>
           <div>
-            <span className="studio-overline">EAR PROFILE / {modesPlayed} OF 18 MODES</span>
+            <span className="studio-overline">EAR PROFILE / {modesPlayed} OF {GAME_MODES.length} MODES</span>
             <h1>{loaded ? profile.title : 'Your ear,'}<br /><em>{loaded ? 'on record.' : 'undiscovered.'}</em></h1>
             <p>A dynamic snapshot of where your hearing strengths are evolving across every listening skill.</p>
           </div>
