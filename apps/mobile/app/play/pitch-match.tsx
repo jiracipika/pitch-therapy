@@ -1,11 +1,12 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
-import { GAME_MODE_META } from '@pitch-therapy/core';
+import { GAME_MODE_META, calculateCentsDeviation } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
 import { GameResultsScreen, GameResultStats, GameResultRow } from '@/components/GameResultsScreen';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useMicPitch } from '@/lib/micPitch';
 import { useSessionResults } from '@/lib/sessionResults';
 import { colors, typography } from '@/lib/theme';
 
@@ -14,8 +15,11 @@ const ACCENT = MODE.accentHex;
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
 
 type Phase = 'idle' | 'playing' | 'done';
+/** Mic detection is primary (parity with web); self-assessment is the
+ *  fallback when the mic is denied or the dev client predates the module. */
+type InputMode = 'mic' | 'self-assess';
 
-// Self-assessment accuracy levels matching the web scoring formula:
+// Self-assessment accuracy levels matching the web scoring tiers:
 // Perfect ~0¢ → 100pts, Good ~30¢ → 40pts, Missed → 0pts
 const ACCURACY_OPTIONS = [
   { label: 'Perfect', emoji: '🎯', cents: 0,  points: 100, correct: true },
@@ -33,12 +37,17 @@ interface RoundRecord {
 export default function PitchMatchScreen() {
   const router = useRouter();
   const { recordResult } = useSessionResults();
+  const mic = useMicPitch();
   const [phase, setPhase] = useState<Phase>('idle');
+  const [inputMode, setInputMode] = useState<InputMode>('self-assess');
   const round = useRef(0);
   const totalRounds = 5;
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [targetNote, setTargetNote] = useState(0);
+  const targetHzRef = useRef(440);
+  const [cents, setCents] = useState(0);
+  const [hasDetectedPitch, setHasDetectedPitch] = useState(false);
   const resultsRef = useRef<RoundRecord[]>([]);
   const sessionStartRef = useRef(0);
   const recordedRef = useRef(false);
@@ -74,16 +83,35 @@ export default function PitchMatchScreen() {
 
   const freq = (i: number) => NOTE_FREQS_4[NOTE_NAMES[i]] ?? 440;
 
+  // Live detection → cents against the current target (octave-agnostic, same
+  // as web). Runs only while the mic stream is active.
+  useEffect(() => {
+    if (inputMode !== 'mic' || phase !== 'playing') return;
+    const estimate = mic.latestEstimate;
+    if (!estimate) {
+      setHasDetectedPitch(false);
+      return;
+    }
+    setCents(Math.round(calculateCentsDeviation(estimate.frequency, targetHzRef.current)));
+    setHasDetectedPitch(true);
+  }, [mic.latestEstimate, inputMode, phase]);
+
   const startRound = (nextRound: number) => {
     const noteIdx = Math.floor(Math.random() * 12);
     setTargetNote(noteIdx);
+    targetHzRef.current = freq(noteIdx);
     setPhase('playing');
     round.current = nextRound;
+    setCents(0);
+    setHasDetectedPitch(false);
     answerLockedRef.current = false;
+    // The target tone plays through the speaker — ignore the mic while it
+    // sounds so the reference isn't scored as the user's voice.
+    if (inputMode === 'mic') mic.suppressUntil(950);
     playFrequency(freq(noteIdx));
   };
 
-  const handleStart = () => {
+  const beginSession = useCallback(async () => {
     clearTransition();
     answerLockedRef.current = false;
     setScore(0);
@@ -91,8 +119,26 @@ export default function PitchMatchScreen() {
     resultsRef.current = [];
     sessionStartRef.current = Date.now();
     recordedRef.current = false;
-    startRound(1);
-  };
+
+    let mode: InputMode = 'self-assess';
+    const status = await mic.start();
+    if (status === 'active') mode = 'mic';
+    setInputMode(mode);
+    // startRound reads inputMode from state which won't have committed yet —
+    // suppress from here for the first round in either mode.
+    const noteIdx = Math.floor(Math.random() * 12);
+    setTargetNote(noteIdx);
+    targetHzRef.current = freq(noteIdx);
+    setCents(0);
+    setHasDetectedPitch(false);
+    setPhase('playing');
+    round.current = 1;
+    answerLockedRef.current = false;
+    if (mode === 'mic') mic.suppressUntil(950);
+    playFrequency(freq(noteIdx));
+    // mic.start/suppressUntil are stable; beginSession is invoked from taps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clearTransition]);
 
   const handleStop = () => {
     // Cancel the pending next-round timer first — otherwise a Stop pressed
@@ -100,7 +146,32 @@ export default function PitchMatchScreen() {
     // user just ended.
     clearTransition();
     answerLockedRef.current = false;
+    mic.stop();
     setPhase('idle');
+  };
+
+  const submitMicAnswer = () => {
+    if (inputMode !== 'mic' || !hasDetectedPitch || answerLockedRef.current) return;
+    answerLockedRef.current = true;
+    const correct = Math.abs(cents) < 50;
+    const points = correct ? Math.max(100 - Math.abs(cents) * 2, 10) : 0;
+    if (correct) void triggerCorrectHaptic();
+    else void triggerIncorrectHaptic();
+    setScore(nextScore => nextScore + points);
+    setStreak(correct ? streak + 1 : 0);
+    resultsRef.current = [
+      ...resultsRef.current,
+      { round: round.current, correct, points, target: NOTE_NAMES[targetNote] },
+    ];
+    if (round.current >= totalRounds) {
+      mic.stop();
+      setPhase('done');
+    } else {
+      transitionTimeoutRef.current = setTimeout(() => {
+        transitionTimeoutRef.current = null;
+        startRound(round.current + 1);
+      }, 800);
+    }
   };
 
   const handleAssess = (option: (typeof ACCURACY_OPTIONS)[number]) => {
@@ -136,7 +207,7 @@ export default function PitchMatchScreen() {
         subtitle={MODE.label}
         score={score}
         accent={ACCENT}
-        onPlayAgain={handleStart}
+        onPlayAgain={beginSession}
         onExit={() => router.back()}
       >
         <GameResultStats
@@ -173,12 +244,12 @@ export default function PitchMatchScreen() {
             <Text style={[styles.howToTitle, { color: ACCENT }]}>HOW TO PLAY</Text>
             <Text style={styles.howToLine}>1. A target note appears — tap 🔊 to hear it</Text>
             <Text style={styles.howToLine}>2. Sing or play the same note name — any octave counts</Text>
-            <Text style={styles.howToLine}>3. Self-assess how accurate you were</Text>
-            <Text style={styles.howToLine}>4. Score 100 pts for perfect, 40 for good</Text>
+            <Text style={styles.howToLine}>3. The mic meter tracks how close you are (±50¢ scores)</Text>
+            <Text style={styles.howToLine}>4. No mic? You can rate yourself instead</Text>
           </View>
 
           <Pressable
-            onPress={handleStart}
+            onPress={beginSession}
             style={({ pressed }) => [
               styles.btnPrimary,
               { backgroundColor: ACCENT, opacity: pressed ? 0.85 : 1 },
@@ -186,7 +257,9 @@ export default function PitchMatchScreen() {
             accessibilityRole="button"
             accessibilityLabel="Start training"
           >
-            <Text style={styles.btnPrimaryText}>Start Training</Text>
+            <Text style={styles.btnPrimaryText}>
+              {mic.status === 'requesting' ? 'Requesting mic…' : 'Start Training'}
+            </Text>
           </Pressable>
           <Pressable
             onPress={() => router.back()}
@@ -202,6 +275,15 @@ export default function PitchMatchScreen() {
   }
 
   // ── Playing ──────────────────────────────────────────────────────────────────
+  const centsColor =
+    !hasDetectedPitch
+      ? colors.textSecondary
+      : Math.abs(cents) < 25
+        ? colors.green
+        : Math.abs(cents) < 50
+          ? colors.warning
+          : colors.danger;
+
   return (
     <View style={styles.container}>
       <GameHeader
@@ -210,6 +292,7 @@ export default function PitchMatchScreen() {
         totalRounds={totalRounds}
         streak={streak}
         accent={ACCENT}
+        onBack={() => router.back()}
       />
 
       <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: 32 }}>
@@ -236,45 +319,92 @@ export default function PitchMatchScreen() {
           <Text style={{ fontSize: 14, color: colors.textSecondary }}>🔊 Hear Target</Text>
         </Pressable>
 
-        {/* Instructions */}
-        <Text style={{ textAlign: 'center', color: colors.textSecondary, fontSize: 13, marginTop: 40, marginBottom: 24 }}>
-          Sing or play the note, then mark how accurate you were
-        </Text>
+        {inputMode === 'mic' ? (
+          <>
+            {/* Cents meter */}
+            <View style={{ marginTop: 28 }}>
+              <View style={styles.meterTrack}>
+                <View style={styles.meterCenter} />
+                <View
+                  style={[
+                    styles.meterNeedle,
+                    {
+                      backgroundColor: centsColor,
+                      left: `${50 + Math.max(-45, Math.min(45, cents / 2))}%`,
+                    },
+                  ]}
+                />
+              </View>
+              <View style={styles.meterScale}>
+                <Text style={styles.meterScaleText}>-100¢</Text>
+                <Text style={styles.meterScaleText}>0¢</Text>
+                <Text style={styles.meterScaleText}>+100¢</Text>
+              </View>
+              <Text style={{ textAlign: 'center', marginTop: 10, fontSize: 22, fontWeight: '700', color: centsColor }}>
+                {hasDetectedPitch ? `${cents > 0 ? '+' : ''}${cents}¢` : mic.status === 'active' ? 'Listening…' : 'Mic unavailable'}
+              </Text>
+            </View>
 
-        {/* Self-assessment buttons */}
-        <View style={{ gap: 12 }}>
-          {ACCURACY_OPTIONS.map((option) => (
-            <Pressable
-              key={option.label}
-              onPress={() => handleAssess(option)}
-              accessibilityRole="button"
-              accessibilityLabel={`${option.label} — ${option.points} points`}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: 18,
-                borderRadius: 16,
-                borderWidth: 1,
-                backgroundColor: option.correct
-                  ? (option.cents === 0 ? colors.green + '14' : colors.warning + '14')
-                  : colors.danger + '14',
-                borderColor: option.correct
-                  ? (option.cents === 0 ? colors.green + '4D' : colors.warning + '4D')
-                  : colors.danger + '4D',
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <Text style={{ fontSize: 22 }}>{option.emoji}</Text>
-              <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16, flex: 1, marginLeft: 14 }}>
-                {option.label}
-              </Text>
-              <Text style={{ color: colors.textSecondary, fontSize: 13 }}>
-                {option.points > 0 ? `+${option.points} pts` : '0 pts'}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+            <View style={{ gap: 12, marginTop: 24 }}>
+              <Pressable
+                onPress={submitMicAnswer}
+                disabled={!hasDetectedPitch}
+                accessibilityRole="button"
+                accessibilityLabel={hasDetectedPitch ? 'Submit pitch' : 'Hum a steady note before submitting'}
+                style={({ pressed }) => [
+                  styles.btnPrimary,
+                  { backgroundColor: ACCENT, opacity: !hasDetectedPitch ? 0.4 : pressed ? 0.85 : 1 },
+                ]}
+              >
+                <Text style={styles.btnPrimaryText}>
+                  {hasDetectedPitch ? 'Submit' : 'Hum a note first'}
+                </Text>
+              </Pressable>
+            </View>
+          </>
+        ) : (
+          <>
+            {/* Instructions */}
+            <Text style={{ textAlign: 'center', color: colors.textSecondary, fontSize: 13, marginTop: 40, marginBottom: 24 }}>
+              Sing or play the note, then mark how accurate you were
+            </Text>
+
+            {/* Self-assessment buttons */}
+            <View style={{ gap: 12 }}>
+              {ACCURACY_OPTIONS.map((option) => (
+                <Pressable
+                  key={option.label}
+                  onPress={() => handleAssess(option)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${option.label} — ${option.points} points`}
+                  style={({ pressed }) => ({
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: 18,
+                    borderRadius: 16,
+                    borderWidth: 1,
+                    backgroundColor: option.correct
+                      ? (option.cents === 0 ? colors.green + '14' : colors.warning + '14')
+                      : colors.danger + '14',
+                    borderColor: option.correct
+                      ? (option.cents === 0 ? colors.green + '4D' : colors.warning + '4D')
+                      : colors.danger + '4D',
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text style={{ fontSize: 22 }}>{option.emoji}</Text>
+                  <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16, flex: 1, marginLeft: 14 }}>
+                    {option.label}
+                  </Text>
+                  <Text style={{ color: colors.textSecondary, fontSize: 13 }}>
+                    {option.points > 0 ? `+${option.points} pts` : '0 pts'}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
 
         <Pressable
           onPress={handleStop}
@@ -322,4 +452,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignSelf: 'center',
   },
+  meterTrack: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.surfaceElevated,
+    marginHorizontal: 4,
+    position: 'relative',
+  },
+  meterCenter: {
+    position: 'absolute',
+    left: '50%',
+    top: -2,
+    bottom: -2,
+    width: 1.5,
+    backgroundColor: colors.green,
+    transform: [{ translateX: -0.75 }],
+  },
+  meterNeedle: {
+    position: 'absolute',
+    top: 0,
+    width: 12,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: -6,
+  },
+  meterScale: {
+    marginTop: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  meterScaleText: { fontSize: 10, color: colors.textTertiary },
 });
