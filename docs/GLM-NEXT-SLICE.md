@@ -63,11 +63,29 @@ Evidence: repo-wide DOM sweep — **18/18 pages fully clean** (no sub-44px inter
 
 Note: the training-slice hardening entry's "known gap" (interactive browser smoke) is considered closed — the CDP round-play sweeps across all three Sep 2026 passes (triple-click submit, chord round advance, wordle guess, mic-denied banner, per-page start-button automation) cover it.
 
+## DONE — New-scope slice: PWA installability, brand assets, dialog a11y (2026-09-27, commit after b3ea172)
+
+The roadmap had no defined next slice, so three candidates were promoted into one:
+
+**PWA installability (web)**
+- `app/manifest.ts` — name/short_name, standalone display, start_url /dashboard, theme/background #050507, icons 192/512 + maskable 512. Served at /manifest.webmanifest (verified JSON + all icon URLs 200).
+- `layout.tsx` appleWebApp metadata (capable, black-translucent, title) + apple-touch-icon — iOS add-to-homescreen renders standalone with the brand mark.
+
+**Brand assets (mobile + web)**
+- Placeholder logo replaced everywhere. Generated from the Resonance Studio wordmark (lime rounded square, dark waveform bars): mobile `icon.png` (1024), `adaptive-icon.png` (lime bars on transparent; adaptive bg now #0A0A0F), `splash.png` (1284×2778, centered mark), `logo.png` (settings screen, replaced the deleted logo-placeholder import — caught by the Metro smoke). Web: `icon-192/512/-maskable.png`.
+- app.json points at all branded assets; placeholder deleted.
+
+**Accessibility (web)**
+- TrainingShell exit dialog: Escape closes, Tab is trapped inside, focus restores to the back button on close (was: focus escaped to page background, no Escape path). CDP-verified: opens focused on "Keep Training", Tab wraps last→first, Escape closes + restores focus.
+- Reduced-motion spot check on mobile: no raw Animated loops in any play screen; all motion flows through lib/motion.tsx which honors the system reduce-motion setting.
+
+Evidence: /manifest.webmanifest JSON + icons 200, apple meta in SSR HTML, 3/3 dialog CDP checks, `ci:verify` + `next build` + mobile typecheck + Metro Android export smoke green.
+
 ## Next slice candidates (open)
 
-- Small-target pass on the remaining 14 game pages (replay pills, listed above) — mechanical.
 - Cross-device sync: BLOCKED on creating a Supabase project + setting `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY` in Vercel (project currently has zero env vars). Client auth states already handle both configured/unconfigured.
 - Mobile dev-client rebuild to activate mic detection (EAS cloud or re-enable Codemagic `expo_android_eas`).
+- Offline service worker (PWA installability is done; offline caching is the remaining half).
 
 
 ## Baseline evidence

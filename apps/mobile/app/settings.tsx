@@ -70,7 +70,7 @@ export default function SettingsScreen() {
       <GlassCard accent={colors.pink}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
           <Image
-            source={require('../assets/logo-placeholder.png')}
+            source={require('../assets/logo.png')}
             style={{ width: 58, height: 58, borderRadius: 8, borderWidth: 1, borderColor: colors.borderStrong }}
           />
           <View style={{ flex: 1, gap: 3 }}>

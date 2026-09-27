@@ -97,6 +97,8 @@ export default function TrainingShell({
   const [exitDialogOpen, setExitDialogOpen] = useState(false);
   const [reduced, setReduced] = useState(false);
   const shellRef = useRef<HTMLDivElement | null>(null);
+  const exitDialogRef = useRef<HTMLDivElement | null>(null);
+  const backButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -111,6 +113,40 @@ export default function TrainingShell({
     else router.push(exitHref);
   };
 
+  // Escape closes the dialog; Tab is trapped inside it; focus returns to the
+  // back button on close so keyboard users aren't dumped at the document top.
+  useEffect(() => {
+    if (!exitDialogOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setExitDialogOpen(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const dialog = exitDialogRef.current;
+      if (!dialog) return;
+      const focusables = dialog.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0]!;
+      const last = focusables[focusables.length - 1]!;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      backButtonRef.current?.focus();
+    };
+  }, [exitDialogOpen]);
+
   return (
     <div
       ref={shellRef}
@@ -122,6 +158,7 @@ export default function TrainingShell({
         {/* Header */}
         <div className="studio-training-bar">
           <button
+            ref={backButtonRef}
             aria-label={`Exit ${title}`}
             onClick={handleBack}
             className="studio-training-back"
@@ -167,6 +204,7 @@ export default function TrainingShell({
 
         {exitDialogOpen && (
           <div
+            ref={exitDialogRef}
             role="dialog"
             aria-modal="true"
             aria-label="Leave session?"

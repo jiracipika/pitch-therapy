@@ -11,6 +11,14 @@ import { GAME_MODES } from "@pitch-therapy/core";
 export const metadata: Metadata = {
   title: "Pitch Therapy",
   description: `Train your ear with ${GAME_MODES.length} game modes. Daily challenges, streaks, and stats.`,
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Pitch Therapy",
+  },
+  icons: {
+    apple: "/icon-192.png",
+  },
 };
 
 export const viewport = {

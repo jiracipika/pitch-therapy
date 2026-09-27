@@ -3,7 +3,7 @@
     "name": "Pitch Therapy",
     "slug": "pitch-therapy",
     "version": "0.1.0",
-    "icon": "./assets/logo-placeholder.png",
+    "icon": "./assets/icon.png",
     "orientation": "portrait",
     "scheme": "pitch-therapy",
     "userInterfaceStyle": "dark",
@@ -13,12 +13,13 @@
       "bundleIdentifier": "com.pitchtherapy.app",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Pitch Therapy uses the microphone to detect the pitch you sing or play so it can score your accuracy."
-      }
+      },
+      "icon": "./assets/icon.png"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo-placeholder.png",
-        "backgroundColor": "#09090b"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0A0F"
       },
       "package": "com.pitchtherapy.app",
       "permissions": [
@@ -26,7 +27,7 @@
       ]
     },
     "splash": {
-      "image": "./assets/logo-placeholder.png",
+      "image": "./assets/splash.png",
       "backgroundColor": "#09090b",
       "resizeMode": "contain"
     },
