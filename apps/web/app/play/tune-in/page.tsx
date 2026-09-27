@@ -423,6 +423,7 @@ export default function TuneInPage() {
               gap: 6,
               borderRadius: 12,
               padding: "8px 16px",
+              minHeight: 44,
               fontSize: 14,
               fontWeight: 500,
               background: "var(--ios-bg2)",
@@ -581,6 +582,7 @@ export default function TuneInPage() {
                   cursor: "pointer",
                   borderRadius: 12,
                   padding: "8px 20px",
+                  minHeight: 44,
                   transition: "opacity 0.12s ease",
                 }}
               >

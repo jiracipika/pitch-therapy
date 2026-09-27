@@ -274,6 +274,7 @@ export default function WaveformMatchPage() {
               style={{
                 borderRadius: 20,
                 padding: "6px 12px",
+                minHeight: 44,
                 fontSize: 12,
                 fontWeight: 600,
                 background: "var(--ios-bg2)",
@@ -318,15 +319,12 @@ export default function WaveformMatchPage() {
             onChange={(e) => handleSlider(Number(e.target.value))}
             ref={sliderRef}
             disabled={showResult}
+            aria-label={`Detune slider, current ${sliderCents} cents`}
+            className="studio-range"
             style={{
-              width: "100%",
-              height: 8,
-              borderRadius: 4,
-              appearance: "none",
-              WebkitAppearance: "none",
-              background: `linear-gradient(to right, var(--ios-blue) ${((sliderCents + 50) / 100) * 100}%, var(--ios-bg3) ${((sliderCents + 50) / 100) * 100}%)`,
+              '--range-fill': `${((sliderCents + 50) / 100) * 100}%`,
               cursor: showResult ? "default" : "pointer",
-            }}
+            } as React.CSSProperties}
           />
         </div>
 

@@ -263,6 +263,7 @@ export default function FrequencyHuntPage() {
                     gap: 6,
                     borderRadius: 20,
                     padding: "8px 16px",
+                    minHeight: 44,
                     fontSize: 13,
                     fontWeight: 500,
                     color: "var(--ios-label2)",

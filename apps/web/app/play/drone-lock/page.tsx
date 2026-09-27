@@ -370,6 +370,7 @@ export default function DroneLockPage() {
                 gap: 6,
                 borderRadius: 20,
                 padding: "8px 16px",
+                minHeight: 44,
                 marginBottom: 24,
                 fontSize: 13,
                 fontWeight: 500,

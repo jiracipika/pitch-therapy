@@ -51,6 +51,18 @@ Evidence:
 
 Known follow-up (out of slice): identical small replay-pill buttons exist on pages outside the four audited routes (drone-lock "Hear Target", tune-in "Hear target", frequency-hunt "Play Target Again", interval-archer replay) — same one-line minHeight fix, next housekeeping pass.
 
+## DONE — Small-target pass, all 18 play pages (2026-09-27, housekeeping follow-up)
+
+The follow-up above is complete, and it closed bigger than listed: a repo-wide CDP sweep (360px, setup + playing states of every page) found one more class of violation the four-route audit couldn't see — waveform-match's 8px detune slider.
+
+Fixed:
+- Replay/hear pills → minHeight 44: drone-lock "Hear Target", tune-in "Hear target" + "Skip round", frequency-hunt "Play Target Again", waveform-match replay trio.
+- waveform-match detune slider migrated onto `.studio-range` (was an 8px inline input).
+
+Evidence: repo-wide DOM sweep — **18/18 pages fully clean** (no sub-44px interactive elements outside the training header bar, no horizontal overflow, setup + playing states). `ci:verify` + `next build` green.
+
+Note: the training-slice hardening entry's "known gap" (interactive browser smoke) is considered closed — the CDP round-play sweeps across all three Sep 2026 passes (triple-click submit, chord round advance, wordle guess, mic-denied banner, per-page start-button automation) cover it.
+
 ## Next slice candidates (open)
 
 - Small-target pass on the remaining 14 game pages (replay pills, listed above) — mechanical.
