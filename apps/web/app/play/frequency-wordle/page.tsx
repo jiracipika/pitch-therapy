@@ -197,7 +197,7 @@ export default function FrequencyWordlePage() {
               borderRadius: 999,
               padding: "9px 14px",
               cursor: "pointer",
-              minHeight: 36,
+              minHeight: 44,
             }}
           >
             New

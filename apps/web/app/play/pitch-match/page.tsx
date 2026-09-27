@@ -343,8 +343,9 @@ export default function PitchMatchPage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                borderRadius: 20,
-                padding: "6px 14px",
+                borderRadius: 22,
+                padding: "10px 16px",
+                minHeight: 44,
                 fontSize: 13,
                 fontWeight: 500,
                 color: "var(--ios-label2)",
@@ -471,8 +472,8 @@ export default function PitchMatchPage() {
               <button
                 onClick={handleStop}
                 style={{
-                  height: 34,
-                  borderRadius: 17,
+                  height: 44,
+                  borderRadius: 22,
                   padding: "0 16px",
                   fontSize: 14,
                   fontWeight: 600,

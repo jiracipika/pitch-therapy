@@ -34,12 +34,28 @@ Evidence (all verified on `main`):
 - aria-live round-result announcements: 9 pages via FeedbackOverlay's built-in sr-only region; 7 pages (drone-lock, frequency-hunt, name-that-note, pitch-match, pitch-memory, tuning-battle, waveform-match) got dedicated sr-only `role="status" aria-live="polite"` regions; mobile name-that-note got `accessibilityLiveRegion="polite"`; note-wordle/frequency-wordle/speed-round already had coverage.
 - Known gap: interactive browser smoke (round-play + back-nav audio check) was NOT completed — the browser-harness daemon was down. Static SSR/build/type evidence only. Re-run the smoke when browser tooling is back.
 
-## Next slice: narrow-layout responsive audit of the four shell routes
+## DONE — Narrow-layout responsive audit of the four shell routes (2026-09-27, commit after 73528ae)
 
-Target routes: `pitch-match`, `note-id`, `frequency-guess`, plus one daily challenge route.
-- Audit at 360px and 768px: stacked CTA groups, meter/slider hit targets ≥44px, TrainingShell header wrapping.
-- Use GAME_MODE_META for any card/copy reuse; no local arrays.
-- Gate: ci:verify + build + browser DOM evidence (desktop + 375px).
+Scope: pitch-match, note-id, frequency-guess, note-wordle (daily route) — setup + playing states, at 360px and 768px, via CDP DOM audit + screenshots.
+
+Findings fixed (all touch-target violations, consistent at both widths):
+- `StudioDifficulty` option pills 38px → 44px min-height (shared component — lifts every mode with a difficulty selector).
+- `.studio-range` slider 28px → 44px hit height with 5px visible track; gained `--range-accent` for per-game tint. frequency-guess and frequency-hunt migrated from thin inline-styled inputs (16px/12px) onto the shared class; settings volume slider inherits the taller hit area unchanged.
+- pitch-match "Play Target" 31px → 44px (minHeight + padding) and "Stop" 34px → 44px.
+- note-wordle / frequency-wordle "New puzzle" 36px → 44px.
+
+Evidence:
+- CDP DOM audit: 16/16 route-state-width combinations clean — no horizontal overflow, no sub-44px interactive elements outside the header bar, no training-header wrapping.
+- Screenshots at 375px (pitch-match playing with mic-denied banner rendering correctly, frequency-guess playing with new accent slider, note-wordle) and 768px.
+- `npm run ci:verify` + `next build` (all routes static) pass from the canonical clone.
+
+Known follow-up (out of slice): identical small replay-pill buttons exist on pages outside the four audited routes (drone-lock "Hear Target", tune-in "Hear target", frequency-hunt "Play Target Again", interval-archer replay) — same one-line minHeight fix, next housekeeping pass.
+
+## Next slice candidates (open)
+
+- Small-target pass on the remaining 14 game pages (replay pills, listed above) — mechanical.
+- Cross-device sync: BLOCKED on creating a Supabase project + setting `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY` in Vercel (project currently has zero env vars). Client auth states already handle both configured/unconfigured.
+- Mobile dev-client rebuild to activate mic detection (EAS cloud or re-enable Codemagic `expo_android_eas`).
 
 
 ## Baseline evidence

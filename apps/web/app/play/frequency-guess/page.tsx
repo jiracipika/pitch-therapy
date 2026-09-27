@@ -242,8 +242,12 @@ export default function FrequencyGuessPage() {
             value={guess}
             onChange={(e) => setGuess(Number(e.target.value))}
             disabled={showFeedback}
-            className="w-full"
-            style={{ accentColor: ACCENT }}
+            className="studio-range"
+            aria-label={`Guess frequency, current ${guess} hertz`}
+            style={{
+              '--range-fill': `${((guess - config.min) / (config.max - config.min)) * 100}%`,
+              '--range-accent': ACCENT,
+            } as React.CSSProperties}
           />
           <div
             style={{

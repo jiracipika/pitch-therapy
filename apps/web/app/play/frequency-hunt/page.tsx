@@ -306,16 +306,13 @@ export default function FrequencyHuntPage() {
                 onTouchStart={handleSliderDown}
                 onTouchEnd={handleSliderUp}
                 disabled={phase !== "hunting"}
-                className="w-full"
+                className="studio-range"
+                aria-label={`Preview frequency, current ${Math.round(sliderToFreq(sliderPos))} hertz`}
                 style={{
-                  height: 12,
-                  borderRadius: 6,
-                  appearance: "none",
-                  WebkitAppearance: "none",
-                  background: `linear-gradient(to right, ${ACCENT}40, ${ACCENT})`,
+                  '--range-fill': `${sliderPos * 100}%`,
+                  '--range-accent': ACCENT,
                   opacity: phase === "hunting" ? 1 : 0.5,
-                  cursor: "pointer",
-                }}
+                } as React.CSSProperties}
               />
               <div style={{ marginTop: 8, textAlign: "center" }}>
                 <span

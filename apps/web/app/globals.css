@@ -2968,9 +2968,11 @@ picture, img, video, svg {
 .studio-wave-grid small { color: var(--ios-label3); font-size: 9px; }
 .studio-wave-grid button.is-active { background: color-mix(in srgb, var(--ios-blue) 8%, transparent); }
 .studio-wave-grid button.is-active b { color: var(--ios-blue); }
-.studio-range { width: 100%; height: 28px; appearance: none; -webkit-appearance: none; background: transparent; cursor: pointer; }
-.studio-range::-webkit-slider-runnable-track { height: 5px; border-radius: 999px; background: linear-gradient(to right, var(--ios-blue) var(--range-fill, 50%), rgba(255,255,255,.08) var(--range-fill, 50%)); }
-.studio-range::-moz-range-track { height: 5px; border-radius: 999px; background: linear-gradient(to right, var(--ios-blue) var(--range-fill, 50%), rgba(255,255,255,.08) var(--range-fill, 50%)); }
+/* 44px hit height; the visible 5px track is drawn by the runnable-track
+   pseudo-elements. --range-accent tints the fill per game. */
+.studio-range { width: 100%; height: 44px; appearance: none; -webkit-appearance: none; background: transparent; cursor: pointer; }
+.studio-range::-webkit-slider-runnable-track { height: 5px; border-radius: 999px; background: linear-gradient(to right, var(--range-accent, var(--ios-blue)) var(--range-fill, 50%), rgba(255,255,255,.08) var(--range-fill, 50%)); }
+.studio-range::-moz-range-track { height: 5px; border-radius: 999px; background: linear-gradient(to right, var(--range-accent, var(--ios-blue)) var(--range-fill, 50%), rgba(255,255,255,.08) var(--range-fill, 50%)); }
 .studio-range::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; margin-top: -8.5px; border-radius: 999px; background: #fff; border: none; box-shadow: 0 3px 10px rgba(0,0,0,.45); }
 .studio-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 999px; background: #fff; border: none; box-shadow: 0 3px 10px rgba(0,0,0,.045); }
 .studio-danger-btn { min-height: 38px; padding: 0 16px; border: 1px solid color-mix(in srgb, var(--ios-red) 40%, var(--pt-stroke)); border-radius: 999px; background: color-mix(in srgb, var(--ios-red) 10%, transparent); color: var(--ios-red); font-size: 12px; font-weight: 700; cursor: pointer; }
@@ -3105,7 +3107,7 @@ picture, img, video, svg {
 
 .studio-difficulty { display: grid; justify-items: center; gap: 12px; margin-top: 30px; }
 .studio-difficulty-row { display: flex; gap: 8px; }
-.studio-difficulty-row button { min-height: 38px; padding: 0 18px; border: 1px solid var(--pt-stroke); border-radius: 999px; background: var(--pt-surface-2); color: var(--ios-label3); font-size: 13px; font-weight: 650; cursor: pointer; transition: transform 150ms ease, background 150ms ease, color 150ms ease, border-color 150ms ease; }
+.studio-difficulty-row button { min-height: 44px; padding: 0 18px; border: 1px solid var(--pt-stroke); border-radius: 999px; background: var(--pt-surface-2); color: var(--ios-label3); font-size: 13px; font-weight: 650; cursor: pointer; transition: transform 150ms ease, background 150ms ease, color 150ms ease, border-color 150ms ease; }
 .studio-difficulty-row button:hover { transform: translateY(-1px); color: var(--ios-label2); }
 .studio-difficulty-row button.is-active { color: var(--pt-on-accent); box-shadow: 0 8px 22px color-mix(in srgb, var(--mode-accent, #c7ff4a) 22%, transparent); }
 .studio-difficulty small { color: var(--ios-label3); font-size: 11px; letter-spacing: .02em; }
