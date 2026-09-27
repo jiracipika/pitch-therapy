@@ -3,8 +3,9 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
+import { useMicPitch } from '@/lib/micPitch';
 import { useSessionResults } from '@/lib/sessionResults';
-import { CHROMATIC_SCALE, GAME_MODE_META, intervalsInPool } from '@pitch-therapy/core';
+import { CHROMATIC_SCALE, GAME_MODE_META, calculateCentsDeviation, intervalsInPool } from '@pitch-therapy/core';
 import { playColors as pc } from '@/lib/theme';
 
 const MODE = GAME_MODE_META['drone-lock'];
@@ -29,17 +30,24 @@ const ACCURACY_OPTIONS = [
 ] as const;
 
 type Phase = 'idle' | 'listening' | 'scored' | 'done';
+/** Mic detection (web parity: Lock In unlocks on a stable reading) with the
+ *  original self-assessment as automatic fallback when the mic isn't up. */
+type InputMode = 'mic' | 'self-assess';
 
 export default function DroneLockScreen() {
   const router = useRouter();
   const { recordResult } = useSessionResults();
+  const mic = useMicPitch();
   const [phase, setPhase] = useState<Phase>('idle');
+  const [inputMode, setInputMode] = useState<InputMode>('self-assess');
   const [round, setRound] = useState(0);
   const totalRounds = 8;
   const [score, setScore] = useState(0);
   const [droneNote, setDroneNote] = useState(0);
   const [targetInterval, setTargetInterval] = useState<(typeof INTERVALS)[number]>(INTERVALS[0]);
   const [lastPoints, setLastPoints] = useState(0);
+  const [cents, setCents] = useState(0);
+  const [hasDetectedPitch, setHasDetectedPitch] = useState(false);
   const [results, setResults] = useState<{ interval: string; points: number }[]>([]);
   const sessionStartRef = useRef<number>(0);
   const recordedRef = useRef(false);
@@ -47,6 +55,8 @@ export default function DroneLockScreen() {
   // update. Lock synchronously so rapid taps cannot record duplicate rounds.
   const answerLockedRef = useRef(false);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const targetHzRef = useRef(261.63);
+  const inputModeRef = useRef<InputMode>('self-assess');
 
   const clearTimers = useCallback(() => {
     timersRef.current.forEach(clearTimeout);
@@ -81,15 +91,21 @@ export default function DroneLockScreen() {
     setTargetInterval(interval);
     setPhase('listening');
     setRound(r => r + 1);
+    setCents(0);
+    setHasDetectedPitch(false);
 
     const droneHz = NOTE_FREQS[noteIdx];
     const targetHz = droneHz * Math.pow(2, interval.semitones / 12);
+    targetHzRef.current = targetHz;
     // Play drone first, then target note 300ms later
     playFrequency(droneHz, 3.0);
     timersRef.current.push(setTimeout(() => playFrequency(targetHz, 1.0), 300));
-  }, [NOTE_FREQS]);
+    // Drone + reference both sound through the speaker — ignore the mic
+    // while they play so the reference isn't scored as the user's voice.
+    if (inputModeRef.current === 'mic') mic.suppressUntil(1200);
+  }, [NOTE_FREQS, mic]);
 
-  const handleStart = useCallback(() => {
+  const handleStart = useCallback(async () => {
     clearTimers();
     answerLockedRef.current = false;
     setRound(0);
@@ -97,29 +113,65 @@ export default function DroneLockScreen() {
     setResults([]);
     sessionStartRef.current = Date.now();
     recordedRef.current = false;
+
+    let mode: InputMode = 'self-assess';
+    const status = await mic.start();
+    if (status === 'active') mode = 'mic';
+    inputModeRef.current = mode;
+    setInputMode(mode);
     startRound();
+    // mic.start/suppressUntil are stable; invoked from taps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clearTimers, startRound]);
 
-  const handleAssess = useCallback((option: typeof ACCURACY_OPTIONS[number]) => {
-    if (answerLockedRef.current) return;
-    answerLockedRef.current = true;
-    if (option.points >= 150) void triggerCorrectHaptic();
-    else void triggerIncorrectHaptic();
-    setLastPoints(option.points);
-    setScore(s => s + option.points);
-    setResults(r => [...r, { interval: targetInterval.name, points: option.points }]);
+  // Mic detection → cents against the interval target (octave-agnostic).
+  useEffect(() => {
+    if (inputMode !== 'mic' || phase !== 'listening') return;
+    const estimate = mic.latestEstimate;
+    if (!estimate) {
+      setHasDetectedPitch(false);
+      return;
+    }
+    setCents(Math.round(calculateCentsDeviation(estimate.frequency, targetHzRef.current)));
+    setHasDetectedPitch(true);
+  }, [mic.latestEstimate, inputMode, phase]);
+
+  const finishRound = useCallback((points: number) => {
+    setLastPoints(points);
+    setScore(s => s + points);
+    setResults(r => [...r, { interval: targetInterval.name, points }]);
     setPhase('scored');
 
     timersRef.current.push(
       setTimeout(() => {
         if (round >= totalRounds) {
+          mic.stop();
           setPhase('done');
         } else {
           startRound();
         }
       }, 1500),
     );
-  }, [round, totalRounds, targetInterval, startRound]);
+  }, [round, totalRounds, targetInterval, startRound, mic]);
+
+  const handleLock = useCallback(() => {
+    if (inputModeRef.current !== 'mic' || !hasDetectedPitch || answerLockedRef.current) return;
+    answerLockedRef.current = true;
+    const absCents = Math.abs(cents);
+    // Same point tiers as the self-assessment options.
+    const points = absCents < 10 ? 200 : absCents < 25 ? 150 : absCents < 50 ? 100 : 50;
+    if (absCents < 25) void triggerCorrectHaptic();
+    else void triggerIncorrectHaptic();
+    finishRound(points);
+  }, [hasDetectedPitch, cents, finishRound]);
+
+  const handleAssess = useCallback((option: typeof ACCURACY_OPTIONS[number]) => {
+    if (answerLockedRef.current) return;
+    answerLockedRef.current = true;
+    if (option.points >= 150) void triggerCorrectHaptic();
+    else void triggerIncorrectHaptic();
+    finishRound(option.points);
+  }, [finishRound]);
 
   if (phase === 'done') {
     const avgPoints = Math.round(results.reduce((s, r) => s + r.points, 0) / results.length);
@@ -170,7 +222,7 @@ export default function DroneLockScreen() {
             <Text style={styles.howToLine}>1. A drone note plays continuously</Text>
             <Text style={styles.howToLine}>2. You hear the target interval once</Text>
             <Text style={styles.howToLine}>3. Sing the interval above the drone</Text>
-            <Text style={styles.howToLine}>4. Self-assess your tuning accuracy</Text>
+            <Text style={styles.howToLine}>4. With the mic it scores your cents; otherwise self-assess</Text>
           </View>
 
           <Pressable accessibilityRole="button" onPress={handleStart} style={[styles.btnPrimary, { backgroundColor: ACCENT }]}>
@@ -247,6 +299,60 @@ export default function DroneLockScreen() {
             <Text style={{ color: pc.textTertiary, fontSize: 13, marginTop: 4 }}>
               {lastPoints >= 200 ? '🎯 Perfect!' : lastPoints >= 150 ? '👍 Good!' : lastPoints >= 100 ? '👌 Close' : '🔄 Keep practicing'}
             </Text>
+          </View>
+        ) : inputMode === 'mic' ? (
+          /* Mic mode: live tuning meter + gated Lock In (web parity) */
+          <View style={{ marginTop: 24 }}>
+            <View style={{ height: 8, borderRadius: 4, backgroundColor: pc.cardAmbient, position: 'relative' }}>
+              <View style={{ position: 'absolute', left: '50%', top: -2, bottom: -2, width: 1.5, backgroundColor: pc.success, transform: [{ translateX: -0.75 }] }} />
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  width: 12,
+                  height: 8,
+                  borderRadius: 4,
+                  marginLeft: -6,
+                  backgroundColor: !hasDetectedPitch
+                    ? pc.textSecondary
+                    : Math.abs(cents) < 10
+                      ? pc.success
+                      : Math.abs(cents) < 25
+                        ? pc.success
+                        : Math.abs(cents) < 50
+                          ? pc.warning
+                          : pc.danger,
+                  left: `${50 + Math.max(-45, Math.min(45, cents / 2))}%`,
+                }}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
+              <Text style={{ color: pc.textTertiary, fontSize: 10 }}>-100¢</Text>
+              <Text style={{ color: pc.textTertiary, fontSize: 10 }}>0¢</Text>
+              <Text style={{ color: pc.textTertiary, fontSize: 10 }}>+100¢</Text>
+            </View>
+            <Text style={{ textAlign: 'center', marginTop: 12, fontSize: 24, fontWeight: '700', color: !hasDetectedPitch ? pc.textSecondary : Math.abs(cents) < 10 ? pc.success : Math.abs(cents) < 25 ? pc.success : Math.abs(cents) < 50 ? pc.warning : pc.danger }}>
+              {hasDetectedPitch ? `${cents > 0 ? '+' : ''}${cents}¢` : 'Listening…'}
+            </Text>
+
+            <Pressable
+              onPress={handleLock}
+              disabled={!hasDetectedPitch}
+              accessibilityRole="button"
+              accessibilityLabel={hasDetectedPitch ? 'Lock in' : 'Hum a steady note before locking in'}
+              style={({ pressed }) => ({
+                marginTop: 20,
+                borderRadius: 14,
+                padding: 16,
+                alignItems: 'center',
+                backgroundColor: hasDetectedPitch ? ACCENT : pc.cardAmbient,
+                opacity: !hasDetectedPitch ? 0.5 : pressed ? 0.85 : 1,
+              })}
+            >
+              <Text style={{ color: hasDetectedPitch ? pc.text : pc.textSecondary, fontWeight: '700', fontSize: 16 }}>
+                {hasDetectedPitch ? '🔒 Lock In' : 'Hum a note first'}
+              </Text>
+            </Pressable>
           </View>
         ) : (
           /* Self-assessment options */
