@@ -1,1 +1,3 @@
 .expo/
+# release signing credentials for the generated android/ tree (expo prebuild)
+android/keystore.properties
