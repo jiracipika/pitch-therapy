@@ -177,7 +177,7 @@ export default function FrequencyHuntScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
+      <View style={{ paddingHorizontal: 24, paddingTop: 56 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: pc.textSecondary }}>←</Text></Pressable>
           <Text style={{ fontSize: 16, fontWeight: '600', color: ACCENT }}>Frequency Hunt</Text>
@@ -205,8 +205,8 @@ export default function FrequencyHuntScreen() {
         {/* Custom Slider */}
         <View style={{ marginBottom: 16 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-            <Text style={{ fontSize: 10, color: pc.trackLine }}>100 Hz</Text>
-            <Text style={{ fontSize: 10, color: pc.trackLine }}>2000 Hz</Text>
+            <Text style={{ fontSize: 10, color: pc.textTertiary }}>100 Hz</Text>
+            <Text style={{ fontSize: 10, color: pc.textTertiary }}>2000 Hz</Text>
           </View>
           <View
             onLayout={(e) => { sliderWidth.current = e.nativeEvent.layout.width; }}

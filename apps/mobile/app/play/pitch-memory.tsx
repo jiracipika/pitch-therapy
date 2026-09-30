@@ -175,7 +175,7 @@ export default function PitchMemoryScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
+      <View style={{ paddingHorizontal: 24, paddingTop: 56 }}>
         {/* Header */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: pc.textSecondary }}>←</Text></Pressable>
@@ -189,7 +189,7 @@ export default function PitchMemoryScreen() {
         {/* Sequence dots */}
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
           {sequence.map((_, i) => (
-            <View
+            <View accessibilityLiveRegion="polite"
               key={i}
               style={{
                 width: 12, height: 12, borderRadius: 6,
@@ -224,7 +224,7 @@ export default function PitchMemoryScreen() {
           ))}
         </View>
 
-        <Text style={{ textAlign: 'center', fontSize: 11, color: pc.trackLine, marginTop: 16 }}>Level {level} • Streak {streak}</Text>
+        <Text style={{ textAlign: 'center', fontSize: 11, color: pc.textTertiary, marginTop: 16 }}>Level {level} • Streak {streak}</Text>
       </View>
     </View>
   );

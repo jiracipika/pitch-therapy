@@ -224,7 +224,7 @@ export default function IntervalArcherScreen() {
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
       <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} onBack={() => router.back()} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
-        <Pressable accessibilityRole="button" onPress={() => playIntervalSound(rootFreq, targetInterval.semitones)} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Replay interval" onPress={() => playIntervalSound(rootFreq, targetInterval.semitones)} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
           <Text style={{ fontSize: 28 }}>🔊</Text>
         </Pressable>
         <Text style={{ textAlign: 'center', color: pc.textSecondary, fontSize: 13, marginBottom: 4 }}>Replay interval</Text>
@@ -238,7 +238,7 @@ export default function IntervalArcherScreen() {
         </View>
 
         {feedback && (
-          <View style={{ backgroundColor: feedback === 'correct' ? pc.cardSurface : pc.cardSurface, borderRadius: 12, padding: 12, marginBottom: 16, alignItems: 'center', borderWidth: 1, borderColor: feedback === 'correct' ? pc.success : pc.danger }}>
+          <View accessibilityLiveRegion="polite" style={{ backgroundColor: feedback === 'correct' ? pc.cardSurface : pc.cardSurface, borderRadius: 12, padding: 12, marginBottom: 16, alignItems: 'center', borderWidth: 1, borderColor: feedback === 'correct' ? pc.success : pc.danger }}>
             <Text style={{ color: feedback === 'correct' ? pc.success : pc.danger, fontWeight: '700', fontSize: 16 }}>
               {feedback === 'correct' ? '🎯 Bullseye!' : `It was ${targetInterval.name}`}
             </Text>

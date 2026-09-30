@@ -260,7 +260,7 @@ export default function TuneInScreen() {
               opacity: pressed ? 0.85 : 1,
             })}
           >
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Start Game</Text>
+            <Text style={{ color: pc.text, fontWeight: '700', fontSize: 16 }}>Start Game</Text>
           </Pressable>
         </View>
 
@@ -343,7 +343,7 @@ export default function TuneInScreen() {
             <Text style={{ color: pc.textTertiary, fontSize: 14, fontWeight: '600' }}>Hear target</Text>
           </Pressable>
 
-          <Text style={{ color: pc.trackLine, fontSize: 13, marginTop: 20 }}>
+          <Text style={{ color: pc.textSecondary, fontSize: 13, marginTop: 20 }}>
             {inputMode === 'mic'
               ? hasPitch
                 ? 'Hold the note steady — it auto-scores'

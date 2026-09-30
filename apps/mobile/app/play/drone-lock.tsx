@@ -292,7 +292,7 @@ export default function DroneLockScreen() {
 
         {phase === 'scored' ? (
           /* Scored feedback */
-          <View style={{ alignItems: 'center', marginTop: 32 }}>
+          <View accessibilityLiveRegion="polite" style={{ alignItems: 'center', marginTop: 32 }}>
             <Text style={{ color: pc.text, fontSize: 18, fontWeight: '700' }}>
               +{lastPoints} pts
             </Text>
@@ -395,7 +395,7 @@ export default function DroneLockScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: pc.screen },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56, paddingBottom: 12 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, marginBottom: 20 },
   title: { fontSize: 28, fontWeight: '700', color: pc.text, letterSpacing: 0 },
   subtitle: { fontSize: 14, color: pc.textSecondary, marginTop: 8, marginBottom: 24, textAlign: 'center' },

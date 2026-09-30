@@ -306,8 +306,9 @@ export default function SpeedRoundScreen() {
         </View>
 
         {/* Current note */}
-        <View style={{ alignItems: 'center', marginTop: 24, marginBottom: 20 }}>
+        <View style={{ alignItems: 'center', marginTop: 24, marginBottom: 20 }} accessibilityLiveRegion="polite">
           <View
+            accessibilityLabel={feedback === 'correct' ? `Correct — it was ${currentNote}` : feedback === 'wrong' ? `Wrong — it was ${currentNote}` : currentNote}
             style={[
               styles.noteBox,
               {

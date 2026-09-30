@@ -227,7 +227,7 @@ export default function NameThatNoteScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
+      <View style={{ paddingHorizontal: 24, paddingTop: 56 }}>
         <View
           style={{
             flexDirection: "row",

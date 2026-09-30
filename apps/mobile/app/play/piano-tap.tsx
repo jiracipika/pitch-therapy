@@ -185,13 +185,13 @@ export default function PianoTapScreen() {
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
       <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} onBack={() => router.back()} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
-        <Pressable accessibilityRole="button" onPress={handlePlay} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Replay target note" onPress={handlePlay} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
           <Text style={{ fontSize: 28 }}>🔊</Text>
         </Pressable>
         <Text style={{ textAlign: 'center', color: pc.textSecondary, fontSize: 13, marginBottom: 24 }}>Tap to replay note</Text>
 
         {feedback && (
-          <View style={{ backgroundColor: feedback === 'correct' ? pc.cardSurface : pc.cardSurface, borderRadius: 12, padding: 12, marginBottom: 20, alignItems: 'center', borderWidth: 1, borderColor: feedback === 'correct' ? pc.success : pc.danger }}>
+          <View accessibilityLiveRegion="polite" style={{ backgroundColor: feedback === 'correct' ? pc.cardSurface : pc.cardSurface, borderRadius: 12, padding: 12, marginBottom: 20, alignItems: 'center', borderWidth: 1, borderColor: feedback === 'correct' ? pc.success : pc.danger }}>
             <Text style={{ color: feedback === 'correct' ? pc.success : pc.danger, fontWeight: '700', fontSize: 16 }}>
               {feedback === 'correct' ? '✓ Correct!' : `✗ It was ${target}`}
             </Text>

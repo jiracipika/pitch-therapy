@@ -386,6 +386,7 @@ function SettingRow({
         <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>{subtitle}</Text>
       </View>
       <Switch
+        accessibilityLabel={title}
         value={value}
         onValueChange={onValueChange}
         trackColor={{ false: colors.surfaceElevated, true: color + '99' }}

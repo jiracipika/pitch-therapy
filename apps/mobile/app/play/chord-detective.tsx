@@ -176,7 +176,7 @@ export default function ChordDetectiveScreen() {
         <Text style={{ textAlign: 'center', fontSize: 48 }}>🕵️</Text>
         <Text style={{ color: ACCENT, fontSize: 26, fontWeight: '700', textAlign: 'center', marginTop: 16 }}>Chord Detective</Text>
         <Text style={{ color: pc.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 8 }}>Identify chord quality by ear</Text>
-        <Pressable accessibilityRole="button" onPress={() => setAdvanced(!advanced)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 24 }}>
+        <Pressable accessibilityRole="switch" accessibilityLabel="Advanced: identify root note too" accessibilityState={{ checked: advanced }} onPress={() => setAdvanced(!advanced)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 24 }}>
           <Text style={{ color: pc.textTertiary, fontSize: 14 }}>Advanced: Identify root too</Text>
           <View style={{ width: 48, height: 28, borderRadius: 14, backgroundColor: advanced ? ACCENT : pc.cardBorder, justifyContent: 'center', paddingHorizontal: 3 }}>
             <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#fff', marginLeft: advanced ? 23 : 0 }} />
@@ -198,7 +198,7 @@ export default function ChordDetectiveScreen() {
       </View>
 
       <View style={{ alignItems: 'center', marginTop: 32 }}>
-        <Pressable accessibilityRole="button" onPress={() => playChord(root, chordType)} style={{
+        <Pressable accessibilityRole="button" accessibilityLabel="Replay chord" onPress={() => playChord(root, chordType)} style={{
           width: 96, height: 96, borderRadius: 48, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center',
         }}>
           <Text style={{ fontSize: 36 }}>🔊</Text>
@@ -210,11 +210,11 @@ export default function ChordDetectiveScreen() {
         <Text style={{ color: pc.textSecondary, fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>CHORD QUALITY</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
           {CHORD_TYPES.map(ct => (
-            <Pressable key={ct.id} accessibilityRole="button" onPress={() => phase === 'playing' && setSelectedType(ct.id)} style={{
+            <Pressable key={ct.id} accessibilityRole="button" accessibilityState={{ selected: selectedType === ct.id }} onPress={() => phase === 'playing' && setSelectedType(ct.id)} style={{
               backgroundColor: selectedType === ct.id ? `${ACCENT}30` : pc.cardAmbient, borderRadius: 16, paddingVertical: 14, paddingHorizontal: 20,
               borderWidth: selectedType === ct.id ? 2 : 1, borderColor: selectedType === ct.id ? ACCENT : pc.cardBorder,
             }}>
-              <Text style={{ color: selectedType === ct.id ? '#fff' : pc.textTertiary, fontWeight: '600', fontSize: 15 }}>{ct.label}</Text>
+              <Text style={{ color: selectedType === ct.id ? pc.text : pc.textTertiary, fontWeight: '600', fontSize: 15 }}>{ct.label}</Text>
             </Pressable>
           ))}
         </View>
@@ -224,11 +224,11 @@ export default function ChordDetectiveScreen() {
             <Text style={{ color: pc.textSecondary, fontSize: 12, fontWeight: '600', marginBottom: 8, textAlign: 'center' }}>ROOT NOTE</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
               {ALL_NOTES.map(note => (
-                <Pressable key={note} accessibilityRole="button" onPress={() => setSelectedRoot(note)} style={{
+                <Pressable key={note} accessibilityRole="button" accessibilityState={{ selected: selectedRoot === note }} onPress={() => setSelectedRoot(note)} style={{
                   backgroundColor: selectedRoot === note ? `${ACCENT}30` : pc.cardAmbient, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14,
                   borderWidth: selectedRoot === note ? 2 : 1, borderColor: selectedRoot === note ? ACCENT : pc.cardBorder,
                 }}>
-                  <Text style={{ color: selectedRoot === note ? '#fff' : pc.textTertiary, fontWeight: '700', fontSize: 14 }}>{note}</Text>
+                  <Text style={{ color: selectedRoot === note ? pc.text : pc.textTertiary, fontWeight: '700', fontSize: 14 }}>{note}</Text>
                 </Pressable>
               ))}
             </View>
@@ -236,7 +236,7 @@ export default function ChordDetectiveScreen() {
         )}
 
         {feedback && (
-          <View style={{
+          <View accessibilityLiveRegion="polite" style={{
             marginTop: 16, borderRadius: 12, padding: 14, alignItems: 'center',
             backgroundColor: feedback === 'correct' ? pc.cardSurface : pc.cardSurface,
             borderWidth: 1, borderColor: feedback === 'correct' ? pc.success : pc.danger,
@@ -250,7 +250,7 @@ export default function ChordDetectiveScreen() {
         <Pressable accessibilityRole="button" onPress={submit} disabled={!selectedType || (advanced && !selectedRoot)} style={{
           backgroundColor: (selectedType && (!advanced || selectedRoot)) ? ACCENT : pc.cardAmbient, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 16, marginBottom: 20,
         }}>
-          <Text style={{ color: (selectedType && (!advanced || selectedRoot)) ? '#fff' : pc.textMuted, fontWeight: '700', fontSize: 16 }}>Submit</Text>
+          <Text style={{ color: (selectedType && (!advanced || selectedRoot)) ? pc.text : pc.textMuted, fontWeight: '700', fontSize: 16 }}>Submit</Text>
         </Pressable>
         <Text style={{ textAlign: 'center', color: pc.textSecondary, marginBottom: 20 }}>🔥 {streak} • Round {round}/{ROUNDS}</Text>
       </ScrollView>

@@ -23,6 +23,8 @@ export { GAME_MODES, GAME_MODE_META, MODE_CATEGORIES, DIFFICULTY_CONFIG } from "
 
 // ─── Audio utilities (pure math, no web deps) ───────────────────────────────
 
+export { decodeBase64ToBytes, pcm16ToFloat32 } from "./pcm";
+
 export {
   noteToFrequency,
   frequencyToNote,

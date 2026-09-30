@@ -174,7 +174,7 @@ export default function TuningBattleScreen() {
             <Pressable key={n} accessibilityRole="button" onPress={() => setTotalRounds(n)} style={{
               backgroundColor: totalRounds === n ? ACCENT : pc.cardAmbient, borderRadius: 20, paddingVertical: 12, paddingHorizontal: 28, borderWidth: 1, borderColor: totalRounds === n ? ACCENT : pc.cardBorder,
             }}>
-              <Text style={{ color: totalRounds === n ? '#fff' : pc.textMuted, fontWeight: '600', fontSize: 16 }}>Best of {n}</Text>
+              <Text style={{ color: totalRounds === n ? pc.text : pc.textMuted, fontWeight: '600', fontSize: 16 }}>Best of {n}</Text>
             </Pressable>
           ))}
         </View>
@@ -199,7 +199,7 @@ export default function TuningBattleScreen() {
 
   if (phase === 'roundResult') {
     return (
-      <View style={{ flex: 1, backgroundColor: pc.screen, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
+      <View accessibilityLiveRegion="polite" style={{ flex: 1, backgroundColor: pc.screen, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
         <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: 56, left: 20 }}>
           <Text style={{ color: pc.textSecondary }}>← Back</Text>
         </Pressable>
@@ -269,11 +269,11 @@ export default function TuningBattleScreen() {
             {ALL_NOTES.map(note => (
               <Pressable key={note} accessibilityRole="button" accessibilityLabel={`Player 1 select ${note}`} accessibilityState={{ selected: players[0].selectedNote === note, disabled: players[0].lockedIn }} disabled={players[0].lockedIn} onPress={() => selectNote(0, note)} style={{
                 width: 40, height: 44, borderRadius: 10,
-                backgroundColor: players[0].selectedNote === note ? pc.cardBorder : pc.cardAmbient,
-                borderWidth: 1, borderColor: players[0].selectedNote === note ? pc.cardBorder : pc.cardBorder,
+                backgroundColor: players[0].selectedNote === note ? ACCENT + "55" : pc.cardAmbient,
+                borderWidth: 1, borderColor: players[0].selectedNote === note ? ACCENT : pc.cardBorder,
                 alignItems: 'center', justifyContent: 'center',
               }}>
-                <Text style={{ color: players[0].selectedNote === note ? '#fff' : pc.textTertiary, fontWeight: '700', fontSize: 13 }}>{note}</Text>
+                <Text style={{ color: players[0].selectedNote === note ? pc.text : pc.textTertiary, fontWeight: '700', fontSize: 13 }}>{note}</Text>
               </Pressable>
             ))}
           </View>
@@ -297,11 +297,11 @@ export default function TuningBattleScreen() {
             {ALL_NOTES.map(note => (
               <Pressable key={note} accessibilityRole="button" accessibilityLabel={`Player 2 select ${note}`} accessibilityState={{ selected: players[1].selectedNote === note, disabled: players[1].lockedIn }} disabled={players[1].lockedIn} onPress={() => selectNote(1, note)} style={{
                 width: 40, height: 44, borderRadius: 10,
-                backgroundColor: players[1].selectedNote === note ? pc.cardBorder : pc.cardAmbient,
-                borderWidth: 1, borderColor: players[1].selectedNote === note ? pc.cardBorder : pc.cardBorder,
+                backgroundColor: players[1].selectedNote === note ? ACCENT + "55" : pc.cardAmbient,
+                borderWidth: 1, borderColor: players[1].selectedNote === note ? ACCENT : pc.cardBorder,
                 alignItems: 'center', justifyContent: 'center',
               }}>
-                <Text style={{ color: players[1].selectedNote === note ? '#fff' : pc.textTertiary, fontWeight: '700', fontSize: 13 }}>{note}</Text>
+                <Text style={{ color: players[1].selectedNote === note ? pc.text : pc.textTertiary, fontWeight: '700', fontSize: 13 }}>{note}</Text>
               </Pressable>
             ))}
           </View>

@@ -175,7 +175,7 @@ export default function FrequencySliderScreen() {
             </>
           )}
           <Pressable accessibilityRole="button" onPress={startGame} style={{ backgroundColor: ACCENT, borderRadius: radii.lg, padding: 16, alignItems: 'center', marginTop: 24 }}>
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>{phase === 'results' ? 'Play Again' : 'Start Game'}</Text>
+            <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16 }}>{phase === 'results' ? 'Play Again' : 'Start Game'}</Text>
           </Pressable>
         </ScrollView>
       </View>
@@ -228,7 +228,7 @@ export default function FrequencySliderScreen() {
         )}
 
         <Pressable accessibilityRole="button" onPress={submitted ? (round >= TOTAL_ROUNDS ? () => setPhase('results') : nextRound) : handleSubmit} style={{ backgroundColor: ACCENT, borderRadius: radii.lg, padding: 16, alignItems: 'center', marginTop: 20 }}>
-          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>
+          <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16 }}>
             {!submitted ? 'Lock In' : round >= TOTAL_ROUNDS ? 'See Results' : 'Next Round →'}
           </Text>
         </Pressable>

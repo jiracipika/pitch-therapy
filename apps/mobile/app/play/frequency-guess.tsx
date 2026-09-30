@@ -271,7 +271,7 @@ export default function FrequencyGuessScreen() {
           ))}
 
           <Pressable accessibilityRole="button" onPress={() => startGame(difficulty)} style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 24 }}>
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Play Again</Text>
+            <Text style={{ color: pc.text, fontWeight: '700', fontSize: 16 }}>Play Again</Text>
           </Pressable>
           <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ padding: 16 }}>
             <Text style={{ color: pc.textSecondary, textAlign: 'center' }}>← Dashboard</Text>
@@ -335,7 +335,7 @@ export default function FrequencyGuessScreen() {
 
         {/* Feedback */}
         {feedback && (
-          <View style={{
+          <View accessibilityLiveRegion="polite" style={{
             backgroundColor: feedback.correct ? 'rgba(74,222,128,0.12)' : 'rgba(248,113,113,0.12)',
             borderRadius: 12,
             padding: 14,
@@ -359,7 +359,7 @@ export default function FrequencyGuessScreen() {
             accessibilityLabel="Submit guess"
             style={{ backgroundColor: ACCENT, borderRadius: 14, padding: 16, alignItems: 'center' }}
           >
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>Submit Guess</Text>
+            <Text style={{ color: pc.text, fontWeight: '700', fontSize: 16 }}>Submit Guess</Text>
           </Pressable>
         )}
       </View>

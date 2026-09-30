@@ -150,7 +150,7 @@ export default function CentsDeviationScreen() {
           <Text style={{ color: pc.text, fontSize: 22, fontWeight: '700', marginTop: 12 }}>Cents Deviation</Text>
           <Text style={{ color: pc.textSecondary, fontSize: 14, marginTop: 4 }}>Detect microtonal shifts</Text>
         </View>
-        <View style={{ flex: 1, paddingHorizontal: 20, justifyContent: 'center' }}>
+        <View accessibilityLiveRegion="polite" style={{ flex: 1, paddingHorizontal: 20, justifyContent: 'center' }}>
           <Text style={{ color: pc.text, fontSize: 18, fontWeight: '600', marginBottom: 16 }}>Difficulty</Text>
           {(Object.keys(DIFF_CONFIG) as Difficulty[]).map(d => (
             <Pressable key={d} accessibilityRole="button" onPress={() => startGame(d)} style={({ pressed }) => ({ backgroundColor: pc.cardSurface, borderRadius: 16, padding: 20, borderWidth: 1, borderColor: pc.cardBorder, marginBottom: 12, opacity: pressed ? 0.75 : 1 })}>
@@ -213,7 +213,7 @@ export default function CentsDeviationScreen() {
         <Text style={{ textAlign: 'center', color: pc.textTertiary, fontSize: 12, marginBottom: 16 }}>Listen then set the needle</Text>
 
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 24 }}>
-          <Pressable accessibilityRole="button" onPress={() => playFrequency(baseFreq, 0.8)} style={{ width: 56, height: 56, borderRadius: 14, backgroundColor: pc.cardSurface, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Replay reference note" onPress={() => playFrequency(baseFreq, 0.8)} style={{ width: 56, height: 56, borderRadius: 14, backgroundColor: pc.cardSurface, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ fontSize: 20 }}>🔊</Text>
           </Pressable>
           <Pressable accessibilityRole="button" onPress={playDeviation} style={{ flex: 1, height: 56, borderRadius: 14, backgroundColor: `${ACCENT}20`, borderWidth: 1, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center' }}>

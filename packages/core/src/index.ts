@@ -19,6 +19,8 @@ export type {
 
 export { GAME_MODES, GAME_MODE_META, MODE_CATEGORIES, DIFFICULTY_CONFIG } from "./gameData";
 
+export { decodeBase64ToBytes, pcm16ToFloat32 } from "./pcm";
+
 // ─── Audio Utilities ─────────────────────────────────────────────────────────
 
 export {

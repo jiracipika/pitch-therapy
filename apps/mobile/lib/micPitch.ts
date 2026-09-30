@@ -11,52 +11,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PermissionsAndroid, Platform } from 'react-native';
 import LiveAudioStream from 'react-native-live-audio-stream';
-import { estimatePitch, stabilizePitch, type PitchEstimate } from '@pitch-therapy/core';
+import {
+  decodeBase64ToBytes,
+  estimatePitch,
+  pcm16ToFloat32,
+  stabilizePitch,
+  type PitchEstimate,
+} from '@pitch-therapy/core';
 
 export type MicStatus = 'idle' | 'requesting' | 'active' | 'denied' | 'unavailable';
 
 const SAMPLE_RATE = 44100;
 const BUFFER_SIZE = 8192; // ~93 ms of 16-bit mono audio per chunk
 const ANDROID_VOICE_RECOGNITION_SOURCE = 6;
-
-const B64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-const B64_LOOKUP = new Int16Array(128).fill(-1);
-for (let i = 0; i < B64_ALPHABET.length; i++) {
-  B64_LOOKUP[B64_ALPHABET.charCodeAt(i)] = i;
-}
-
-/** atob is not guaranteed on Hermes — decode base64 PCM chunks directly.
- *  Padding '=' characters must be KEPT: short final chunks rely on them. */
-function decodeBase64(b64: string): Uint8Array {
-  const clean = b64.replace(/[^A-Za-z0-9+/=]/g, '');
-  const len = clean.length;
-  const out = new Uint8Array(Math.floor((len * 3) / 4));
-  let p = 0;
-  for (let i = 0; i + 3 < len; i += 4) {
-    const n =
-      (B64_LOOKUP[clean.charCodeAt(i)]! << 18) |
-      (B64_LOOKUP[clean.charCodeAt(i + 1)]! << 12) |
-      ((B64_LOOKUP[clean.charCodeAt(i + 2)]! & 63) << 6) |
-      (B64_LOOKUP[clean.charCodeAt(i + 3)]! & 63);
-    out[p++] = (n >> 16) & 255;
-    if (i + 4 < len || clean.charCodeAt(i + 2) !== 61) out[p++] = (n >> 8) & 255;
-    if (i + 4 < len || clean.charCodeAt(i + 3) !== 61) out[p++] = n & 255;
-  }
-  return out.subarray(0, p);
-}
-
-/** 16-bit little-endian PCM bytes → normalized Float32 samples (-1..1). */
-function pcm16ToFloat32(bytes: Uint8Array): Float32Array {
-  const sampleCount = bytes.length >> 1;
-  const out = new Float32Array(sampleCount);
-  for (let i = 0; i < sampleCount; i++) {
-    const lo = bytes[i * 2]!;
-    const hi = bytes[i * 2 + 1]!;
-    const sample = (hi << 8) | lo; // little-endian pair, unsigned combine
-    out[i] = (sample << 16 >> 16) / 32768; // re-interpret as signed 16-bit
-  }
-  return out;
-}
 
 export function useMicPitch() {
   const [status, setStatus] = useState<MicStatus>('idle');
@@ -124,7 +91,7 @@ export function useMicPitch() {
             historyRef.current = [];
             return;
           }
-          const bytes = decodeBase64(chunk);
+          const bytes = decodeBase64ToBytes(chunk);
           const frame = pcm16ToFloat32(bytes);
           const estimate = estimatePitch(frame, SAMPLE_RATE);
           if (estimate) {

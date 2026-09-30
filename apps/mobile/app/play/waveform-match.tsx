@@ -211,7 +211,7 @@ export default function WaveformMatchScreen() {
         </View>
 
         {phase === 'reveal' && (
-          <View style={{ backgroundColor: 'rgba(34,197,94,0.1)', borderRadius: 12, padding: 12, marginBottom: 16, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(74,222,128,0.3)' }}>
+          <View accessibilityLiveRegion="polite" style={{ backgroundColor: Math.abs(sliderCents - detuneCents) <= 5 ? 'rgba(34,197,94,0.1)' : 'rgba(251,191,36,0.1)', borderRadius: 12, padding: 12, marginBottom: 16, alignItems: 'center', borderWidth: 1, borderColor: Math.abs(sliderCents - detuneCents) <= 5 ? 'rgba(74,222,128,0.3)' : 'rgba(251,191,36,0.4)' }}>
             <Text style={{ color: pc.textSecondary, fontSize: 13 }}>Target: <Text style={{ color: pc.text, fontWeight: '700' }}>{detuneCents > 0 ? '+' : ''}{detuneCents}¢</Text></Text>
             <Text style={{ color: pc.textSecondary, fontSize: 13 }}>Your answer: <Text style={{ color: pc.text, fontWeight: '700' }}>{sliderCents > 0 ? '+' : ''}{sliderCents}¢</Text></Text>
             <Text style={{ color: Math.abs(sliderCents - detuneCents) <= 5 ? pc.success : pc.warning, fontSize: 16, fontWeight: '700', marginTop: 4 }}>

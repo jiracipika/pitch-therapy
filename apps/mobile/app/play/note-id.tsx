@@ -436,7 +436,7 @@ export default function NoteIdScreen() {
 
         {/* Feedback banner */}
         {feedback && (
-          <View
+          <View accessibilityLiveRegion="polite"
             style={{
               backgroundColor:
                 feedback === "correct" ? pc.success + "1E" : pc.danger + "1E",
