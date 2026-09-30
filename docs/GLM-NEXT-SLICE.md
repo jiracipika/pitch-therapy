@@ -81,11 +81,26 @@ The roadmap had no defined next slice, so three candidates were promoted into on
 
 Evidence: /manifest.webmanifest JSON + icons 200, apple meta in SSR HTML, 3/3 dialog CDP checks, `ci:verify` + `next build` + mobile typecheck + Metro Android export smoke green.
 
+## DONE — Offline service worker + tested PCM decoding + deep mobile a11y (2026-09-27, commit after a6181d7)
+
+**Offline service worker (web)** — the remaining PWA half:
+- `public/sw.js`: navigations network-first (never stale HTML online) with cache → precached `/offline` fallback; `/_next/static` cache-first (content-hashed); icons/manifest stale-while-revalidate. Versioned caches, old-cache cleanup on activate. No precache manifest → deploys can't poison the app shell.
+- Registered prod-only via `components/ServiceWorkerRegister.tsx` in the root layout. Styled `app/offline/page.tsx`.
+- CDP-verified: SW registers, dashboard fully renders with the network emulated offline, recovers when back online.
+
+**PCM decoding hardened in core** (mobile mic path):
+- base64 decoder + PCM16→Float32 moved from the hook into `packages/core/src/pcm.ts` (exported from both entries) with 7 vitest cases. TDD paid off immediately: the tests caught that padding-stripped base64 chunks (which streaming native modules sometimes emit) decoded to zero bytes. Decoder now handles padded + stripped remainders.
+
+**Deep mobile a11y integration** (from a full read-only subagent audit of all 18 play screens + components):
+- labeled the unlabeled emoji-only replay buttons (4 screens); white-on-accent text → dark-on-accent in 6 screens (worst was 2.15:1); border token no longer used as text color (was 1.85:1); 4 playing headers out of the status-bar zone; outcome banners announce via accessibilityLiveRegion on 10 screens (speed-round's color-only note box gained a state label); Advanced toggle is a real switch; chord chips expose selected state; settings switches labelled; tuning-battle selection dead-code fixed.
+
+Evidence: 728 core tests (incl. new pcm suite), ci:verify + next build + mobile typecheck + Metro smoke green, CDP SW checks 3/3.
+
 ## Next slice candidates (open)
 
 - Cross-device sync: BLOCKED on creating a Supabase project + setting `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY` in Vercel (project currently has zero env vars). Client auth states already handle both configured/unconfigured.
 - Mobile dev-client rebuild to activate mic detection (EAS cloud or re-enable Codemagic `expo_android_eas`).
-- Offline service worker (PWA installability is done; offline caching is the remaining half).
+- Remaining mobile a11y P1s deferred as layout-level: custom PanResponder sliders lack `accessibilityRole="adjustable"` + accessibilityActions (frequency-slider/frequency-guess/frequency-hunt — needs per-game value mapping); pitch-memory piano keys are 28pt wide (needs a 2-row layout); sub-legible fontSize 8-10 labels. These need design decisions, not one-liners.
 
 
 ## Baseline evidence

@@ -7,6 +7,7 @@ import { StatsProvider } from "@/components/StatsProvider";
 import AppTransitionShell from "@/components/AppTransitionShell";
 import DesktopTopBar from "@/components/DesktopTopBar";
 import { GAME_MODES } from "@pitch-therapy/core";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 export const metadata: Metadata = {
   title: "Pitch Therapy",
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className="min-h-dvh min-h-screen"
         style={{ background: "var(--ios-bg)", color: "var(--ios-label)" }}
       >
+        <ServiceWorkerRegister />
         <a className="pt-skip-link" href="#main-content">
           Skip to main content
         </a>
