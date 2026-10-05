@@ -49,7 +49,7 @@ Evidence:
 - Screenshots at 375px (pitch-match playing with mic-denied banner rendering correctly, frequency-guess playing with new accent slider, note-wordle) and 768px.
 - `npm run ci:verify` + `next build` (all routes static) pass from the canonical clone.
 
-Known follow-up (out of slice): identical small replay-pill buttons exist on pages outside the four audited routes (drone-lock "Hear Target", tune-in "Hear target", frequency-hunt "Play Target Again", interval-archer replay) — same one-line minHeight fix, next housekeeping pass.
+Known follow-up (out of slice): identical small replay-pill buttons exist on pages outside the four audited routes (drone-lock "Hear Target", tune-in "Hear target", frequency-hunt "Play Target Again", interval-archer replay) — same one-line minHeight fix, next housekeeping pass. **[RESOLVED 2026-10-05 — see the small-target pass entry below and the verification note; interval-archer was a false positive.]**
 
 ## DONE — Small-target pass, all 18 play pages (2026-09-27, housekeeping follow-up)
 
@@ -62,6 +62,15 @@ Fixed:
 Evidence: repo-wide DOM sweep — **18/18 pages fully clean** (no sub-44px interactive elements outside the training header bar, no horizontal overflow, setup + playing states). `ci:verify` + `next build` green.
 
 Note: the training-slice hardening entry's "known gap" (interactive browser smoke) is considered closed — the CDP round-play sweeps across all three Sep 2026 passes (triple-click submit, chord round advance, wordle guess, mic-denied banner, per-page start-button automation) cover it.
+
+## DONE — Follow-up verification: 4 named replay pills (2026-10-05, commit after a19a770)
+
+Code-level audit of the narrow-layout slice's "known follow-up" list, to close it out:
+
+- drone-lock "Hear Target", tune-in "Hear target" + "Skip round", frequency-hunt "Play Target Again" — already fixed by the small-target pass (b3ea172, `minHeight: 44` present in all three pages).
+- interval-archer replay — **false positive in the original follow-up note**: the 🔊 replay button has been 80×80 (`width: 80, height: 80`) since before the note was written (last styled in ef6a702). Full-page sweep of the current file: answer tiles ~59px (14px padding + 2 lines), results actions are shared `.studio-start-btn` (50px) / `.studio-results-secondary` (48px). No sub-44px interactive element exists on the page, so no code change was made — adding `minHeight: 44` to an 80px button would be a dead property.
+
+Evidence: `npm run ci:verify` green (759/759 core tests, lint 0, typecheck clean) + `npm run build` green (all routes static) from the canonical clone at a19a770.
 
 ## DONE — New-scope slice: PWA installability, brand assets, dialog a11y (2026-09-27, commit after b3ea172)
 
