@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import { GAME_MODE_META, GAME_MODES, MODE_CATEGORIES, getModeTrainingCue, type ModeCategoryId } from "@pitch-therapy/core";
 import { useStatsContext } from "@/components/StatsProvider";
 import { buildCategoryMastery } from "@/lib/gamification";
@@ -47,7 +47,14 @@ export default function PlayModesPage() {
                 const meta = GAME_MODE_META[mode.modeId];
                 const cue = getModeTrainingCue(mode.modeId);
                 return (
-                  <motion.article key={mode.modeId} initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.045 }}>
+                  <motion.article
+                    key={mode.modeId}
+                    initial={reduce ? false : { opacity: 0, y: 18, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ type: "spring", bounce: 0.3, duration: 0.6, delay: index * 0.05 }}
+                    whileHover={reduce ? undefined : { y: -4 }}
+                    whileTap={reduce ? undefined : { scale: 0.98 }}
+                  >
                     <Link href={`/play/${mode.modeId}`} className="studio-mode-card" style={{ "--mode-accent": meta.accentHex } as React.CSSProperties}>
                       <div className="studio-mode-card-top"><span>0{index + 1}</span><span>{cue.durationLabel}</span></div>
                       <div className="studio-mode-card-icon">{meta.icon}</div>

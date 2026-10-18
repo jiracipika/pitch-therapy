@@ -1,11 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 /**
  * Standard animated progress bar used in game playing screens.
  *
- * Renders an `.ios-progress-track` with a framer-motion fill bar that animates
+ * Renders an `.ios-progress-track` with a Motion fill bar that animates
  * to `current / total * 100%`.
  *
  * Extracted from the identical progress-bar block in every

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { playTone, stopAllTones } from "@/lib/audio";
 import { answerHaptic } from "@/lib/haptics";
 import WaveVisualizer from "@/components/WaveVisualizer";

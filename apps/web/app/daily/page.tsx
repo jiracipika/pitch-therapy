@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from "motion/react";
 import { useStatsContext } from '@/components/StatsProvider';
 import {
   DAILY_CHALLENGE_MODES,

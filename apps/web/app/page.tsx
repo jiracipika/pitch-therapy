@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import { GAME_MODE_META, GAME_MODES, MODE_CATEGORIES } from "@pitch-therapy/core";
 import { playTone, stopAllTones } from "@/lib/audio";
 
@@ -77,7 +77,14 @@ export default function Home() {
           </motion.div>
         </section>
 
-        <section className="studio-session-strip" aria-labelledby="session-title">
+        <motion.section
+          className="studio-session-strip"
+          aria-labelledby="session-title"
+          initial={reduce ? false : { opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ type: "spring", bounce: 0.25, duration: 0.6 }}
+        >
           <div><span>YOUR FIRST SESSION</span><h2 id="session-title">Ten minutes to a better ear.</h2></div>
           <ol>
             <li><b>01</b><span>Identify<small>Note ID · 2 min</small></span></li>
@@ -85,13 +92,21 @@ export default function Home() {
             <li><b>03</b><span>React<small>Speed Round · 3 min</small></span></li>
           </ol>
           <Link href="/dashboard">Run session <span aria-hidden="true">→</span></Link>
-        </section>
+        </motion.section>
 
         <section className="studio-exercises" aria-labelledby="exercise-title">
           <div className="studio-section-heading"><span>THE EXERCISES</span><h2 id="exercise-title">One weakness.<br />One focused drill.</h2><p>No bloated curriculum. Choose the listening skill you want to sharpen and begin.</p></div>
           <div className="studio-exercise-grid">
             {featured.map((mode, index) => (
-              <motion.article key={mode.id} initial={reduce ? false : { opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ delay: index * 0.045, duration: 0.42 }}>
+              <motion.article
+                key={mode.id}
+                initial={reduce ? false : { opacity: 0, y: 20, scale: 0.97 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ type: "spring", bounce: 0.3, duration: 0.6, delay: index * 0.05 }}
+                whileHover={reduce ? undefined : { y: -4 }}
+                whileTap={reduce ? undefined : { scale: 0.98 }}
+              >
                 <Link href={`/play/${mode.id}`} className="studio-exercise-card" style={{ "--exercise-accent": mode.accentHex } as React.CSSProperties}>
                   <span className="studio-exercise-index">0{index + 1}</span>
                   <span className="studio-exercise-icon">{mode.icon}</span>
@@ -108,12 +123,18 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="studio-closing">
+        <motion.section
+          className="studio-closing"
+          initial={reduce ? false : { opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ type: "spring", bounce: 0.25, duration: 0.6 }}
+        >
           <Waveform compact />
           <span>YOUR EAR IS AN INSTRUMENT</span>
           <h2>Tune it daily.</h2>
           <Link href="/daily" className="studio-button-primary">Play today&apos;s challenge <span aria-hidden="true">→</span></Link>
-        </section>
+        </motion.section>
       </main>
 
       <footer className="studio-footer"><span>© 2026 PITCH THERAPY</span><span>LISTEN / RESPOND / IMPROVE</span><Link href="/privacy" style={{ opacity: 0.7 }}>Privacy</Link></footer>

@@ -8,13 +8,34 @@
  */
 
 import { type CSSProperties, type ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "motion/react";
 import {
   GAME_MODES,
   GAME_MODE_META,
   MODE_CATEGORIES,
   type GameMode,
 } from "@pitch-therapy/core";
+
+/**
+ * Session-report reveal — the drill's payoff moment. Each block (eyebrow,
+ * headline, stat cards, actions) springs in with a short stagger. Runs under
+ * the app-wide <MotionConfig reducedMotion="user"> so reduced-motion users
+ * get an opacity-only fade.
+ */
+const resultsReveal: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+
+const resultsRevealItem: Variants = {
+  hidden: { opacity: 0, y: 18, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", bounce: 0.3, duration: 0.6 },
+  },
+};
 
 /**
  * Derives the setup-screen presentation fields (eyebrow, icon, title,
@@ -183,15 +204,16 @@ export function StudioStartButton({
   disabled?: boolean;
 }) {
   return (
-    <button
+    <motion.button
       type="button"
       className="studio-start-btn"
       onClick={onClick}
       disabled={disabled}
+      whileTap={{ scale: 0.97 }}
       style={{ background: accent, "--mode-accent": accent } as CSSProperties}
     >
       {children}
-    </button>
+    </motion.button>
   );
 }
 
@@ -254,6 +276,7 @@ export function StudioChoice({
           <motion.button
             key={String(value)}
             type="button"
+            whileHover={{ y: -2 }}
             whileTap={{ scale: 0.96 }}
             onClick={() => onPick(value)}
             disabled={disabled}
@@ -286,18 +309,24 @@ export function StudioResults({
   return (
     <div className="pb-tab studio-training" style={{ "--mode-accent": accent } as CSSProperties}>
       <div className="mx-auto max-w-sm px-4 pt-12 md:max-w-lg">
-        <div className="studio-results" style={{ "--mode-accent": accent } as CSSProperties}>
-          <span className="studio-setup-eyebrow">{eyebrow}</span>
-          <h2>{headline}</h2>
+        <motion.div
+          className="studio-results"
+          style={{ "--mode-accent": accent } as CSSProperties}
+          initial="hidden"
+          animate="visible"
+          variants={resultsReveal}
+        >
+          <motion.span className="studio-setup-eyebrow" variants={resultsRevealItem}>{eyebrow}</motion.span>
+          <motion.h2 variants={resultsRevealItem}>{headline}</motion.h2>
           <div className="studio-results-grid">
             {stats.map((stat) => (
-              <article key={stat.label}>
+              <motion.article key={stat.label} variants={resultsRevealItem}>
                 <b className={stat.accentValue ? "is-accent" : ""}>{stat.value}</b>
                 <span>{stat.label}</span>
-              </article>
+              </motion.article>
             ))}
           </div>
-          <div className="studio-results-actions">
+          <motion.div className="studio-results-actions" variants={resultsRevealItem}>
             <button
               type="button"
               className="studio-start-btn"
@@ -309,8 +338,8 @@ export function StudioResults({
             <button type="button" className="studio-results-secondary" onClick={secondaryAction.onClick}>
               {secondaryAction.label}
             </button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );

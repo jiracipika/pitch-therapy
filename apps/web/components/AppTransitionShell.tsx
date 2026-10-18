@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, MotionConfig, useReducedMotion } from "motion/react";
 import { usePathname } from 'next/navigation';
 import { useSwipeNav } from '@/lib/useSwipeNav';
 
@@ -65,7 +65,7 @@ export default function AppTransitionShell({ children }: { children: React.React
   const ambientDurations = { a: motionLite ? 26 : 18, b: motionLite ? 30 : 22, grid: motionLite ? 0 : 8 };
 
   // ── Live drag feedback ──────────────────────────────────────────
-  // Applied to a PLAIN wrapper div (not the motion.div) so framer-motion's
+  // Applied to a PLAIN wrapper div (not the motion.div) so Motion's
   // transform management never fights the finger-follow transform.
   // While dragging: no transition (instant follow). On release: CSS spring
   // back to center while the route transition takes over.
@@ -93,7 +93,8 @@ export default function AppTransitionShell({ children }: { children: React.React
   const exitTo = motionLite ? 0 : -dir * 16;
 
   return (
-    <div className="pt-route-root">
+    <MotionConfig reducedMotion="user">
+      <div className="pt-route-root">
       <div className="pt-ambient" aria-hidden>
         <motion.div
           className="pt-ambient-glow pt-ambient-glow-a"
@@ -141,6 +142,7 @@ export default function AppTransitionShell({ children }: { children: React.React
           </motion.div>
         </AnimatePresence>
       </div>
-    </div>
+      </div>
+    </MotionConfig>
   );
 }

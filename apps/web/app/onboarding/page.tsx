@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import Link from 'next/link';
 import { GAME_MODES } from '@pitch-therapy/core';
 

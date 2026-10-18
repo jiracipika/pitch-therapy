@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import { useStatsContext } from "@/components/StatsProvider";
 import { GAME_MODE_META, buildAdaptivePracticePlan, estimatePlanDuration } from "@pitch-therapy/core";
 import { buildCategoryMastery, calculateTotalXP, getLevelProgress, levelTitle, todayXP, DAILY_GOAL_XP, getLastPlayedMode } from "@/lib/gamification";
