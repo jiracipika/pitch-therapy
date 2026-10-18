@@ -116,7 +116,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="studio-footer"><span>© 2026 PITCH THERAPY</span><span>LISTEN / RESPOND / IMPROVE</span></footer>
+      <footer className="studio-footer"><span>© 2026 PITCH THERAPY</span><span>LISTEN / RESPOND / IMPROVE</span><Link href="/privacy" style={{ opacity: 0.7 }}>Privacy</Link></footer>
     </div>
   );
 }

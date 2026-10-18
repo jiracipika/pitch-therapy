@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import { AuthProvider } from "@/components/AuthProvider";
@@ -36,6 +37,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className="min-h-dvh min-h-screen"
         style={{ background: "var(--ios-bg)", color: "var(--ios-label)" }}
       >
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4128325832827761"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <ServiceWorkerRegister />
         <a className="pt-skip-link" href="#main-content">
           Skip to main content
