@@ -378,7 +378,7 @@ export function MotionStatusCard({ tone, title, message }: MotionStatusCardProps
             justifyContent: 'center',
           }}
         >
-          <Text style={{ color: '#00121f', fontSize: tone === 'loading' ? 8 : 10, fontWeight: '900' }}>{toneGlyph}</Text>
+          <Text style={{ color: colors.text, fontSize: tone === 'loading' ? 8 : 10, fontWeight: '800' }}>{toneGlyph}</Text>
         </Animated.View>
         <View style={{ flex: 1 }}>
           <Text style={{ color: colors.text, ...typography.subhead }} numberOfLines={2}>

@@ -123,7 +123,7 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: num
             justifyContent: 'center',
           }}
         >
-          <Text style={{ color: '#00121f', fontSize: 13, fontWeight: '900' }}>
+          <Text style={{ color: colors.text, fontSize: 13, fontWeight: '800' }}>
             {toast.icon ?? cfg.defaultIcon}
           </Text>
         </View>

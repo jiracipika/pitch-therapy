@@ -142,7 +142,7 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <LinearGradient
-        colors={[colors.background, '#0C0C11', '#12101A']}
+        colors={[colors.background, '#0A0A0B', '#131315']}
         locations={[0, 0.5, 1]}
         style={{ position: 'absolute', inset: 0 }}
       />
@@ -174,20 +174,19 @@ export default function HomeScreen() {
             style={{
               width: 58,
               height: 58,
+              borderRadius: 14,
               backgroundColor: colors.signal,
-              borderWidth: 1,
-              borderColor: colors.cream,
               alignItems: 'center',
               justifyContent: 'center',
-              shadowColor: colors.coral,
+              shadowColor: colors.signal,
               shadowOffset: { width: 0, height: 5 },
-              shadowOpacity: 0.32,
-              shadowRadius: 8,
+              shadowOpacity: 0.35,
+              shadowRadius: 10,
               elevation: 5,
               transform: [{ scale: logoScale }, { rotate: logoRotateDeg }],
             }}
           >
-            <Text style={{ color: colors.ink, fontSize: 17, fontWeight: '900', letterSpacing: -1 }}>
+            <Text style={{ color: '#FFFFFF', fontSize: 17, fontWeight: '800', letterSpacing: -1 }}>
               PT
             </Text>
           </Animated.View>
