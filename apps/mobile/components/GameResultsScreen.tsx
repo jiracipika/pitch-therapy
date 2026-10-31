@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { Animated, Easing, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppleButton, GlassCard } from "@/components/AppleUI";
+import { AnimatedCounter, useReducedMotionPreference } from "@/lib/motion";
 import { colors, spacing, typography } from "@/lib/theme";
 
 interface GameResultsScreenProps {
@@ -27,6 +29,38 @@ export function GameResultsScreen({
   exitLabel = "Back to dashboard",
 }: GameResultsScreenProps) {
   const insets = useSafeAreaInsets();
+  const reduce = useReducedMotionPreference();
+
+  // Staggered reveal: title → score card → details → actions.
+  const titleShift = useRef(new Animated.Value(1)).current;
+  const cardShift = useRef(new Animated.Value(1)).current;
+  const detailShift = useRef(new Animated.Value(1)).current;
+  const actionShift = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const blocks = [titleShift, cardShift, detailShift, actionShift];
+    if (reduce) {
+      blocks.forEach((value) => value.setValue(1));
+      return;
+    }
+    blocks.forEach((value) => value.setValue(0));
+    Animated.stagger(
+      95,
+      blocks.map((value) =>
+        Animated.timing(value, {
+          toValue: 1,
+          duration: 460,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ),
+    ).start();
+  }, [reduce, titleShift, cardShift, detailShift, actionShift]);
+
+  const rise = (value: Animated.Value) =>
+    value.interpolate({ inputRange: [0, 1], outputRange: [16, 0] });
+  const scale = (value: Animated.Value) =>
+    value.interpolate({ inputRange: [0, 1], outputRange: [0.93, 1] });
 
   return (
     <View style={styles.screen}>
@@ -40,23 +74,33 @@ export function GameResultsScreen({
         ]}
         contentInsetAdjustmentBehavior="never"
       >
-        <Text accessibilityRole="header" style={styles.title}>
-          {title}
-        </Text>
-        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        <Animated.View style={{ opacity: titleShift, transform: [{ translateY: rise(titleShift) }] }}>
+          <Text accessibilityRole="header" style={styles.title}>
+            {title}
+          </Text>
+          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        </Animated.View>
 
-        <GlassCard accent={accent} padding={spacing.xl} style={styles.scoreCard}>
-          <View accessible accessibilityLabel={`${score} points`} style={styles.scoreContent}>
-            <Text maxFontSizeMultiplier={1.4} style={[styles.score, { color: accent }]}>
-              {score}
-            </Text>
-            <Text style={styles.scoreLabel}>points</Text>
-          </View>
-        </GlassCard>
+        <Animated.View style={{ opacity: cardShift, transform: [{ scale: scale(cardShift) }] }}>
+          <GlassCard accent={accent} padding={spacing.xl} style={styles.scoreCard}>
+            <View accessible accessibilityLabel={`${score} points`} style={styles.scoreContent}>
+              <AnimatedCounter
+                value={score}
+                maxFontSizeMultiplier={1.4}
+                style={[styles.score, { color: accent }]}
+              />
+              <Text style={styles.scoreLabel}>points</Text>
+            </View>
+          </GlassCard>
+        </Animated.View>
 
-        {children ? <View style={styles.details}>{children}</View> : null}
+        {children ? (
+          <Animated.View style={[styles.details, { opacity: detailShift, transform: [{ translateY: rise(detailShift) }] }]}>
+            {children}
+          </Animated.View>
+        ) : null}
 
-        <View style={styles.actions}>
+        <Animated.View style={[styles.actions, { opacity: actionShift }]}>
           <AppleButton
             title="Play Again"
             color={accent}
@@ -64,7 +108,7 @@ export function GameResultsScreen({
             accessibilityHint="Starts a new session with the same settings"
           />
           {onExit ? <AppleButton title={exitLabel} variant="text" onPress={onExit} /> : null}
-        </View>
+        </Animated.View>
       </ScrollView>
     </View>
   );

@@ -1,6 +1,8 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, View, Text, Pressable, StyleSheet, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useReducedMotionPreference } from '@/lib/motion';
 import { colors, radii, shadows, typography } from '@/lib/theme';
 
 interface GameHeaderProps {
@@ -15,6 +17,46 @@ interface GameHeaderProps {
 
 export function GameHeader({ score, round, totalRounds, streak, accent = colors.pitchMatch, onBack }: GameHeaderProps) {
   const insets = useSafeAreaInsets();
+  const reduce = useReducedMotionPreference();
+
+  // Pulse the score pill and streak metric whenever their values change,
+  // so point gains register visually without pulling the whole header.
+  const scorePulse = useRef(new Animated.Value(1)).current;
+  const streakPulse = useRef(new Animated.Value(1)).current;
+  const prevScore = useRef(score);
+  const prevStreak = useRef(streak);
+
+  useEffect(() => {
+    if (score === prevScore.current) return;
+    prevScore.current = score;
+    if (reduce) return;
+    scorePulse.setValue(1);
+    Animated.sequence([
+      Animated.timing(scorePulse, {
+        toValue: 1.18,
+        duration: 130,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.spring(scorePulse, { toValue: 1, stiffness: 320, damping: 17, mass: 0.7, useNativeDriver: true }),
+    ]).start();
+  }, [score, reduce, scorePulse]);
+
+  useEffect(() => {
+    if (streak === prevStreak.current) return;
+    prevStreak.current = streak;
+    if (reduce) return;
+    streakPulse.setValue(1);
+    Animated.sequence([
+      Animated.timing(streakPulse, {
+        toValue: 1.16,
+        duration: 130,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.spring(streakPulse, { toValue: 1, stiffness: 320, damping: 17, mass: 0.7, useNativeDriver: true }),
+    ]).start();
+  }, [streak, reduce, streakPulse]);
 
   return (
     <LinearGradient
@@ -42,14 +84,14 @@ export function GameHeader({ score, round, totalRounds, streak, accent = colors.
           </View>
         </View>
       </View>
-      <View style={styles.scorePill} accessibilityLabel={`Score ${score}`}>
+      <Animated.View style={[styles.scorePill, { transform: [{ scale: scorePulse }] }]} accessibilityLabel={`Score ${score}`}>
         <Text style={[styles.scoreText, { color: accent }]}>{score}</Text>
         <Text style={styles.scoreLabel}>Score</Text>
-      </View>
-      <View style={[styles.metric, styles.metricRight]}>
+      </Animated.View>
+      <Animated.View style={[styles.metric, styles.metricRight, { transform: [{ scale: streakPulse }] }]}>
         <Text style={styles.label}>Streak</Text>
         <Text style={styles.metricValue}>{streak}</Text>
-      </View>
+      </Animated.View>
     </LinearGradient>
   );
 }
