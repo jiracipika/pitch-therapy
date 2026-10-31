@@ -29,36 +29,42 @@ function getHeroSpec(variant: NonNullable<AppPageProps['heroVariant']>) {
         gradient: ['rgba(199,255,74,0.16)', 'rgba(155,140,255,0.10)', 'rgba(5,5,7,0.98)'] as const,
         ribbonA: ['rgba(199,255,74,0)', 'rgba(199,255,74,0.16)', 'rgba(199,255,74,0)'] as const,
         ribbonB: ['rgba(155,140,255,0)', 'rgba(155,140,255,0.13)', 'rgba(155,140,255,0)'] as const,
+        ribbonC: ['rgba(102,220,255,0)', 'rgba(102,220,255,0.11)', 'rgba(102,220,255,0)'] as const,
       };
     case 'daily':
       return {
         gradient: ['rgba(98,230,167,0.16)', 'rgba(199,255,74,0.08)', 'rgba(5,5,7,0.98)'] as const,
         ribbonA: ['rgba(98,230,167,0)', 'rgba(98,230,167,0.15)', 'rgba(98,230,167,0)'] as const,
         ribbonB: ['rgba(255,122,89,0)', 'rgba(255,122,89,0.12)', 'rgba(255,122,89,0)'] as const,
+        ribbonC: ['rgba(102,220,255,0)', 'rgba(102,220,255,0.10)', 'rgba(102,220,255,0)'] as const,
       };
     case 'play':
       return {
         gradient: ['rgba(199,255,74,0.15)', 'rgba(102,220,255,0.08)', 'rgba(5,5,7,0.98)'] as const,
         ribbonA: ['rgba(199,255,74,0)', 'rgba(199,255,74,0.14)', 'rgba(199,255,74,0)'] as const,
         ribbonB: ['rgba(102,220,255,0)', 'rgba(102,220,255,0.12)', 'rgba(102,220,255,0)'] as const,
+        ribbonC: ['rgba(155,140,255,0)', 'rgba(155,140,255,0.11)', 'rgba(155,140,255,0)'] as const,
       };
     case 'progress':
       return {
         gradient: ['rgba(155,140,255,0.17)', 'rgba(199,255,74,0.07)', 'rgba(5,5,7,0.98)'] as const,
         ribbonA: ['rgba(155,140,255,0)', 'rgba(155,140,255,0.14)', 'rgba(155,140,255,0)'] as const,
         ribbonB: ['rgba(199,255,74,0)', 'rgba(199,255,74,0.10)', 'rgba(199,255,74,0)'] as const,
+        ribbonC: ['rgba(102,220,255,0)', 'rgba(102,220,255,0.10)', 'rgba(102,220,255,0)'] as const,
       };
     case 'settings':
       return {
         gradient: ['rgba(255,122,89,0.17)', 'rgba(199,255,74,0.06)', 'rgba(5,5,7,0.98)'] as const,
         ribbonA: ['rgba(255,122,89,0)', 'rgba(255,122,89,0.14)', 'rgba(255,122,89,0)'] as const,
         ribbonB: ['rgba(199,255,74,0)', 'rgba(199,255,74,0.09)', 'rgba(199,255,74,0)'] as const,
+        ribbonC: ['rgba(102,220,255,0)', 'rgba(102,220,255,0.10)', 'rgba(102,220,255,0)'] as const,
       };
     default:
       return {
         gradient: ['rgba(199,255,74,0.12)', 'rgba(247,246,242,0.04)', 'rgba(5,5,7,0.98)'] as const,
         ribbonA: ['rgba(199,255,74,0)', 'rgba(199,255,74,0.12)', 'rgba(199,255,74,0)'] as const,
         ribbonB: ['rgba(255,122,89,0)', 'rgba(255,122,89,0.10)', 'rgba(255,122,89,0)'] as const,
+        ribbonC: ['rgba(155,140,255,0)', 'rgba(155,140,255,0.10)', 'rgba(155,140,255,0)'] as const,
       };
   }
 }
@@ -104,6 +110,7 @@ export function AppPage({
   const dragScale = useRef(new Animated.Value(1)).current;          // subtle scale during drag
   const ambientShiftA = useRef(new Animated.Value(0)).current;
   const ambientShiftB = useRef(new Animated.Value(0)).current;
+  const ambientShiftC = useRef(new Animated.Value(0)).current;
   const heroShift = useRef(new Animated.Value(0)).current;
   const childAnimationsRef = useRef<Animated.Value[]>([]);
 
@@ -292,6 +299,7 @@ export function AppPage({
     if (reducedMotion) {
       ambientShiftA.setValue(0.5);
       ambientShiftB.setValue(0.5);
+      ambientShiftC.setValue(0.5);
       return;
     }
 
@@ -331,11 +339,29 @@ export function AppPage({
 
     loopA.start();
     loopB.start();
+    const loopC = Animated.loop(
+      Animated.sequence([
+        Animated.timing(ambientShiftC, {
+          toValue: 1,
+          duration: motionProfile.ambientA + 5200,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(ambientShiftC, {
+          toValue: 0,
+          duration: motionProfile.ambientA + 5200,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loopC.start();
     return () => {
       loopA.stop();
       loopB.stop();
+      loopC.stop();
     };
-  }, [ambientShiftA, ambientShiftB, motionProfile.ambientA, motionProfile.ambientB, reducedMotion]);
+  }, [ambientShiftA, ambientShiftB, ambientShiftC, motionProfile.ambientA, motionProfile.ambientB, reducedMotion]);
 
   // ── Hero parallax ──
   useEffect(() => {
@@ -394,6 +420,10 @@ export function AppPage({
   const ambientTranslateBX = ambientShiftB.interpolate({
     inputRange: [0, 1],
     outputRange: [40, -40],
+  });
+  const ambientTranslateCX = ambientShiftC.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-34, 44],
   });
   const heroTranslateX = heroShift.interpolate({
     inputRange: [0, 1],
@@ -495,6 +525,25 @@ export function AppPage({
       >
         <LinearGradient
           colors={heroSpec.ribbonB}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+      <Animated.View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          width: width * 1.32,
+          height: reducedGlass ? 104 : 140,
+          top: 268,
+          right: -width * 0.22,
+          transform: [{ translateX: ambientTranslateCX }, { rotate: '-3deg' }],
+          opacity: reducedGlass ? 0.2 : 0.46,
+        }}
+      >
+        <LinearGradient
+          colors={heroSpec.ribbonC}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={{ flex: 1 }}
