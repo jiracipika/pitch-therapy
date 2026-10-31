@@ -400,7 +400,6 @@ export default function TuneInScreen() {
                 onPress={handleSkip}
                 accessibilityRole="button"
                 accessibilityLabel="Skip this note"
-                accessibilityState={{ disabled: answerLockedRef.current }}
                 disabled={answerLockedRef.current}
                 style={({ pressed }) => ({
                   marginTop: 20,
@@ -425,7 +424,6 @@ export default function TuneInScreen() {
             onPress={() => handleSuccess()}
             accessibilityRole="button"
             accessibilityLabel="Mark as matched correctly"
-            accessibilityState={{ disabled: answerLockedRef.current }}
             disabled={answerLockedRef.current}
             style={({ pressed }) => ({
               flex: 1,
@@ -446,7 +444,6 @@ export default function TuneInScreen() {
             onPress={handleSkip}
             accessibilityRole="button"
             accessibilityLabel="Skip this note"
-            accessibilityState={{ disabled: answerLockedRef.current }}
             disabled={answerLockedRef.current}
             style={({ pressed }) => ({
               flex: 1,

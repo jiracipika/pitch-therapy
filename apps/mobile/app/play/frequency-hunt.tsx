@@ -44,8 +44,14 @@ export default function FrequencyHuntScreen() {
     }
   }, []);
 
-  // Pending round-advance timers must never outlive this screen.
-  useEffect(() => clearAdvance, [clearAdvance]);
+  // Pending round-advance and preview-debounce timers must never outlive
+  // this screen.
+  useEffect(() => {
+    return () => {
+      clearAdvance();
+      if (previewRef.current) clearTimeout(previewRef.current);
+    };
+  }, [clearAdvance]);
 
   // Persist session result once when the game completes.
   useEffect(() => {

@@ -139,7 +139,8 @@ export default function SpeedRoundScreen() {
       setAnswerLocked(true);
 
       const isCorrect = note === currentNote;
-      const points = isCorrect ? Math.max(10, 100 - streak * 2) : 0;
+      // Web parity: correct answers earn 10 + streak * 2 (streak rewards).
+      const points = isCorrect ? 10 + streak * 2 : 0;
 
       setTotal((t) => t + 1);
       setFeedback(isCorrect ? 'correct' : 'wrong');

@@ -198,7 +198,7 @@ export default function ChordDetectiveScreen() {
       </View>
 
       <View style={{ alignItems: 'center', marginTop: 32 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Replay chord" onPress={() => playChord(root, chordType)} style={{
+        <Pressable accessibilityRole="button" accessibilityLabel="Replay chord" onPress={() => playChordTracked(root, chordType)} style={{
           width: 96, height: 96, borderRadius: 48, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center',
         }}>
           <Text style={{ fontSize: 36 }}>🔊</Text>

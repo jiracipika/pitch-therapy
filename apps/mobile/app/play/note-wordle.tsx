@@ -58,6 +58,11 @@ export default function NoteWordleScreen() {
   // Synchronous submit latch — state alone is stale for multiple taps inside
   // one JS batch, which would append the same guess twice and burn an attempt.
   const submitLockedRef = useRef(false);
+  // The latch releases only when the next guess becomes selectable (state has
+  // flushed), never synchronously inside submit — that reset was a no-op.
+  useEffect(() => {
+    submitLockedRef.current = false;
+  }, [guesses.length, phase]);
 
   const initGame = () => {
     submitLockedRef.current = false;
@@ -97,7 +102,8 @@ export default function NoteWordleScreen() {
     const nextGuesses = [...guesses, { note: currentGuess, feedback }];
     setGuesses(nextGuesses);
     setCurrentGuess(null);
-    submitLockedRef.current = false;
+    // Latch stays set until the next guess becomes selectable (effect below) —
+    // resetting it here was a no-op that never guarded anything.
 
     if (feedback === "correct") {
       void triggerCorrectHaptic();

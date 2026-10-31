@@ -191,7 +191,7 @@ export default function PianoTapScreen() {
         <Text style={{ textAlign: 'center', color: pc.textSecondary, fontSize: 13, marginBottom: 24 }}>Tap to replay note</Text>
 
         {feedback && (
-          <View accessibilityLiveRegion="polite" style={{ backgroundColor: feedback === 'correct' ? pc.cardSurface : pc.cardSurface, borderRadius: 12, padding: 12, marginBottom: 20, alignItems: 'center', borderWidth: 1, borderColor: feedback === 'correct' ? pc.success : pc.danger }}>
+          <View accessibilityLiveRegion="polite" style={{ backgroundColor: pc.cardSurface, borderRadius: 12, padding: 12, marginBottom: 20, alignItems: "center", borderWidth: 1, borderColor: feedback === 'correct' ? pc.success : pc.danger }}>
             <Text style={{ color: feedback === 'correct' ? pc.success : pc.danger, fontWeight: '700', fontSize: 16 }}>
               {feedback === 'correct' ? '✓ Correct!' : `✗ It was ${target}`}
             </Text>

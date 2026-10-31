@@ -83,12 +83,12 @@ export default function IntervalArcherScreen() {
   const pool = MODE_CONFIG[intervalMode].pool;
   const activeIntervals = INTERVALS.filter(i => pool.includes(i.semitones));
 
-  const playIntervalSound = (freq: number, semitones: number) => {
+  const playIntervalSound = (freq: number, semitones: number, mode: IntervalMode) => {
     const secondFreq = freq * Math.pow(2, semitones / 12);
-    if (intervalMode === 'ascending') {
+    if (mode === 'ascending') {
       playFrequency(freq, 0.5);
       timersRef.current.push(setTimeout(() => playFrequency(secondFreq, 0.8), 550));
-    } else if (intervalMode === 'descending') {
+    } else if (mode === 'descending') {
       playFrequency(secondFreq, 0.5);
       timersRef.current.push(setTimeout(() => playFrequency(freq, 0.8), 550));
     } else {
@@ -112,14 +112,17 @@ export default function IntervalArcherScreen() {
     const noteIdx = Math.floor(Math.random() * 12);
     const note = NOTE_NAMES[noteIdx];
     const freq = NOTE_FREQS_4[note] || 261.63;
-    const intervalSemitones = pool[Math.floor(Math.random() * pool.length)];
+    // Use the pool of the mode being started, not the (stale) state —
+    // round 1 of a newly chosen mode must respect that mode.
+    const modePool = MODE_CONFIG[mode].pool;
+    const intervalSemitones = modePool[Math.floor(Math.random() * modePool.length)];
     const interval = INTERVALS[intervalSemitones];
     setRootNote(note);
     setRootFreq(freq);
     setTargetInterval(interval);
     setFeedback(null);
     setSelected(null);
-    playIntervalSound(freq, interval.semitones);
+    playIntervalSound(freq, interval.semitones, mode);
   };
 
   const nextRound = (mode?: IntervalMode) => {
@@ -224,7 +227,7 @@ export default function IntervalArcherScreen() {
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
       <GameHeader score={score} round={round} totalRounds={TOTAL_ROUNDS} streak={streak} accent={ACCENT} onBack={() => router.back()} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 32 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Replay interval" onPress={() => playIntervalSound(rootFreq, targetInterval.semitones)} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Replay interval" onPress={() => playIntervalSound(rootFreq, targetInterval.semitones, intervalMode)} style={{ alignSelf: 'center', width: 72, height: 72, borderRadius: 18, backgroundColor: `${ACCENT}22`, borderWidth: 2, borderColor: ACCENT, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
           <Text style={{ fontSize: 28 }}>🔊</Text>
         </Pressable>
         <Text style={{ textAlign: 'center', color: pc.textSecondary, fontSize: 13, marginBottom: 4 }}>Replay interval</Text>
@@ -238,7 +241,7 @@ export default function IntervalArcherScreen() {
         </View>
 
         {feedback && (
-          <View accessibilityLiveRegion="polite" style={{ backgroundColor: feedback === 'correct' ? pc.cardSurface : pc.cardSurface, borderRadius: 12, padding: 12, marginBottom: 16, alignItems: 'center', borderWidth: 1, borderColor: feedback === 'correct' ? pc.success : pc.danger }}>
+          <View accessibilityLiveRegion="polite" style={{ backgroundColor: pc.cardSurface, borderRadius: 12, padding: 12, marginBottom: 16, alignItems: 'center', borderWidth: 1, borderColor: feedback === 'correct' ? pc.success : pc.danger }}>
             <Text style={{ color: feedback === 'correct' ? pc.success : pc.danger, fontWeight: '700', fontSize: 16 }}>
               {feedback === 'correct' ? '🎯 Bullseye!' : `It was ${targetInterval.name}`}
             </Text>

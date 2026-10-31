@@ -11,6 +11,8 @@ import { playColors as pc } from '@/lib/theme';
 const MODE = GAME_MODE_META['drone-lock'];
 const ACCENT = MODE.accentHex;
 const NOTE_NAMES = CHROMATIC_SCALE;
+// Module scope: rebuilding per render churned startRound's useCallback deps.
+const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQS_4[n] ?? 261.63);
 
 // Drone Lock uses full interval names for its descriptive UI.
 // Intentionally excludes M7 (semitone 11) — extremely difficult to sing
@@ -80,8 +82,6 @@ export default function DroneLockScreen() {
       timeMs: Date.now() - sessionStartRef.current,
     });
   }, [phase, results, score, recordResult]);
-
-  const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQS_4[n] ?? 261.63);
 
   const startRound = useCallback(() => {
     answerLockedRef.current = false;
@@ -283,7 +283,7 @@ export default function DroneLockScreen() {
           onPress={() => {
             const droneHz = NOTE_FREQS[droneNote];
             playFrequency(droneHz, 2.0);
-            setTimeout(() => playFrequency(droneHz * Math.pow(2, targetInterval.semitones / 12), 1.0), 200);
+            timersRef.current.push(setTimeout(() => playFrequency(droneHz * Math.pow(2, targetInterval.semitones / 12), 1.0), 200));
           }}
           style={styles.playBtn}
         >
@@ -351,6 +351,27 @@ export default function DroneLockScreen() {
             >
               <Text style={{ color: hasDetectedPitch ? pc.text : pc.textSecondary, fontWeight: '700', fontSize: 16 }}>
                 {hasDetectedPitch ? '🔒 Lock In' : 'Hum a note first'}
+              </Text>
+            </Pressable>
+            {/* Mic mode had no escape hatch: with no detected pitch the round
+                could only be abandoned via back-navigation. */}
+            <Pressable
+              onPress={() => handleAssess(ACCURACY_OPTIONS[3])}
+              accessibilityRole="button"
+              accessibilityLabel="Skip this round and score it as off track"
+              style={({ pressed }) => ({
+                marginTop: 10,
+                paddingVertical: 12,
+                paddingHorizontal: 24,
+                borderRadius: 12,
+                alignSelf: 'center',
+                minHeight: 44,
+                justifyContent: 'center',
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <Text style={{ color: pc.textTertiary, fontSize: 13, fontWeight: '600' }}>
+                Mic not picking you up? Skip round
               </Text>
             </Pressable>
           </View>
