@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, type PointerEvent } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { GAME_MODE_META, GAME_MODES, MODE_CATEGORIES } from "@pitch-therapy/core";
 import { playTone, stopAllTones } from "@/lib/audio";
+import LandingCanvas from "@/components/LandingCanvas";
+import TiltCard from "@/components/TiltCard";
 
 const bars = [22, 42, 68, 34, 82, 52, 94, 61, 38, 72, 88, 46, 76, 31, 64, 91, 56, 27, 70, 43, 84, 58, 35, 74, 49, 90, 62, 29, 67, 44, 80, 53];
 const featured = GAME_MODES.slice(0, 6).map((id) => GAME_MODE_META[id]);
@@ -37,6 +39,33 @@ export default function Home() {
     window.setTimeout(() => setTonePlaying(false), 1600);
   };
 
+  // Scroll-linked hero choreography: the copy drifts up with a slight
+  // italic lean while the instrument panel sinks, rotates, and dissolves
+  // through a hue-shift + progressive blur as it leaves the viewport.
+  const heroRef = useRef<HTMLElement | null>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const copyY = useTransform(scrollYProgress, [0, 1], [0, -70]);
+  const copySkew = useTransform(scrollYProgress, [0, 1], [0, -2.5]);
+  const copyFade = useTransform(scrollYProgress, [0, 0.85], [1, 0.25]);
+  const instrumentY = useTransform(scrollYProgress, [0, 1], [0, -150]);
+  const instrumentScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  const instrumentRotate = useTransform(scrollYProgress, [0, 1], [0, 4]);
+  const instrumentFilter = useTransform(
+    scrollYProgress,
+    [0, 0.55, 1],
+    ["hue-rotate(0deg) blur(0px)", "hue-rotate(16deg) blur(1.2px)", "hue-rotate(40deg) blur(6px)"],
+  );
+  const canvasHue = useTransform(scrollYProgress, [0, 1], ["hue-rotate(0deg)", "hue-rotate(55deg)"]);
+
+  // Cursor-following spotlight on exercise cards (delegated, no re-render).
+  const onCardGridMove = (event: PointerEvent<HTMLDivElement>) => {
+    const card = (event.target as HTMLElement).closest<HTMLElement>(".studio-exercise-card");
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty("--mx", `${(((event.clientX - rect.left) / rect.width) * 100).toFixed(2)}%`);
+    card.style.setProperty("--my", `${(((event.clientY - rect.top) / rect.height) * 100).toFixed(2)}%`);
+  };
+
   return (
     <div className="studio-landing">
       <header className="studio-landing-nav">
@@ -52,7 +81,11 @@ export default function Home() {
       </header>
 
       <main id="landing-content">
-        <section className="studio-hero">
+        <section ref={heroRef} className="studio-hero">
+          <motion.div className="studio-hero-canvas" style={reduce ? undefined : { filter: canvasHue }} aria-hidden="true">
+            <LandingCanvas className="studio-canvas" />
+          </motion.div>
+          <motion.div className="studio-hero-cell" style={reduce ? undefined : { y: copyY, skewY: copySkew, opacity: copyFade }}>
           <motion.div className="studio-hero-copy" initial={reduce ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}>
             <div className="studio-eyebrow"><i /> EAR TRAINING, RECOMPOSED</div>
             <h1>Hear what<br /><em>others miss.</em></h1>
@@ -67,13 +100,18 @@ export default function Home() {
               <span><b>∞</b><small>practice rounds</small></span>
             </div>
           </motion.div>
+          </motion.div>
 
+          <motion.div className="studio-hero-cell studio-hero-cell-right" style={reduce ? undefined : { y: instrumentY, scale: instrumentScale, rotate: instrumentRotate, filter: instrumentFilter }}>
+          <TiltCard max={4.5} lift={6} className="studio-instrument-tilt">
           <motion.div className="studio-instrument" initial={reduce ? false : { opacity: 0, x: 36, rotateY: -5 }} animate={{ opacity: 1, x: 0, rotateY: 0 }} transition={{ delay: 0.12, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}>
             <div className="studio-instrument-top"><span>REFERENCE TONE / A4</span><button type="button" className="is-live" onClick={playReferenceTone} aria-label="Play reference tone A4, 440 hertz"><i /> {tonePlaying ? "PLAYING" : "PLAY A4"}</button></div>
             <div className="studio-note-readout"><span>A</span><div><b>440.0</b><small>HERTZ</small></div></div>
             <Waveform />
             <div className="studio-tuner"><span>−50</span><span>−25</span><strong>0</strong><span>+25</span><span>+50</span><i /></div>
             <div className="studio-instrument-bottom"><span>CONCERT PITCH</span><b>A440</b></div>
+          </motion.div>
+          </TiltCard>
           </motion.div>
         </section>
 
@@ -96,7 +134,7 @@ export default function Home() {
 
         <section className="studio-exercises" aria-labelledby="exercise-title">
           <div className="studio-section-heading"><span>THE EXERCISES</span><h2 id="exercise-title">One weakness.<br />One focused drill.</h2><p>No bloated curriculum. Choose the listening skill you want to sharpen and begin.</p></div>
-          <div className="studio-exercise-grid">
+          <div className="studio-exercise-grid" onPointerMove={onCardGridMove}>
             {featured.map((mode, index) => (
               <motion.article
                 key={mode.id}
