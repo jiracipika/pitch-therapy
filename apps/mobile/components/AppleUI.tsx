@@ -1,9 +1,7 @@
 import { type ReactNode, useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { AnimatedCounter, useReducedMotionPreference } from '@/lib/motion';
-import { useAppSettings } from '@/lib/settings';
-import { colors, radii, shadows, typography } from '@/lib/theme';
+import { colors, radii, typography } from '@/lib/theme';
 
 interface GlassCardProps {
   children: ReactNode;
@@ -15,91 +13,37 @@ interface GlassCardProps {
   accessibilityHint?: string;
 }
 
+// Inset-grouped card (iOS Settings/Fitness): flat elevated surface, hairline
+// edge, no gradient/glow. `accent` is accepted for API compatibility and
+// intentionally unused — grouping, not accent tinting, carries the hierarchy.
 export function GlassCard({
   children,
   style,
   onPress,
   padding = 16,
-  accent,
   accessibilityLabel,
   accessibilityHint,
 }: GlassCardProps) {
-  const lift = useRef(new Animated.Value(0)).current;
-  const { glassMode } = useAppSettings();
-  const reducedGlass = glassMode === 'reduced';
-  const reducedMotion = useReducedMotionPreference();
-
-  useEffect(() => {
-    if (reducedMotion) {
-      lift.setValue(1);
-      return;
-    }
-    Animated.spring(lift, {
-      toValue: 1,
-      useNativeDriver: true,
-      stiffness: 180,
-      damping: 24,
-      mass: 0.9,
-    }).start();
-  }, [lift, reducedMotion]);
-
-  const translateY = lift.interpolate({
-    inputRange: [0, 1],
-    outputRange: [10, 0],
-  });
-  const opacity = lift.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.75, 1],
-  });
-
-  const content = (
-    <LinearGradient
-      colors={
-        reducedGlass
-          ? [accent ? accent + '14' : 'rgba(255,255,255,0.035)', 'rgba(17,22,34,0.92)']
-          : accent
-            ? [accent + '26', colors.card, colors.card]
-            : [colors.glassLight, colors.card]
-      }
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={[styles.glass, reducedGlass ? styles.glassReduced : null, { padding }, style]}
-    >
-      <View
-        pointerEvents="none"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 40,
-          backgroundColor: reducedGlass ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.045)',
-        }}
-      />
-      {children}
-    </LinearGradient>
-  );
+  const content = <View style={[styles.glass, { padding }, style]}>{children}</View>;
 
   if (!onPress) {
-    return <Animated.View style={{ opacity, transform: [{ translateY }] }}>{content}</Animated.View>;
+    return content;
   }
 
   return (
-    <Animated.View style={{ opacity, transform: [{ translateY }] }}>
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel}
-        accessibilityHint={accessibilityHint}
-        style={({ pressed }) => ({
-          minHeight: 48,
-          opacity: pressed ? 0.86 : 1,
-          transform: [{ scale: pressed ? 0.985 : 1 }],
-        })}
-      >
-        {content}
-      </Pressable>
-    </Animated.View>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      style={({ pressed }) => ({
+        minHeight: 48,
+        opacity: pressed ? 0.88 : 1,
+        transform: [{ scale: pressed ? 0.988 : 1 }],
+      })}
+    >
+      {content}
+    </Pressable>
   );
 }
 
@@ -162,20 +106,15 @@ export function AppleButton({
       style={({ pressed }) => [
         styles.button,
         {
-          backgroundColor: isPrimary ? color : 'transparent',
-          borderWidth: isSecondary ? 1 : 0,
-          borderColor: isSecondary ? colors.borderStrong : 'transparent',
-          opacity: pressed ? 0.78 : disabled ? 0.42 : 1,
-          transform: [{ scale: pressed ? 0.985 : 1 }],
-          shadowColor: isPrimary ? color : '#000',
-          shadowOpacity: isPrimary ? 0.32 : 0.12,
-          shadowRadius: isPrimary ? 16 : 8,
-          shadowOffset: { width: 0, height: isPrimary ? 7 : 4 },
+          backgroundColor: isPrimary ? color : isSecondary ? colors.surfaceElevated : 'transparent',
+          borderWidth: isSecondary ? 0 : 0,
+          opacity: pressed ? 0.75 : disabled ? 0.4 : 1,
+          transform: [{ scale: pressed ? 0.98 : 1 }],
         },
         style,
       ]}
     >
-      <Text style={[styles.buttonText, { color: isPrimary ? colors.background : colors.textSecondary }]}>
+      <Text style={[styles.buttonText, { color: isPrimary ? '#FFFFFF' : colors.text }]}>
         {loading ? 'Loading...' : title}
       </Text>
     </Pressable>
@@ -463,19 +402,11 @@ export function Divider() {
 
 const styles = StyleSheet.create({
   glass: {
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
     overflow: 'hidden',
-    ...shadows.card,
-  },
-  glassReduced: {
-    borderColor: 'rgba(255,255,255,0.09)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.22,
-    shadowRadius: 16,
-    elevation: 6,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -485,18 +416,18 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: colors.text,
-    ...typography.headline,
+    ...typography.title3,
   },
   sectionSubtitle: {
     color: colors.textTertiary,
-    ...typography.caption1,
+    ...typography.footnote,
   },
   sectionAction: {
     color: colors.blue,
     ...typography.subhead,
   },
   button: {
-    minHeight: 48,
+    minHeight: 50,
     borderRadius: radii.md,
     paddingVertical: 15,
     paddingHorizontal: 22,
@@ -515,7 +446,7 @@ const styles = StyleSheet.create({
   },
   pillText: {
     ...typography.caption1,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   statItem: {
     flex: 1,
@@ -534,13 +465,11 @@ const styles = StyleSheet.create({
   pathRow: {
     minHeight: 58,
     borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: 'rgba(255,255,255,0.045)',
+    backgroundColor: colors.surfaceElevated,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    padding: 10,
+    padding: 12,
   },
   pathIndex: {
     width: 30,
@@ -552,25 +481,24 @@ const styles = StyleSheet.create({
   },
   pathIndexText: {
     ...typography.caption1,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   pathLabel: {
     color: colors.text,
     ...typography.subhead,
-    fontWeight: '800',
+    fontWeight: '600',
   },
   pathDetail: {
     color: colors.textSecondary,
-    ...typography.caption1,
+    ...typography.footnote,
     lineHeight: 17,
   },
   input: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceElevated,
     borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: 16,
-    paddingVertical: 15,
+    borderWidth: 0,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
     color: colors.text,
     ...typography.body,
   },

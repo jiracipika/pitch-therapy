@@ -1,11 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Pressable, Text, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { type Href, usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { triggerSelectionHaptic } from '@/lib/haptics';
 import { MAIN_TABS } from '@/lib/main-tabs';
-import { colors, radii, shadows, typography } from '@/lib/theme';
+import { colors, typography } from '@/lib/theme';
 
 // Extracted into its own component so hooks are at the top level (not inside .map())
 function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: boolean }) {
@@ -24,19 +23,20 @@ function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: b
 
   const iconScale = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: [1, 1.06],
+    outputRange: [1, 1.08],
   });
-  const labelOpacity = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.7, 1],
-  });
-  const activeBgOpacity = progress.interpolate({
+  const tint = progress.interpolate({
     inputRange: [0, 1],
     outputRange: [0, 1],
   });
-  const labelTranslate = progress.interpolate({
+
+  const iconColor = tint.interpolate({
     inputRange: [0, 1],
-    outputRange: [3, 0],
+    outputRange: [colors.textTertiary as string, colors.blue as string],
+  });
+  const labelColor = tint.interpolate({
+    inputRange: [0, 1],
+    outputRange: [colors.textTertiary as string, colors.blue as string],
   });
 
   return (
@@ -53,32 +53,18 @@ function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: b
       hitSlop={8}
       style={({ pressed }) => ({
         flex: 1,
-        minHeight: 54,
+        minHeight: 50,
         justifyContent: 'center',
-        transform: [{ scale: pressed ? 0.97 : 1 }],
-        opacity: pressed ? 0.9 : 1,
+        transform: [{ scale: pressed ? 0.96 : 1 }],
+        opacity: pressed ? 0.85 : 1,
       })}
     >
-      <View style={{ alignItems: 'center', paddingVertical: 8, paddingHorizontal: 4, position: 'relative' }}>
-        <Animated.View
-          style={{
-            position: 'absolute',
-            top: 3,
-            bottom: 3,
-            left: 3,
-            right: 3,
-            borderRadius: radii.md,
-            backgroundColor: active ? tab.color + '24' : colors.glassLight,
-            borderWidth: 1,
-            borderColor: active ? tab.color + '66' : colors.border,
-            opacity: activeBgOpacity,
-          }}
-        />
+      <View style={{ alignItems: 'center', paddingVertical: 6, paddingHorizontal: 4 }}>
         <Animated.Text
           style={{
             fontSize: 19,
             marginBottom: 2,
-            color: active ? tab.color : colors.textTertiary,
+            color: iconColor,
             transform: [{ scale: iconScale }],
           }}
         >
@@ -86,11 +72,9 @@ function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: b
         </Animated.Text>
         <Animated.Text
           style={{
-            color: active ? colors.text : colors.textTertiary,
-            opacity: labelOpacity,
-            transform: [{ translateY: labelTranslate }],
+            color: labelColor,
             ...typography.caption2,
-            fontWeight: active ? '800' : '600',
+            fontWeight: '600',
           }}
         >
           {tab.label}
@@ -100,76 +84,30 @@ function TabButton({ tab, active }: { tab: (typeof MAIN_TABS)[number]; active: b
   );
 }
 
+// iOS-style tab bar: full-width translucent bar with a hairline top edge.
+// Selected tab tints system blue; no floating pill, no decorative sweep.
 export function AnimatedTabBar() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
-  const sheen = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(sheen, {
-          toValue: 1,
-          duration: 5200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(sheen, {
-          toValue: 0,
-          duration: 5200,
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [sheen]);
-
-  const sheenTranslate = sheen.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-160, 160],
-  });
 
   return (
     <View
       style={{
         position: 'absolute',
-        bottom: Math.max(insets.bottom, 10),
-        left: 12,
-        right: 12,
+        bottom: 0,
+        left: 0,
+        right: 0,
         flexDirection: 'row',
-        backgroundColor: 'rgba(12,12,17,0.96)',
-        borderWidth: 1,
-        borderColor: colors.glassBorder,
-        paddingVertical: 6,
-        paddingHorizontal: 6,
-        borderRadius: radii.lg,
-        overflow: 'hidden',
-        ...shadows.tab,
+        backgroundColor: 'rgba(20, 20, 22, 0.94)',
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: 'rgba(255, 255, 255, 0.12)',
+        paddingTop: 6,
+        paddingBottom: Math.max(insets.bottom, 10),
       }}
     >
-      <Animated.View
-        pointerEvents="none"
-        style={{
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          width: 120,
-          opacity: 0.35,
-          transform: [{ translateX: sheenTranslate }],
-        }}
-      >
-        <LinearGradient
-          colors={['rgba(183,243,74,0)', 'rgba(183,243,74,0.26)', 'rgba(183,243,74,0)']}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}
-          style={{ flex: 1 }}
-        />
-      </Animated.View>
       {MAIN_TABS.map((tab) => {
         const active = pathname === tab.route || (pathname === '/' && tab.route === '/dashboard');
-        return (
-          <TabButton key={tab.route} tab={tab} active={active} />
-        );
+        return <TabButton key={tab.route} tab={tab} active={active} />;
       })}
     </View>
   );

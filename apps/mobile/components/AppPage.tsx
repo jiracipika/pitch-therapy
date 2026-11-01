@@ -69,10 +69,6 @@ function getHeroSpec(variant: NonNullable<AppPageProps['heroVariant']>) {
   }
 }
 
-function reduceRgbaAlpha(value: string, alpha: string) {
-  return value.replace(/,\s*0\.\d+\)$/, `,${alpha})`);
-}
-
 // ─── Swipe constants ─────────────────────────────────────────────────────────
 
 /** Distance (px) the finger must travel to trigger a tab switch — 20% of screen width. */
@@ -111,7 +107,6 @@ export function AppPage({
   const ambientShiftA = useRef(new Animated.Value(0)).current;
   const ambientShiftB = useRef(new Animated.Value(0)).current;
   const ambientShiftC = useRef(new Animated.Value(0)).current;
-  const heroShift = useRef(new Animated.Value(0)).current;
   const childAnimationsRef = useRef<Animated.Value[]>([]);
 
   // ── Navigation tracking ──
@@ -363,33 +358,6 @@ export function AppPage({
     };
   }, [ambientShiftA, ambientShiftB, ambientShiftC, motionProfile.ambientA, motionProfile.ambientB, reducedMotion]);
 
-  // ── Hero parallax ──
-  useEffect(() => {
-    if (reducedMotion) {
-      heroShift.setValue(0.5);
-      return;
-    }
-
-    const heroLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(heroShift, {
-          toValue: 1,
-          duration: motionProfile.heroDuration,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.timing(heroShift, {
-          toValue: 0,
-          duration: motionProfile.heroDuration,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    heroLoop.start();
-    return () => heroLoop.stop();
-  }, [heroShift, motionProfile.heroDuration, reducedMotion]);
-
   // ── Child stagger ──
   useEffect(() => {
     if (reducedMotion) {
@@ -424,35 +392,6 @@ export function AppPage({
   const ambientTranslateCX = ambientShiftC.interpolate({
     inputRange: [0, 1],
     outputRange: [-34, 44],
-  });
-  const heroTranslateX = heroShift.interpolate({
-    inputRange: [0, 1],
-    outputRange:
-      heroVariant === 'progress'
-        ? [-18, 18]
-        : heroVariant === 'settings'
-          ? [-10, 10]
-          : heroVariant === 'play'
-            ? [-12, 16]
-          : [-14, 14],
-  });
-  const heroTranslateY = heroShift.interpolate({
-    inputRange: [0, 1],
-    outputRange:
-      heroVariant === 'daily'
-        ? [-8, 8]
-        : heroVariant === 'play'
-          ? [3, -9]
-        : heroVariant === 'dashboard'
-          ? [0, -7]
-          : [0, -5],
-  });
-  const heroScale = heroShift.interpolate({
-    inputRange: [0, 1],
-    outputRange:
-      heroVariant === 'settings'
-        ? [0.995, 1.005]
-        : [0.985, 1.015],
   });
   const heroSpec = getHeroSpec(heroVariant);
 
@@ -636,60 +575,24 @@ export function AppPage({
             }
           >
             <View style={{ width: '100%', maxWidth: contentMaxWidth, alignSelf: 'center', gap: 18 }}>
-              <LinearGradient
-                colors={
-                  reducedGlass
-                    ? [reduceRgbaAlpha(heroSpec.gradient[0], '0.12'), 'rgba(18,18,20,0.90)', 'rgba(255,255,255,0.015)']
-                    : heroSpec.gradient
-                }
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{
-                  borderRadius: 16,
-                  paddingHorizontal: 17,
-                  paddingVertical: 16,
-                  borderWidth: 1,
-                  borderColor: reducedGlass ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.13)',
-                  gap: 7,
-                  overflow: 'hidden',
-                  shadowColor: '#000000',
-                  shadowOffset: { width: 0, height: 5 },
-                  shadowOpacity: reducedGlass ? 0.22 : 0.32,
-                  shadowRadius: 14,
-                  elevation: reducedGlass ? 4 : 7,
-                }}
-              >
-                <Animated.View
-                  pointerEvents="none"
-                  style={{
-                    position: 'absolute',
-                    width: 180,
-                    height: 180,
-                    borderRadius: 180,
-                    top: -80,
-                    right: -40,
-                    opacity: reducedMotion ? 0.2 : 0.4,
-                    backgroundColor: reducedGlass ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.08)',
-                    transform: [{ translateX: heroTranslateX }, { translateY: heroTranslateY }, { scale: heroScale }],
-                  }}
-                />
-                <Text style={{ color: colors.text, ...typography.title1 }}>{title}</Text>
+              <View style={{ paddingTop: 8, gap: 5 }}>
+                <Text style={{ color: colors.text, ...typography.largeTitle }}>{title}</Text>
                 {subtitle ? (
-                  <Text style={{ color: colors.textSecondary, ...typography.subhead, lineHeight: 21 }}>
+                  <Text style={{ color: colors.textSecondary, ...typography.callout, lineHeight: 21 }}>
                     {subtitle}
                   </Text>
                 ) : null}
                 {heroHint ? (
-                  <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>
+                  <Text style={{ color: colors.textTertiary, ...typography.footnote }}>
                     {heroHint}
                   </Text>
                 ) : null}
                 {showSwipeHint && canSwipeTabs ? (
-                  <Text style={{ color: colors.textTertiary, ...typography.caption1 }}>
+                  <Text style={{ color: colors.textTertiary, ...typography.footnote }}>
                     Swipe left or right to move between sections
                   </Text>
                 ) : null}
-              </LinearGradient>
+              </View>
               {childArray.map((child, index) => {
                 const animatedValue = childAnimationsRef.current[index];
                 const translateY = animatedValue.interpolate({

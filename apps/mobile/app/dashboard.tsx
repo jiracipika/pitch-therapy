@@ -36,50 +36,15 @@ export default function DashboardScreen() {
       heroVariant="dashboard"
       heroHint="Warm up, focus, then review."
     >
-      <GlassCard accent={colors.signal} padding={18} style={{ gap: 18 }}>
-        <View
-          style={{
-            flexDirection: isTablet ? "row" : "column",
-            alignItems: isTablet ? "center" : "flex-start",
-            gap: 14,
-          }}
-        >
-          <View
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-            style={{
-              width: 66,
-              height: 66,
-              borderRadius: radii.lg,
-              borderWidth: 1,
-              borderColor: colors.signal + "66",
-              backgroundColor: colors.signal + "18",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ color: colors.signal, fontSize: 25, fontWeight: "900", letterSpacing: -1 }}>
-              PT
-            </Text>
-            <View
-              style={{
-                width: 30,
-                height: 3,
-                marginTop: 4,
-                borderRadius: 2,
-                backgroundColor: colors.coral,
-              }}
-            />
-          </View>
-          <View style={{ flex: 1, gap: 7 }}>
-            <Pill label={practicePlan.personalized ? "Tuned to your progress" : "Ready for today"} color={colors.signal} />
-            <Text style={{ color: colors.text, ...typography.title2 }}>
-              {practicePlan.title}
-            </Text>
-            <Text style={{ color: colors.textSecondary, ...typography.caption1, lineHeight: 18 }}>
-              {practicePlan.summary}
-            </Text>
-          </View>
+      <GlassCard accent={colors.signal} padding={18} style={{ gap: 16 }}>
+        <View style={{ gap: 7 }}>
+          <Pill label={practicePlan.personalized ? "Tuned to your progress" : "Ready for today"} color={colors.signal} />
+          <Text style={{ color: colors.text, ...typography.title2 }}>
+            {practicePlan.title}
+          </Text>
+          <Text style={{ color: colors.textSecondary, ...typography.footnote, lineHeight: 18 }}>
+            {practicePlan.summary}
+          </Text>
         </View>
 
         <View style={{ flexDirection: isTablet ? "row" : "column", gap: 10 }}>
@@ -93,15 +58,17 @@ export default function DashboardScreen() {
             accessibilityHint="Open the full play mode catalog"
             style={({ pressed }) => ({
               flex: 1,
-              minHeight: 48,
+              minHeight: 50,
               borderRadius: radii.md,
-              backgroundColor: colors.text,
+              backgroundColor: colors.signal,
               paddingVertical: 14,
               alignItems: "center",
-              opacity: pressed ? 0.82 : 1,
+              justifyContent: "center",
+              opacity: pressed ? 0.75 : 1,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
             })}
           >
-            <Text style={{ color: colors.background, ...typography.headline }}>Browse Modes</Text>
+            <Text style={{ color: "#FFFFFF", ...typography.headline }}>Browse Modes</Text>
           </Pressable>
           <Pressable
             onPress={() => {
@@ -111,14 +78,15 @@ export default function DashboardScreen() {
             accessibilityRole="button"
             accessibilityLabel="Open daily challenge"
             style={({ pressed }) => ({
-              width: isTablet ? 104 : "100%",
-              minHeight: 48,
+              width: isTablet ? 110 : "100%",
+              minHeight: 50,
               borderRadius: radii.md,
-              borderWidth: 1,
-              borderColor: colors.borderStrong,
+              backgroundColor: colors.surfaceElevated,
               paddingVertical: 14,
               alignItems: "center",
-              opacity: pressed ? 0.82 : 1,
+              justifyContent: "center",
+              opacity: pressed ? 0.75 : 1,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
             })}
           >
             <Text style={{ color: colors.text, ...typography.headline }}>Daily</Text>
