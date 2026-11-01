@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0A0A0F"
+        "backgroundColor": "#0A84FF"
       },
       "package": "com.pitchtherapy.app",
       "permissions": [
@@ -28,7 +28,7 @@
     },
     "splash": {
       "image": "./assets/splash.png",
-      "backgroundColor": "#09090b",
+      "backgroundColor": "#000000",
       "resizeMode": "contain"
     },
     "plugins": [

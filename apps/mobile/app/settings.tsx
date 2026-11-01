@@ -354,7 +354,7 @@ export default function SettingsScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Permanently delete all progress"
               >
-                <Text style={{ color: colors.background, ...typography.subhead, fontWeight: '700' }}>
+                <Text style={{ color: '#FFFFFF', ...typography.subhead, fontWeight: '700' }}>
                   Delete
                 </Text>
               </Pressable>
@@ -389,8 +389,8 @@ function SettingRow({
         accessibilityLabel={title}
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: colors.surfaceElevated, true: color + '99' }}
-        thumbColor={value ? colors.text : colors.textTertiary}
+        trackColor={{ false: colors.surfaceElevated, true: color }}
+        thumbColor={'#FFFFFF'}
       />
     </View>
   );
