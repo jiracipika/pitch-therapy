@@ -1,6 +1,7 @@
 import { View, Text, Pressable, ScrollView, PanResponder, LayoutChangeEvent } from 'react-native';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GAME_MODE_META, DIFFICULTY_CONFIG, type Difficulty } from '@pitch-therapy/core';
 import { GameHeader } from '@/components/GameHeader';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
@@ -84,6 +85,7 @@ function FreqSlider({ value, onChange, accent }: { value: number; onChange: (v: 
 
 export default function FrequencyGuessScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('select-difficulty');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
@@ -196,7 +198,7 @@ export default function FrequencyGuessScreen() {
   if (phase === 'select-difficulty') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
-        <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 20, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
           <Text style={{ color: pc.text, fontSize: 22, fontWeight: '700' }}>{MODE.label}</Text>
         </View>
@@ -239,7 +241,7 @@ export default function FrequencyGuessScreen() {
     const avgErr = results.reduce((s, r) => s + r.errorPct, 0) / results.length;
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
-        <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
+        <ScrollView contentContainerStyle={{ paddingTop: insets.top + 24, paddingHorizontal: 20, paddingBottom: 40 }}>
           <Text style={{ color: pc.text, fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Complete!</Text>
           <Text style={{ color: pc.textSecondary, marginBottom: 32 }}>{MODE.label} · {difficulty}</Text>
 

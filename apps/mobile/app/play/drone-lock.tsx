@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useMicPitch } from '@/lib/micPitch';
@@ -38,6 +39,7 @@ type InputMode = 'mic' | 'self-assess';
 
 export default function DroneLockScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { recordResult } = useSessionResults();
   const mic = useMicPitch();
   const [phase, setPhase] = useState<Phase>('idle');
@@ -239,7 +241,7 @@ export default function DroneLockScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={styles.backBtn}>
           <Text style={{ color: pc.textSecondary }}>←</Text>
         </Pressable>
@@ -416,7 +418,7 @@ export default function DroneLockScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: pc.screen },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56, paddingBottom: 12 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingBottom: 12 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, marginBottom: 20 },
   title: { fontSize: 28, fontWeight: '700', color: pc.text, letterSpacing: 0 },
   subtitle: { fontSize: 14, color: pc.textSecondary, marginTop: 8, marginBottom: 24, textAlign: 'center' },
@@ -431,7 +433,7 @@ const styles = StyleSheet.create({
   btnPrimaryText: { color: pc.text, fontWeight: '700', fontSize: 16 },
   linkBtn: { padding: 16, marginTop: 4 },
   linkBtnText: { color: pc.textSecondary, textAlign: 'center', fontSize: 13 },
-  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' },
   scoreBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder },
   scoreText: { fontSize: 12, fontWeight: '600', color: pc.text },
   playBtn: { alignSelf: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder },

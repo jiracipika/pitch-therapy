@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet, PanResponder, Animated } from 'react-native';
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { playFrequency } from '@/lib/audio';
 import { triggerImpactMedium, triggerSelectionHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
@@ -17,6 +18,7 @@ const freqToSlider = (freq: number) => Math.log(freq / MIN_FREQ) / Math.log(MAX_
 type Phase = 'idle' | 'hunting' | 'result' | 'done';
 
 export default function FrequencyHuntScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('idle');
@@ -183,7 +185,7 @@ export default function FrequencyHuntScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={{ paddingHorizontal: 24, paddingTop: 56 }}>
+      <View style={{ paddingHorizontal: 24, paddingTop: insets.top + 8 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: pc.textSecondary }}>←</Text></Pressable>
           <Text style={{ fontSize: 16, fontWeight: '600', color: ACCENT }}>Frequency Hunt</Text>
@@ -217,7 +219,7 @@ export default function FrequencyHuntScreen() {
           <View
             onLayout={(e) => { sliderWidth.current = e.nativeEvent.layout.width; }}
             {...panResponder.panHandlers}
-            style={{ height: 40, justifyContent: 'center' }}
+            style={{ height: 52, justifyContent: 'center' }}
           >
             {/* Track background */}
             <View style={{ height: 4, borderRadius: 2, backgroundColor: pc.cardBorder, overflow: 'hidden' }}>
@@ -270,7 +272,7 @@ const styles = StyleSheet.create({
   btnPrimaryText: { color: pc.text, fontWeight: '700', fontSize: 16 },
   linkBtn: { padding: 16, marginTop: 8 },
   linkBtnText: { color: pc.textSecondary, textAlign: 'center', fontSize: 13 },
-  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' },
   scoreBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder },
   scoreText: { fontSize: 12, fontWeight: '600', color: pc.text },
   playBtn: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder },

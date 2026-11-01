@@ -1,6 +1,7 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
@@ -26,6 +27,7 @@ interface RoundResult { round: number; target: string; answer: string; correct: 
 
 export default function PianoTapScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [kbMode, setKbMode] = useState<KeyboardMode>('diatonic');
@@ -131,7 +133,7 @@ export default function PianoTapScreen() {
   if (phase === 'setup') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
-        <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
+        <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 20 }}>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
           <Text style={{ color: pc.text, fontSize: 22, fontWeight: '700', marginTop: 12 }}>Piano Tap</Text>
           <Text style={{ color: pc.textSecondary, fontSize: 14, marginTop: 4 }}>Tap the correct piano key</Text>
@@ -156,7 +158,7 @@ export default function PianoTapScreen() {
     const correct = results.filter(r => r.correct).length;
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
-        <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
+        <ScrollView contentContainerStyle={{ paddingTop: insets.top + 24, paddingHorizontal: 20, paddingBottom: 40 }}>
           <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ marginBottom: 12 }}>
             <Text style={{ color: pc.textSecondary }}>← Back</Text>
           </Pressable>

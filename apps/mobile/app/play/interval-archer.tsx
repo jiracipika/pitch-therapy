@@ -1,6 +1,7 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { playTone, playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
@@ -38,6 +39,7 @@ interface RoundResult { round: number; root: string; interval: string; answer: s
 
 export default function IntervalArcherScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [intervalMode, setIntervalMode] = useState<IntervalMode>('ascending');
@@ -163,8 +165,14 @@ export default function IntervalArcherScreen() {
   if (phase === 'setup') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
-        <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ marginBottom: 12 }}>
+        <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 20 }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back to dashboard"
+            onPress={() => router.back()}
+            style={{ marginBottom: 12, minHeight: 44, justifyContent: 'center', alignItems: 'flex-start' }}
+            hitSlop={8}
+          >
             <Text style={{ color: pc.textSecondary }}>← Back</Text>
           </Pressable>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
@@ -188,8 +196,14 @@ export default function IntervalArcherScreen() {
     const correct = results.filter(r => r.correct).length;
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
-        <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 }}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ marginBottom: 12 }}>
+        <ScrollView contentContainerStyle={{ paddingTop: insets.top + 24, paddingHorizontal: 20, paddingBottom: 40 }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back to dashboard"
+            onPress={() => router.back()}
+            style={{ marginBottom: 12, minHeight: 44, justifyContent: 'center', alignItems: 'flex-start' }}
+            hitSlop={8}
+          >
             <Text style={{ color: pc.textSecondary }}>← Back</Text>
           </Pressable>
           <Text style={{ color: pc.text, fontSize: 28, fontWeight: '700', marginBottom: 4 }}>Interval Archer Complete!</Text>

@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic, triggerSelectionHaptic } from '@/lib/haptics';
@@ -18,6 +19,7 @@ function pickRandom() { return ALL_NOTES[Math.floor(Math.random() * ALL_NOTES.le
 
 export default function TuningBattleScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [totalRounds, setTotalRounds] = useState(5);
@@ -163,7 +165,7 @@ export default function TuningBattleScreen() {
   if (phase === 'setup') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen, paddingHorizontal: 20, justifyContent: 'center' }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: 56, left: 20 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: insets.top + 8, left: 20, minHeight: 44, justifyContent: 'center' }}>
           <Text style={{ color: pc.textSecondary }}>← Back</Text>
         </Pressable>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>⚔️</Text>
@@ -188,7 +190,7 @@ export default function TuningBattleScreen() {
   if (phase === 'countdown') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen, justifyContent: 'center', alignItems: 'center' }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: 56, left: 20 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: insets.top + 8, left: 20, minHeight: 44, justifyContent: 'center' }}>
           <Text style={{ color: pc.textSecondary }}>← Back</Text>
         </Pressable>
         <Text style={{ color: pc.textSecondary, marginBottom: 8 }}>Listen for the target note</Text>
@@ -200,7 +202,7 @@ export default function TuningBattleScreen() {
   if (phase === 'roundResult') {
     return (
       <View accessibilityLiveRegion="polite" style={{ flex: 1, backgroundColor: pc.screen, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: 56, left: 20 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: insets.top + 8, left: 20, minHeight: 44, justifyContent: 'center' }}>
           <Text style={{ color: pc.textSecondary }}>← Back</Text>
         </Pressable>
         <Text style={{ fontSize: 56 }}>{roundWinner ? '🏆' : '🤝'}</Text>
@@ -246,7 +248,7 @@ export default function TuningBattleScreen() {
   // Playing
   return (
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8 }}>
         <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>⚔️ Tuning Battle</Text>
         <Text style={{ color: pc.textSecondary }}>R{currentRound}/{totalRounds}</Text>
@@ -268,7 +270,7 @@ export default function TuningBattleScreen() {
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
             {ALL_NOTES.map(note => (
               <Pressable key={note} accessibilityRole="button" accessibilityLabel={`Player 1 select ${note}`} accessibilityState={{ selected: players[0].selectedNote === note, disabled: players[0].lockedIn }} disabled={players[0].lockedIn} onPress={() => selectNote(0, note)} style={{
-                width: 40, height: 44, borderRadius: 10,
+                width: 46, height: 44, borderRadius: 10,
                 backgroundColor: players[0].selectedNote === note ? ACCENT + "55" : pc.cardAmbient,
                 borderWidth: 1, borderColor: players[0].selectedNote === note ? ACCENT : pc.cardBorder,
                 alignItems: 'center', justifyContent: 'center',
@@ -296,7 +298,7 @@ export default function TuningBattleScreen() {
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
             {ALL_NOTES.map(note => (
               <Pressable key={note} accessibilityRole="button" accessibilityLabel={`Player 2 select ${note}`} accessibilityState={{ selected: players[1].selectedNote === note, disabled: players[1].lockedIn }} disabled={players[1].lockedIn} onPress={() => selectNote(1, note)} style={{
-                width: 40, height: 44, borderRadius: 10,
+                width: 46, height: 44, borderRadius: 10,
                 backgroundColor: players[1].selectedNote === note ? ACCENT + "55" : pc.cardAmbient,
                 borderWidth: 1, borderColor: players[1].selectedNote === note ? ACCENT : pc.cardBorder,
                 alignItems: 'center', justifyContent: 'center',

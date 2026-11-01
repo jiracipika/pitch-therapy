@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
@@ -14,6 +15,7 @@ type Phase = 'idle' | 'playing' | 'input' | 'feedback' | 'done';
 
 export default function PitchMemoryScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('idle');
   const [level, setLevel] = useState(1);
@@ -175,7 +177,7 @@ export default function PitchMemoryScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={{ paddingHorizontal: 24, paddingTop: 56 }}>
+      <View style={{ paddingHorizontal: 24, paddingTop: insets.top + 8 }}>
         {/* Header */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: pc.textSecondary }}>←</Text></Pressable>
@@ -211,6 +213,7 @@ export default function PitchMemoryScreen() {
               onPress={() => handlePianoTap(i)}
               accessibilityRole="button"
               accessibilityLabel={`Play note ${name}`}
+              hitSlop={{ top: 8, bottom: 8, left: 1, right: 1 }}
               style={{
                 width: '7.5%', maxWidth: 34, height: 90, borderRadius: 6,
                 backgroundColor: name.includes('#') ? pc.cardAmbient : pc.cardBorder,
@@ -244,7 +247,7 @@ const styles = StyleSheet.create({
   btnPrimaryText: { color: pc.text, fontWeight: '700', fontSize: 16 },
   linkBtn: { padding: 16, marginTop: 8 },
   linkBtnText: { color: pc.textSecondary, textAlign: 'center', fontSize: 13 },
-  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' },
   scoreBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: pc.cardAmbient, borderWidth: 1, borderColor: pc.cardBorder },
   scoreText: { fontSize: 12, fontWeight: '600', color: pc.text },
 });

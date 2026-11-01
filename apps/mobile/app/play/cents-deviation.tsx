@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { playFrequency, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
 import {
@@ -30,6 +31,7 @@ interface RoundResult { round: number; note: string; actualCents: number; guessC
 
 export default function CentsDeviationScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
@@ -142,8 +144,14 @@ export default function CentsDeviationScreen() {
   if (phase === 'setup') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
-        <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ marginBottom: 12 }}>
+        <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 20 }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back to dashboard"
+            onPress={() => router.back()}
+            style={{ marginBottom: 12, minHeight: 44, justifyContent: 'center', alignItems: 'flex-start' }}
+            hitSlop={8}
+          >
             <Text style={{ color: pc.textSecondary }}>← Back</Text>
           </Pressable>
           <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
@@ -244,10 +252,10 @@ export default function CentsDeviationScreen() {
         <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
           {[10, 5, 1].map(amt => (
             <View key={amt} style={{ flexDirection: 'row', gap: 4 }}>
-              <Pressable accessibilityRole="button" onPress={() => adjustNeedle(-amt)} style={{ width: 44, height: 36, borderRadius: 8, backgroundColor: pc.cardSurface, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' }}>
+              <Pressable accessibilityRole="button" onPress={() => adjustNeedle(-amt)} style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: pc.cardSurface, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={{ color: pc.textTertiary, fontSize: 13, fontWeight: '600' }}>-{amt}</Text>
               </Pressable>
-              <Pressable accessibilityRole="button" onPress={() => adjustNeedle(amt)} style={{ width: 44, height: 36, borderRadius: 8, backgroundColor: pc.cardSurface, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' }}>
+              <Pressable accessibilityRole="button" onPress={() => adjustNeedle(amt)} style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: pc.cardSurface, borderWidth: 1, borderColor: pc.cardBorder, alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={{ color: pc.textTertiary, fontSize: 13, fontWeight: '600' }}>+{amt}</Text>
               </Pressable>
             </View>

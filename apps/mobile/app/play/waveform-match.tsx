@@ -1,6 +1,7 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { playFrequency } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic, triggerSelectionHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
@@ -16,6 +17,7 @@ type Phase = 'setup' | 'playing' | 'reveal' | 'done';
 
 export default function WaveformMatchScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [round, setRound] = useState(0);
@@ -98,7 +100,7 @@ export default function WaveformMatchScreen() {
     const avg = results.length > 0 ? Math.round(results.reduce((a, r) => a + r.pts, 0) / results.length) : 0;
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
-        <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40, alignItems: 'center' }}>
+        <ScrollView contentContainerStyle={{ paddingTop: insets.top + 24, paddingHorizontal: 20, paddingBottom: 40, alignItems: 'center' }}>
           <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ alignSelf: 'flex-start' }}>
             <Text style={{ color: pc.textSecondary }}>← Back</Text>
           </Pressable>
@@ -123,7 +125,7 @@ export default function WaveformMatchScreen() {
   if (phase === 'setup') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen, paddingHorizontal: 20, justifyContent: 'center' }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: 56, left: 20 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: insets.top + 8, left: 20, minHeight: 44, justifyContent: 'center' }}>
           <Text style={{ color: pc.textSecondary }}>← Back</Text>
         </Pressable>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>🌊</Text>
@@ -139,8 +141,8 @@ export default function WaveformMatchScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 12 }}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>🌊 Waveform Match</Text>
         <Text style={{ color: pc.textSecondary }}>{round}/{ROUNDS}</Text>
       </View>
@@ -194,7 +196,7 @@ export default function WaveformMatchScreen() {
             <Text style={{ color: Math.abs(sliderCents) < 5 ? pc.success : pc.text, fontSize: 14, fontWeight: '700' }}>{sliderCents > 0 ? '+' : ''}{sliderCents}¢</Text>
             <Text style={{ color: pc.textSecondary, fontSize: 12 }}>♯ +50¢</Text>
           </View>
-          <View style={{ height: 40, justifyContent: 'center' }}>
+          <View style={{ height: 48, justifyContent: 'center' }}>
             <View style={{ height: 6, backgroundColor: pc.cardBorder, borderRadius: 99 }}>
               <View style={{ height: '100%', backgroundColor: ACCENT, borderRadius: 99, width: `${((sliderCents + 50) / 100) * 100}%` }} />
             </View>
@@ -202,7 +204,7 @@ export default function WaveformMatchScreen() {
           <View style={{ flexDirection: 'row', gap: 6, justifyContent: 'center', marginTop: 8 }}>
             {[-50, -30, -20, -10, -5, 0, 5, 10, 20, 30, 50].map(v => (
               <Pressable key={v} accessibilityRole="button" onPress={() => setSliderCents(v)} style={{
-                backgroundColor: sliderCents === v ? ACCENT : pc.cardAmbient, borderRadius: 8, paddingVertical: 6, paddingHorizontal: 8, borderWidth: 1, borderColor: sliderCents === v ? ACCENT : pc.cardBorder,
+                backgroundColor: sliderCents === v ? ACCENT : pc.cardAmbient, borderRadius: 8, minHeight: 44, justifyContent: 'center', paddingHorizontal: 10, borderWidth: 1, borderColor: sliderCents === v ? ACCENT : pc.cardBorder,
               }}>
                 <Text style={{ color: sliderCents === v ? '#fff' : pc.textMuted, fontSize: 11, fontWeight: '600' }}>{v > 0 ? '+' : ''}{v}</Text>
               </Pressable>

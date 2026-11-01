@@ -1,6 +1,7 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { playTone, NOTE_FREQS_4, playFrequency } from '@/lib/audio';
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from '@/lib/haptics';
 import { useSessionResults } from '@/lib/sessionResults';
@@ -37,6 +38,7 @@ const ROUNDS = 10;
 
 export default function ChordDetectiveScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>('setup');
   const [advanced, setAdvanced] = useState(false);
@@ -145,7 +147,7 @@ export default function ChordDetectiveScreen() {
     const c = results.filter(r => r.correct).length;
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
-        <ScrollView contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40, alignItems: 'center' }}>
+        <ScrollView contentContainerStyle={{ paddingTop: insets.top + 24, paddingHorizontal: 20, paddingBottom: 40, alignItems: 'center' }}>
           <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ alignSelf: 'flex-start' }}>
             <Text style={{ color: pc.textSecondary }}>← Back</Text>
           </Pressable>
@@ -170,7 +172,7 @@ export default function ChordDetectiveScreen() {
   if (phase === 'setup') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen, paddingHorizontal: 20, justifyContent: 'center' }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: 56, left: 20 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ position: 'absolute', top: insets.top + 8, left: 20, minHeight: 44, justifyContent: 'center' }}>
           <Text style={{ color: pc.textSecondary }}>← Back</Text>
         </Pressable>
         <Text style={{ textAlign: 'center', fontSize: 48 }}>🕵️</Text>
@@ -191,8 +193,8 @@ export default function ChordDetectiveScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: pc.screen }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 56 }}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: insets.top + 8 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to dashboard" onPress={() => router.back()} style={{ minHeight: 44, justifyContent: 'center', alignSelf: 'center', paddingHorizontal: 12 }}><Text style={{ color: pc.textSecondary }}>← Back</Text></Pressable>
         <Text style={{ color: ACCENT, fontWeight: '700' }}>🕵️ Chord Detective</Text>
         <Text style={{ color: pc.textSecondary }}>{score}</Text>
       </View>
@@ -225,7 +227,7 @@ export default function ChordDetectiveScreen() {
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
               {ALL_NOTES.map(note => (
                 <Pressable key={note} accessibilityRole="button" accessibilityState={{ selected: selectedRoot === note }} onPress={() => setSelectedRoot(note)} style={{
-                  backgroundColor: selectedRoot === note ? `${ACCENT}30` : pc.cardAmbient, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14,
+                  backgroundColor: selectedRoot === note ? `${ACCENT}30` : pc.cardAmbient, borderRadius: 10, minHeight: 44, justifyContent: 'center', paddingHorizontal: 14,
                   borderWidth: selectedRoot === note ? 2 : 1, borderColor: selectedRoot === note ? ACCENT : pc.cardBorder,
                 }}>
                   <Text style={{ color: selectedRoot === note ? pc.text : pc.textTertiary, fontWeight: '700', fontSize: 14 }}>{note}</Text>

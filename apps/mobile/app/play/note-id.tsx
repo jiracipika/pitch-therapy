@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GAME_MODE_META, DIFFICULTY_CONFIG, type Difficulty } from "@pitch-therapy/core";
 import { GameHeader } from "@/components/GameHeader";
 import { GameResultRow, GameResultStats, GameResultsScreen } from "@/components/GameResultsScreen";
@@ -34,6 +35,7 @@ interface RoundResult {
 
 export default function NoteIdScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>("select-difficulty");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
@@ -258,7 +260,7 @@ export default function NoteIdScreen() {
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
         <View
           style={{
-            paddingTop: 56,
+            paddingTop: insets.top + 8,
             paddingHorizontal: 20,
             paddingBottom: 20,
             flexDirection: "row",

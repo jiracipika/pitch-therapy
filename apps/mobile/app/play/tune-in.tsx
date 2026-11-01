@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { calculateCentsDeviation } from '@pitch-therapy/core';
 import { playTone, NOTE_FREQS_4 } from '@/lib/audio';
 import { GameHeader } from '@/components/GameHeader';
@@ -32,6 +33,7 @@ interface RoundResult {
 }
 
 export default function TuneInScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { recordResult } = useSessionResults();
   const mic = useMicPitch();
@@ -228,7 +230,7 @@ export default function TuneInScreen() {
   if (phase === 'setup') {
     return (
       <View style={{ flex: 1, backgroundColor: pc.screen }}>
-        <View style={{ paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20 }}>
+        <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 20 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT }} />
             <Text style={{ color: pc.text, fontSize: 22, fontWeight: '700' }}>Tune In</Text>

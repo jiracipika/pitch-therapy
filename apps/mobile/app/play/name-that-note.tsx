@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { playFrequency } from "@/lib/audio";
 import NoteComparisonStaff from "@/components/NoteComparisonStaff";
 import { triggerCorrectHaptic, triggerIncorrectHaptic } from "@/lib/haptics";
@@ -26,6 +27,7 @@ type Phase = "idle" | "playing" | "timed-out" | "done";
 
 export default function NameThatNoteScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { recordResult } = useSessionResults();
   const [phase, setPhase] = useState<Phase>("idle");
   const [round, setRound] = useState(0);
@@ -227,7 +229,7 @@ export default function NameThatNoteScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={{ paddingHorizontal: 24, paddingTop: 56 }}>
+      <View style={{ paddingHorizontal: 24, paddingTop: insets.top + 8 }}>
         <View
           style={{
             flexDirection: "row",
@@ -407,9 +409,9 @@ const styles = StyleSheet.create({
   linkBtn: { padding: 16, marginTop: 8 },
   linkBtnText: { color: pc.textSecondary, textAlign: "center", fontSize: 13 },
   backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: pc.cardAmbient,
     borderWidth: 1,
     borderColor: pc.cardBorder,
