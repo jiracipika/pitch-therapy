@@ -22,7 +22,7 @@ import {
   type PitchEstimate,
 } from "@pitch-therapy/core";
 
-const ACCENT = "#30D158";
+const ACCENT = "#00a06a";
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
 
 // Drone Lock excludes M7 (semitone 11) — extremely difficult to sing

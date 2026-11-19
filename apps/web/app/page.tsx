@@ -94,6 +94,7 @@ export default function Home() {
               <Link href="/dashboard" className="studio-button-primary">Begin your session <span aria-hidden="true">→</span></Link>
               <Link href="/play-modes" className="studio-button-ghost">Explore {MODE_COUNT} exercises</Link>
             </div>
+            <span className="pt-hand-note pt-hand-note--arrow" aria-hidden="true">no account — your progress lives in this browser</span>
             <div className="studio-hero-proof">
               <span><b>{MODE_COUNT}</b><small>precision drills</small></span>
               <span><b>3 min</b><small>average session</small></span>
@@ -105,6 +106,7 @@ export default function Home() {
           <motion.div className="studio-hero-cell studio-hero-cell-right" style={reduce ? undefined : { y: instrumentY, scale: instrumentScale, rotate: instrumentRotate, filter: instrumentFilter }}>
           <TiltCard max={4.5} lift={6} className="studio-instrument-tilt">
           <motion.div className="studio-instrument" initial={reduce ? false : { opacity: 0, x: 36, rotateY: -5 }} animate={{ opacity: 1, x: 0, rotateY: 0 }} transition={{ delay: 0.12, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}>
+            <span className="pt-hand-note" aria-hidden="true" style={{ position: "absolute", top: 46, right: 18, transform: "rotate(2.2deg)", zIndex: 3 }}>go on — tap play ↷</span>
             <div className="studio-instrument-top"><span>REFERENCE TONE / A4</span><button type="button" className="is-live" onClick={playReferenceTone} aria-label="Play reference tone A4, 440 hertz"><i /> {tonePlaying ? "PLAYING" : "PLAY A4"}</button></div>
             <div className="studio-note-readout"><span>A</span><div><b>440.0</b><small>HERTZ</small></div></div>
             <Waveform />

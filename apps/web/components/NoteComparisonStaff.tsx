@@ -33,9 +33,9 @@ export default function NoteComparisonStaff({
   const needsLowLedger = guessed.position <= 0 || correct.position <= 0;
 
   // Color scheme
-  const greenColor = '#30D158';
-  const redColor = '#FF453A';
-  const successColor = '#30D158';
+  const greenColor = '#00a06a';
+  const redColor = '#d92c35';
+  const successColor = '#00a06a';
 
   return (
     <div style={{

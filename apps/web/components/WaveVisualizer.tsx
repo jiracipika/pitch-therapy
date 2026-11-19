@@ -8,7 +8,7 @@ interface WaveVisualizerProps {
   height?: number;
 }
 
-export default function WaveVisualizer({ active, color = '#6366f1', height = 60 }: WaveVisualizerProps) {
+export default function WaveVisualizer({ active, color = '#4f46e5', height = 60 }: WaveVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
   const ctxRef = useRef<AudioContext | null>(null);

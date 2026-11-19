@@ -5,11 +5,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        pitch: "#3B82F6",
-        note: "#8B5CF6",
-        freq: "#F59E0B",
-        nwordle: "#22C55E",
-        fwordle: "#14B8A6",
+        // MedBrewery-family accents (ink-safe on paper, still vivid on midnight ink)
+        pitch: "#2563eb",
+        note: "#6d5bd0",
+        freq: "#b45309",
+        nwordle: "#00a06a",
+        fwordle: "#0f766e",
       },
     },
   },

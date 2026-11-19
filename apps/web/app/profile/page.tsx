@@ -76,12 +76,12 @@ export default function ProfilePage() {
   });
 
   const getProfileTitle = (score: number) => {
-    if (score >= 90) return { title: 'Perfect Pitch Prodigy', emoji: '🎯', color: '#ffd65c' };
-    if (score >= 75) return { title: 'Sharp Ear', emoji: '🎵', color: '#62e6a7' };
-    if (score >= 55) return { title: 'Tuned Listener', emoji: '📻', color: '#c7ff4a' };
-    if (score >= 35) return { title: 'Rising Musician', emoji: '🎶', color: '#9b8cff' };
-    if (score >= 15) return { title: 'Eager Ear', emoji: '👂', color: '#ff7a59' };
-    return { title: 'New Listener', emoji: '🌱', color: '#8e8e93' };
+    if (score >= 90) return { title: 'Perfect Pitch Prodigy', emoji: '🎯', color: '#9a7b0c' };
+    if (score >= 75) return { title: 'Sharp Ear', emoji: '🎵', color: '#00a06a' };
+    if (score >= 55) return { title: 'Tuned Listener', emoji: '📻', color: '#2563eb' };
+    if (score >= 35) return { title: 'Rising Musician', emoji: '🎶', color: '#6d5bd0' };
+    if (score >= 15) return { title: 'Eager Ear', emoji: '👂', color: '#c2410c' };
+    return { title: 'New Listener', emoji: '🌱', color: '#556f7e' };
   };
 
   const profile = getProfileTitle(earProfileScore);

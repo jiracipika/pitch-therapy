@@ -28,7 +28,7 @@ const DIFFICULTIES: Record<Difficulty, { options: number; rounds: number; timeLi
   hard: { options: 12, rounds: 15, timeLimit: 8 },
 };
 
-const ACCENT = "#BF5AF2";
+const ACCENT = "#6d5bd0";
 
 export default function NoteIdPage() {
   const { recordResult } = useStatsContext();

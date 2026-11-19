@@ -8,25 +8,25 @@ import { GAME_MODES } from '@pitch-therapy/core';
 const STEPS = [
   {
     emoji: '🎵',
-    color: '#c7ff4a',
+    color: '#2563eb',
     title: 'Train your ear',
     desc: `${GAME_MODES.length} focused drills that sharpen pitch, frequency recognition, and musical intervals. From beginner to expert.`,
   },
   {
     emoji: '🔥',
-    color: '#ff7a59',
+    color: '#c2410c',
     title: 'Daily challenges',
     desc: 'A fresh challenge every day. Keep your streak alive and build the habit of listening closely.',
   },
   {
     emoji: '📊',
-    color: '#62e6a7',
+    color: '#00a06a',
     title: 'Track progress',
     desc: 'Detailed stats, accuracy trends, and streak tracking. See your growth over time.',
   },
   {
     emoji: '🎓',
-    color: '#9b8cff',
+    color: '#6d5bd0',
     title: 'Practice mode',
     desc: 'No pressure, no scoring. Explore sounds and train at your own pace.',
   },

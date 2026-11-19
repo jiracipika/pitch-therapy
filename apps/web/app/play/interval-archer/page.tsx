@@ -19,7 +19,7 @@ import {
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import { INTERVALS as CORE_INTERVALS } from "@pitch-therapy/core";
 
-const ACCENT = "#D946EF";
+const ACCENT = "#a21caf";
 
 // Display adapter: uses short abbreviation labels for this mode's compact UI.
 const INTERVALS = CORE_INTERVALS.map((i) => ({

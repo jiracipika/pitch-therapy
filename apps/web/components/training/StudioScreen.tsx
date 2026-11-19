@@ -210,7 +210,7 @@ export function StudioStartButton({
       onClick={onClick}
       disabled={disabled}
       whileTap={{ scale: 0.97 }}
-      style={{ background: accent, "--mode-accent": accent } as CSSProperties}
+      style={{ background: "var(--ios-blue)", "--mode-accent": accent } as CSSProperties}
     >
       {children}
     </motion.button>
@@ -331,7 +331,7 @@ export function StudioResults({
               type="button"
               className="studio-start-btn"
               onClick={primaryAction.onClick}
-              style={{ background: accent, "--mode-accent": accent } as CSSProperties}
+              style={{ background: "var(--ios-blue)", "--mode-accent": accent } as CSSProperties}
             >
               {primaryAction.label}
             </button>

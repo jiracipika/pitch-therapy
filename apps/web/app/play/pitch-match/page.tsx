@@ -25,7 +25,7 @@ import {
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
 const freq = (i: number) => NOTE_FREQS[i] ?? 261.63;
 
-const ACCENT = "#0A84FF";
+const ACCENT = "#2563eb";
 
 export default function PitchMatchPage() {
   const { recordResult } = useStatsContext();

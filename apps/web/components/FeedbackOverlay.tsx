@@ -73,7 +73,7 @@ export default function FeedbackOverlay({ correct, show, onDone, streak }: Feedb
                   animate={{ opacity: 1, y: 0 }}
                   transition={reduceMotion ? { duration: 0.01 } : { delay: 0.3 }}
                   className="text-xl font-bold"
-                  style={{ color: "#FBBF24" }}
+                  style={{ color: "#b45309" }}
                 >
                   🔥 {streak} streak!
                 </motion.div>

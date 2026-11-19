@@ -209,9 +209,9 @@ export function buildCategoryMastery(
 
 export const MASTERY_CONFIG: Record<MasteryLevel, { label: string; color: string; ringColor: string; bg: string }> = {
   "not-started": { label: "Not Started", color: "var(--ios-label3)", ringColor: "var(--ios-label4)", bg: "transparent" },
-  familiar:      { label: "Familiar",     color: "#FF9F0A",          ringColor: "#FF9F0A",            bg: "rgba(255,159,10,0.08)" },
-  proficient:    { label: "Proficient",   color: "#0A84FF",          ringColor: "#0A84FF",            bg: "rgba(10,132,255,0.08)" },
-  mastered:      { label: "Mastered",     color: "#30D158",          ringColor: "#30D158",            bg: "rgba(48,209,88,0.08)" },
+  familiar:      { label: "Familiar",     color: "#b45309",          ringColor: "#b45309",            bg: "rgba(255,159,10,0.08)" },
+  proficient:    { label: "Proficient",   color: "#2563eb",          ringColor: "#2563eb",            bg: "rgba(10,132,255,0.08)" },
+  mastered:      { label: "Mastered",     color: "#00a06a",          ringColor: "#00a06a",            bg: "rgba(48,209,88,0.08)" },
 };
 
 /* ── Last played mode (for resume card) ── */

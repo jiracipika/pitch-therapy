@@ -19,7 +19,7 @@ import {
 } from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
-const ACCENT = "#30D158";
+const ACCENT = "#00a06a";
 
 type Difficulty = "easy" | "medium" | "hard";
 

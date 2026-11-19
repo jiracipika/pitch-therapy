@@ -232,7 +232,7 @@ export default function ProgressPage() {
                       <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(199,255,74,.22)', display: 'block' }} />
                       <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(199,255,74,.45)', display: 'block' }} />
                       <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(199,255,74,.7)', display: 'block' }} />
-                      <span style={{ width: 10, height: 10, borderRadius: 2, background: '#c7ff4a', display: 'block' }} />
+                      <span style={{ width: 10, height: 10, borderRadius: 2, background: '#2563eb', display: 'block' }} />
                     </i>
                     <span>MORE</span>
                   </div>

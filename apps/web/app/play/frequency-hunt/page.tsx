@@ -15,7 +15,7 @@ import {
 } from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
-const ACCENT = "#FF9F0A";
+const ACCENT = "#b45309";
 const MIN_FREQ = 100;
 const MAX_FREQ = 2000;
 

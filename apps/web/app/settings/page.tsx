@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, useReducedMotion } from "motion/react";
 import { useStatsContext } from '@/components/StatsProvider';
 import { useSettingsContext } from '@/components/SettingsProvider';
+import { useTheme, type ThemeName } from '@/lib/useTheme';
 import { GAME_MODE_META } from '@pitch-therapy/core';
 import { SETTINGS_MODE_IDS, type Difficulty } from '@/lib/useSettings';
 
@@ -58,6 +59,12 @@ export default function SettingsPage() {
   } = useSettingsContext();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const reduce = useReducedMotion();
+  const { theme, setTheme } = useTheme();
+
+  const THEMES: Array<{ id: ThemeName; label: string }> = [
+    { id: 'paper', label: 'Paper' },
+    { id: 'midnight', label: 'Midnight ink' },
+  ];
 
   const { sound, haptics, soundType, volume, difficulty } = settings;
 
@@ -83,6 +90,33 @@ export default function SettingsPage() {
 
         <section className="studio-inner-grid">
           <div className="studio-inner-main">
+            {/* ── THEME ── */}
+            <motion.section className="studio-panel" {...fade(0.02)}>
+              <div className="studio-panel-heading"><div><span>APPEARANCE</span><h2>Theme</h2></div></div>
+              <div className="studio-row-list">
+                <div className="studio-control-row">
+                  <span className="studio-control-icon" style={{ background: 'color-mix(in srgb, var(--ios-blue) 12%, transparent)' }}>📓</span>
+                  <div>
+                    <b>Paper or midnight ink</b>
+                    <small>Paper is the family default</small>
+                  </div>
+                  <div className="studio-segment" role="group" aria-label="Theme">
+                    {THEMES.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        className={theme === t.id ? 'is-active' : ''}
+                        onClick={() => setTheme(t.id)}
+                        aria-pressed={theme === t.id}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.section>
+
             {/* ── AUDIO ── */}
             <motion.section className="studio-panel" {...fade(0.05)}>
               <div className="studio-panel-heading"><div><span>AUDIO</span><h2>Sound & feedback</h2></div></div>

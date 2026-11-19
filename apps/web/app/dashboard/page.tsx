@@ -47,7 +47,7 @@ export default function Dashboard() {
     <div className="studio-app-page">
       <div className="pt-page-shell studio-dashboard">
         <motion.header className="studio-dashboard-header" initial={reduce ? false : { opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
-          <div><span className="studio-overline">{greeting()} / LISTENING STUDIO</span><h1>{totalGames ? "Ready for another round?" : "Let’s train your ear."}</h1><p>{totalGames ? "Your next focused session is ready." : "Start small. Three minutes is enough to begin hearing differently."}</p></div>
+          <div><span className="studio-overline">{greeting()} / LISTENING STUDIO</span><h1>{totalGames ? "Ready for another round?" : "Let’s train your ear."}</h1><p>{totalGames ? "Your next focused session is ready." : "Start small. Three minutes is enough to begin hearing differently."}</p><span className="pt-hand-note" aria-hidden="true">small wins, every day — that’s the whole trick ✎</span></div>
           <div className="studio-level-chip"><span>LEVEL</span><b>{loaded ? level.level : "—"}</b><small>{loaded ? levelTitle(level.level) : "Loading"}</small></div>
         </motion.header>
 

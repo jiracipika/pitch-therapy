@@ -24,7 +24,7 @@ interface GuessRow {
   direction?: FrequencyWordleDirection;
 }
 
-const ACCENT = "#0A84FF";
+const ACCENT = "#2563eb";
 const FEEDBACK_LABELS: Record<FrequencyWordleFeedback, string> = {
   correct: "Correct",
   close: "Within 10%",

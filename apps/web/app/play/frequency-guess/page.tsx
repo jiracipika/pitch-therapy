@@ -28,7 +28,7 @@ const CONFIGS: Record<Difficulty, { min: number; max: number; step: number; roun
   hard: { min: 50, max: 4000, step: 1, rounds: 12 },
 };
 
-const ACCENT = "#FF9F0A";
+const ACCENT = "#b45309";
 
 export default function FrequencyGuessPage() {
   const { recordResult } = useStatsContext();

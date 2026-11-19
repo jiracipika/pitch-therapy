@@ -22,7 +22,7 @@ interface GuessRow {
 }
 
 const MAX_GUESSES = 6;
-const ACCENT = "#30D158";
+const ACCENT = "#00a06a";
 
 export default function NoteWordlePage() {
   const { recordResult } = useStatsContext();

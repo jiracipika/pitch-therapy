@@ -86,7 +86,7 @@ export default function TrainingShell({
   round,
   totalRounds,
   scoreLabel,
-  accent = "#c7ff4a",
+  accent = "#2563eb",
   micStatus = "idle",
   micError,
   confirmExit = false,

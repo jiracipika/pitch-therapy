@@ -18,7 +18,7 @@ import {
 } from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
-const ACCENT = "#5E5CE6";
+const ACCENT = "#4f46e5";
 
 const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 

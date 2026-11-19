@@ -56,7 +56,7 @@ export default function ResultsScreen({
             {results.map((r) => (
               <div key={r.round}
                 className={`flex h-8 w-8 items-center justify-center rounded-xl text-xs font-semibold ${
-                  r.correct ? 'bg-[#4ADE80]/10 text-[#4ADE80]' : 'bg-red-400/10 text-red-400'
+                  r.correct ? 'bg-[#00a06a]/10 text-[#00a06a]' : 'bg-red-400/10 text-red-400'
                 }`}>
                 {r.round}
               </div>
@@ -70,7 +70,7 @@ export default function ResultsScreen({
             {copied ? '✅ Copied!' : '📋 Share'}
           </button>
           <button onClick={onPlayAgain}
-            className="flex-1 rounded-full bg-[#60A5FA] py-3 text-sm font-semibold text-white transition-all duration-300 ease-out hover:opacity-90">
+            className="flex-1 rounded-full bg-[#2563eb] py-3 text-sm font-semibold text-white transition-all duration-300 ease-out hover:opacity-90">
             🔄 Play Again
           </button>
           <button onClick={onDashboard}

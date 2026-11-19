@@ -17,7 +17,7 @@ import {
 } from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
-const ACCENT = "#0A84FF";
+const ACCENT = "#2563eb";
 const MIN_FREQ = 80;
 const MAX_FREQ = 1200;
 const TOTAL_ROUNDS = 6;

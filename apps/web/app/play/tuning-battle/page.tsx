@@ -16,7 +16,7 @@ import {
 import { playTone, NOTE_NAMES, NOTE_FREQUENCIES, stopAllTones } from "@/lib/audio";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
-const ACCENT = "#FF453A";
+const ACCENT = "#d92c35";
 const NOTE_FREQS: Record<string, number> = Object.fromEntries(
   NOTE_NAMES.map((n) => [n, NOTE_FREQUENCIES[`${n}4`] ?? 440]),
 );

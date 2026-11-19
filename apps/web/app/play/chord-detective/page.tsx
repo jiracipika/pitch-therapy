@@ -19,7 +19,7 @@ import {
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import { CHORD_TYPES, CHORD_INTERVALS, chordTypeById } from "@pitch-therapy/core";
 
-const ACCENT = "#FF2D55";
+const ACCENT = "#d92c35";
 
 const ALL_NOTES = NOTE_NAMES;
 const ROUNDS = 10;

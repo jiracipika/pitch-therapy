@@ -24,7 +24,7 @@ import {
 } from "@/components/training/StudioScreen";
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
-const ACCENT = "#FF2D55";
+const ACCENT = "#d92c35";
 
 const TARGET_NOTES = ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5"];
 

@@ -15,7 +15,7 @@ import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 import { playTone, stopAllTones } from "@/lib/audio";
 import { answerHaptic } from "@/lib/haptics";
 
-const ACCENT = "#5E5CE6";
+const ACCENT = "#4f46e5";
 const ROUNDS = 8;
 
 function centsToFreq(baseFreq: number, cents: number) {

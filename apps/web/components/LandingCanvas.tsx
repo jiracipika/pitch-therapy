@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 
 type Particle = { x: number; y: number; r: number; hue: number; speed: number; sway: number; phase: number };
 
-const HUES = ['199, 255, 74', '155, 140, 255', '102, 220, 255'] as const;
+const HUES = ['37, 99, 235', '109, 91, 208', '14, 116, 144'] as const;
 
 /**
  * Ambient "frequency field" canvas behind the landing hero.
@@ -66,16 +66,16 @@ export default function LandingCanvas({ className = '' }: { className?: string }
       if (!visible) return;
       const time = t / 1000;
 
-      // Opaque base — the hero never shows translucent stacking.
+      // Opaque base — the hero never shows translucent stacking. Paper wash.
       const base = ctx.createLinearGradient(0, 0, 0, h);
-      base.addColorStop(0, '#050507');
-      base.addColorStop(0.65, '#08080f');
-      base.addColorStop(1, '#0b0b14');
+      base.addColorStop(0, '#faf8f1');
+      base.addColorStop(0.65, '#f6f3e9');
+      base.addColorStop(1, '#f1efe4');
       ctx.fillStyle = base;
       ctx.fillRect(0, 0, w, h);
 
-      // Faint oscilloscope grid.
-      ctx.strokeStyle = 'rgba(247, 246, 242, 0.035)';
+      // Faint oscilloscope grid — graph paper in family blue.
+      ctx.strokeStyle = 'rgba(37, 99, 235, 0.07)';
       ctx.lineWidth = 1;
       for (let y = h * 0.2; y < h; y += 46) {
         ctx.beginPath();
@@ -84,11 +84,11 @@ export default function LandingCanvas({ className = '' }: { className?: string }
         ctx.stroke();
       }
 
-      // Layered wave traces — three voices (lime lead, violet mid, cyan ghost).
+      // Layered wave traces — three voices (blue lead, violet mid, teal ghost).
       const waves: Array<{ base: number; amp: number; freq: number; speed: number; color: string; glow: number; width: number }> = [
-        { base: 0.42, amp: 42, freq: 0.011, speed: 0.9, color: 'rgba(199, 255, 74, 0.55)', glow: 14, width: 1.6 },
-        { base: 0.52, amp: 30, freq: 0.017, speed: -0.6, color: 'rgba(155, 140, 255, 0.42)', glow: 10, width: 1.3 },
-        { base: 0.6, amp: 22, freq: 0.026, speed: 0.4, color: 'rgba(102, 220, 255, 0.3)', glow: 8, width: 1 },
+        { base: 0.42, amp: 42, freq: 0.011, speed: 0.9, color: 'rgba(37, 99, 235, 0.5)', glow: 10, width: 1.6 },
+        { base: 0.52, amp: 30, freq: 0.017, speed: -0.6, color: 'rgba(109, 91, 208, 0.38)', glow: 8, width: 1.3 },
+        { base: 0.6, amp: 22, freq: 0.026, speed: 0.4, color: 'rgba(14, 116, 144, 0.28)', glow: 6, width: 1 },
       ];
       for (const wave of waves) {
         ctx.beginPath();
@@ -118,7 +118,7 @@ export default function LandingCanvas({ className = '' }: { className?: string }
         const x = p.x + Math.sin(time * 0.6 + p.phase) * p.sway * 0.4;
         ctx.beginPath();
         ctx.arc(x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${HUES[p.hue]}, 0.5)`;
+        ctx.fillStyle = `rgba(${HUES[p.hue]}, 0.38)`;
         ctx.fill();
       }
     };

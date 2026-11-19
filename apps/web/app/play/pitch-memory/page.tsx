@@ -15,7 +15,7 @@ import {
 import { useTrackedTimeouts } from "@/lib/useTrackedTimeouts";
 
 const NOTE_FREQS = NOTE_NAMES.map((n) => NOTE_FREQUENCIES[`${n}4`] ?? 261.63) as number[];
-const ACCENT = "#FF453A";
+const ACCENT = "#d92c35";
 
 type Phase = "idle" | "playing" | "input" | "feedback" | "done";
 

@@ -20,7 +20,7 @@ const NOTE_FREQS: Record<string, number> = {};
 (NOTE_NAMES as unknown as string[]).forEach((n) => {
   NOTE_FREQS[`${n}4`] = NOTE_FREQUENCIES[`${n}4`] ?? 261.63;
 });
-const ACCENT = "#0A84FF";
+const ACCENT = "#2563eb";
 
 // Staff positions: 0 = C4 (ledger below), 1 = D4, 2 = E4, ..., 12 = C5
 const STAFF_NOTES = [
