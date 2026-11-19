@@ -99,10 +99,11 @@ export default function ProfilePage() {
             <span className="studio-overline">EAR PROFILE / {modesPlayed} OF {GAME_MODES.length} MODES</span>
             <h1>{loaded ? profile.title : 'Your ear,'}<br /><em>{loaded ? 'on record.' : 'undiscovered.'}</em></h1>
             <p>A dynamic snapshot of where your hearing strengths are evolving across every listening skill.</p>
+            <span className="pt-hand-note" aria-hidden="true">every session leaves a mark ✎</span>
           </div>
           <div className="studio-header-chip">
             <span>EAR SCORE</span>
-            <b>{loaded ? earProfileScore : '—'}</b>
+            <b>{loaded && hasData ? earProfileScore : '—'}</b>
             <small>OUT OF 100</small>
           </div>
         </motion.header>
@@ -117,7 +118,7 @@ export default function ProfilePage() {
             >
               <div className="studio-panel-heading">
                 <div><span>EAR PROFILE</span><h2>{loaded ? profile.title : 'Discover your profile'}</h2></div>
-                <div className="studio-score-ring">
+                <div className={`studio-score-ring${hasData ? '' : ' is-ghost'}`}>
                   <svg viewBox="0 0 100 100" aria-hidden="true">
                     <circle cx="50" cy="50" r="42" />
                     <motion.circle
@@ -128,7 +129,7 @@ export default function ProfilePage() {
                       transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
                     />
                   </svg>
-                  <span><b>{loaded ? earProfileScore : '—'}</b><small>EAR SCORE</small></span>
+                  <span><b>{loaded && hasData ? earProfileScore : '—'}</b><small>EAR SCORE</small></span>
                 </div>
               </div>
               <p style={{ margin: '-6px 0 18px', color: 'var(--ios-label2)', fontSize: 12, lineHeight: 1.55 }}>
@@ -137,7 +138,7 @@ export default function ProfilePage() {
                   : 'Play a few sessions to generate your personalized score, skill breakdown, and next-step guidance.'}
               </p>
               {!hasData && (
-                <Link href="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', gap: 28, width: '100%', minHeight: 48, padding: '0 20px', borderRadius: 999, background: 'var(--ios-blue)', color: 'var(--pt-on-accent)', fontSize: 13, fontWeight: 750, textDecoration: 'none', boxShadow: '0 12px 30px rgba(199,255,74,.15)' }}>
+                <Link href="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', gap: 28, width: '100%', minHeight: 48, padding: '0 20px', borderRadius: 'var(--sketch-radius-soft)', background: 'var(--ios-blue)', color: 'var(--pt-on-accent)', fontSize: 13, fontWeight: 750, textDecoration: 'none', boxShadow: '0 0 20px rgba(37,99,235,.18), 0 6px 18px rgba(15,23,43,.10)' }}>
                   Start training <span aria-hidden="true">→</span>
                 </Link>
               )}
@@ -187,7 +188,7 @@ export default function ProfilePage() {
                         ) : (
                           <>
                             <i className="studio-meter" aria-hidden="true" style={{ height: 4, margin: '0 0 5px' }}>
-                              <em style={{ display: 'block', height: '100%', width: `${Math.round(s.progressFraction * 100)}%`, background: isNext ? 'var(--ios-blue)' : 'rgba(255,255,255,.22)' }} />
+                              <em style={{ display: 'block', height: '100%', width: `${Math.round(s.progressFraction * 100)}%`, background: isNext ? 'var(--ios-blue)' : 'var(--pt-line-15)' }} />
                             </i>
                             <span className="studio-badge-metric">{formatMetricProgress(s)}</span>
                           </>

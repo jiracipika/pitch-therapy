@@ -121,8 +121,9 @@ export default function DailyPage() {
                       <div className="studio-history-dots">
                         {CHALLENGES.map((c) => {
                           const done = dayCompletion.completedModes.some((mode) => mode === c.id);
-                          return <i key={c.id} className={done ? 'is-done' : ''} role="img" aria-label={`${c.label}: ${done ? 'completed' : 'not completed'}`}><b /></i>;
+                          return <i key={c.id} className={done ? 'is-done' : ''} role="img" aria-label={`${c.label}: ${done ? 'completed' : 'not completed'}`}>{c.icon}</i>;
                         })}
+                        <b aria-hidden="true">{dayCompletion.completedCount}/{CHALLENGES.length}</b>
                       </div>
                     </div>
                   );

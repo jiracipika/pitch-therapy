@@ -14,7 +14,7 @@ export default function OfflinePage() {
           <Link
             href="/dashboard"
             className="ios-btn-primary"
-            style={{ borderRadius: 999, textDecoration: 'none', letterSpacing: '-.01em' }}
+            style={{ borderRadius: 'var(--sketch-radius-soft)', textDecoration: 'none', letterSpacing: '-.01em' }}
           >
             Try the studio
           </Link>

@@ -73,7 +73,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
         type="submit"
         disabled={loading}
         className="ios-btn-primary"
-        style={{ marginTop: 8, borderRadius: 999, opacity: loading ? 0.6 : 1, letterSpacing: '-.01em' }}
+        style={{ marginTop: 8, borderRadius: 'var(--sketch-radius-soft)', opacity: loading ? 0.6 : 1, letterSpacing: '-.01em' }}
       >
         {loading ? 'Please wait…' : mode === 'login' ? 'Sign in to the studio' : 'Create account'}
       </button>

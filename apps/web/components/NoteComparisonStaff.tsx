@@ -40,7 +40,7 @@ export default function NoteComparisonStaff({
   return (
     <div style={{
       background: 'var(--ios-bg2)',
-      borderRadius: 16,
+      borderRadius: 'var(--sketch-radius-soft)',
       padding: '16px 12px',
       border: '1px solid var(--ios-sep)',
       marginBottom: 16,
@@ -67,8 +67,8 @@ export default function NoteComparisonStaff({
           bottom: STAFF_BOTTOM_PAD - 6,
           fontSize: 42,
           lineHeight: 1,
-          color: 'rgba(255,255,255,0.25)',
-          fontFamily: 'serif',
+          color: 'var(--pt-ink-42)',
+          fontFamily: 'var(--font-display), serif',
           userSelect: 'none',
         }}>
           𝄞
@@ -83,7 +83,7 @@ export default function NoteComparisonStaff({
               left: 36,
               right: 12,
               height: 1,
-              background: 'rgba(255,255,255,0.15)',
+              background: 'var(--pt-line-15)',
               bottom: toBottomPx(linePos),
             }}
           />
@@ -96,7 +96,7 @@ export default function NoteComparisonStaff({
             left: 36,
             right: 12,
             height: 1,
-            background: 'rgba(255,255,255,0.15)',
+            background: 'var(--pt-line-15)',
             bottom: toBottomPx(0),
           }} />
         )}
@@ -201,7 +201,7 @@ function NoteHead({
         height: NOTEHEAD_H,
         borderRadius: '50%',
         backgroundColor: color,
-        boxShadow: `0 0 8px ${color}40`,
+        boxShadow: '0 2px 5px rgba(15,23,43,.22)',
         transition: 'all 0.3s ease',
       }} />
 

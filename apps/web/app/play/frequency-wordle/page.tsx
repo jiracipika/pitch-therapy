@@ -209,17 +209,17 @@ export default function FrequencyWordlePage() {
         {Array.from({ length: FREQUENCY_WORDLE_MAX_GUESSES }).map((_, index) => {
           const guess = guesses[index];
           const isCurrent = phase === "playing" && index === guesses.length;
-          const statusColor = guess?.feedback === "correct" ? "var(--ios-green)" : guess?.feedback === "close" ? "var(--ios-orange)" : guess ? "var(--ios-red)" : "var(--ios-label3)";
-          const background = guess?.feedback === "correct" ? "rgba(48,209,88,0.15)" : guess?.feedback === "close" ? "rgba(255,159,10,0.15)" : guess ? "rgba(255,69,58,0.12)" : "var(--ios-bg2)";
+          const statusColor = guess?.feedback === "correct" ? "var(--ios-green)" : guess?.feedback === "close" ? "var(--ios-orange)" : guess ? "var(--ios-red)" : isCurrent ? "var(--ios-label)" : "var(--ios-label3)";
+          const background = guess?.feedback === "correct" ? "rgba(48,209,88,0.15)" : guess?.feedback === "close" ? "rgba(255,159,10,0.15)" : guess ? "rgba(255,69,58,0.12)" : isCurrent ? "color-mix(in srgb, var(--ios-blue) 7%, var(--ios-bg2))" : "var(--ios-bg2)";
           const directionText = guess?.direction === "higher" ? "Try higher" : guess?.direction === "lower" ? "Try lower" : "Correct";
           return (
             <div
               key={index}
               role="listitem"
               aria-label={guess ? `Guess ${index + 1}: ${formatFrequency(guess.frequency)}. ${FEEDBACK_LABELS[guess.feedback]}. ${directionText}.` : `Guess ${index + 1}: ${isCurrent ? "current guess" : "empty"}`}
-              style={{ minHeight: 52, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, fontSize: 16, fontWeight: 700, background, border: `${guess || isCurrent ? 2 : 1}px solid ${guess ? statusColor : "var(--ios-sep)"}`, color: statusColor, transition: "transform 0.2s ease, opacity 0.2s ease" }}
+              style={{ minHeight: 52, borderRadius: "var(--sketch-radius-soft)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, fontSize: 16, fontWeight: 700, background, border: guess ? `2px solid ${statusColor}` : isCurrent ? "2px solid color-mix(in srgb, var(--ios-blue) 45%, var(--ios-sep))" : "1.5px dashed var(--ios-sep)", color: statusColor, transition: "transform 0.2s ease, opacity 0.2s ease" }}
             >
-              {guess ? <><span>{formatFrequency(guess.frequency)}</span><span style={{ fontSize: 12 }}>{directionText}</span></> : isCurrent && inputValue ? `${inputValue} Hz` : ""}
+              {guess ? <><span>{formatFrequency(guess.frequency)}</span><span style={{ fontSize: 12 }}>{directionText}</span></> : isCurrent && inputValue ? `${inputValue} Hz` : <span aria-hidden="true" style={{ opacity: 0.4, fontWeight: 500 }}>Hz</span>}
             </div>
           );
         })}
@@ -241,9 +241,9 @@ export default function FrequencyWordlePage() {
               aria-describedby="frequency-hint frequency-error"
               aria-invalid={Boolean(inputError)}
               placeholder="e.g. 440"
-              style={{ flex: 1, minWidth: 0, minHeight: 48, borderRadius: 12, padding: "12px 16px", background: "var(--ios-bg2)", border: `1px solid ${inputError ? "var(--ios-red)" : "var(--ios-sep)"}`, color: "var(--ios-label)", fontSize: 16 }}
+              style={{ flex: 1, minWidth: 0, minHeight: 48, borderRadius: "var(--sketch-radius-soft)", padding: "12px 16px", background: "var(--ios-bg2)", border: `1px solid ${inputError ? "var(--ios-red)" : "var(--ios-sep)"}`, color: "var(--ios-label)", fontSize: 16 }}
             />
-            <button type="submit" style={{ minWidth: 88, minHeight: 48, borderRadius: 12, padding: "0 20px", background: ACCENT, color: "#fff", fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer" }}>
+            <button type="submit" style={{ minWidth: 88, minHeight: 48, borderRadius: "var(--sketch-radius-soft)", padding: "0 20px", background: "var(--ios-blue)", color: "var(--pt-on-accent)", fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer" }}>
               Submit
             </button>
           </div>
@@ -257,7 +257,7 @@ export default function FrequencyWordlePage() {
           <p style={{ color: "var(--ios-label2)", margin: "0 0 16px" }}>The target was {formatFrequency(targetFrequency)}.</p>
           <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
             <button onClick={handleShare} className="ios-btn-secondary" style={{ flex: 1 }}>{shareStatus === "Shared" ? "Shared" : shareStatus === "Copied" ? "Copied" : "Share result"}</button>
-            <button onClick={initGame} className="ios-btn-primary" style={{ flex: 1, background: ACCENT }}>Play again</button>
+            <button onClick={initGame} className="ios-btn-primary" style={{ flex: 1, background: "var(--ios-blue)", borderRadius: "var(--sketch-radius-soft)" }}>Play again</button>
           </div>
           <button className="ios-btn-secondary" onClick={() => router.push("/dashboard")}>Dashboard</button>
           <p aria-live="polite" style={{ minHeight: 20, margin: "8px 0 0", color: "var(--ios-red)", fontSize: 13 }}>{shareStatus.startsWith("Could not") ? shareStatus : ""}</p>

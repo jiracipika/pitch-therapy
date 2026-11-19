@@ -178,7 +178,7 @@ export default function NoteWordlePage() {
           const guess = guesses[i];
           const isCurrent = phase === "playing" && i === guesses.length;
           let bg = "var(--ios-bg2)";
-          let border = "1.5px solid var(--ios-sep)";
+          let border = "1.5px dashed var(--ios-sep)";
           let color = "var(--ios-label3)";
           if (guess) {
             if (guess.feedback === "correct") {
@@ -195,8 +195,8 @@ export default function NoteWordlePage() {
               color = "var(--ios-red)";
             }
           } else if (isCurrent) {
-            bg = "var(--ios-bg2)";
-            border = "2px solid var(--ios-sep)";
+            bg = "color-mix(in srgb, var(--ios-blue) 7%, var(--ios-bg2))";
+            border = "2px solid color-mix(in srgb, var(--ios-blue) 45%, var(--ios-sep))";
             color = "var(--ios-label)";
           }
           return (
@@ -211,7 +211,7 @@ export default function NoteWordlePage() {
               style={{
                 width: "100%",
                 height: 52,
-                borderRadius: 12,
+                borderRadius: "var(--sketch-radius-soft)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -223,7 +223,7 @@ export default function NoteWordlePage() {
                 transition: "all 0.2s ease",
               }}
             >
-              {guess ? guess.note : isCurrent ? (currentGuess ?? "") : ""}
+              {guess ? guess.note : isCurrent ? (currentGuess ?? "") : <span aria-hidden="true" style={{ opacity: 0.4, fontWeight: 500 }}>♪</span>}
             </div>
           );
         })}
@@ -252,8 +252,8 @@ export default function NoteWordlePage() {
                   padding: "10px 4px",
                   fontSize: 13,
                   fontWeight: 700,
-                  background: currentGuess === n ? ACCENT : "var(--ios-bg2)",
-                  color: currentGuess === n ? "#000" : "var(--ios-label2)",
+                  background: currentGuess === n ? "var(--ios-blue)" : "var(--ios-bg2)",
+                  color: currentGuess === n ? "var(--pt-on-accent)" : "var(--ios-label2)",
                   border: "none",
                   cursor: "pointer",
                   transition: "background 0.12s",
@@ -268,7 +268,7 @@ export default function NoteWordlePage() {
             onClick={submitGuess}
             disabled={!currentGuess}
             className="ios-btn-primary"
-            style={{ background: ACCENT, opacity: currentGuess ? 1 : 0.3 }}
+            style={{ background: "var(--ios-blue)", borderRadius: "var(--sketch-radius-soft)", opacity: currentGuess ? 1 : 0.3 }}
           >
             Submit
           </button>

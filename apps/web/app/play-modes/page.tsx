@@ -21,6 +21,7 @@ export default function PlayModesPage() {
           <span className="studio-overline">EXERCISE LIBRARY / {GAME_MODES.length} MODES</span>
           <h1>Train one thing<br /><em>at a time.</em></h1>
           <p>Choose the listening skill you want to sharpen. Every drill is short, focused, and built for repetition.</p>
+          <span className="pt-hand-note pt-hand-note--arrow" aria-hidden="true">pick a lane — depth beats breadth</span>
         </motion.header>
 
         <nav className="studio-category-tabs" aria-label="Exercise categories">

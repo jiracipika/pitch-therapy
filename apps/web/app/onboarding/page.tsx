@@ -40,8 +40,6 @@ export default function OnboardingPage() {
   return (
     <div className="studio-gate">
       <div className="studio-gate-inner">
-        <div className="studio-gate-mark" aria-hidden="true">🎵</div>
-
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -89,7 +87,7 @@ export default function OnboardingPage() {
               <button
                 onClick={() => setStep(s => s + 1)}
                 className="ios-btn-primary"
-                style={{ borderRadius: 999, background: cur.color, letterSpacing: '-.01em' }}
+                style={{ borderRadius: 'var(--sketch-radius-soft)', background: 'var(--ios-blue)', letterSpacing: '-.01em' }}
               >
                 Next step
               </button>
@@ -105,7 +103,7 @@ export default function OnboardingPage() {
             <Link
               href="/dashboard"
               className="ios-btn-primary"
-              style={{ borderRadius: 999, background: cur.color, textDecoration: 'none', letterSpacing: '-.01em' }}
+              style={{ borderRadius: 'var(--sketch-radius-soft)', background: 'var(--ios-blue)', textDecoration: 'none', letterSpacing: '-.01em' }}
             >
               Enter the studio
             </Link>

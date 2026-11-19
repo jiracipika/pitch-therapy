@@ -20,7 +20,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
           <button
             onClick={reset}
             className="ios-btn-primary"
-            style={{ borderRadius: 999, letterSpacing: '-.01em', cursor: 'pointer' }}
+            style={{ borderRadius: 'var(--sketch-radius-soft)', letterSpacing: '-.01em', cursor: 'pointer' }}
           >
             Try again
           </button>

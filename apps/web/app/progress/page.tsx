@@ -164,9 +164,31 @@ export default function ProgressPage() {
                 <p style={{ margin: '-6px 0 18px', color: 'var(--ios-label2)', fontSize: 12, lineHeight: 1.55 }}>
                   Complete your first session to unlock trend detection, activity history, and weak-mode insights.
                 </p>
-                <Link href="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', gap: 28, width: '100%', minHeight: 48, padding: '0 20px', borderRadius: 999, background: 'var(--ios-blue)', color: 'var(--pt-on-accent)', fontSize: 13, fontWeight: 750, textDecoration: 'none', boxShadow: '0 12px 30px rgba(199,255,74,.15)' }}>
+                <Link href="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', gap: 28, width: '100%', minHeight: 48, padding: '0 20px', borderRadius: 'var(--sketch-radius-soft)', background: 'var(--ios-blue)', color: 'var(--pt-on-accent)', fontSize: 13, fontWeight: 750, textDecoration: 'none', boxShadow: '0 0 20px rgba(37,99,235,.18), 0 6px 18px rgba(15,23,43,.10)' }}>
                   Start your first session <span aria-hidden="true">→</span>
                 </Link>
+              </motion.section>
+            )}
+
+            {/* ── PREVIEW (empty state) ── */}
+            {!hasData && (
+              <motion.section className="studio-panel" {...fade(0.14)}>
+                <div className="studio-panel-heading"><div><span>COMING SOON</span><h2>What play unlocks</h2></div></div>
+                <p style={{ margin: '-6px 0 14px', color: 'var(--ios-label2)', fontSize: 12, lineHeight: 1.55 }}>
+                  Twelve weeks of listening, mapped day by day — plus badges, streaks, and per-mode momentum. All of it appears here after your first round.
+                </p>
+                <div className="studio-heatmap" aria-hidden="true" style={{ opacity: 0.65 }}>
+                  {Array.from({ length: 8 }).map((_, w) => (
+                    <div key={w}>
+                      {Array.from({ length: 7 }).map((_, d) => {
+                        const v = ((w * 7 + d) * 2654435761 >>> 0) % 100;
+                        const heat = v > 74 ? 'is-hot-3' : v > 58 ? 'is-hot-2' : v > 40 ? 'is-hot-1' : '';
+                        return <i key={d} className={heat} />;
+                      })}
+                    </div>
+                  ))}
+                </div>
+                <span className="pt-hand-note pt-hand-note--arrow" aria-hidden="true" style={{ display: 'block', marginTop: 16 }}>your heatmap will live here</span>
               </motion.section>
             )}
 
@@ -228,10 +250,10 @@ export default function ProgressPage() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 5, marginTop: 10, color: 'var(--ios-label4)', font: '700 8px/1 ui-monospace, SFMono-Regular, Menlo, monospace', letterSpacing: '.08em' }}>
                     <span>LESS</span>
                     <i className="studio-heatmap" style={{ display: 'flex', gap: 3 }} aria-hidden="true">
-                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(255,255,255,.045)', display: 'block' }} />
-                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(199,255,74,.22)', display: 'block' }} />
-                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(199,255,74,.45)', display: 'block' }} />
-                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(199,255,74,.7)', display: 'block' }} />
+                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--pt-line-05)', display: 'block' }} />
+                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(37,99,235,.22)', display: 'block' }} />
+                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(37,99,235,.45)', display: 'block' }} />
+                      <span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(37,99,235,.7)', display: 'block' }} />
                       <span style={{ width: 10, height: 10, borderRadius: 2, background: '#2563eb', display: 'block' }} />
                     </i>
                     <span>MORE</span>
@@ -276,7 +298,7 @@ export default function ProgressPage() {
                         ) : (
                           <>
                             <i className="studio-meter" aria-hidden="true" style={{ height: 4, margin: '0 0 5px' }}>
-                              <em style={{ display: 'block', height: '100%', width: `${Math.round(s.progressFraction * 100)}%`, background: isNext ? 'var(--ios-blue)' : 'rgba(255,255,255,.22)' }} />
+                              <em style={{ display: 'block', height: '100%', width: `${Math.round(s.progressFraction * 100)}%`, background: isNext ? 'var(--ios-blue)' : 'var(--pt-line-15)' }} />
                             </i>
                             <span className="studio-badge-metric">{formatMetricProgress(s)}</span>
                           </>

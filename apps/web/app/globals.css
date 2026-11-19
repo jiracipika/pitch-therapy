@@ -3111,11 +3111,10 @@ picture, img, video, svg {
 /* Daily history day row (date + two dots) */
 .studio-history-row { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 12px 2px; }
 .studio-history-row > span { color: var(--ios-label2); font-size: 13px; }
-.studio-history-dots { display: flex; gap: 7px; }
-.studio-history-dots i { width: 22px; height: 22px; display: grid; place-items: center; border: 1.5px solid var(--ios-sep); border-radius: 999px; background: var(--ios-bg3); }
-.studio-history-dots i.is-done { border-color: var(--ios-green); background: color-mix(in srgb, var(--ios-green) 16%, transparent); }
-.studio-history-dots i > b { width: 6px; height: 6px; border-radius: 999px; background: var(--ios-bg4); }
-.studio-history-dots i.is-done > b { background: var(--ios-green); }
+.studio-history-dots { display: flex; align-items: center; gap: 6px; }
+.studio-history-dots i { width: 26px; height: 26px; display: grid; place-items: center; border: 1.5px solid var(--ios-sep); border-radius: 9px; background: var(--ios-bg3); font-size: 12px; font-style: normal; opacity: .5; }
+.studio-history-dots i.is-done { border-color: var(--ios-green); background: color-mix(in srgb, var(--ios-green) 16%, transparent); opacity: 1; }
+.studio-history-dots > b { margin-left: 4px; color: var(--ios-label3); font: 700 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; }
 
 /* Activity heatmap (progress) */
 .studio-heatmap { display: flex; gap: 3px; }
@@ -3148,6 +3147,7 @@ picture, img, video, svg {
 .studio-score-ring > span { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
 .studio-score-ring b { color: var(--ios-label); font: 400 34px/1 var(--font-display); }
 .studio-score-ring small { display: block; margin-top: 5px; color: var(--ios-label3); font: 700 7px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .16em; }
+.studio-score-ring.is-ghost circle:first-child { stroke-dasharray: 3 10; stroke-linecap: round; }
 
 /* Settings — control rows, segmented pills, range slider */
 .studio-control-row { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 14px; min-height: 56px; padding: 10px 2px; }
